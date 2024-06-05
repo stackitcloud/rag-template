@@ -1,0 +1,326 @@
+openapi: 3.0.2
+info:
+  contact: {}
+  description: The perfect rag solution.
+  title: RAG SIT x Stackit
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /search:
+    post:
+      operationId: search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/search_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/search_response'
+          description: "200."
+        "500":
+          description: Internal Server Error.
+      tags:
+      - rag
+  /chat/{session_id}:
+    post:
+      operationId: chat
+      parameters:
+      - explode: false
+        in: path
+        name: session_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/chat_request'
+        description: Chat with RAG.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/chat_response'
+          description: OK.
+        "500":
+          description: Internal Server Error!
+      tags:
+      - rag
+    summary: QNA or Rag Chat.
+  /source_documents:
+    post:
+      operationId: upload-source-documents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/upload_source_document'
+              type: array
+        required: true
+      responses:
+        "201":
+          description: The file was successful uploaded.
+        "422":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Wrong json format.
+        "500":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Internal Server Error.
+      summary: Upload Files for RAG.
+      tags:
+      - rag
+  /source_documents/remove:
+    post:
+      operationId: remove-source-documents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_request'
+        required: true
+      responses:
+        "202":
+          description: Accepted.
+        "404":
+          description: Ressource not Found
+        "422":
+          description: ID or metadata missing.
+        "500":
+          description: Internal Server Error.
+      tags:
+      - rag
+components:
+  schemas:
+    key_value_pair:
+      description: The key value pair.
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          description: ""
+          title: key
+          type: string
+        value:
+          description: '    '
+          title: value
+          type: string
+      required:
+      - key
+      - value
+      title: key_value_pair
+      type: object
+    chat_history:
+      description: ""
+      properties:
+        messages:
+          $ref: '#/components/schemas/chat_history_message'
+      required:
+      - messages
+      title: chat_history
+      type: object
+    chat_role:
+      description: ""
+      enum:
+      - user
+      - assistant
+      title: chat_role
+      type: string
+    chat_history_message:
+      description: ""
+      properties:
+        role:
+          $ref: '#/components/schemas/chat_role'
+        message:
+          description: ""
+          title: message
+          type: string
+      required:
+      - message
+      - role
+      title: chat_history_message
+      type: object
+    search_request:
+      description: ""
+      properties:
+        search_term:
+          description: ""
+          title: search_term
+          type: string
+        metadata:
+          description: ""
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: metadata
+          type: array
+      required:
+      - search_term
+      title: search_request
+      type: object
+    content_type:
+      description: ""
+      enum:
+      - TEXT
+      - IMAGE
+      - TABLE
+      - SUMMARY
+      title: content_type
+      type: string
+    delete_request:
+      description: ""
+      properties:
+        metadata:
+          description: ""
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: metadata
+          type: array
+      title: file_request
+      type: object
+    source_document:
+      description: Uploading a json with chunks and metadata.
+      example:
+        metadata:
+        - value: value
+          key: key
+        - value: value
+          key: key
+        content: content
+      properties:
+        metadata:
+          description: The metadata of the documents that are stored in the vectordatabase.
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: metadata
+          type: array
+        content:
+          description: ""
+          title: content
+          type: string
+      required:
+      - content
+      - metadata
+      title: file
+      type: object
+    chat_request:
+      description: ""
+      properties:
+        history:
+          $ref: '#/components/schemas/chat_history'
+        message:
+          description: ""
+          title: message
+          type: string
+      required:
+      - message
+      title: chat_request
+      type: object
+    chat_response:
+      description: ""
+      example:
+        finish_reason: finish_reason
+        citations:
+        - metadata:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          content: content
+        - metadata:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          content: content
+        answer: answer
+      properties:
+        answer:
+          description: ""
+          title: answer
+          type: string
+        finish_reason:
+          description: '    '
+          title: finish_reason
+          type: string
+        citations:
+          description: ""
+          items:
+            $ref: '#/components/schemas/source_document'
+          title: citations
+          type: array
+      required:
+      - answer
+      - citations
+      - finish_reason
+      title: chat_response
+      type: object
+    upload_source_document:
+      description: ""
+      properties:
+        content_type:
+          $ref: '#/components/schemas/content_type'
+        metadata:
+          description: ""
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: metadata
+          type: array
+        content:
+          description: ""
+          title: content
+          type: string
+      required:
+      - content
+      - content_type
+      - metadata
+      title: upload_doc
+      type: object
+    source_documents:
+      description: ""
+      example:
+        documents:
+        - metadata:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          content: content
+        - metadata:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          content: content
+      properties:
+        documents:
+          description: ""
+          items:
+            $ref: '#/components/schemas/source_document'
+          title: documents
+          type: array
+      required:
+      - documents
+      title: source_documents
+      type: object
+    search_response:
+      oneOf:
+      - $ref: '#/components/schemas/source_documents'
+      - $ref: '#/components/schemas/chat_response'
+      title: search_response

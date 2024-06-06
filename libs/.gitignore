@@ -1,0 +1,14 @@
+.vscode
+docs/arc42/output
+**/k3d_mnt
+.venv
+venv
+*.tgz
+*.tar.gz
+.idea
+*.prompt
+
+backend/**/.env*
+**/notebooks
+*.pyc
+.openapi-generator

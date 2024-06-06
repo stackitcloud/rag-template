@@ -18,30 +18,28 @@ import re  # noqa: F401
 import json
 
 
-
-
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.key_value_pair import KeyValuePair
+from rag_core.models.chat_role import ChatRole
+
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class SourceDocument(BaseModel):
-    """
-    Uploading a json with chunks and metadata.
-    """ # noqa: E501
-    metadata: List[KeyValuePair] = Field(description="The metadata of the documents that are stored in the vectordatabase.")
-    content: StrictStr
-    __properties: ClassVar[List[str]] = ["metadata", "content"]
+
+class ChatHistoryMessage(BaseModel):
+    """ """  # noqa: E501
+
+    role: ChatRole
+    message: StrictStr
+    __properties: ClassVar[List[str]] = ["role", "message"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -54,7 +52,7 @@ class SourceDocument(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of SourceDocument from a JSON string"""
+        """Create an instance of ChatHistoryMessage from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -69,32 +67,19 @@ class SourceDocument(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in metadata (list)
-        _items = []
-        if self.metadata:
-            for _item in self.metadata:
-                if _item:
-                    _items.append(_item.to_dict())
-            _dict['metadata'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of SourceDocument from a dict"""
+        """Create an instance of ChatHistoryMessage from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "metadata": [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")] if obj.get("metadata") is not None else None,
-            "content": obj.get("content")
-        })
+        _obj = cls.model_validate({"role": obj.get("role"), "message": obj.get("message")})
         return _obj
-
-

@@ -18,30 +18,29 @@ import re  # noqa: F401
 import json
 
 
-
-
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.chat_role import ChatRole
+
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class ChatHistoryMessage(BaseModel):
+
+class KeyValuePair(BaseModel):
     """
-    
-    """ # noqa: E501
-    role: ChatRole
-    message: StrictStr
-    __properties: ClassVar[List[str]] = ["role", "message"]
+    The key value pair.
+    """  # noqa: E501
+
+    key: StrictStr
+    value: StrictStr = Field(description="    ")
+    __properties: ClassVar[List[str]] = ["key", "value"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -54,7 +53,7 @@ class ChatHistoryMessage(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of ChatHistoryMessage from a JSON string"""
+        """Create an instance of KeyValuePair from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -69,25 +68,19 @@ class ChatHistoryMessage(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of ChatHistoryMessage from a dict"""
+        """Create an instance of KeyValuePair from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "role": obj.get("role"),
-            "message": obj.get("message")
-        })
+        _obj = cls.model_validate({"key": obj.get("key"), "value": obj.get("value")})
         return _obj
-
-

@@ -2,12 +2,12 @@
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
-from openapi_server.models.chat_request import ChatRequest
-from openapi_server.models.chat_response import ChatResponse
-from openapi_server.models.delete_request import DeleteRequest
-from openapi_server.models.search_request import SearchRequest
-from openapi_server.models.search_response import SearchResponse
-from openapi_server.models.upload_source_document import UploadSourceDocument
+from rag_core.models.chat_request import ChatRequest
+from rag_core.models.chat_response import ChatResponse
+from rag_core.models.delete_request import DeleteRequest
+from rag_core.models.search_request import SearchRequest
+from rag_core.models.search_response import SearchResponse
+from rag_core.models.upload_source_document import UploadSourceDocument
 
 
 class BaseRagApi:
@@ -16,30 +16,24 @@ class BaseRagApi:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         BaseRagApi.subclasses = BaseRagApi.subclasses + (cls,)
+
     def chat(
         self,
         session_id: str,
         chat_request: ChatRequest,
-    ) -> ChatResponse:
-        ...
-
+    ) -> ChatResponse: ...
 
     def remove_source_documents(
         self,
         delete_request: DeleteRequest,
-    ) -> None:
-        ...
-
+    ) -> None: ...
 
     def search(
         self,
         search_request: SearchRequest,
-    ) -> SearchResponse:
-        ...
-
+    ) -> SearchResponse: ...
 
     def upload_source_documents(
         self,
         upload_source_document: List[UploadSourceDocument],
-    ) -> None:
-        ...
+    ) -> None: ...

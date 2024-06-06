@@ -9,7 +9,7 @@ description = "The perfect rag template"
 authors = []
 readme = "README.md"
 license = ""
-packages = [{ include = "openapi_server", from = "src" }]
+packages = [{ include = "rag_core", from = "src" }]
 
 
 [tool.poetry.dependencies]

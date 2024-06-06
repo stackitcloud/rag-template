@@ -19,29 +19,22 @@ import re  # noqa: F401
 from enum import Enum
 
 
-
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
 
-class ContentType(str, Enum):
-    """
-    
-    """
+class ChatRole(str, Enum):
+    """ """
 
     """
     allowed enum values
     """
-    TEXT = 'TEXT'
-    IMAGE = 'IMAGE'
-    TABLE = 'TABLE'
-    SUMMARY = 'SUMMARY'
+    USER = "user"
+    ASSISTANT = "assistant"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of ContentType from a JSON string"""
+        """Create an instance of ChatRole from a JSON string"""
         return cls(json.loads(json_str))
-
-

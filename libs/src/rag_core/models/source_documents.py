@@ -18,30 +18,27 @@ import re  # noqa: F401
 import json
 
 
+from pydantic import BaseModel, ConfigDict
+from typing import Any, ClassVar, Dict, List
+from rag_core.models.source_document import SourceDocument
 
-
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.key_value_pair import KeyValuePair
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class SearchRequest(BaseModel):
-    """
-    
-    """ # noqa: E501
-    search_term: StrictStr
-    metadata: Optional[List[KeyValuePair]] = None
-    __properties: ClassVar[List[str]] = ["search_term", "metadata"]
+
+class SourceDocuments(BaseModel):
+    """ """  # noqa: E501
+
+    documents: List[SourceDocument]
+    __properties: ClassVar[List[str]] = ["documents"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -54,7 +51,7 @@ class SearchRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of SearchRequest from a JSON string"""
+        """Create an instance of SourceDocuments from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -69,32 +66,34 @@ class SearchRequest(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in metadata (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in documents (list)
         _items = []
-        if self.metadata:
-            for _item in self.metadata:
+        if self.documents:
+            for _item in self.documents:
                 if _item:
                     _items.append(_item.to_dict())
-            _dict['metadata'] = _items
+            _dict["documents"] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of SearchRequest from a dict"""
+        """Create an instance of SourceDocuments from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "search_term": obj.get("search_term"),
-            "metadata": [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")] if obj.get("metadata") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "documents": (
+                    [SourceDocument.from_dict(_item) for _item in obj.get("documents")]
+                    if obj.get("documents") is not None
+                    else None
+                )
+            }
+        )
         return _obj
-
-

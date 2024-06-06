@@ -18,31 +18,28 @@ import re  # noqa: F401
 import json
 
 
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from rag_core.models.chat_history import ChatHistory
 
-
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
-from openapi_server.models.source_document import SourceDocument
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class ChatResponse(BaseModel):
-    """
-    
-    """ # noqa: E501
-    answer: StrictStr
-    finish_reason: StrictStr = Field(description="    ")
-    citations: List[SourceDocument]
-    __properties: ClassVar[List[str]] = ["answer", "finish_reason", "citations"]
+
+class ChatRequest(BaseModel):
+    """ """  # noqa: E501
+
+    history: Optional[ChatHistory] = None
+    message: StrictStr
+    __properties: ClassVar[List[str]] = ["history", "message"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -55,7 +52,7 @@ class ChatResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of ChatResponse from a JSON string"""
+        """Create an instance of ChatRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,33 +67,27 @@ class ChatResponse(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in citations (list)
-        _items = []
-        if self.citations:
-            for _item in self.citations:
-                if _item:
-                    _items.append(_item.to_dict())
-            _dict['citations'] = _items
+        # override the default output from pydantic by calling `to_dict()` of history
+        if self.history:
+            _dict["history"] = self.history.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of ChatResponse from a dict"""
+        """Create an instance of ChatRequest from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "answer": obj.get("answer"),
-            "finish_reason": obj.get("finish_reason"),
-            "citations": [SourceDocument.from_dict(_item) for _item in obj.get("citations")] if obj.get("citations") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "history": ChatHistory.from_dict(obj.get("history")) if obj.get("history") is not None else None,
+                "message": obj.get("message"),
+            }
+        )
         return _obj
-
-

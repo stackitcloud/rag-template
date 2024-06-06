@@ -4,8 +4,8 @@ from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.rag_api_base import BaseRagApi
-import openapi_server.impl
+from rag_core.apis.rag_api_base import BaseRagApi
+import rag_core.impl
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -21,18 +21,18 @@ from fastapi import (  # noqa: F401
     status,
 )
 
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
-from openapi_server.models.chat_request import ChatRequest
-from openapi_server.models.chat_response import ChatResponse
-from openapi_server.models.delete_request import DeleteRequest
-from openapi_server.models.search_request import SearchRequest
-from openapi_server.models.search_response import SearchResponse
-from openapi_server.models.upload_source_document import UploadSourceDocument
+from rag_core.models.extra_models import TokenModel  # noqa: F401
+from rag_core.models.chat_request import ChatRequest
+from rag_core.models.chat_response import ChatResponse
+from rag_core.models.delete_request import DeleteRequest
+from rag_core.models.search_request import SearchRequest
+from rag_core.models.search_response import SearchResponse
+from rag_core.models.upload_source_document import UploadSourceDocument
 
 
 router = APIRouter()
 
-ns_pkg = openapi_server.impl
+ns_pkg = rag_core.impl
 for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 
@@ -50,7 +50,7 @@ async def chat(
     session_id: str = Path(..., description=""),
     chat_request: ChatRequest = Body(None, description="Chat with RAG."),
 ) -> ChatResponse:
-    ...
+    return BaseRagApi.subclasses[0]().chat(session_id, chat_request)
 
 
 @router.post(
@@ -67,7 +67,7 @@ async def chat(
 async def remove_source_documents(
     delete_request: DeleteRequest = Body(None, description=""),
 ) -> None:
-    ...
+    return BaseRagApi.subclasses[0]().remove_source_documents(delete_request)
 
 
 @router.post(
@@ -82,7 +82,7 @@ async def remove_source_documents(
 async def search(
     search_request: SearchRequest = Body(None, description=""),
 ) -> SearchResponse:
-    ...
+    return BaseRagApi.subclasses[0]().search(search_request)
 
 
 @router.post(
@@ -99,4 +99,4 @@ async def search(
 async def upload_source_documents(
     upload_source_document: List[UploadSourceDocument] = Body(None, description=""),
 ) -> None:
-    ...
+    return BaseRagApi.subclasses[0]().upload_source_documents(upload_source_document)

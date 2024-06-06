@@ -18,29 +18,28 @@ import re  # noqa: F401
 import json
 
 
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from rag_core.models.key_value_pair import KeyValuePair
 
-
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
-from openapi_server.models.chat_history_message import ChatHistoryMessage
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class ChatHistory(BaseModel):
-    """
-    
-    """ # noqa: E501
-    messages: ChatHistoryMessage
-    __properties: ClassVar[List[str]] = ["messages"]
+
+class SearchRequest(BaseModel):
+    """ """  # noqa: E501
+
+    search_term: StrictStr
+    metadata: Optional[List[KeyValuePair]] = None
+    __properties: ClassVar[List[str]] = ["search_term", "metadata"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -53,7 +52,7 @@ class ChatHistory(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of ChatHistory from a JSON string"""
+        """Create an instance of SearchRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -68,27 +67,35 @@ class ChatHistory(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of messages
-        if self.messages:
-            _dict['messages'] = self.messages.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in metadata (list)
+        _items = []
+        if self.metadata:
+            for _item in self.metadata:
+                if _item:
+                    _items.append(_item.to_dict())
+            _dict["metadata"] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of ChatHistory from a dict"""
+        """Create an instance of SearchRequest from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "messages": ChatHistoryMessage.from_dict(obj.get("messages")) if obj.get("messages") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "search_term": obj.get("search_term"),
+                "metadata": (
+                    [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")]
+                    if obj.get("metadata") is not None
+                    else None
+                ),
+            }
+        )
         return _obj
-
-

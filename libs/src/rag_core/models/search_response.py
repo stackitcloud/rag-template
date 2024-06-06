@@ -19,14 +19,14 @@ import pprint
 import re  # noqa: F401
 
 
-
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
-from openapi_server.models.chat_response import ChatResponse
-from openapi_server.models.source_documents import SourceDocuments
+from rag_core.models.chat_response import ChatResponse
+from rag_core.models.source_documents import SourceDocuments
 from typing import Union, Any, List, TYPE_CHECKING, Optional, Dict
 from typing_extensions import Literal
 from pydantic import StrictStr, Field
+
 try:
     from typing import Self
 except ImportError:
@@ -34,10 +34,12 @@ except ImportError:
 
 SEARCHRESPONSE_ONE_OF_SCHEMAS = ["ChatResponse", "SourceDocuments"]
 
+
 class SearchResponse(BaseModel):
     """
     SearchResponse
     """
+
     # data type: SourceDocuments
     oneof_schema_1_validator: Optional[SourceDocuments] = None
     # data type: ChatResponse
@@ -50,7 +52,6 @@ class SearchResponse(BaseModel):
         "protected_namespaces": (),
     }
 
-
     def __init__(self, *args, **kwargs) -> None:
         if args:
             if len(args) > 1:
@@ -61,7 +62,7 @@ class SearchResponse(BaseModel):
         else:
             super().__init__(**kwargs)
 
-    @field_validator('actual_instance')
+    @field_validator("actual_instance")
     def actual_instance_must_validate_oneof(cls, v):
         instance = SearchResponse.model_construct()
         error_messages = []
@@ -78,10 +79,16 @@ class SearchResponse(BaseModel):
             match += 1
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: " + ", ".join(error_messages))
+            raise ValueError(
+                "Multiple matches found when setting `actual_instance` in SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: "
+                + ", ".join(error_messages)
+            )
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: " + ", ".join(error_messages))
+            raise ValueError(
+                "No match found when setting `actual_instance` in SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: "
+                + ", ".join(error_messages)
+            )
         else:
             return v
 
@@ -111,10 +118,16 @@ class SearchResponse(BaseModel):
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: " + ", ".join(error_messages))
+            raise ValueError(
+                "Multiple matches found when deserializing the JSON string into SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: "
+                + ", ".join(error_messages)
+            )
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: " + ", ".join(error_messages))
+            raise ValueError(
+                "No match found when deserializing the JSON string into SearchResponse with oneOf schemas: ChatResponse, SourceDocuments. Details: "
+                + ", ".join(error_messages)
+            )
         else:
             return instance
 
@@ -144,5 +157,3 @@ class SearchResponse(BaseModel):
     def to_str(self) -> str:
         """Returns the string representation of the actual instance"""
         return pprint.pformat(self.model_dump())
-
-

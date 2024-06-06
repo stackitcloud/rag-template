@@ -18,29 +18,29 @@ import re  # noqa: F401
 import json
 
 
-
-
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.source_document import SourceDocument
+from rag_core.models.source_document import SourceDocument
+
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class SourceDocuments(BaseModel):
-    """
-    
-    """ # noqa: E501
-    documents: List[SourceDocument]
-    __properties: ClassVar[List[str]] = ["documents"]
+
+class ChatResponse(BaseModel):
+    """ """  # noqa: E501
+
+    answer: StrictStr
+    finish_reason: StrictStr = Field(description="    ")
+    citations: List[SourceDocument]
+    __properties: ClassVar[List[str]] = ["answer", "finish_reason", "citations"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -53,7 +53,7 @@ class SourceDocuments(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of SourceDocuments from a JSON string"""
+        """Create an instance of ChatResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -68,31 +68,36 @@ class SourceDocuments(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in documents (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in citations (list)
         _items = []
-        if self.documents:
-            for _item in self.documents:
+        if self.citations:
+            for _item in self.citations:
                 if _item:
                     _items.append(_item.to_dict())
-            _dict['documents'] = _items
+            _dict["citations"] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of SourceDocuments from a dict"""
+        """Create an instance of ChatResponse from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "documents": [SourceDocument.from_dict(_item) for _item in obj.get("documents")] if obj.get("documents") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "answer": obj.get("answer"),
+                "finish_reason": obj.get("finish_reason"),
+                "citations": (
+                    [SourceDocument.from_dict(_item) for _item in obj.get("citations")]
+                    if obj.get("citations") is not None
+                    else None
+                ),
+            }
+        )
         return _obj
-
-

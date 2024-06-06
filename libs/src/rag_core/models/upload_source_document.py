@@ -18,29 +18,30 @@ import re  # noqa: F401
 import json
 
 
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List
+from rag_core.models.content_type import ContentType
+from rag_core.models.key_value_pair import KeyValuePair
 
-
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.key_value_pair import KeyValuePair
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class DeleteRequest(BaseModel):
-    """
-    
-    """ # noqa: E501
-    metadata: Optional[List[KeyValuePair]] = None
-    __properties: ClassVar[List[str]] = ["metadata"]
+
+class UploadSourceDocument(BaseModel):
+    """ """  # noqa: E501
+
+    content_type: ContentType
+    metadata: List[KeyValuePair]
+    content: StrictStr
+    __properties: ClassVar[List[str]] = ["content_type", "metadata", "content"]
 
     model_config = {
         "populate_by_name": True,
         "validate_assignment": True,
         "protected_namespaces": (),
     }
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -53,7 +54,7 @@ class DeleteRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of DeleteRequest from a JSON string"""
+        """Create an instance of UploadSourceDocument from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -68,8 +69,7 @@ class DeleteRequest(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
         # override the default output from pydantic by calling `to_dict()` of each item in metadata (list)
@@ -78,21 +78,27 @@ class DeleteRequest(BaseModel):
             for _item in self.metadata:
                 if _item:
                     _items.append(_item.to_dict())
-            _dict['metadata'] = _items
+            _dict["metadata"] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of DeleteRequest from a dict"""
+        """Create an instance of UploadSourceDocument from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "metadata": [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")] if obj.get("metadata") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "content_type": obj.get("content_type"),
+                "metadata": (
+                    [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")]
+                    if obj.get("metadata") is not None
+                    else None
+                ),
+                "content": obj.get("content"),
+            }
+        )
         return _obj
-
-

@@ -1,0 +1,86 @@
+langfuse:
+  enabled: true
+qdrant:
+  enabled: true
+frontend:
+  enabled: true
+
+registry:
+  auths:
+    crIo:
+      username: github-username # replace with your github username
+      pat: github-pat # replace with your github personal access token
+      email: email-address@domain.de # replace with your email address
+  name: "ghcr.io"
+
+global:
+  ssl: true
+  imagePullSecret:
+    name: cr-credentials
+  secrets:
+    aleph_alpha:
+      aleph_alpha_aleph_alpha_api_key: "sk-123456"
+    basic_auth: ""
+    langfuse:
+      public_key: "pk-lf"
+      secret_key: "sk-lf"
+    stackit_myapi_llm:
+      auth_client_id: auth-client-id
+      auth_client_secret: auth-client-secret
+    usecase:
+
+  config:
+    tls:
+      enabled: true
+      host: rag.localhost
+      secretName: tls-certificate
+    envs:
+      database:
+        VECTOR_DB_COLLECTION_NAME: ebm_papst
+        VECTOR_DB_URL: qdrant.qdrant.svc.cluster.local:6333
+      retriever:
+        RETRIEVER_THRESHOLD: 0.3
+        RETRIEVER_K_DOCUMENTS: 10
+        RETRIEVER_TOTAL_K: 7
+        RETRIEVER_SUMMARY_THRESHOLD: 0.3
+        RETRIEVER_SUMMARY_K_DOCUMENTS: 10
+        RETRIEVER_TABLE_THRESHOLD: 0.3
+        RETRIEVER_TABLE_K_DOCUMENTS: 10
+        RETRIEVER_IMAGE_THRESHOLD: 0.7
+        RETRIEVER_IMAGE_K_DOCUMENTS: 10
+      stackit_myapi_llm:
+        STACKIT_TOKEN_LIFETIME_MARGIN: 30
+        STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
+      aleph_alpha:
+        ALEPH_ALPHA_MODEL: llama-3-70b-instruct
+        ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1
+        ALEPH_ALPHA_TOP_K: 0
+        ALEPH_ALPHA_TOP_P: 0
+        ALEPH_ALPHA_PRESENCE_PENALTY: 0
+        ALEPH_ALPHA_FREQUENCY_PENALTY: 0
+        ALEPH_ALPHA_MAXIMUM_TOKENS: 256
+        ALEPH_ALPHA_TEMPERATURE: 0
+        ALEPH_ALPHA_N: 1
+        ALEPH_ALPHA_BEST_OF: 2
+      errormessages:
+        ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: Es tut mir leid, meine Antworten sind begrenzt. Sie müssen die richtigen Fragen stellen.
+        ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: Es wurden keine Dokumente zum durchsuchen bereitgestellt.
+        ERROR_MESSAGES_NO_PRODUCT_NAME_MESSAGE: "Es wurde kein Produktname im chat-verlauf gefunden. Ich habe derzeit Informationen über folgende Produkte:"
+      langfuse:
+        LANGFUSE_DATASET_NAME: "test_ds"
+        LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+      rag_class_types:
+        RAG_CLASS_TYPE_LLM_TYPE: "myapi"
+      public:
+        PUBLIC_HOST: "https://api.aleph-alpha.com"
+      ollama:
+        OLLAMA_MODEL: "llama3:instruct"
+        OLLAMA_BASE_URL: "http://ollama.ollama.svc.cluster.local:11434"
+        OLLAMA_TOP_K: 0
+        OLLAMA_TOP_P: 0
+        OLLAMA_TEMPERATURE: 0
+      usecase:
+
+  debug:
+    backend:
+      enabled: false

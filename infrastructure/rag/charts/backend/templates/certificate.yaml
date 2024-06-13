@@ -1,0 +1,13 @@
+{{- if $.Values.global.ssl }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rag-certificate
+spec:
+  dnsNames:
+    - rag.localhost
+  secretName: tls-certificate
+  issuerRef:
+    name: letsencrypt-cluster-issuer
+    kind: ClusterIssuer
+{{- end }}

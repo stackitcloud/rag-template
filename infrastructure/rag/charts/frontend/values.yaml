@@ -1,0 +1,28 @@
+replicaCount: 1
+image:
+  # TODO: Change to jfrog/azure or something else
+  repository: ghcr.io/mmmake-gmbh/rag
+  name: frontend
+  pullPolicy: Always
+  tag: "dev-e12f8cc"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+config:
+  envs:
+    VITE_API_URL: http://rag.localhost/api
+    VITE_CHAT_URL: http://rag.localhost
+
+exports:
+  chart_name:
+    frontendChartName: frontend
+
+ingress:
+  enabled: true
+  host:
+    name: rag.localhost
+    path: /
+    pathType: ImplementationSpecific
+    port: 8080

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}      
+    spec:
+      volumes:
+      - name: frontend
+        emptyDir: {}
+      initContainers:
+      - name: frontend-copy
+        image: {{ template "fullimagename" . }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.name" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullSecrets:
+          - name: {{ .Values.global.imagePullSecret.name }}    
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: frontend        
+        command: ["cp","-r", "/app/frontend/.", "/usr/share/nginx/html"]
+      - name: vite-workaround
+        command: 
+          - /bin/sh
+          - -c
+        args: 
+          - /app/env.sh
+        image: {{ template "fullimagename" . }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.name" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullSecrets:
+          - name: {{ .Values.global.imagePullSecret.name }}    
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: frontend        
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ template "fullimagename" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullSecrets:
+          - name: {{ .Values.global.imagePullSecret.name }}
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: frontend
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.name" . }}
+      imagePullSecrets:
+      - name: {{ .Values.global.imagePullSecret.name }}

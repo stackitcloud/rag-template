@@ -1,0 +1,10 @@
+langfuse:
+  postgresql:
+    deploy: true
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+  langfuse:
+    additionalEnv:
+      HOSTNAME: 0.0.0.0

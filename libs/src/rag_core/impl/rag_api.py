@@ -7,7 +7,8 @@ from dependency_injector.wiring import Provide, inject
 from langchain_core.documents import Document
 
 from fastapi import Depends, HTTPException
-from rag_core.container import Container
+from rag_core.api_chains.chat_chain import ChatChain
+from rag_core.dependency_container import DependencyContainer
 from rag_core.impl.answer_generation_chains.answer_chain_input_data import AnswerChainInputData
 from rag_core.impl.retriever.no_or_empty_collection_error import NoOrEmptyCollectionError
 from rag_core.retriever.retriever import Retriever
@@ -47,38 +48,16 @@ class RagApi(BaseRagApi):
         self,
         session_id: str,
         chat_request: ChatRequest,
-        composed_retriever: Retriever = Depends(Provide[Container.composed_retriever]),
-        answer_generation_chain: AnswerGenerationChain = Depends(Provide[Container.answer_generation_chain]),
+        chat_chain: ChatChain = Depends(Provide[DependencyContainer.chat_chain]),
     ) -> ChatResponse:
-        # TODO: use the chat history for something ]:->
-        chat_history = chat_request.history
-        current_question = chat_request.message
-
-        logger.info(
-            "RECEIVED question: %s",
-            current_question,
-        )
-
-        retrieved_documents = self._search_documents(
-            prompt=current_question, composed_retriever=composed_retriever
-        )  # TODO: apply filter quarks as needed. For now, we just search for all documents.
-
-        answer_generation_input = AnswerChainInputData(
-            question=chat_request.message, retrieved_documents=retrieved_documents
-        )
-
-        answer = answer_generation_chain.invoke(answer_generation_input, session_id)
-
-        logger.info("GENERATED answer: %s", answer)
-
-        response = ChatResponse(answer=answer, citations=[], finish_reason="")
-        return response
+        config = {"session_id": session_id}
+        return chat_chain.invoke(chat_request, config)
 
     @inject
     def remove_source_documents(
         self,
         delete_request: DeleteRequest,
-        vector_database: VectorDatabase = Depends(Provide[Container.vector_database]),
+        vector_database: VectorDatabase = Depends(Provide[DependencyContainer.vector_database]),
     ) -> None:
         logger.info("Deleting documents from vector database")
         try:
@@ -94,7 +73,7 @@ class RagApi(BaseRagApi):
     def search(
         self,
         search_request: SearchRequest,
-        composed_retriever: Retriever = Depends(Provide[Container.composed_retriever]),
+        composed_retriever: Retriever = Depends(Provide[DependencyContainer.composed_retriever]),
     ) -> SearchResponse:
         try:
             composed_retriever.verify_readiness()
@@ -102,9 +81,16 @@ class RagApi(BaseRagApi):
             logger.warning("No documents available in vector database.")
             return ChatResponse(answer="Nix da an Dokumenten!", finish_reason="Error", citations=[])
 
-        retrieved_documents = self._search_documents(
-            prompt=search_request.search_term, metadata=search_request.metadata, composed_retriever=composed_retriever
-        )
+        retrieved_documents = ...
+        config = RunnableConfig(metadata=search_request.metadata)
+        try:
+            retrieved_documents = composed_retriever.invoke(input=search_request.search_term, config=config)
+        except Exception as e:
+            logger.error("Error while searching for documents in vector database: %s", e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error while searching for documents in vector database: %s" % e,
+            )
 
         source_documents = [
             SourceDocument(content=document.page_content, metadata=document.metadata)
@@ -118,7 +104,7 @@ class RagApi(BaseRagApi):
     def upload_source_documents(
         self,
         upload_source_document: List[UploadSourceDocument],
-        vector_database: VectorDatabase = Depends(Provide[Container.vector_database]),
+        vector_database: VectorDatabase = Depends(Provide[DependencyContainer.vector_database]),
     ) -> None:
         langchain_documents = [
             UploadSourceDocument2LangchainDocument.source_document2langchain_document(document)
@@ -132,7 +118,6 @@ class RagApi(BaseRagApi):
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    @inject
     def _search_documents(self, prompt: str, composed_retriever: Retriever, metadata: dict = None) -> list[Document]:
         config = RunnableConfig(metadata=metadata)
         try:

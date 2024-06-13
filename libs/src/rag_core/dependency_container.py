@@ -1,6 +1,7 @@
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Singleton, Selector, Configuration, List
 from rag_core.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
+from rag_core.impl.api_chains.default_chat_chain import DefaultChatChain
 from rag_core.impl.data_types.content_type import ContentType
 from rag_core.impl.llms.llm_factory import llm_provider
 from rag_core.impl.llms.llm_type import LLMType
@@ -26,14 +27,15 @@ from langchain_community.llms import Ollama
 from rag_core.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
 from rag_core.impl.vector_databases.qdrant_database import QdrantDatabase
+from rag_core.impl import rag_api
 
 
-class Container(DeclarativeContainer):
+class DependencyContainer(DeclarativeContainer):
     """
     Dependency injection container for managing application dependencies.
     """
 
-    wiring_config = WiringConfiguration(modules=["rag_core.impl.rag_api"])
+    wiring_config = WiringConfiguration(modules=[rag_api])
 
     class_selector_config = Configuration()
 
@@ -143,7 +145,7 @@ class Container(DeclarativeContainer):
         ollama=large_language_model,
     )
 
-    answer_generation_chain = Singleton(
+    untraced_answer_generation_chain = Singleton(
         AnswerGenerationChain,
         llm=large_language_model,
         prompt=prompt,
@@ -152,6 +154,12 @@ class Container(DeclarativeContainer):
     # wrap chain in tracer
     answer_generation_chain = Singleton(
         LangfuseTracedChain,
-        inner_chain=answer_generation_chain,
+        inner_chain=untraced_answer_generation_chain,
         settings=LangfuseSettings,
+    )
+
+    chat_chain = Singleton(
+        DefaultChatChain,
+        composed_retriever=composed_retriever,
+        answer_generation_chain=answer_generation_chain,
     )

@@ -10,12 +10,11 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
-
 from fastapi import FastAPI
+from dependency_injector.containers import Container
 
 from rag_core.apis.rag_api import router as RagApiRouter
-from rag_core.container import Container
+from rag_core.dependency_container import DependencyContainer
 
 app = FastAPI(
     title="RAG SIT x Stackit",
@@ -25,11 +24,15 @@ app = FastAPI(
 
 app.include_router(RagApiRouter)
 
-container = Container()
+container = DependencyContainer()
 app.container = container
 
 
-def register_dependency(name, instance):
-    # TODO: this can currently only replace. Implement adding new dependencies!
-    dependency = getattr(app.container, name)
-    dependency.override(instance)
+def register_dependency_container(new_container: Container):
+    # preserve old wiring
+    wiring_target = container.wiring_config.modules
+    app.container.override(new_container)
+
+    # rewire
+    wiring_target = list(set(wiring_target + new_container.wiring_config.modules))
+    app.container.wire(modules=wiring_target)

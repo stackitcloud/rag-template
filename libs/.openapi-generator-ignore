@@ -31,3 +31,4 @@ setup.cfg
 .flake8
 .gitignore
 docker-compose.yaml
+.openapi-generator/FILES

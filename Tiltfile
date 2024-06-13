@@ -35,13 +35,13 @@ create_namespace_if_notexist(namespace)
 registry = "ghcr.io/mmmake-gmbh/rag"
 rag_api_image_name = "rag_api"
 
-backend_context = "."
+backend_context = "./rag-backend"
 rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
 docker_build(
     rag_api_full_image_name,
     backend_context,
-    live_update=[sync(".", "/app")],
-    dockerfile=("DebugDockerfile" if backend_debug else "Dockerfile")
+    live_update=[sync(backend_context, "/app")],
+    dockerfile=backend_context+"/"+("DebugDockerfile" if backend_debug else "Dockerfile")
 )
 
 ########################################################################################################################

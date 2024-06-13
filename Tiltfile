@@ -41,7 +41,7 @@ docker_build(
     rag_api_full_image_name,
     backend_context,
     live_update=[sync(".", "/app")],
-    dockerfile=backend_context+("DebugDockerfile" if backend_debug else "Dockerfile")
+    dockerfile=("DebugDockerfile" if backend_debug else "Dockerfile")
 )
 
 ########################################################################################################################
@@ -66,15 +66,15 @@ value_override = [
     "backend.ingress.host.name=rag.localhost",
 ]
 
-helm_remote(
-    "rag",
-    repo_name="rag",
-    values="<<some_values.yaml>>",
+yaml = helm(
+    "./rag-infrastructure/rag",
+    name="rag",
     namespace="rag",
-    version="0.0.1",
-    repo_url="<<REPO_URL>>",
+    values=["./rag-infrastructure/rag/values.yaml"],
     set=value_override,
 )
+
+k8s_yaml(yaml)
 
 k8s_resource(
     "backend",
@@ -95,7 +95,7 @@ k8s_resource(
 ########################################################################################################################
 
 k8s_resource(
-    "qdrant",
+    "rag-qdrant",
     port_forwards=[
         port_forward(
             6333,
@@ -111,7 +111,7 @@ k8s_resource(
 ########################################################################################################################
 
 k8s_resource(
-    "langfuse",
+    "rag-langfuse",
     port_forwards=[
         port_forward(
             3000,

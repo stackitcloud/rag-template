@@ -10,6 +10,9 @@ python = "^3.11"
 rag-core-lib = { path = "./rag-core-library", develop = true}
 
 
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

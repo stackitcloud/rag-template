@@ -1,3 +1,7 @@
+#TODO: add tag to the submodules
 [submodule "rag-core-library"]
 	path = rag-core-library
 	url = git@ssh.dev.azure.com:v3/schwarzit-wiking/schwarzit.rag-template-sit-stackit/rag-core-library
+[submodule "rag-infrastructure"]
+	path = rag-infrastructure
+	url = git@ssh.dev.azure.com:v3/schwarzit-wiking/schwarzit.rag-template-sit-stackit/rag-infrastructure

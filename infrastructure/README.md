@@ -15,7 +15,8 @@ For local deployment a view env variables need to be provided by an `.env` file 
 The `.env` needs to contain the following values:
 
 ```
-BASIC_AUTH=...
+BASIC_AUTH=Zm9vOiRhcHIxJGh1VDVpL0ZKJG10elZQUm1IM29JQlBVMlZ4YkpUQy8K
+BASIC_AUTH_CLEAR=foo:bar
 
 S3_SECRET_ACCESS_KEY=password
 S3_ACCESS_KEY_ID=admin
@@ -40,7 +41,7 @@ TLS_ENABLED=false
 SSL=false
 ```
 
-This results in a basic auth with username=password=`foo`.
+This results in a basic auth with username`foo` and password=`bar`.
 
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
 

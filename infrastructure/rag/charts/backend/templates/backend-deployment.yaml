@@ -14,32 +14,32 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ include "backendfullimagename" . }}
-        imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-        {{- if not (empty .Values.backend.image.command) }}
+        image: {{ include "fullimagename" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if not (empty .Values.image.command) }}
         command: 
-        {{- range $cmd :=  .Values.backend.image.command }}
+        {{- range $cmd :=  .Values.image.command }}
         - {{ $cmd -}}
         {{ end }}
         {{- end }}
-        {{- if not .Values.global.debug.backend.enabled }}
-        {{- if not (empty .Values.backend.image.args) }}
+        {{- if not .Values.global.debug.enabled }}
+        {{- if not (empty .Values.image.args) }}
         args:
-        {{- range $arg :=  .Values.backend.image.args }}
+        {{- range $arg :=  .Values.image.args }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}
         {{- else }}
-        {{- if not (empty .Values.backend.image.debugArgs) }}
+        {{- if not (empty .Values.image.debugArgs) }}
         args:
-        {{- range $arg :=  .Values.backend.image.debugArgs }}
+        {{- range $arg :=  .Values.image.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}       
         {{- end }}
         ports:
         - containerPort: {{ .Values.service.port }}
-        {{- if .Values.global.debug.backend.enabled }}
+        {{- if .Values.global.debug.enabled }}
         - containerPort: 31415
         {{- end }}
         envFrom:
@@ -72,11 +72,7 @@ spec:
           - secretRef:
               name: {{ template "secret.usecase.name" . }}
         env:
-          - name: PYDEVD_WARN_EVALUATION_TIMEOUT
-            value: "6000"
           - name: PYTHONPATH
             value: {{ .Values.pythonPathEnv.PYTHONPATH }}
-          - name: LANGFUSE_HOST
-            value: http://langfuse.langfuse.svc.cluster.local:3000
       imagePullSecrets:
       - name: {{ .Values.global.imagePullSecret.name }}

@@ -56,14 +56,14 @@
 {{- end -}}
 
 {{- define "configmap.usecase.name" -}}
-{{- .Release.Name -}}-usecase.configmap
+{{- .Release.Name -}}-usecase-configmap
 {{- end -}}
 
-{{- define "backendfullimagename" -}}
-{{- printf "%s/%s:%s" .Values.backend.image.repository .Values.backend.image.name .Values.backend.image.tag | trimSuffix ":" }}
+{{- define "fullimagename" -}}
+{{- printf "%s/%s:%s" .Values.image.repository .Values.image.name .Values.image.tag | trimSuffix ":" }}
 {{- end -}}
 
 # ingress
-{{- define "ingress.backend.fullname" -}}
+{{- define "ingress.fullname" -}}
 {{- .Release.Name -}}-backend-ingress
 {{- end -}}

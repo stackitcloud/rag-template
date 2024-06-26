@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "ingress.backend.fullname" . }}
+  name: {{ include "ingress.fullname" . }}
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-origin: "{{ .Values.ingress.host.name }}, admin.{{ .Values.ingress.host.name }}"
     nginx.ingress.kubernetes.io/auth-type: basic

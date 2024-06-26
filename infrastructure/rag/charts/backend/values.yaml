@@ -1,41 +1,40 @@
 replicaCount: 1
 
-backend:
-  image:
-    # TODO: Change to jfrog/azure or something else
-    repository: ghcr.io/mmmake-gmbh/rag
-    name: rag_api
-    pullPolicy: Always
-    tag: "dev-ba20c7b"
+image:
+  # TODO: Change to jfrog/azure or something else
+  repository: ghcr.io/mmmake-gmbh/rag
+  name: rag_api
+  pullPolicy: Always
+  tag: "dev-ba20c7b"
 
-    command:
-      - "python"
-    args:
-      - "-m"
-      - "uvicorn"
-      - "main:perfect_rag_app"
-      - "--host"
-      - "0.0.0.0"
-      - "--port"
-      - "8080"
-      - "--root-path"
-      - "/api"
-    debugArgs:
-      - "-m"
-      - "debugpy"
-      - "--wait-for-client"
-      - "--listen"
-      - "0.0.0.0:31415"
-      - "-m"
-      - "uvicorn"
-      - "main:perfect_rag_app"
-      - "--host"
-      - "0.0.0.0"
-      - "--port"
-      - "8080"
-      - "--reload"
-      - "--root-path"
-      - "/api"
+  command:
+    - "python"
+  args:
+    - "-m"
+    - "uvicorn"
+    - "main:perfect_rag_app"
+    - "--host"
+    - "0.0.0.0"
+    - "--port"
+    - "8080"
+    - "--root-path"
+    - "/api"
+  debugArgs:
+    - "-m"
+    - "debugpy"
+    - "--wait-for-client"
+    - "--listen"
+    - "0.0.0.0:31415"
+    - "-m"
+    - "uvicorn"
+    - "main:perfect_rag_app"
+    - "--host"
+    - "0.0.0.0"
+    - "--port"
+    - "8080"
+    - "--reload"
+    - "--root-path"
+    - "/api"
 
 service:
   type: ClusterIP

@@ -37,7 +37,7 @@ global:
     envs:
       database:
         VECTOR_DB_COLLECTION_NAME: ebm_papst
-        VECTOR_DB_URL: qdrant.qdrant.svc.cluster.local:6333
+        VECTOR_DB_URL: qdrant:6333
       retriever:
         RETRIEVER_THRESHOLD: 0.3
         RETRIEVER_K_DOCUMENTS: 10
@@ -69,13 +69,14 @@ global:
       langfuse:
         LANGFUSE_DATASET_NAME: "test_ds"
         LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+        LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
       rag_class_types:
         RAG_CLASS_TYPE_LLM_TYPE: "myapi"
       public:
         PUBLIC_HOST: "https://api.aleph-alpha.com"
       ollama:
         OLLAMA_MODEL: "llama3:instruct"
-        OLLAMA_BASE_URL: "http://ollama.ollama.svc.cluster.local:11434"
+        OLLAMA_BASE_URL: "http://ollama:11434"
         OLLAMA_TOP_K: 0
         OLLAMA_TOP_P: 0
         OLLAMA_TEMPERATURE: 0

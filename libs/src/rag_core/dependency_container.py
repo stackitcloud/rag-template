@@ -1,11 +1,15 @@
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Singleton, Selector, Configuration, List
 from rag_core.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
-from rag_core.impl.api_chains.default_chat_chain import DefaultChatChain
+from rag_core.impl.api_endpoints.default_chat_chain import DefaultChatChain
+from rag_core.impl.api_endpoints.default_searcher import DefaultSearcher
+from rag_core.impl.api_endpoints.default_source_documents_remover import DefaultSourceDocumentsRemover
+from rag_core.impl.api_endpoints.default_source_documents_uploader import DefaultSourceDocumentsUploader
 from rag_core.impl.data_types.content_type import ContentType
 from rag_core.impl.llms.llm_factory import llm_provider
 from rag_core.impl.llms.llm_type import LLMType
 from rag_core.impl.llms.secured_llm import SecuredLLM
+from rag_core.impl.mapper.source_document_mapper import SourceDocumentMapper
 from rag_core.impl.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
 from rag_core.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
 from rag_core.impl.retriever.composite_retriever import CompositeRetriever
@@ -97,6 +101,10 @@ class DependencyContainer(DeclarativeContainer):
         vectorstore=vectorstore,
     )
 
+    source_documents_uploader = Singleton(DefaultSourceDocumentsUploader, vector_database)
+
+    source_documents_remover = Singleton(DefaultSourceDocumentsRemover, vector_database)
+
     image_retriever = Singleton(
         RetrieverQuark,
         vector_database,
@@ -130,6 +138,10 @@ class DependencyContainer(DeclarativeContainer):
         CompositeRetriever, List(image_retriever, table_retriever, text_retriever, summary_retriever)
     )
 
+    source_document_mapper = Singleton(SourceDocumentMapper)
+
+    searcher = Singleton(DefaultSearcher, composed_retriever, source_document_mapper)
+
     large_language_model = Selector(
         class_selector_config.llm_type,
         myapi=Singleton(llm_provider, aleph_alpha_settings),
@@ -145,21 +157,23 @@ class DependencyContainer(DeclarativeContainer):
         ollama=large_language_model,
     )
 
-    untraced_answer_generation_chain = Singleton(
+    answer_generation_chain = Singleton(
         AnswerGenerationChain,
         llm=large_language_model,
         prompt=prompt,
     )
 
-    # wrap chain in tracer
-    answer_generation_chain = Singleton(
-        LangfuseTracedChain,
-        inner_chain=untraced_answer_generation_chain,
-        settings=LangfuseSettings,
-    )
-
     chat_chain = Singleton(
         DefaultChatChain,
         composed_retriever=composed_retriever,
+        searcher=searcher,
+        mapper=source_document_mapper,
         answer_generation_chain=answer_generation_chain,
+    )
+
+    # wrap chain in tracer
+    traced_chat_chain = Singleton(
+        LangfuseTracedChain,
+        inner_chain=chat_chain,
+        settings=LangfuseSettings,
     )

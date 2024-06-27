@@ -1,5 +1,6 @@
 import logging
 from typing import Any, List, Optional
+from copy import deepcopy
 
 from langchain_core.documents import Document
 from langchain_core.runnables import (
@@ -31,7 +32,8 @@ class CompositeRetriever(Retriever):
     def invoke(self, input: str, config: Optional[RunnableConfig] = None, **kwargs: Any) -> List[Document]:
         results = []
         for retriever in self._retrievers:
-            results += retriever.invoke(input, config=config)
+            tmp_config = deepcopy(config)
+            results += retriever.invoke(input, config=tmp_config)
 
         # remove summaries
         results = [x for x in results if x.metadata["type"] != ContentType.SUMMARY.value]

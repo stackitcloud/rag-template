@@ -26,6 +26,8 @@ requirements.txt
 Dockerfile
 tests/*
 src/rag_core/main.py
+src/rag_core/apis/*
+src/rag_core/impl/*
 README.md
 setup.cfg
 .flake8

@@ -16,4 +16,3 @@ class LangfuseSettings(BaseSettings):
     secret_key: str = Field()
     public_key: str = Field()
     host: str = Field()
-    dataset_filename: str = Field(default="test_data.json")

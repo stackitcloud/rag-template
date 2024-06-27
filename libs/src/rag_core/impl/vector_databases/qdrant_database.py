@@ -6,8 +6,9 @@ from qdrant_client.http import models
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 
 from rag_core.embeddings.embedder import Embedder
-from rag_core.vector_databases.vector_database import VectorDatabase
 from rag_core.impl.settings.vector_db_settings import VectorDatabaseSettings
+from rag_core.vector_databases.vector_database import VectorDatabase
+
 
 
 class QdrantDatabase(VectorDatabase):
@@ -55,7 +56,7 @@ class QdrantDatabase(VectorDatabase):
             search_kwargs=(
                 search_kwargs
                 if not filter_kwargs
-                else self._search_kwargs_builder(search_kwargs=search_kwargs, filter_kwargs=filter_kwargs.metadata)
+                else self._search_kwargs_builder(search_kwargs=search_kwargs, filter_kwargs=filter_kwargs)
             ),
         )
         results = retriever.invoke(query)

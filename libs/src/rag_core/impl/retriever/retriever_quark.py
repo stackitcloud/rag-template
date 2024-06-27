@@ -35,7 +35,7 @@ class RetrieverQuark(Retriever):
             "score_threshold": threshold,
         }
         self._filter_kwargs = {
-            "metadata": {self.TYPE_KEY: retriever_type.value},
+            self.TYPE_KEY: retriever_type.value,
         }
 
     def verify_readiness(self) -> None:
@@ -46,6 +46,6 @@ class RetrieverQuark(Retriever):
     def invoke(self, input: str, config: Optional[RunnableConfig] = None) -> List[Document]:
         config = ensure_config(config)
         self.verify_readiness()
-        if self.TYPE_KEY not in config.metadata.keys():
-            config.metadata = config.metadata | self._filter_kwargs
-        return self._vector_database.search(query=input, search_kwargs=self._search_kwargs, filter_kwargs=config)
+        if self.TYPE_KEY not in config["metadata"]["filter_kwargs"].keys():
+            config["metadata"]["filter_kwargs"] = config["metadata"]["filter_kwargs"] | self._filter_kwargs
+        return self._vector_database.search(query=input, search_kwargs=self._search_kwargs, filter_kwargs=config["metadata"]["filter_kwargs"])

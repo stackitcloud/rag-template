@@ -5,11 +5,15 @@ from fastapi import HTTPException, status
 from langchain_core.runnables import RunnableConfig
 from langchain_core.documents import Document
 
-from rag_core.api_chains.chat_chain import ChatChain
+from rag_core.models.search_request import SearchRequest
+from rag_core.api_endpoints.chat_chain import ChatChain
+from rag_core.api_endpoints.searcher import Searcher
 from rag_core.impl.answer_generation_chains.answer_chain_input_data import AnswerChainInputData
 from rag_core.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
+from rag_core.impl.mapper.source_document_mapper import SourceDocumentMapper
 from rag_core.models.chat_request import ChatRequest
 from rag_core.models.chat_response import ChatResponse
+from rag_core.models.source_documents import SourceDocuments
 from rag_core.retriever.retriever import Retriever
 
 
@@ -18,9 +22,17 @@ logger = logging.getLogger(__name__)
 
 class DefaultChatChain(ChatChain):
 
-    def __init__(self, composed_retriever: Retriever, answer_generation_chain: AnswerGenerationChain):
+    def __init__(
+        self,
+        composed_retriever: Retriever,
+        answer_generation_chain: AnswerGenerationChain,
+        searcher: Searcher,
+        mapper: SourceDocumentMapper,
+    ):
         self._composed_retriever = composed_retriever
         self._answer_generation_chain = answer_generation_chain
+        self._searcher = searcher
+        self._mapper = mapper
 
     def invoke(self, input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse:
 
@@ -33,9 +45,15 @@ class DefaultChatChain(ChatChain):
             current_question,
         )
 
-        retrieved_documents = self._search_documents(
-            prompt=current_question, composed_retriever=self._composed_retriever
-        )  # TODO: apply filter quarks as needed. For now, we just search for all documents.
+        retrieved_documents = self._searcher.search(search_request=SearchRequest(search_term=current_question))
+
+        if not isinstance(retrieved_documents, SourceDocuments):
+            # failure in search. Forward error
+            return retrieved_documents
+
+        retrieved_documents = [
+            self._mapper.source_document2langchain_document(x) for x in retrieved_documents.documents
+        ]
 
         answer_generation_input = AnswerChainInputData(question=input.message, retrieved_documents=retrieved_documents)
 

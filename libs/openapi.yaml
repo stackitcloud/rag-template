@@ -131,7 +131,10 @@ components:
       description: ""
       properties:
         messages:
-          $ref: '#/components/schemas/chat_history_message'
+          items:
+            $ref: '#/components/schemas/chat_history_message'
+          title: messages
+          type: array
       required:
       - messages
       title: chat_history

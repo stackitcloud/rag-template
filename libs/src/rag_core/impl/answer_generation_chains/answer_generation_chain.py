@@ -5,7 +5,6 @@ from langchain.prompts import PromptTemplate
 from langchain_core.documents import Document
 from langchain_core.language_models.llms import LLM
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
 
 
 from rag_core.impl.answer_generation_chains.answer_chain_input_data import (
@@ -23,11 +22,13 @@ class AnswerGenerationChain(Runnable[RunnableInput, RunnableOutput], ABC):
 
     def __init__(self, llm: LLM, prompt: PromptTemplate):
         self._llm = llm
-        self._chain = (
+        self._chain = self._create_chain(prompt)
+
+    def _create_chain(self, prompt: PromptTemplate) -> Runnable:
+        return (
             RunnablePassthrough.assign(context=(lambda x: self.format_docs(x["retrieved_documents"])))
             | prompt
-            | llm
-            | StrOutputParser()
+            | self._llm
         )
 
     def invoke(self, input: RunnableInput, config: Optional[RunnableConfig] = None, **kwargs: Any) -> RunnableOutput:

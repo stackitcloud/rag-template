@@ -31,7 +31,7 @@ except ImportError:
 class ChatHistory(BaseModel):
     """ """  # noqa: E501
 
-    messages: ChatHistoryMessage
+    messages: List[ChatHistoryMessage]
     __properties: ClassVar[List[str]] = ["messages"]
 
     model_config = {
@@ -69,9 +69,13 @@ class ChatHistory(BaseModel):
             exclude={},
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of messages
+        # override the default output from pydantic by calling `to_dict()` of each item in messages (list)
+        _items = []
         if self.messages:
-            _dict["messages"] = self.messages.to_dict()
+            for _item in self.messages:
+                if _item:
+                    _items.append(_item.to_dict())
+            _dict["messages"] = _items
         return _dict
 
     @classmethod
@@ -84,6 +88,12 @@ class ChatHistory(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate(
-            {"messages": ChatHistoryMessage.from_dict(obj.get("messages")) if obj.get("messages") is not None else None}
+            {
+                "messages": (
+                    [ChatHistoryMessage.from_dict(_item) for _item in obj.get("messages")]
+                    if obj.get("messages") is not None
+                    else None
+                )
+            }
         )
         return _obj

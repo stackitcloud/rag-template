@@ -12,6 +12,8 @@ spec:
       labels:
         app: {{ .Chart.Name }}      
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret.name }}    
       volumes:
       - name: frontend
         emptyDir: {}
@@ -22,8 +24,6 @@ spec:
           - configMapRef:
               name: {{ template "configmap.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        imagePullSecrets:
-          - name: {{ .Values.global.imagePullSecret.name }}    
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend        
@@ -38,18 +38,14 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.name" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        imagePullSecrets:
-          - name: {{ .Values.global.imagePullSecret.name }}    
+        imagePullPolicy: {{ .Values.image.pullPolicy }}        
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend        
       containers:
       - name: {{ .Chart.Name }}
         image: {{ template "fullimagename" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        imagePullSecrets:
-          - name: {{ .Values.global.imagePullSecret.name }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}        
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend
@@ -57,6 +53,4 @@ spec:
         - containerPort: {{ .Values.service.port }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.name" . }}
-      imagePullSecrets:
-      - name: {{ .Values.global.imagePullSecret.name }}
+              name: {{ template "configmap.name" . }}      

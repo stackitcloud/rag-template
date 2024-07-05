@@ -12,6 +12,8 @@ spec:
       labels:
         app: {{ .Chart.Name }}
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret.name }}    
       containers:
       - name: {{ .Chart.Name }}
         image: {{ include "fullimagename" . }}
@@ -74,5 +76,3 @@ spec:
         env:
           - name: PYTHONPATH
             value: {{ .Values.pythonPathEnv.PYTHONPATH }}
-      imagePullSecrets:
-      - name: {{ .Values.global.imagePullSecret.name }}

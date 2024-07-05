@@ -5,7 +5,9 @@ metadata:
   name: rag-certificate
 spec:
   dnsNames:
-    - rag.localhost
+    {{- range .Values.global.config.dns }} 
+    - {{.}} 
+    {{- end }}
   secretName: tls-certificate
   issuerRef:
     name: letsencrypt-cluster-issuer

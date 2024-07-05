@@ -5,14 +5,6 @@ qdrant:
 frontend:
   enabled: true
 
-registry:
-  auths:
-    crIo:
-      username: github-username # replace with your github username
-      pat: github-pat # replace with your github personal access token
-      email: email-address@domain.de # replace with your email address
-  name: "ghcr.io"
-
 global:
   ssl: true
   imagePullSecret:
@@ -30,6 +22,8 @@ global:
     usecase:
 
   config:
+    dns:
+      - rag.localhost
     tls:
       enabled: true
       host: rag.localhost

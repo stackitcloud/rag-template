@@ -1,5 +1,9 @@
+import qdrant_client
+from langchain_qdrant import Qdrant
+from langchain_community.llms import Ollama
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Singleton, Selector, Configuration, List
+
 from rag_core.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
 from rag_core.impl.api_endpoints.default_chat_chain import DefaultChatChain
 from rag_core.impl.api_endpoints.default_searcher import DefaultSearcher
@@ -25,9 +29,6 @@ from rag_core.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaS
 from rag_core.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core.impl.settings.retriever_settings import RetrieverSettings
 from rag_core.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
-import qdrant_client
-from langchain_qdrant import Qdrant
-from langchain_community.llms import Ollama
 from rag_core.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
 from rag_core.impl.vector_databases.qdrant_database import QdrantDatabase
@@ -175,5 +176,5 @@ class DependencyContainer(DeclarativeContainer):
     traced_chat_chain = Singleton(
         LangfuseTracedChain,
         inner_chain=chat_chain,
-        settings=LangfuseSettings,
+        settings=langfuse_settings,
     )

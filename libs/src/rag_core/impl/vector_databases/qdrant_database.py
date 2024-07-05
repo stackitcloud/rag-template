@@ -10,7 +10,6 @@ from rag_core.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core.vector_databases.vector_database import VectorDatabase
 
 
-
 class QdrantDatabase(VectorDatabase):
     """
     A class representing the interface to the Qdrant database.

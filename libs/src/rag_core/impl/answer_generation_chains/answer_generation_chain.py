@@ -26,7 +26,7 @@ class AnswerGenerationChain(Runnable[RunnableInput, RunnableOutput], ABC):
 
     def _create_chain(self, prompt: PromptTemplate) -> Runnable:
         return (
-            RunnablePassthrough.assign(context=(lambda x: self.format_docs(x["retrieved_documents"])))
+            RunnablePassthrough.assign(context=(lambda x: self._format_docs(x["retrieved_documents"])))
             | prompt
             | self._llm
         )
@@ -36,5 +36,5 @@ class AnswerGenerationChain(Runnable[RunnableInput, RunnableOutput], ABC):
         return self._chain.invoke(prompt_input, config=config)
 
     @staticmethod
-    def format_docs(docs: List[Document]) -> str:
+    def _format_docs(docs: List[Document]) -> str:
         return "\n\n".join(doc.page_content for doc in docs)

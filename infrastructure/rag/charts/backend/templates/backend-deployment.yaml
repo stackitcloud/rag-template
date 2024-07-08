@@ -19,12 +19,12 @@ spec:
         image: {{ include "fullimagename" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if not (empty .Values.image.command) }}
-        command: 
+        command:
         {{- range $cmd :=  .Values.image.command }}
         - {{ $cmd -}}
         {{ end }}
         {{- end }}
-        {{- if not .Values.global.debug.enabled }}
+        {{- if not .Values.global.debug.backend.enabled }}
         {{- if not (empty .Values.image.args) }}
         args:
         {{- range $arg :=  .Values.image.args }}
@@ -37,7 +37,7 @@ spec:
         {{- range $arg :=  .Values.image.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
-        {{- end }}       
+        {{- end }}
         {{- end }}
         ports:
         - containerPort: {{ .Values.service.port }}

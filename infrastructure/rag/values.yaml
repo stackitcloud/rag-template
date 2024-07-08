@@ -8,6 +8,7 @@ frontend:
 global:
   ssl: true
   imagePullSecret:
+    create: false
     name: cr-credentials
   secrets:
     aleph_alpha:

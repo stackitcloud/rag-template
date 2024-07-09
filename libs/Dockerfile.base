@@ -2,10 +2,6 @@ FROM python:3.11.7-bookworm
 
 WORKDIR /app
 
-ENV POETRY_VIRTUALENVS_CREATE=1
-ENV POETRY_VIRTUALENVS_IN_PROJECT=1
-ENV PATH="$PATH:/app/.venv/bin"
-
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make libhdf5-dev
 

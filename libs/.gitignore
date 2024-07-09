@@ -139,3 +139,12 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# IDE stuff
+.idea
+.github
+.vscode
+.devcontainer
+
+# Generated files
+flake8_dashboard

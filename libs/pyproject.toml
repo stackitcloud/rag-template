@@ -11,7 +11,6 @@ readme = "README.md"
 license = ""
 packages = [{ include = "rag_core", from = "src" }]
 
-
 [tool.poetry.dependencies]
 python = "^3.11"
 langchain = "^0.2.1"
@@ -30,72 +29,46 @@ qdrant-client = "^1.9.1"
 aleph-alpha-client = "^7.1.0"
 deprecated = "^1.2.14"
 
-
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"
 pytest = "^8.2.1"
+flake8 = "^7.1.0"
+flake8-black = "^0.3.6"
+flake8-pyproject = "^1.2.3"
+flake8-dashboard = "^0.1.4"
+pandas = "<2"
+coverage = "^7.5.4"
+
+[tool.flake8]
+exclude= [".eggs", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+statistics = true
+show-source = false
+max-complexity = 8
+max-annotations-complexity = 3
+docstring-convent = 'numpy'
+max-line-length = 120
+ignore = ["E203", "W503"]
+inline-quotes = '"'
+docstring-quotes = '"""'
+multiline-quotes = '"""'
+dictionaries = ["en_US", "python", "technical", "pandas"]
+ban-relative-imports = true
 
 [tool.black]
 line-length = 120
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
+exclude = [".eggs", ".git", ".hg", ".mypy_cache", ".tox", ".venv", "_build", "buck-out", "build", "dist"]
 
 [tool.isort]
 profile = "black"
-skip = [
-    '.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox',
-    '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv',
-]
+skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
 skip_gitignore = true
 
 [tool.pylint]
 max-line-length = 120
 
-
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".ipynb_checkpoints",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "site-packages",
-    "venv",
-]
+exclude = [".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".ipynb_checkpoints", ".mypy_cache", ".nox", ".pants.d", ".pyenv", ".pytest_cache", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", ".vscode", "__pypackages__", "_build", "buck-out", "build", "dist", "node_modules", "site-packages", "venv"]
 
 # Same as Black.
 "line-length" = 120
@@ -128,3 +101,7 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+[tool.pytest.ini_options]
+log_cli = 1
+log_cli_level = "DEBUG"

@@ -8,8 +8,10 @@ image:
   tag: "dev-ba20c7b"
 
   command:
-    - "python"
+    - "poetry"
+    - "run"
   args:
+    - "python"
     - "-m"
     - "uvicorn"
     - "main:perfect_rag_app"
@@ -20,6 +22,7 @@ image:
     - "--root-path"
     - "/api"
   debugArgs:
+    - "python"
     - "-m"
     - "debugpy"
     - "--wait-for-client"

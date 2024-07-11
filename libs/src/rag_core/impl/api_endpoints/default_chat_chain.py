@@ -37,7 +37,6 @@ class DefaultChatChain(ChatChain):
     def invoke(self, input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse:
 
         # TODO: use the chat history for something ]:->
-        chat_history = input.history
         current_question = input.message
 
         logger.info(

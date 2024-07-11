@@ -16,8 +16,6 @@ from rag_core.models.search_request import SearchRequest
 from rag_core.models.search_response import SearchResponse
 from rag_core.models.upload_source_document import UploadSourceDocument
 from rag_core.apis.rag_api_base import BaseRagApi
-from rag_core.apis.rag_api_base import BaseRagApi
-from rag_core.models.search_response import SearchResponse
 
 
 logger = logging.getLogger(__name__)

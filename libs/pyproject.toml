@@ -40,23 +40,24 @@ pandas = "<2"
 coverage = "^7.5.4"
 
 [tool.flake8]
-exclude= [".eggs", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+exclude= [".eggs", "./src/rag_core/models/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
 statistics = true
 show-source = false
 max-complexity = 8
 max-annotations-complexity = 3
 docstring-convent = 'numpy'
 max-line-length = 120
-ignore = ["E203", "W503"]
+ignore = ["E203", "W503", "E704"]
 inline-quotes = '"'
 docstring-quotes = '"""'
 multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
+per-file-ignores = """./src/rag_core/impl/prompt_templates/answer_generation_prompt.py: E501"""
 
 [tool.black]
 line-length = 120
-exclude = [".eggs", ".git", ".hg", ".mypy_cache", ".tox", ".venv", "_build", "buck-out", "build", "dist"]
+# exclude = '''[".eggs", ".git", ".hg", ".mypy_cache", ".tox", ".venv", "_build", "buck-out", "build", "dist"]'''
 
 [tool.isort]
 profile = "black"

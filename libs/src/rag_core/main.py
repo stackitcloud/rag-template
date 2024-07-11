@@ -13,6 +13,7 @@
 from fastapi import FastAPI
 from dependency_injector.containers import Container
 
+
 from rag_core.apis.rag_api import router as RagApiRouter
 from rag_core.dependency_container import DependencyContainer
 

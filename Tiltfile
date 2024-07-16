@@ -6,7 +6,26 @@ if os.path.exists(".env"):
 config.define_bool("debug")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
+def create_linter_command(folder_name, name):
+    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile " + folder_name + ";docker run --rm "+name+" make lint"
 
+def create_test_command(folder_name, name):
+    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile " + folder_name + ";docker run --rm "+name+" make test"
+
+########################################################################################################################
+########################################## build helm charts ###########################################################
+########################################################################################################################
+local_resource(
+    "core helm chart",
+    cmd="cd ./rag-infrastructure/rag && helm dependency update",
+    ignore=[
+        "rag-infrastructure/rag/charts/backend-0.0.1.tgz",
+        "rag-infrastructure/rag/charts/frontend-0.0.1.tgz",
+        "rag-infrastructure/rag/charts/langfuse-0.2.1.tgz",
+        "rag-infrastructure/rag/charts/qdrant-0.9.1.tgz",
+    ],
+    labels=["helm"],
+)
 
 ########################################################################################################################
 ############################## create k8s namespaces, if they don't exist ##############################################
@@ -40,10 +59,29 @@ rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
 docker_build(
     rag_api_full_image_name,
     backend_context,
+    build_args={
+        "dev": "1" if backend_debug else "0",
+    },
     live_update=[sync(backend_context, "/app")],
-    dockerfile=backend_context+"/"+("DebugDockerfile" if backend_debug else "Dockerfile")
+    dockerfile=backend_context + "/Dockerfile",
+)
+# Add linter trigger
+local_resource(
+    "RAG Backend linting",
+    create_linter_command(backend_context, "back"),
+    labels=["linting"],
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
 )
 
+# Add test trigger
+local_resource(
+    "RAG Backend testing",
+    create_test_command(backend_context, "back"),
+    labels=["test"],
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
 ########################################################################################################################
 ############################ deploy local doctopus chart (back-/frontend) and forward port #############################
 ########################################################################################################################
@@ -88,6 +126,7 @@ k8s_resource(
             name="Backend-Debugger",
         ),
     ],
+    labels=["backend"],
 )
 
 ########################################################################################################################
@@ -104,6 +143,7 @@ k8s_resource(
             link_path="/dashboard",
         ),
     ],
+    labels=["infrastructure"],
 )
 
 ########################################################################################################################
@@ -117,6 +157,7 @@ k8s_resource(
             3000,
             container_port=3000,
             name="Langfuse Web",
-        ),
+        ),        
     ],
+    labels=["infrastructure"],
 )

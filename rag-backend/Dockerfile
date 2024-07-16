@@ -2,14 +2,27 @@
 
 INCLUDE+ rag-core-library/Dockerfile.base
 
+WORKDIR /app
+
+ARG dev=0
+
 COPY rag-core-library rag-core-library
 
-ENV POETRY_VIRTUALENVS_CREATE=false
-ENV POETRY_VIRTUALENVS_PATH="/app"
+ENV POETRY_CACHE_DIR "${HOME}/poetry_cache"
 
-COPY poetry.lock pyproject.toml ./
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make
 
-RUN poetry install --no-root
+COPY pyproject.toml pyproject.toml
+# COPY poetry.lock poetry.lock
 
-# TODO: investigate if multi context build might be a better solution, to avoid copying the rag-core-library twice
-COPY . . 
+# Install Python dependencies
+RUN if [ "$dev" = "1" ]; then \
+        poetry install --no-interaction --no-ansi --no-root --with dev; \
+    else \
+        poetry install --no-interaction --no-ansi --no-root; \
+    fi
+
+COPY . .
+
+

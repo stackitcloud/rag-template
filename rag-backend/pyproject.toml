@@ -9,40 +9,40 @@ readme = "README.md"
 python = "^3.11"
 rag-core-lib = { path = "./rag-core-library", develop = true}
 
-
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"
+pytest = "^8.2.2"
+flake8 = "^7.1.0"
+flake8-black = "^0.3.6"
+flake8-pyproject = "^1.2.3"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
+[tool.flake8]
+exclude= [".eggs", "./rag-core-library/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+statistics = true
+show-source = false
+max-complexity = 8
+max-annotations-complexity = 3
+docstring-convent = 'numpy'
+max-line-length = 120
+ignore = ["E203", "W503", "E704"]
+inline-quotes = '"'
+docstring-quotes = '"""'
+multiline-quotes = '"""'
+dictionaries = ["en_US", "python", "technical", "pandas"]
+ban-relative-imports = true
+
 [tool.black]
 line-length = 120
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
+exclude = '''['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']'''
 
 [tool.isort]
 profile = "black"
-skip = [
-    '.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox',
-    '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv',
-]
+skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
 skip_gitignore = true
 
 [tool.pylint]

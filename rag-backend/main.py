@@ -1,4 +1,4 @@
-from rag_core.main import app as perfect_rag_app, register_dependency_container
+from rag_core.main import app as perfect_rag_app, register_dependency_container # noqa: F401
 
 from use_case_container import UseCaseContainer
 

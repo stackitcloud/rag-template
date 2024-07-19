@@ -16,10 +16,10 @@ dependencies:
     version: 0.9.1
     repository: "https://qdrant.github.io/qdrant-helm"
     condition: qdrant.enabled
+  - name: backend
+    version: 0.0.1
+    repository: file://./charts/backend
   - name: frontend
     version: 0.0.1
     repository: file://./charts/frontend
     condition: frontend.enabled
-  - name: backend
-    version: 0.0.1
-    repository: file://./charts/backend

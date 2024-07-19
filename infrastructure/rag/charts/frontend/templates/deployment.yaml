@@ -12,8 +12,6 @@ spec:
       labels:
         app: {{ .Chart.Name }}      
     spec:
-      imagePullSecrets:
-        - name: {{ .Values.global.imagePullSecret.name }}    
       volumes:
       - name: frontend
         emptyDir: {}
@@ -23,6 +21,8 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.name" . }}
+          - secretRef:
+              name: "vite-auth"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
@@ -38,7 +38,9 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.name" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}        
+          - secretRef:
+              name: "vite-auth"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend        
@@ -53,4 +55,8 @@ spec:
         - containerPort: {{ .Values.service.port }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.name" . }}      
+              name: {{ template "configmap.name" . }}
+          - secretRef:
+              name: "vite-auth"
+      imagePullSecrets:
+      - name: {{ .Values.global.imagePullSecret.name }}

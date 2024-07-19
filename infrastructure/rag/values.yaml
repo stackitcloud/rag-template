@@ -2,7 +2,7 @@ langfuse:
   enabled: true
 qdrant:
   enabled: true
-frontend:
+frontend_flag:
   enabled: true
 
 global:
@@ -20,8 +20,10 @@ global:
     stackit_myapi_llm:
       auth_client_id: auth-client-id
       auth_client_secret: auth-client-secret
+    vite_auth:
+      VITE_AUTH_USERNAME: ""
+      VITE_AUTH_PASSWORD: ""
     usecase:
-
   config:
     dns:
       - rag.localhost
@@ -75,6 +77,9 @@ global:
         OLLAMA_TOP_K: 0
         OLLAMA_TOP_P: 0
         OLLAMA_TEMPERATURE: 0
+      frontend:
+        VITE_API_URL: "http://rag.localhost/api"
+        VITE_CHAT_URL: "http://rag.localhost"
       usecase:
 
   debug:

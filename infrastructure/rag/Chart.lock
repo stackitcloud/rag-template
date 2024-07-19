@@ -5,11 +5,11 @@ dependencies:
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
   version: 0.9.1
-- name: frontend
-  repository: file://./charts/frontend
-  version: 0.0.1
 - name: backend
   repository: file://./charts/backend
   version: 0.0.1
-digest: sha256:e2394d095eb6be12db3ce63c69fccde7ed21ff5c625063e031e69476f9eaef7f
-generated: "2024-06-12T22:19:19.774796935+02:00"
+- name: frontend
+  repository: file://./charts/frontend
+  version: 0.0.1
+digest: sha256:104b20a76dbee80837b4fd38daa6769c469ddb3058011f1d441b61a2d0672195
+generated: "2024-07-04T11:25:25.256433438+02:00"

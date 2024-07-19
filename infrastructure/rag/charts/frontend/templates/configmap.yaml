@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ template "configmap.name" . }}
 data:
-  {{- range $key, $value := .Values.config.envs }}
+  {{- range $key, $value := .Values.global.config.envs.frontend }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
 {{- end }}

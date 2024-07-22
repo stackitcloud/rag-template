@@ -1,9 +1,9 @@
-.PHONY: lint coverage
+.PHONY: lint test
 
 lint:
-	poetry run flake8 --config=pyproject.toml  --format=dashboard --title="RAG Core Lint Report" --debug ./*
+	cd rag-core-lib;make lint
+	cd rag-core-api;make lint
 
-coverage:
-	poetry run coverage run --omit *.pyc --omit *__init__.py --source src/rag_core -m pytest tests
-	poetry run coverage report -m
-	poetry run coverage html
+test:
+	cd rag-core-lib;make test
+	cd rag-core-api;make test

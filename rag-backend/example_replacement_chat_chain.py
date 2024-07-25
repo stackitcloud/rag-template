@@ -2,9 +2,9 @@ from typing import Any, Optional
 
 from langchain_core.runnables import RunnableConfig
 
-from rag_core.api_endpoints.chat_chain import ChatChain
-from rag_core.models.chat_request import ChatRequest
-from rag_core.models.chat_response import ChatResponse
+from rag_core_api.api_endpoints.chat_chain import ChatChain
+from rag_core_api.models.chat_request import ChatRequest
+from rag_core_api.models.chat_response import ChatResponse
 
 
 class ExampleReplacementChatChain(ChatChain):

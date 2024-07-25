@@ -6,11 +6,12 @@ if os.path.exists(".env"):
 config.define_bool("debug")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
+
 def create_linter_command(folder_name, name):
-    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile " + folder_name + ";docker run --rm "+name+" make lint"
+    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile .;docker run --rm "+name+" make lint"
 
 def create_test_command(folder_name, name):
-    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile " + folder_name + ";docker run --rm "+name+" make test"
+    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile .;docker run --rm "+name+" make test"
 
 ########################################################################################################################
 ########################################## build helm charts ###########################################################
@@ -32,7 +33,6 @@ local_resource(
 ########################################################################################################################
 
 namespace = "rag"
-
 
 def create_namespace_if_notexist(namespace):
     check_namespace_cmd = "kubectl get namespace %s --ignore-not-found" % namespace
@@ -58,7 +58,7 @@ backend_context = "./rag-backend"
 rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
 docker_build(
     rag_api_full_image_name,
-    backend_context,
+    ".",
     build_args={
         "dev": "1" if backend_debug else "0",
     },
@@ -98,10 +98,11 @@ value_override = [
     "global.secrets.langfuse.secret_key=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     # variables
     "global.debug.backend.enabled=%s" % backend_debug,
+    "frontend.enabled=false",
     "global.config.tls.enabled=false",
     "global.ssl=false",
     #ingress host names
-    "backend.ingress.host.name=rag.localhost",
+    "backend.ingress.host.name=rag.localhost",    
 ]
 
 yaml = helm(

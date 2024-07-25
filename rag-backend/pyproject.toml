@@ -7,7 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-rag-core-lib = { path = "./rag-core-library", develop = true}
+rag-core-api = { path = "../rag-core-library/rag-core-api", develop = true}
+rag-core-lib = { path = "../rag-core-library/rag-core-lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"

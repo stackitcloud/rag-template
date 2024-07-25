@@ -38,7 +38,7 @@ STACKIT_AUTH_CLIENT_ID=...
 STACKIT_AUTH_CLIENT_SECRET=...
 ```
 
-This results in a basic auth with username`foo` and password=`bar`.
+This results in a basic auth with username=`foo` and password=`bar`.
 
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
 
@@ -96,6 +96,14 @@ More information about adjusting the hosts file can be found in the section 'Acc
 
 
 ### *tilt* deployment
+
+If this is the first time you are starting the *tiltfile* you have to build the helm-chart first.
+This can be done with the following command from the root of the git-repository:
+```shell
+cd rag-infrastructure/rag;helm dependency update; cd ../..
+```
+After the initial build of the the helm chart `tilt` is able to update the files.
+
 
 The following will tear up the microservices in *k3d*.
 For the following steps it is assumend your current working directory is the root of the git-repository.

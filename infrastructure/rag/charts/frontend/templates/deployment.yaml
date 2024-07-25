@@ -31,7 +31,6 @@ spec:
       - name: vite-workaround
         command: 
           - /bin/sh
-          - -c
         args: 
           - /app/env.sh
         image: {{ template "fullimagename" . }}

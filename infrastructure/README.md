@@ -6,6 +6,9 @@ This Repository contains the helmchart for the following RAG components:
 - frontend
 - backend
 
+The complete list of available settings can be found in the [rag/values.yaml](rag/values.yaml) file.
+This README only explains the most important settings.
+
 With the exception of the `backend` all components can be disabled and exchanged with components of your choice.
 This can be done by overwriting the following values in your `values.yaml`
 ```yaml
@@ -102,9 +105,11 @@ global:
 > Both *AlephAlpha* options share the same settings. There is no instance of *Ollama* bundled with this package. If you require one you have to deploy your own instance.
 
 
+
 # Requirements
 
 > *Windows users*: make sure you use wsl for infrastructure setup & orchestration.
+
 
 ## Local setup instructions
 
@@ -168,7 +173,7 @@ The following will spin up the microservices in *k3d*
 tilt up
 ```
 
-Environment variables are loaded from `../.env` file. See [README](../README.md#installation--usage) for required variables.
+Environment variables are loaded from the `.env` file in the same directory the `Tiltfile` is located. The [use case README](../README.md#installation--usage) should contain a list of the required variables.
 
 The tilt ui is available at [http://localhost:10350/](http://localhost:10350/)
 

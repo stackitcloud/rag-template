@@ -10,10 +10,23 @@ from rag_core_api.models.key_value_pair import KeyValuePair
 
 class SourceDocumentMapper:
 
+    DOCUMENT_URL_KEY = "document_url"
+    IMAGE_CONTENT_KEY = "base64_image"
+
     @staticmethod
     def source_document2langchain_document(source_document: SourceDocument) -> LangchainDocument:
         metadata = {x.key: json.loads(x.value) for x in source_document.metadata}
+        if SourceDocumentMapper.DOCUMENT_URL_KEY not in metadata.keys():
+            raise ValueError('Required key "%s" not found in metadata.' % SourceDocumentMapper.DOCUMENT_URL_KEY)
         metadata["type"] = SourceDocumentMapper.external_content2internal_content(metadata["type"]).value
+        if (
+            metadata["type"] == InternalContentType.IMAGE
+            and SourceDocumentMapper.IMAGE_CONTENT_KEY not in metadata.keys()
+        ):
+            raise ValueError(
+                'Required key "%s" for content-type %s not found in metadata.'
+                % (InternalContentType.IMAGE, SourceDocumentMapper.IMAGE_CONTENT_KEY)
+            )
         return LangchainDocument(page_content=source_document.content, metadata=metadata)
 
     @staticmethod

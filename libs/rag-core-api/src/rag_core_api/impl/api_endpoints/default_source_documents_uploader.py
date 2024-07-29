@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 
-from rag_core_api.impl.mapper.upload_source_document2langchain_document import UploadSourceDocument2LangchainDocument
+from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
 from rag_core_api.models.upload_source_document import UploadSourceDocument
 
 from rag_core_api.api_endpoints.source_documents_uploader import SourceDocumentsUploader
@@ -14,8 +14,7 @@ class DefaultSourceDocumentsUploader(SourceDocumentsUploader):
 
     def upload_source_documents(self, source_document: list[UploadSourceDocument]):
         langchain_documents = [
-            UploadSourceDocument2LangchainDocument.source_document2langchain_document(document)
-            for document in source_document
+            SourceDocumentMapper.source_document2langchain_document(document) for document in source_document
         ]
         try:
             # TODO: maybe put in background task. Just writing to the database should not take so incredibly long

@@ -33,7 +33,7 @@ global:
       secretName: tls-certificate
     envs:
       database:
-        VECTOR_DB_COLLECTION_NAME: ebm_papst
+        VECTOR_DB_COLLECTION_NAME: rag-db
         VECTOR_DB_URL: qdrant:6333
       retriever:
         RETRIEVER_THRESHOLD: 0.3

@@ -44,7 +44,7 @@ class DefaultChatChain(ChatChain):
             current_question,
         )
 
-        retrieved_documents = self._searcher.search(search_request=SearchRequest(search_term=current_question))
+        retrieved_documents = self._searcher.search(search_request=SearchRequest(search_term=current_question)).actual_instance
 
         if not isinstance(retrieved_documents, SourceDocuments):
             # failure in search. Forward error

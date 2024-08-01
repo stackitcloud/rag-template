@@ -26,7 +26,7 @@ class DefaultSearcher(Searcher):
     def search(self, search_request: SearchRequest) -> SearchResponse:
 
         retrieved_documents = ...
-        search_metadata = {meta.key: meta.value for meta in search_request.metadata}
+        search_metadata = {meta.key: meta.value for meta in search_request.metadata} if search_request.metadata else {}
         config = RunnableConfig(metadata={"filter_kwargs": search_metadata})
         try:
             retrieved_documents = self._composed_retriever.invoke(input=search_request.search_term, config=config)

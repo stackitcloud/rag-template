@@ -129,7 +129,7 @@ class DependencyContainer(DeclarativeContainer):
 
     source_document_mapper = Singleton(SourceDocumentMapper)
 
-    searcher = Singleton(DefaultSearcher, composed_retriever, source_document_mapper)
+    searcher = Singleton(DefaultSearcher, composed_retriever, source_document_mapper, error_messages)
 
     large_language_model = Selector(
         class_selector_config.llm_type,
@@ -160,6 +160,7 @@ class DependencyContainer(DeclarativeContainer):
         searcher=searcher,
         mapper=source_document_mapper,
         answer_generation_chain=answer_generation_chain,
+        error_messages=error_messages
     )
 
     # wrap chain in tracer

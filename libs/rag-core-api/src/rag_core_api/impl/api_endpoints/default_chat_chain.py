@@ -15,6 +15,7 @@ from rag_core_api.api_endpoints.chat_chain import ChatChain
 from rag_core_api.api_endpoints.searcher import Searcher
 from rag_core_api.impl.answer_generation_chains.answer_chain_input_data import AnswerChainInputData
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
+from rag_core_api.impl.settings.error_messages import ErrorMessages
 
 
 logger = logging.getLogger(__name__)
@@ -28,11 +29,13 @@ class DefaultChatChain(ChatChain):
         answer_generation_chain: AnswerGenerationChain,
         searcher: Searcher,
         mapper: SourceDocumentMapper,
+        error_messages: ErrorMessages
     ):
         self._composed_retriever = composed_retriever
         self._answer_generation_chain = answer_generation_chain
         self._searcher = searcher
         self._mapper = mapper
+        self.error_messages = error_messages
 
     def invoke(self, input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse:
 
@@ -53,6 +56,9 @@ class DefaultChatChain(ChatChain):
         retrieved_documents = [
             self._mapper.source_document2langchain_document(x) for x in retrieved_documents.documents
         ]
+        
+        if not retrieved_documents:
+            return ChatResponse(answer=self.error_messages.no_documents_message, citations=[], finish_reason="")
 
         answer_generation_input = AnswerChainInputData(question=input.message, retrieved_documents=retrieved_documents)
 

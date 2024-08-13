@@ -9,7 +9,6 @@ from langchain_core.runnables import (
 from rag_core_lib.impl.data_types.content_type import ContentType
 
 from rag_core_api.retriever.retriever import Retriever
-from rag_core_api.impl.retriever.no_documents_error import NoDocumentsError
 from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
 
 logger = logging.getLogger(__name__)
@@ -44,8 +43,5 @@ class CompositeRetriever(Retriever):
             if result.metadata["id"] in [x.metadata["id"] for x in return_val]:
                 continue
             return_val.append(result)
-
-        if not return_val:
-            raise NoDocumentsError()
 
         return return_val

@@ -1,10 +1,15 @@
-langfuse:
-  postgresql:
-    deploy: true
-    auth:
-      username: postgres
-      password: postgres
-      database: langfuse
+rag-base:
   langfuse:
-    additionalEnv:
-      HOSTNAME: 0.0.0.0
+    image:
+      repository: ghcr.io/langfuse/langfuse
+      pullPolicy: Always
+      tag: "2"
+    postgresql:
+      deploy: true
+      auth:
+        username: postgres
+        password: postgres
+        database: langfuse
+    langfuse:
+      additionalEnv:
+        HOSTNAME: 0.0.0.0

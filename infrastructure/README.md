@@ -92,6 +92,7 @@ global:
     envs:
       rag_class_types:
         RAG_CLASS_TYPE_LLM_TYPE: "myapi"
+        RAG_CLASS_TYPE_EMBEDDER_TYPE: "myapi"
 
 ```
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
@@ -102,6 +103,7 @@ global:
 > - `alephalpha`: Uses the public AlephAlpha instance.
 > - `ollama`: Uses ollama as an LLM provider.
 >
+> The same options are also available for the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_EMBEDDER_TYPE`.
 > Both *AlephAlpha* options share the same settings. There is no instance of *Ollama* bundled with this package. If you require one you have to deploy your own instance.
 
 

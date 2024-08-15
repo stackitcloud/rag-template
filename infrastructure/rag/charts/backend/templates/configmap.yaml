@@ -56,6 +56,15 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: {{ template "configmap.embedder-class-types.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.embedder_class_types }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: {{ template "configmap.stackit-myapi-llm.name" . }}
 data:
   {{- range $key, $value := .Values.global.config.envs.stackit_myapi_llm }}

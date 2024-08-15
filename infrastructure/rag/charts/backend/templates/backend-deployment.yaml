@@ -59,6 +59,8 @@ spec:
           - configMapRef:
               name: {{ template "configmap.rag-class-types.name" . }}
           - configMapRef:
+              name: {{ template "configmap.embedder-class-types.name" . }}
+          - configMapRef:
               name: {{ template "configmap.retriever.name" . }}
           - configMapRef:
               name: {{ template "configmap.alephalpha.name" . }}

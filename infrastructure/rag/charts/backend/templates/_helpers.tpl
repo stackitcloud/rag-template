@@ -39,6 +39,10 @@
 {{- .Release.Name -}}-rag-class-types-configmap
 {{- end -}}
 
+{{- define "configmap.embedder-class-types.name" -}}
+{{- .Release.Name -}}-embedder-class-types-configmap
+{{- end -}}
+
 {{- define "configmap.retriever.name" -}}
 {{- .Release.Name -}}-retriever-configmap
 {{- end -}}

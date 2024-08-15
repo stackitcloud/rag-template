@@ -69,7 +69,8 @@ global:
         LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
       rag_class_types:
         RAG_CLASS_TYPE_LLM_TYPE: "myapi"
-        RAG_CLASS_TYPE_EMBEDDER_TYPE: "myapi"
+      embedder_class_types:
+        EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "myapi"
       public:
         PUBLIC_HOST: "https://api.aleph-alpha.com"
       ollama:

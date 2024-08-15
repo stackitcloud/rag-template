@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   # TODO: Change to jfrog/azure or something else
   repository: ghcr.io/mmmake-gmbh/rag
-  name: rag_api
+  name: rag-api
   pullPolicy: Always
   tag: "dev-ba20c7b"
 

@@ -1,0 +1,64 @@
+apiVersion: v1
+data:
+  logging.yaml: |
+    version: 1
+
+    formatters:
+      # Formatters are used by handlers to specify, how the logged information are displayed. Variables in subsection
+      # `format` are LogRecords attributes; see https://docs.python.org/3.8/library/logging.html#logrecord-attributes for
+      # further information.
+
+      format:
+        style: '{'  # using f-string syntax
+        format: '[{levelname}] : {asctime} : {name} : line {lineno} : {message}'
+        datefmt: '%d-%b-%Y %H:%M:%S'    # preferred date format, pick as you please
+
+    handlers:
+      # By default, two handlers are prepared. One vor terminal output and one for writing log messages to dedicated file.
+      # Subsection `level` specifies, which messages are processed. Each message below the stated level will be ignored by
+      # the handler; see https://docs.python.org/3.8/library/logging.html#levels for further information.
+      # Specified object in subsection `formatter` must have been defined in previous section `formatters`.
+
+      console:
+        # logger for console output
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: format
+        stream: ext://sys.stdout
+
+      file:
+        # logger for file output
+        class: logging.FileHandler
+        level: DEBUG
+        formatter: format
+        filename: logfile.log     # file to store LogRecords
+        mode: w     # write mode of this handler:
+                    # In mode `w` the file is overwritten; i.e. at any time there are LogRecords originating from not
+                    # more than one session available.
+                    # in mode `a` the new LogRecords are appended at the file.
+
+    disable_existing_loggers: False
+    capture_warnings: True
+
+    loggers:
+      # Define and configure logger objects.
+      # The above defined handlers are used for this purpose. The root logger is considered the only logger with handlers
+      # attached. The other specified logger propagate their messages up to the root logger which take care of them,
+      # according to the handlers, as stated in https://docs.python.org/3.8/library/logging.html#logging.Logger .
+      # Assuming a directory structure with modules and submodules, it is expected to add for each further module a logger.
+      # No loggers need to be added for the submodules. E.g. there is a module `foo` with submodule `bar` and file `baz.py`,
+      # then a logger called `foo` has to be added in this section. All messages which are generated in `baz.py` will be
+      # handled by a logger named `foo.bar.baz`, which will propagate the messages to the logger named `foo`.
+      #
+      # IMPORTANT: in each file an according logger has to be instantiated with `logger = logging.getLogger(__name__)` and
+      # log-messages have to be called with this object, i.e. logger.info(...).
+      # Similar to the handlers level, logger also got the level attribute. This enables further possibilities of managing
+      # the messages according to their severity.
+
+      root:
+        # This is the base logger. It is used when called `logging.info(...)` inside the main file.
+        level: DEBUG
+        handlers: [console, file]
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.logging.name" . }}

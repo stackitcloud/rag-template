@@ -12,10 +12,17 @@ spec:
       labels:
         app: {{ .Chart.Name }}
     spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "configmap.logging.name" . }}
       imagePullSecrets:
-        - name: {{ .Values.global.imagePullSecret.name }}    
+        - name: {{ .Values.global.imagePullSecret.name }}
       containers:
       - name: {{ .Chart.Name }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
         image: {{ include "fullimagename" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if not (empty .Values.image.command) }}

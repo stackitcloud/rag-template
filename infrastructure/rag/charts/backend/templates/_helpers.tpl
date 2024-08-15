@@ -27,6 +27,10 @@
 {{- .Release.Name -}}-database-configmap
 {{- end -}}
 
+{{- define "configmap.logging.name" -}}
+{{- .Release.Name -}}-logging-configmap
+{{- end -}}
+
 {{- define "configmap.ollama.name" -}}
 {{- .Release.Name -}}-ollama-configmap
 {{- end -}}

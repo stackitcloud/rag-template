@@ -29,7 +29,7 @@ class DefaultChatChain(ChatChain):
         answer_generation_chain: AnswerGenerationChain,
         searcher: Searcher,
         mapper: SourceDocumentMapper,
-        error_messages: ErrorMessages
+        error_messages: ErrorMessages,
     ):
         self._composed_retriever = composed_retriever
         self._answer_generation_chain = answer_generation_chain
@@ -47,7 +47,9 @@ class DefaultChatChain(ChatChain):
             current_question,
         )
 
-        retrieved_documents = self._searcher.search(search_request=SearchRequest(search_term=current_question)).actual_instance
+        retrieved_documents = self._searcher.search(
+            search_request=SearchRequest(search_term=current_question)
+        ).actual_instance
 
         if not isinstance(retrieved_documents, SourceDocuments):
             # failure in search. Forward error
@@ -56,7 +58,7 @@ class DefaultChatChain(ChatChain):
         retrieved_documents = [
             self._mapper.source_document2langchain_document(x) for x in retrieved_documents.documents
         ]
-        
+
         if not retrieved_documents:
             return ChatResponse(answer=self.error_messages.no_documents_message, citations=[], finish_reason="")
 

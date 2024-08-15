@@ -15,18 +15,12 @@ from rag_core_api.impl.retriever.no_or_empty_collection_error import NoOrEmptyCo
 from rag_core_api.impl.settings.error_messages import ErrorMessages
 
 
-
 logger = logging.getLogger(__name__)
 
 
 class DefaultSearcher(Searcher):
 
-    def __init__(
-        self,
-        composed_retriever: Retriever,
-        mapper: SourceDocumentMapper,
-        error_messages: ErrorMessages
-        ):
+    def __init__(self, composed_retriever: Retriever, mapper: SourceDocumentMapper, error_messages: ErrorMessages):
         self._composed_retriever = composed_retriever
         self._mapper = mapper
         self.error_messages = error_messages
@@ -40,7 +34,9 @@ class DefaultSearcher(Searcher):
             retrieved_documents = self._composed_retriever.invoke(input=search_request.search_term, config=config)
         except NoOrEmptyCollectionError:
             logger.warning("No documents available in vector database.")
-            return SearchResponse(ChatResponse(answer=self.error_messages.no_or_empty_collection, finish_reason="Error", citations=[]))
+            return SearchResponse(
+                ChatResponse(answer=self.error_messages.no_or_empty_collection, finish_reason="Error", citations=[])
+            )
         except Exception as e:
             logger.error("Error while searching for documents in vector database: %s", e)
             raise HTTPException(

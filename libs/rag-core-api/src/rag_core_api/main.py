@@ -10,12 +10,20 @@
 
     Do not edit the class manually.
 """  # noqa: E501
+import logging.config
+import yaml
+
 from fastapi import FastAPI
 from dependency_injector.containers import Container
 
 
 from rag_core_api.apis.rag_api import router as RagApiRouter
 from rag_core_api.dependency_container import DependencyContainer
+
+with open("/config/logging.yaml", "r") as stream:
+    config = yaml.load(stream, Loader=yaml.FullLoader)
+
+logging.config.dictConfig(config)
 
 app = FastAPI(
     title="RAG SIT x Stackit",

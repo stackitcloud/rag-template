@@ -160,7 +160,7 @@ class DependencyContainer(DeclarativeContainer):
         searcher=searcher,
         mapper=source_document_mapper,
         answer_generation_chain=answer_generation_chain,
-        error_messages=error_messages
+        error_messages=error_messages,
     )
 
     # wrap chain in tracer

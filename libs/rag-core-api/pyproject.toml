@@ -26,6 +26,7 @@ oauthlib = "^3.2.2"
 requests-oauthlib = "^2.0.0"
 qdrant-client = "^1.9.1"
 deprecated = "^1.2.14"
+pyyaml = "^6.0.2"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"

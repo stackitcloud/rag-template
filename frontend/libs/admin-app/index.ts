@@ -1,0 +1,1 @@
+export { default as DocumentView } from './feature-document/DocumentsView.vue';

@@ -1,0 +1,106 @@
+openapi: 3.0.2
+info:
+  description: The API is used for the communication between the frontend and the
+    backend in the rag project.
+  title: rag
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /document_reference/{id}:
+    get:
+      operationId: document_reference_id_get
+      parameters:
+      - description: Identifier of the pdf document.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: Returns the pdf in binary form.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Document not found.
+        "500":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Internal server error
+      tags:
+      - admin
+  /upload_documents:
+    post:
+      description: Uploads user selected pdf documents.
+      operationId: upload_documents_post
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              format: binary
+              type: string
+        description: The PDF document to upload.
+        required: true
+      responses:
+        "200":
+          description: ok
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      tags:
+      - admin
+  /delete_document/{id}:
+    delete:
+      operationId: delete_document
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Deleted
+        "500":
+          description: Internal server error
+      tags:
+      - admin
+  /all_documents:
+    get:
+      operationId: get_all_documents
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
+          description: List of document links
+        "500":
+          description: Internal server error
+      tags:
+      - admin
+components:
+  schemas: {}

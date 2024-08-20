@@ -1,0 +1,23 @@
+{
+  "name": "admin-app-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/admin-app-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/admin-app-e2e/cypress.config.ts",
+        "devServerTarget": "admin-app:serve:development",
+        "testingType": "e2e"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "admin-app:serve:production"
+        }
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["admin-app"]
+}

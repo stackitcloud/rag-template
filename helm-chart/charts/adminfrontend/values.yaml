@@ -1,0 +1,22 @@
+replicaCount: 1
+image:
+  repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+  name: adminfrontend
+  pullPolicy: Always
+  tag: "443892"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+exports:
+  chart_name:
+    adminfrontendChartName: adminfrontend
+
+ingress:
+  enabled: true
+  host:
+    name: admin.rag.localhost
+    path: /
+    pathType: ImplementationSpecific
+    port: 8080

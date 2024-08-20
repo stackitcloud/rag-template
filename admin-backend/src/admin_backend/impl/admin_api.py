@@ -1,0 +1,216 @@
+import io
+import logging
+import tempfile
+from pathlib import Path
+import json
+import urllib
+
+from dependency_injector.wiring import Provide, inject
+from fastapi import BackgroundTasks, Depends, HTTPException, Request, Response, UploadFile, status
+
+from admin_backend.impl.mapper.informationpiece2document import InformationPiece2Document
+from admin_backend.apis.admin_api_base import BaseAdminApi
+from admin_backend.dependency_container import DependencyContainer
+from admin_backend.document_extractor_client.openapi_client.api.extractor_api import (
+    ExtractorApi,
+)
+from admin_backend.document_extractor_client.openapi_client.models.extraction_request import (
+    ExtractionRequest,
+)
+from admin_backend.file_services.file_service import FileService
+from admin_backend.impl.chunker.chunker import Chunker
+from admin_backend.information_enhancer.information_enhancer import (
+    InformationEnhancer,
+)
+from admin_backend.rag_backend_client.openapi_client.api.rag_api import RagApi
+from admin_backend.rag_backend_client.openapi_client.models.delete_request import DeleteRequest
+from admin_backend.rag_backend_client.openapi_client.models.key_value_pair import KeyValuePair
+from admin_backend.rag_backend_client.openapi_client.models.upload_source_document import UploadSourceDocument
+from admin_backend.rag_backend_client.openapi_client.models.content_type import ContentType
+
+logger = logging.getLogger(__name__)
+
+
+class AdminApi(BaseAdminApi):
+    DOCUMENT_METADATA_TYPE_KEY = "type"
+
+    @inject
+    def delete_document(
+        self,
+        id: str,
+        file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
+        rag_api: RagApi = Depends(Provide[DependencyContainer.rag_api]),
+    ) -> None:
+        error_messages = ""
+        # Delete the document from file service and vector database
+        logger.debug("Deleting existing document: %s", id)
+        try:
+            file_service.delete_file(id)
+            for filename in file_service.get_all_sorted_file_names():
+                if filename.startswith(f"connection_diagrams/{id}"):
+                    file_service.delete_file(filename)
+                    logger.info("Deleted file %s from file service.", filename)
+        except Exception as e:
+            error_messages += "Error while deleting %s from file storage\n %s\n" % (id, str(e))
+        try:
+            rag_api.remove_source_documents(
+                DeleteRequest(metadata=[KeyValuePair(key="document", value=json.dumps(id))])
+            )
+            logger.info("Deleted documents belonging to %s from rag.", id)
+        except Exception as e:
+            error_messages += "Error while deleting %s from vector db\n%s" % (id, str(e))
+        if error_messages:
+            raise HTTPException(404, error_messages)
+
+    @inject
+    def get_all_documents(
+        self,
+        file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
+    ) -> list[str]:
+        all_stored_files = file_service.get_all_sorted_file_names()
+        return all_stored_files
+
+    @inject
+    def document_reference_id_get(
+        self,
+        id: str,
+        file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
+    ) -> Response:
+        """
+        Retrieves the document with the given name.
+
+        Args:
+            document_name (str): The name of the document.
+            file_service (FileService): The file service.
+
+        Returns:
+            bytes: The document in binary form.
+        """
+        try:
+
+            document_name = id
+            logger.debug("START retrieving document with id: %s", document_name)
+            document_buffer = io.BytesIO()
+            try:
+                file_service.download_file(document_name, document_buffer)
+                logger.debug("DONE retrieving document with id: %s", document_name)
+                document_data = document_buffer.getvalue()
+            except Exception as e:
+                logger.error("Error retrieving document with id: %s. Error: %s", document_name, e)
+                raise ValueError(f"Document with id '{document_name}' not found.")
+            finally:
+                document_buffer.close()
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+        if document_name.endswith(".pdf"):
+            media_type = "application/pdf"
+        else:
+            media_type = "application/octet-stream"
+
+        headers = {
+            "Content-Disposition": f'inline; filename="{id}"',
+            "Content-Type": media_type,
+        }
+        return Response(document_data, status_code=200, headers=headers, media_type=media_type)
+
+    @inject
+    async def upload_documents_post(
+        self,
+        body: UploadFile,
+        request: Request,
+        background_tasks: BackgroundTasks,
+    ) -> None:
+        """
+        Parses the document and saves the extracted information to the vector database.
+
+        Args:
+            file_content: File content in bytes
+            filename: The name of the document
+            body (str): The document body.
+            pdf_extractor (InformationExtractor): The PDF extractor.
+            file_service (FileService): The file service.
+            vector_database (VectorDatabase): The vector database.
+
+        Returns:
+            None
+        """
+        content = await body.read()
+        try:
+            background_tasks.add_task(self._save_new_document, content, body.filename, request)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def _save_new_document(
+        self,
+        file_content: bytes,
+        filename: str,
+        request: Request,
+    ):
+        try:
+            self.delete_document(filename)
+        except HTTPException as e:
+            logger.error(
+                "Error while trying to delete file %s before uploading %s. Still continuing with upload.", filename, e
+            )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file_path = Path(temp_dir) / filename
+            with open(temp_file_path, "wb") as temp_file:
+                logger.debug("Temporary file created at %s.", temp_file_path)
+                temp_file.write(file_content)
+                logger.debug("Temp file created and content written.")
+                self._parse_document(Path(temp_file_path), request)
+
+    @inject
+    def _parse_document(
+        self,
+        s3_file_path: Path,
+        request: Request,
+        document_extractor: ExtractorApi = Depends(Provide[DependencyContainer.document_extractor]),
+        file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
+        rag_api: RagApi = Depends(Provide[DependencyContainer.rag_api]),
+        information_enhancer: InformationEnhancer = Depends(Provide[DependencyContainer.information_enhancer]),
+        information_mapper: InformationPiece2Document = Depends(Provide[DependencyContainer.information_mapper]),
+        chunker: Chunker = Depends(Provide[DependencyContainer.chunker]),
+    ):
+        logger.debug("START parsing of the document %s", s3_file_path)
+        filename = s3_file_path.name
+
+        file_service.upload_file(s3_file_path, filename)
+
+        information_pieces = document_extractor.extract_information(ExtractionRequest(path_on_s3=filename))
+        documents = [information_mapper.information_piece2document(x) for x in information_pieces]
+        documents = information_enhancer.invoke(documents)
+        host_base_url = str(request.base_url)
+
+        document_url = f"{host_base_url.rstrip('/')}/document_reference/{urllib.parse.quote_plus(filename)}"
+
+        chunked_documents = chunker.chunk(documents)
+        for idx, chunk in enumerate(chunked_documents):
+            if chunk.metadata["id"] in chunk.metadata["related"]:
+                chunk.metadata["related"].remove(chunk.metadata["id"])
+            chunk.metadata.update(
+                {
+                    "chunk": idx,
+                    "chunk_length": len(chunk.page_content),
+                    "document_url": document_url,
+                }
+            )
+
+        rag_api_documents = []
+        for document in chunked_documents:
+            metadata = [KeyValuePair(key=str(key), value=json.dumps(value)) for key, value in document.metadata.items()]
+            content_type = ContentType(document.metadata[self.DOCUMENT_METADATA_TYPE_KEY].upper())
+            rag_api_documents.append(
+                UploadSourceDocument(
+                    content_type=content_type,
+                    metadata=metadata,
+                    content=document.page_content,
+                )
+            )
+
+        rag_api.upload_source_documents(rag_api_documents)
+        logger.info("File uploaded successfully: %s", filename)

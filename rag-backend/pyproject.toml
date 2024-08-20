@@ -39,7 +39,25 @@ ban-relative-imports = true
 
 [tool.black]
 line-length = 120
-exclude = '''['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']'''
+exclude = """
+/(
+     .eggs
+    | .git
+    | .hg
+    | .mypy_cache
+    | .nox
+    | .pants.d
+    | .tox
+    | .venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | node_modules
+    | venv
+)/
+"""
+
 
 [tool.isort]
 profile = "black"

@@ -1,0 +1,18 @@
+{
+  "documents": {
+    "files": "Files",
+    "uploadDocuments": "Upload documents",
+    "uploadDocumentsInfo": "Select the documents you want to upload",
+    "uploadSelectTitle": "Select a file or drag & drop it here",
+    "uploadSelectDescription": "Only PDF files are allowed",
+    "uploadDocumentCompleted": "Completed",
+    "uploadProcessing": "Processing...",
+    "uploadingDocument": "Uploading...",
+    "fileTypeNotAllowedTitle": "File type not allowed",
+    "fileTypeNotAllowedDescription": "Only PDF files are allowed",
+    "select": "Select",
+    "chat": "Start chat",
+    "uploadDocumentFailed": "Upload failed",
+    "error": {}
+  }
+}

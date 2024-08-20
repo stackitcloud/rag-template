@@ -1,4 +1,4 @@
-# Introduction 
+# Introduction
 This is a very basic example of how to use the rag-template.
 It also gives an example of how to replace modules of the core template.
 
@@ -23,7 +23,7 @@ The following is a list of the dependencies. If you miss one of the dependencies
 
 For local deployment a view env variables need to be provided by an `.env` file (here: .)
 
-The `.env` needs to contain at least the following values:
+The `.env` needs to contain the following values:
 
 ```
 BASIC_AUTH=Zm9vOiRhcHIxJGh1VDVpL0ZKJG10elZQUm1IM29JQlBVMlZ4YkpUQy8K
@@ -36,20 +36,14 @@ ALEPH_ALPHA_ALEPH_ALPHA_API_KEY=...
 
 STACKIT_AUTH_CLIENT_ID=...
 STACKIT_AUTH_CLIENT_SECRET=...
-
-STACKIT_VLLM_API_KEY=...
-STACKIT_EMBEDDER_API_KEY=...
-
-OPENAI_API_KEY=...
-
 ```
 
 This results in a basic auth with username=`foo` and password=`bar`.
 
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
 
-> ⓘ INFO: The sit-internal instance of AlephAlpha has proven to be not the most reliable. 
-> This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to on of the following values: 
+> ⓘ INFO: The sit-internal instance of AlephAlpha has proven to be not the most reliable.
+> This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to on of the following values:
 > - `myapi`: Uses the sit-internal AlephAlpha instance.
 > - `alephalpha`: Uses the public AlephAlpha instance.
 > - `ollama`: Uses ollama as an LLM provider.
@@ -132,7 +126,7 @@ tilt up -- --debug=true
 The backend will wait until your debugger is connected before it will fully start.
 The debugger used is `debugpy` which is compatible with Vscode.
 To connect the debugger you can use the following `launch.json`:
-'''json
+```json
 {
     "version": "0.2.0",
     "configurations": [
@@ -144,18 +138,69 @@ To connect the debugger you can use the following `launch.json`:
             "port": 31415,
             "justMyCode": false,
             "env": {
-                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600"
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
             },
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}/rag-backend",
-                    "remoteRoot": "/app"
+                    "remoteRoot": "/app/rag-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
+                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
+                    "remoteRoot": "/app/rag-core-library/rag-core-api"
                 }
             ]
-        }        
+        },
+        {
+            "name": "document_extractor",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31416,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/document-extractor",
+                    "remoteRoot": "/app/document-extractor"
+                }
+            ]
+        },
+        {
+            "name": "rag_admin_backend",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31417,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/admin-backend",
+                    "remoteRoot": "/app/admin-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
+                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                }
+            ]
+        }
+
+
     ]
 }
-'''
+```
 
 The following will delete everything deployed with `tilt up` command
 
@@ -165,7 +210,7 @@ tilt down
 
 ### Access via ingress
 
-To access the ingress by its hostname, the hosts file need to be adjusted. On *linux/macOS*, you have to adjust `/etc/hosts` as follows. 
+To access the ingress by its hostname, the hosts file need to be adjusted. On *linux/macOS*, you have to adjust `/etc/hosts` as follows.
 
 ```shell
 echo "127.0.0.1 rag.localhost" | sudo tee -a /etc/hosts > /dev/null
@@ -173,7 +218,7 @@ echo "127.0.0.1 rag.localhost" | sudo tee -a /etc/hosts > /dev/null
 
 Afterwards the services should be accessible from [http://rag.localhost](http://rag.localhost)
 
-Note: The command above has only been tested on *Ubnutu 22.04 LTS*. 
+Note: The command above has only been tested on *Ubnutu 22.04 LTS*.
 
 On *Windows* you can adjust the hosts file as described [here](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
 
@@ -194,15 +239,6 @@ After signing up and creating a project in the local LangFuse instance, create A
 The example Tiltfile provides a automatic/triggered linting and testing.
 The linting-settings can be changed in the `rag-backend/pyproject.toml` file under section `tool.flake8`.
 
-
-# Usage
-The following endpoints are provided:
-- `/chat/{session_id}': The endpoint for chatting.
-- '/source_documents/remove': Endpoint to remove documents from the vector database.
-- '/search': Endpoint to search documents. This is the same search that is internally used when using the chat-endpoint.
-- '/source_documents': Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity a Langchain Documents like format is used.
-
-For further information on the endpoints please consult the Swagger API.
 
 # Contribute
 This use case example contains 2 git submodules, the `rag-infrastructure` and the `rag-core-library`.

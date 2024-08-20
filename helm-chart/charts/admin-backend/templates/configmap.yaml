@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.s3.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.s3 }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.chunker.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.chunker }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.pdfextractor.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.pdfextractor }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ragapi.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.ragapi }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+

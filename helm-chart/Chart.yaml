@@ -1,0 +1,29 @@
+apiVersion: v2
+name: rag
+description: |
+  This helm chart deploys a front- and backend microservice. Together, those components
+  form rag. rag is an application, where you can upload you own documents and
+  ask question about their content and rag will answer them. Also deploys the other
+  necessary stuff.
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+dependencies:
+  - name: minio
+    repository: https://charts.bitnami.com/bitnami
+    version: "14.6.7"
+    condition: minio.enabled
+  - name: rag
+    version: 0.0.1
+    repository: file://../rag-infrastructure/rag
+    alias: rag-base
+  - name: admin-backend
+    version: 0.0.1
+    repository: file://./charts/admin-backend
+  - name: ollama
+    alias: ollama
+    version: 0.29.1
+    repository: https://otwld.github.io/ollama-helm/
+  - name: adminfrontend
+    version: 0.0.1
+    repository: file://./charts/adminfrontend

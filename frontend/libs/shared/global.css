@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+main {
+  height: 100%;
+  overflow: auto;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 25px;
+  background-color: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 25px;
+  background-color: var(--scrollbar-thumb);
+}
+
+.base-200-highlight {
+  background-color: var(--base-200-highlight);
+}

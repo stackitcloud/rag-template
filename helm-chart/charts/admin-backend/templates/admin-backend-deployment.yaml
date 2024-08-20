@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-backend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: admin-backend
+  template:
+    metadata:
+      labels:
+        app: admin-backend
+    spec:
+      imagePullSecrets:
+          - name: {{ .Values.global.imagePullSecret.name }}
+      containers:
+      - name: admin-backend
+        image: {{ template "adminbackendfullimagename" . }}
+        imagePullPolicy: {{ .Values.admin_backend.image.pullPolicy }}
+        {{- if not (empty .Values.admin_backend.image.command) }}
+        command:
+        {{- range $cmd :=  .Values.admin_backend.image.command }}
+        - {{ $cmd -}}
+        {{ end }}
+        {{- end }}
+        {{- if not .Values.global.debug.backend.enabled }}
+        {{- if not (empty .Values.admin_backend.image.args) }}
+        args:
+        {{- range $arg :=  .Values.admin_backend.image.args }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- else }}
+        {{- if not (empty .Values.admin_backend.image.debugArgs) }}
+        args:
+        {{- range $arg :=  .Values.admin_backend.image.debugArgs }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        {{- if .Values.global.debug.backend.enabled }}
+        - containerPort: 31415
+        {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.rag-class-types.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.alephalpha.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.langfuse.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.ollama.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.stackit-myapi-llm.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.usecase.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.s3.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.ragapi.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.pdfextractor.name" . }}
+          - secretRef:
+              name: {{ template "secret.alephalpha.name" . }}
+          - secretRef:
+              name: {{ template "secret.langfuse.name" . }}
+          - secretRef:
+              name: {{ template "secret.stackit-myapi-llm.name" . }}
+          - secretRef:
+              name: {{ template "secret.usecase.name" . }}
+          - secretRef:
+              name: {{ template "secret.s3.name" . }}
+        env:
+          - name: PYTHONPATH
+            value: {{ .Values.pythonPathEnv.PYTHONPATH }}

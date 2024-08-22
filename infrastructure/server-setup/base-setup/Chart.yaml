@@ -1,0 +1,14 @@
+apiVersion: v2
+name: basic
+description: |
+  This helm chart deploys the basic nginx-ingress controller and cert-manager.
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+dependencies:
+  - name: cert-manager
+    version: "v1.12.3"
+    repository: https://charts.jetstack.io
+  - name : nginx-ingress-controller
+    version: "11.3.18"
+    repository: https://charts.bitnami.com/bitnami

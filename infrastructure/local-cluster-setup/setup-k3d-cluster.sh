@@ -1,5 +1,5 @@
 #!/bin/bash
-k3d cluster create rag --config k3d-cluster-config.yaml --k3s-arg "--disable=traefik@server:*" 
+k3d cluster create rag --config k3d-cluster-config.yaml --k3s-arg "--disable=traefik@server:*"
 
 kubectl wait --for=condition=ready node --all --timeout=120s
 

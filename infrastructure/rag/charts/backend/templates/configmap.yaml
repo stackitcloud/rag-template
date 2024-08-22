@@ -59,7 +59,12 @@ metadata:
   name: {{ template "configmap.reranker.name" . }}
 data:
   {{- range $key, $value := .Values.global.config.envs.reranker }}
-
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: {{ template "configmap.embedder-class-types.name" . }}
 data:
   {{- range $key, $value := .Values.global.config.envs.embedder_class_types }}
@@ -84,6 +89,7 @@ data:
   {{ $key }}: {{ $value | quote }}
   {{- end }}
 ---
+
 apiVersion: v1
 kind: ConfigMap
 metadata:

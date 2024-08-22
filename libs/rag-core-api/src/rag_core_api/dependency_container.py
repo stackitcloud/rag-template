@@ -4,6 +4,7 @@ from dependency_injector.providers import Configuration, List, Selector, Singlet
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama
 from langchain_qdrant import Qdrant
+from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
@@ -34,6 +35,7 @@ from rag_core_api.impl.settings.error_messages import ErrorMessages
 from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
+from rag_core_api.impl.settings.embedder_class_type_settings import EmbedderClassTypeSettings
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -55,8 +57,9 @@ class DependencyContainer(DeclarativeContainer):
     stackit_myapi_llm_settings = StackitMyAPILLMSettings()
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
+    embedder_class_type_settings = EmbedderClassTypeSettings()
 
-    class_selector_config.from_dict(rag_class_type_settings.model_dump())
+    class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
 
     if rag_class_type_settings.llm_type.value == LLMType.ALEPHALPHA.value:
         aleph_alpha_settings.host = public_aleph_alpha_settings.host
@@ -68,8 +71,13 @@ class DependencyContainer(DeclarativeContainer):
         ollama=Singleton(NoSecretProvider),
     )
 
-    embedder = Singleton(
-        LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_settings.model_dump())
+    embedder = Selector(
+        class_selector_config.embedder_type,
+        myapi=Singleton(AlephAlphaEmbedder, aleph_alpha_settings, llm_secret_provider),
+        alephalpha=Singleton(AlephAlphaEmbedder, aleph_alpha_settings, llm_secret_provider),
+        ollama=Singleton(
+            LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_settings.model_dump())
+        ),
     )
 
     vectordb_client = Singleton(

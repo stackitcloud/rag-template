@@ -79,6 +79,8 @@ global:
         OLLAMA_TOP_K: 0
         OLLAMA_TOP_P: 0
         OLLAMA_TEMPERATURE: 0
+      reranker:
+        RERANKER_TOTAL_K: 5
       frontend:
         VITE_API_URL: "http://rag.localhost/api"
         VITE_CHAT_URL: "http://rag.localhost"

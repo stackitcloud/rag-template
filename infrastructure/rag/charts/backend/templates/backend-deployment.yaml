@@ -63,6 +63,8 @@ spec:
           - configMapRef:
               name: {{ template "configmap.retriever.name" . }}
           - configMapRef:
+              name: {{ template "configmap.reranker.name" . }}
+          - configMapRef:
               name: {{ template "configmap.alephalpha.name" . }}
           - configMapRef:
               name: {{ template "configmap.langfuse.name" . }}

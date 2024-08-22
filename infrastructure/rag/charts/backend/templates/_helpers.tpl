@@ -59,6 +59,10 @@
 {{- .Release.Name -}}-errormessages-configmap
 {{- end -}}
 
+{{- define "configmap.reranker.name" -}}
+{{- .Release.Name -}}-reranker-configmap
+{{- end -}}
+
 {{- define "configmap.stackit-myapi-llm.name" -}}
 {{- .Release.Name -}}-stackit-myapi-llm.configmap
 {{- end -}}

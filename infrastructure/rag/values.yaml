@@ -23,10 +23,12 @@ global:
     vite_auth:
       VITE_AUTH_USERNAME: ""
       VITE_AUTH_PASSWORD: ""
+    openai:
+      api_key: "sk-123456"
     usecase:
   config:
     dns:
-      - rag.localhost
+    - rag.localhost
     tls:
       enabled: true
       host: rag.localhost
@@ -69,6 +71,14 @@ global:
         LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
       rag_class_types:
         RAG_CLASS_TYPE_LLM_TYPE: "myapi"
+      ragas:
+        RAGAS_IS_DEBUG: false
+        RAGAS_MODEL: "gpt-3.5-turbo-0125"
+        RAGAS_TIMEOUT: 60
+        RAGAS_ADAPT_PROMPTS_TO_LANG: false
+        RAGAS_PROMPT_LANGUAGE: "german"
+        RAGAS_BASE_URL: "https://api.openai.com/v1"
+        RAGAS_EVALUATION_DATASET_NAME: "eval-data"
       embedder_class_types:
         EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "myapi"
       public:

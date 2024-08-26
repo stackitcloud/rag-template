@@ -15,6 +15,10 @@
 {{- .Release.Name -}}-stackit-myapi-llm-secret
 {{- end -}}
 
+{{- define "secret.openai.name" -}}
+{{- .Release.Name -}}-openai-secret
+{{- end -}}
+
 {{- define "secret.usecase.name" -}}
 {{- .Release.Name -}}-usecase-secret
 {{- end -}}
@@ -53,6 +57,10 @@
 
 {{- define "configmap.langfuse.name" -}}
 {{- .Release.Name -}}-langfuse-configmap
+{{- end -}}
+
+{{- define "configmap.ragas.name" -}}
+{{- .Release.Name -}}-ragas-configmap
 {{- end -}}
 
 {{- define "configmap.errormessages.name" -}}

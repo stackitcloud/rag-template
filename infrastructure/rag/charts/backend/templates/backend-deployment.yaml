@@ -76,10 +76,14 @@ spec:
               name: {{ template "configmap.stackit-myapi-llm.name" . }}
           - configMapRef:
               name: {{ template "configmap.usecase.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.ragas.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:
               name: {{ template "secret.langfuse.name" . }}
+          - secretRef:
+              name: {{ template "secret.openai.name" . }}
           - secretRef:
               name: {{ template "secret.stackit-myapi-llm.name" . }}
           - secretRef:

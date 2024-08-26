@@ -107,3 +107,12 @@ data:
   {{- range $key, $value := .Values.global.config.envs.usecase }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ragas.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.ragas }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

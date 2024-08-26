@@ -11,7 +11,7 @@ export const useDocumentsStore = defineStore('chat', () => {
     const error = ref<ErrorType | null>(null);
 
     function updateUploadedDocumentData(documentId: string, data: Partial<UploadedDocument>) {
-        const document = uploadedDocuments.value.find((d) => d.id === documentId);
+        const document = uploadedDocuments.value.find((d: UploadedDocument) => d.id === documentId);
         if(document) {
             Object.assign(document, data);
         }
@@ -43,7 +43,8 @@ export const useDocumentsStore = defineStore('chat', () => {
         try {
             const loadedDocuments = await DocumentAPI.loadDocuments();
             allDocuments.value = [...loadedDocuments.map(o => ({
-                id: o
+                name: o.name,
+                status: o.status
             } as DocumentModel))];
         } catch {
             error.value = "load";

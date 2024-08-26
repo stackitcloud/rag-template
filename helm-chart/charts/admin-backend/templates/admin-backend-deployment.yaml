@@ -63,6 +63,8 @@ spec:
               name: {{ template "configmap.ragapi.name" . }}
           - configMapRef:
               name: {{ template "configmap.pdfextractor.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.redis.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:

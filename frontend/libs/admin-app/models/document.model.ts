@@ -1,3 +1,6 @@
+export type DocumentStatus = "UPLOADING" | "PROCESSING" | "READY" | "ERROR";
+
 export interface DocumentModel {
-    id: string;
+    name: string;
+    status: DocumentStatus;
 }

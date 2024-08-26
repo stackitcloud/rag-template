@@ -13,6 +13,9 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     version: "14.6.7"
     condition: minio.enabled
+  - name: keydb
+    repository: https://enapter.github.io/charts/
+    version: "0.48.0"
   - name: rag
     version: 0.0.1
     repository: file://../rag-infrastructure/rag

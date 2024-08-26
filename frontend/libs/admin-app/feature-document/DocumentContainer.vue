@@ -9,14 +9,14 @@
 
         const { t } = useI18n();
         const store = useDocumentsStore();
-        const documents = computed(() => store.allDocuments);
+        const documents: DocumentModel[] = computed(() => store.allDocuments);
 
         const deleteDocument = (documentId: string) => {
             store.deleteDocument(documentId);
         };
 
         const highlightNewDocuments = (newDocs: DocumentModel[], oldDocs: DocumentModel[]) => {
-            const newDocumentIds = newDocs.map(doc => doc.id).filter(id => !oldDocs.some(doc => doc.id === id));
+            const newDocumentIds = newDocs.map(doc => doc.name).filter(name => !oldDocs.some(doc => doc.name === name));
             highlightDocumentsById(newDocumentIds);
         };
 
@@ -44,8 +44,8 @@
                       :count="documents?.length ?? 0">
         <DocumentItem v-for="document in documents"
                       class="mb-2 md:mb-4"
-                      :id="document.id"
-                      :key="document.id"
+                      :id="document.name"
+                      :key="document.name"
                       :deleteDocument="deleteDocument"
                       :data="document" />
     </SideBarContainer>

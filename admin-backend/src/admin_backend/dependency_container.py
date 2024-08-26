@@ -1,3 +1,4 @@
+from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Singleton, Selector, List, Configuration
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -38,6 +39,7 @@ from admin_backend.impl.settings.rag_api_settings import RAGAPISettings
 from admin_backend.rag_backend_client.openapi_client.api_client import ApiClient as RagApiClient
 from admin_backend.rag_backend_client.openapi_client.api.rag_api import RagApi
 from admin_backend.impl import admin_api
+from admin_backend.impl.settings.key_value_settings import KeyValueSettings
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -60,6 +62,7 @@ class DependencyContainer(DeclarativeContainer):
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
     rag_api_settings = RAGAPISettings()
+    key_value_store_settings = KeyValueSettings()
 
     if rag_class_type_settings.llm_type == LLMType.ALEPHALPHA.value:
         aleph_alpha_settings.host = public_aleph_alpha_settings.host
@@ -70,7 +73,7 @@ class DependencyContainer(DeclarativeContainer):
         alephalpha=Singleton(StaticSecretProvider, aleph_alpha_settings),
         ollama=Singleton(NoSecretProvider),
     )
-
+    key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)
     file_service = Singleton(S3Service, s3_settings=s3_settings)
 
     text_splitter = Singleton(RecursiveCharacterTextSplitter)(

@@ -5,6 +5,9 @@ from pathlib import Path
 import json
 import urllib
 
+from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_backend.models.document_status import DocumentStatus
+from admin_backend.models.status import Status
 from dependency_injector.wiring import Provide, inject
 from fastapi import BackgroundTasks, Depends, HTTPException, Request, Response, UploadFile, status
 
@@ -35,21 +38,19 @@ class AdminApi(BaseAdminApi):
     DOCUMENT_METADATA_TYPE_KEY = "type"
 
     @inject
-    def delete_document(
+    async def delete_document(
         self,
         id: str,
         file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
         rag_api: RagApi = Depends(Provide[DependencyContainer.rag_api]),
+        key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
     ) -> None:
         error_messages = ""
         # Delete the document from file service and vector database
         logger.debug("Deleting existing document: %s", id)
         try:
+            key_value_store.remove(id)
             file_service.delete_file(id)
-            for filename in file_service.get_all_sorted_file_names():
-                if filename.startswith(f"connection_diagrams/{id}"):
-                    file_service.delete_file(filename)
-                    logger.info("Deleted file %s from file service.", filename)
         except Exception as e:
             error_messages += "Error while deleting %s from file storage\n %s\n" % (id, str(e))
         try:
@@ -63,15 +64,15 @@ class AdminApi(BaseAdminApi):
             raise HTTPException(404, error_messages)
 
     @inject
-    def get_all_documents(
+    async def get_all_documents(
         self,
-        file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
-    ) -> list[str]:
-        all_stored_files = file_service.get_all_sorted_file_names()
-        return all_stored_files
+        key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
+    ) -> list[DocumentStatus]:
+        all_documents = key_value_store.get_all()
+        return [DocumentStatus(name=x[0], status=x[1]) for x in all_documents]
 
     @inject
-    def document_reference_id_get(
+    async def document_reference_id_get(
         self,
         id: str,
         file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
@@ -120,34 +121,26 @@ class AdminApi(BaseAdminApi):
         body: UploadFile,
         request: Request,
         background_tasks: BackgroundTasks,
+        key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
     ) -> None:
-        """
-        Parses the document and saves the extracted information to the vector database.
-
-        Args:
-            file_content: File content in bytes
-            filename: The name of the document
-            body (str): The document body.
-            pdf_extractor (InformationExtractor): The PDF extractor.
-            file_service (FileService): The file service.
-            vector_database (VectorDatabase): The vector database.
-
-        Returns:
-            None
-        """
         content = await body.read()
         try:
+            key_value_store.upsert(body.filename, Status.UPLOADING)
             background_tasks.add_task(self._save_new_document, content, body.filename, request)
         except ValueError as e:
+            key_value_store.upsert(body.filename, Status.ERROR)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         except Exception as e:
+            key_value_store.upsert(body.filename, Status.ERROR)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+    @inject
     def _save_new_document(
         self,
         file_content: bytes,
         filename: str,
         request: Request,
+        key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
     ):
         try:
             self.delete_document(filename)
@@ -155,14 +148,19 @@ class AdminApi(BaseAdminApi):
             logger.error(
                 "Error while trying to delete file %s before uploading %s. Still continuing with upload.", filename, e
             )
+            key_value_store.upsert(filename, Status.ERROR)
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_file_path = Path(temp_dir) / filename
-            with open(temp_file_path, "wb") as temp_file:
-                logger.debug("Temporary file created at %s.", temp_file_path)
-                temp_file.write(file_content)
-                logger.debug("Temp file created and content written.")
-                self._parse_document(Path(temp_file_path), request)
+        try:
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_file_path = Path(temp_dir) / filename
+                with open(temp_file_path, "wb") as temp_file:
+                    logger.debug("Temporary file created at %s.", temp_file_path)
+                    temp_file.write(file_content)
+                    logger.debug("Temp file created and content written.")
+                    self._parse_document(Path(temp_file_path), request)
+        except Exception as e:
+            logger.error(f"Error during document parsing: {e}")
+            key_value_store.upsert(filename, Status.ERROR)
 
     @inject
     def _parse_document(
@@ -175,12 +173,13 @@ class AdminApi(BaseAdminApi):
         information_enhancer: InformationEnhancer = Depends(Provide[DependencyContainer.information_enhancer]),
         information_mapper: InformationPiece2Document = Depends(Provide[DependencyContainer.information_mapper]),
         chunker: Chunker = Depends(Provide[DependencyContainer.chunker]),
+        key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
     ):
         logger.debug("START parsing of the document %s", s3_file_path)
         filename = s3_file_path.name
 
         file_service.upload_file(s3_file_path, filename)
-
+        key_value_store.upsert(filename, Status.PROCESSING)
         information_pieces = document_extractor.extract_information(ExtractionRequest(path_on_s3=filename))
         documents = [information_mapper.information_piece2document(x) for x in information_pieces]
         documents = information_enhancer.invoke(documents)
@@ -213,4 +212,5 @@ class AdminApi(BaseAdminApi):
             )
 
         rag_api.upload_source_documents(rag_api_documents)
+        key_value_store.upsert(filename, Status.READY)
         logger.info("File uploaded successfully: %s", filename)

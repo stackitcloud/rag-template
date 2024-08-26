@@ -43,6 +43,10 @@
 {{- .Release.Name -}}-ragapi-configmap
 {{- end -}}
 
+{{- define "configmap.redis.name" -}}
+{{- .Release.Name -}}-redis-configmap
+{{- end -}}
+
 {{- define "configmap.langfuse.name" -}}
 {{- .Release.Name -}}-langfuse-configmap
 {{- end -}}

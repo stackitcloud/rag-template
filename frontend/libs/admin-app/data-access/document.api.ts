@@ -8,21 +8,21 @@ axios.defaults.auth = {
 };
 
 export class DocumentAPI {
-    static async loadDocuments(): Promise<string[]> {
+    static async loadDocuments(): Promise<DocumentModel[]> {
         try {
-            const response = await axios.get<string[]>('/all_documents');
+            const response = await axios.get<DocumentModel[]>('/all_documents');
             return response.data;
         } catch (error) {
             this.handleError(error);
         }
     }
 
-    static async uploadDocument(file: File, onUploadProgress: (progressEvent: AxiosProgressEvent) => void): Promise<DocumentModel> {
+    static async uploadDocument(file: File, onUploadProgress: (progressEvent: AxiosProgressEvent) => void): Promise<null> {
         try {
             const formData = new FormData();
             formData.append('body', file);
 
-            const response = await axios.post<DocumentModel>('/upload_documents', formData, {
+            const response = await axios.post<null>('/upload_documents', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },

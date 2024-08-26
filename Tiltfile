@@ -8,11 +8,30 @@ cfg = config.parse()
 backend_debug = cfg.get("debug", False)
 core_library_context = "./rag-core-library"
 
+
 def create_linter_command(folder_name, name):
-    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile .;docker run --rm "+name+" make lint"
+    return (
+        "docker build -t "
+        + name
+        + " --build-arg dev=1 -f "
+        + folder_name
+        + "/Dockerfile .;docker run --rm "
+        + name
+        + " make lint"
+    )
+
 
 def create_test_command(folder_name, name):
-    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile .;docker run --rm "+name+" make test"
+    return (
+        "docker build -t "
+        + name
+        + " --build-arg dev=1 -f "
+        + folder_name
+        + "/Dockerfile .;docker run --rm "
+        + name
+        + " make test"
+    )
+
 
 ########################################################################################################################
 ########################################## build helm charts ###########################################################
@@ -44,6 +63,7 @@ local_resource(
 ########################################################################################################################
 
 namespace = "rag"
+
 
 def create_namespace_if_notexist(namespace):
     check_namespace_cmd = "kubectl get namespace %s --ignore-not-found" % namespace
@@ -124,6 +144,7 @@ local_resource(
     create_linter_command(admin_backend_context, "adminback"),
     labels=["linting"],
     trigger_mode=TRIGGER_MODE_MANUAL,
+    auto_init=False,
     allow_parallel=True,
 )
 
@@ -133,6 +154,7 @@ local_resource(
     create_test_command(admin_backend_context, "adminback"),
     labels=["test"],
     trigger_mode=TRIGGER_MODE_MANUAL,
+    auto_init=False,
     allow_parallel=True,
 )
 
@@ -162,6 +184,7 @@ local_resource(
     create_linter_command(extractor_context, "extractor"),
     labels=["linting"],
     trigger_mode=TRIGGER_MODE_MANUAL,
+    auto_init=False,
     allow_parallel=True,
 )
 
@@ -171,6 +194,7 @@ local_resource(
     create_test_command(extractor_context, "extractor"),
     labels=["test"],
     trigger_mode=TRIGGER_MODE_MANUAL,
+    auto_init=False,
     allow_parallel=True,
 )
 
@@ -207,9 +231,12 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "global.secrets.aleph_alpha.aleph_alpha_aleph_alpha_api_key=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    "global.secrets.stackit_myapi_llm.auth_client_id=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
-    "global.secrets.stackit_myapi_llm.auth_client_secret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
+    "global.secrets.aleph_alpha.aleph_alpha_aleph_alpha_api_key=%s"
+    % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
+    "global.secrets.stackit_myapi_llm.auth_client_id=%s"
+    % os.environ["STACKIT_AUTH_CLIENT_ID"],
+    "global.secrets.stackit_myapi_llm.auth_client_secret=%s"
+    % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
     "global.secrets.openai.api_key=%s" % os.environ["OPENAI_API_KEY"],
     "global.secrets.s3.access_key=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "global.secrets.s3.secret_key=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
@@ -223,7 +250,7 @@ value_override = [
     "frontend.enabled=true",
     "global.config.tls.enabled=false",
     "global.ssl=false",
-    #ingress host names
+    # ingress host names
     "backend.ingress.host.name=rag.localhost",
 ]
 

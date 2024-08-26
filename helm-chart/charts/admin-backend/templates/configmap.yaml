@@ -33,4 +33,13 @@ data:
   {{- range $key, $value := .Values.global.config.envs.ragapi }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.redis.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.redis }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
 

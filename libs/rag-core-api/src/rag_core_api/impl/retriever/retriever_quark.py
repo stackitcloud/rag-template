@@ -49,5 +49,7 @@ class RetrieverQuark(Retriever):
         if self.TYPE_KEY not in config["metadata"]["filter_kwargs"].keys():
             config["metadata"]["filter_kwargs"] = config["metadata"]["filter_kwargs"] | self._filter_kwargs
         return self._vector_database.search(
-            query=input, search_kwargs=self._search_kwargs, filter_kwargs=config["metadata"]["filter_kwargs"]
+            query=input,
+            search_kwargs=self._search_kwargs,
+            filter_kwargs=config["metadata"]["filter_kwargs"],
         )

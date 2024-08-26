@@ -14,7 +14,9 @@ class SourceDocumentMapper:
     IMAGE_CONTENT_KEY = "base64_image"
 
     @staticmethod
-    def source_document2langchain_document(source_document: SourceDocument) -> LangchainDocument:
+    def source_document2langchain_document(
+        source_document: SourceDocument,
+    ) -> LangchainDocument:
         metadata = {x.key: json.loads(x.value) for x in source_document.metadata}
         if SourceDocumentMapper.DOCUMENT_URL_KEY not in metadata.keys():
             raise ValueError('Required key "%s" not found in metadata.' % SourceDocumentMapper.DOCUMENT_URL_KEY)
@@ -30,14 +32,31 @@ class SourceDocumentMapper:
         return LangchainDocument(page_content=source_document.content, metadata=metadata)
 
     @staticmethod
-    def langchain_document2source_document(langchain_document: LangchainDocument) -> SourceDocument:
-        metadata = [
-            KeyValuePair(key=key, value=json.dumps(value)) for key, value in langchain_document.metadata.items()
-        ]
+    def langchain_document2source_document(
+        langchain_document: LangchainDocument,
+    ) -> SourceDocument:
+        metadata = SourceDocumentMapper._dict2key_value_pair(langchain_document.metadata)
         return SourceDocument(content=langchain_document.page_content, metadata=metadata)
 
     @staticmethod
-    def internal_content2external_content(internal_content_type: str) -> ExternalContentType:
+    def _dict2key_value_pair(metadata: dict[str, any]) -> list[KeyValuePair]:
+        mapped_values = []
+        for key, value in metadata.items():
+            mapped_item: KeyValuePair = ...
+
+            match value:
+                case dict():
+                    mapped_item = KeyValuePair(key=key, value=json.dumps(value))
+                case _:
+                    mapped_item = KeyValuePair(key=key, value=json.dumps(str(value)))
+
+            mapped_values.append(mapped_item)
+        return mapped_values
+
+    @staticmethod
+    def internal_content2external_content(
+        internal_content_type: str,
+    ) -> ExternalContentType:
         lookup_table = {
             InternalContentType.IMAGE.value: ExternalContentType.IMAGE,
             InternalContentType.TABLE.value: ExternalContentType.TABLE,
@@ -47,7 +66,9 @@ class SourceDocumentMapper:
         return lookup_table[internal_content_type]
 
     @staticmethod
-    def external_content2internal_content(external_content_type: str) -> InternalContentType:
+    def external_content2internal_content(
+        external_content_type: str,
+    ) -> InternalContentType:
         lookup_table = {
             ExternalContentType.IMAGE.value: InternalContentType.IMAGE,
             ExternalContentType.TABLE.value: InternalContentType.TABLE,

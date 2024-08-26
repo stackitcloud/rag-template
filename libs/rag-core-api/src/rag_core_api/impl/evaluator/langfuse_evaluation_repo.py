@@ -50,7 +50,12 @@ class LangfuseEvaluationRepo(EvaluationRepo):
         if not dataset_run_item:
             output = ({"answer": "", "documents": ""},)
         else:
-            output = ({"answer": dataset_run_item.answer, "documents": dataset_run_item.documents},)
+            output = (
+                {
+                    "answer": dataset_run_item.answer,
+                    "documents": dataset_run_item.documents,
+                },
+            )
 
         langfuse_generation = self._langfuse.generation(
             name=dataset_name,
@@ -59,7 +64,7 @@ class LangfuseEvaluationRepo(EvaluationRepo):
             model="aleph alpha",
             start_time=self._generation_metadata["generation_start_time"],
             end_time=datetime.now(),
-            trace_id=str(uuid4()) if not dataset_run_item else dataset_run_item.trace_id,
+            trace_id=(str(uuid4()) if not dataset_run_item else dataset_run_item.trace_id),
         )
 
         item.link(

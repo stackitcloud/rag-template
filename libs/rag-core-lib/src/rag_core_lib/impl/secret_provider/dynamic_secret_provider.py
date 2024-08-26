@@ -13,7 +13,9 @@ from requests_oauthlib import OAuth2Session
 
 from rag_core_lib.impl.secret_provider.authentication_error import AuthenticationError
 from rag_core_lib.secret_provider.secret_provider import SecretProvider
-from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
+from rag_core_lib.impl.settings.stackit_myapi_llm_settings import (
+    StackitMyAPILLMSettings,
+)
 
 
 logger = logging.getLogger(__name__)

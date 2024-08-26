@@ -86,7 +86,7 @@ class ChatRequest(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "history": ChatHistory.from_dict(obj.get("history")) if obj.get("history") is not None else None,
+                "history": (ChatHistory.from_dict(obj.get("history")) if obj.get("history") is not None else None),
                 "message": obj.get("message"),
             }
         )

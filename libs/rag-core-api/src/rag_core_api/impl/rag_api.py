@@ -30,7 +30,12 @@ class RagApi(BaseRagApi):
         chat_request: ChatRequest,
         chat_chain: ChatChain = Depends(Provide[DependencyContainer.traced_chat_chain]),
     ) -> ChatResponse:
-        config = RunnableConfig(tags=[], callbacks=None, recursion_limit=25, metadata={"session_id": session_id})
+        config = RunnableConfig(
+            tags=[],
+            callbacks=None,
+            recursion_limit=25,
+            metadata={"session_id": session_id},
+        )
         return chat_chain.invoke(chat_request, config)
 
     @inject

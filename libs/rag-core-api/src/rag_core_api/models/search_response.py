@@ -19,7 +19,14 @@ import pprint
 import re  # noqa: F401
 
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictStr,
+    ValidationError,
+    field_validator,
+)
 from typing import Any, List, Optional
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.source_documents import SourceDocuments

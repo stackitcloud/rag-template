@@ -26,3 +26,21 @@ resource "stackit_ske_cluster" "rag-ske" {
     end                                  = "02:00:00Z"
   }
 }
+
+resource "stackit_objectstorage_credentials_group" "credentials-group" {  
+  project_id = stackit_ske_project.rag-ske.id
+  name       = "credentials-group"
+  depends_on = [stackit_ske_project.rag-ske, stackit_objectstorage_bucket.docs]
+}
+
+resource "stackit_objectstorage_credential" "misc-creds" {
+  depends_on = [stackit_objectstorage_credentials_group.credentials-group]
+  project_id           = stackit_objectstorage_credentials_group.credentials-group.project_id
+  credentials_group_id = stackit_objectstorage_credentials_group.credentials-group.credentials_group_id
+  expiration_timestamp = "2027-01-02T03:04:05Z"
+}
+
+resource "stackit_objectstorage_bucket" "docs" {
+  project_id = stackit_ske_project.rag-ske.id
+  name       = "docs"
+}

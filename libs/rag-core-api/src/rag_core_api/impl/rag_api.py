@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import Depends
+from fastapi import Depends, BackgroundTasks
 from dependency_injector.wiring import Provide, inject
 from langchain_core.runnables import RunnableConfig
 
@@ -16,6 +16,7 @@ from rag_core_api.api_endpoints.source_documents_remover import SourceDocumentsR
 from rag_core_api.api_endpoints.source_documents_uploader import SourceDocumentsUploader
 from rag_core_api.dependency_container import DependencyContainer
 from rag_core_api.apis.rag_api_base import BaseRagApi
+from rag_core_api.evaluator.evaluator import Evaluator
 
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 class RagApi(BaseRagApi):
 
     @inject
-    def chat(
+    async def chat(
         self,
         session_id: str,
         chat_request: ChatRequest,
@@ -39,7 +40,15 @@ class RagApi(BaseRagApi):
         return chat_chain.invoke(chat_request, config)
 
     @inject
-    def remove_source_documents(
+    async def evaluate(
+        self,
+        background_tasks: BackgroundTasks,
+        evaluator: Evaluator = Depends(Provide[DependencyContainer.evaluator]),
+    ) -> None:
+        background_tasks.add_task(evaluator.evaluate)
+
+    @inject
+    async def remove_source_documents(
         self,
         delete_request: DeleteRequest,
         source_documents_remover: SourceDocumentsRemover = Depends(
@@ -49,7 +58,7 @@ class RagApi(BaseRagApi):
         source_documents_remover.remove_source_documents(delete_request)
 
     @inject
-    def search(
+    async def search(
         self,
         search_request: SearchRequest,
         searcher: Searcher = Depends(Provide[DependencyContainer.searcher]),
@@ -57,7 +66,7 @@ class RagApi(BaseRagApi):
         return searcher.search(search_request)
 
     @inject
-    def upload_source_documents(
+    async def upload_source_documents(
         self,
         upload_source_document: list[UploadSourceDocument],
         source_documents_uploader: SourceDocumentsUploader = Depends(

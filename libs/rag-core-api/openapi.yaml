@@ -7,6 +7,16 @@ info:
 servers:
 - url: /
 paths:
+  /evaluate:
+    post:
+      operationId: evaluate
+      responses:
+        "201":
+          description: Accepted.
+        "500":
+          description: Internal Server Error.
+      tags:
+      - rag
   /search:
     post:
       operationId: search

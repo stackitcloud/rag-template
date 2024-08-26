@@ -10,6 +10,7 @@ import rag_core_api.impl
 from fastapi import (  # noqa: F401
     APIRouter,
     Body,
+    BackgroundTasks,
     Cookie,
     Depends,
     Form,
@@ -50,7 +51,22 @@ async def chat(
     session_id: str = Path(..., description=""),
     chat_request: ChatRequest = Body(None, description="Chat with RAG."),
 ) -> ChatResponse:
-    return BaseRagApi.subclasses[0]().chat(session_id, chat_request)
+    return await BaseRagApi.subclasses[0]().chat(session_id, chat_request)
+
+
+@router.post(
+    "/evaluate",
+    responses={
+        201: {"description": "Accepted."},
+        500: {"description": "Internal Server Error."},
+    },
+    tags=["rag"],
+    response_model_by_alias=True,
+)
+async def evaluate(
+    background_tasks: BackgroundTasks,
+) -> None:
+    return await BaseRagApi.subclasses[0]().evaluate(background_tasks)
 
 
 @router.post(
@@ -67,7 +83,7 @@ async def chat(
 async def remove_source_documents(
     delete_request: DeleteRequest = Body(None, description=""),
 ) -> None:
-    return BaseRagApi.subclasses[0]().remove_source_documents(delete_request)
+    return await BaseRagApi.subclasses[0]().remove_source_documents(delete_request)
 
 
 @router.post(
@@ -82,7 +98,7 @@ async def remove_source_documents(
 async def search(
     search_request: SearchRequest = Body(None, description=""),
 ) -> SearchResponse:
-    return BaseRagApi.subclasses[0]().search(search_request)
+    return await BaseRagApi.subclasses[0]().search(search_request)
 
 
 @router.post(
@@ -99,4 +115,4 @@ async def search(
 async def upload_source_documents(
     upload_source_document: List[UploadSourceDocument] = Body(None, description=""),
 ) -> None:
-    return BaseRagApi.subclasses[0]().upload_source_documents(upload_source_document)
+    return await BaseRagApi.subclasses[0]().upload_source_documents(upload_source_document)

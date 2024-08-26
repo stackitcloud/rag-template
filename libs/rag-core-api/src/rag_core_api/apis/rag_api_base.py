@@ -2,6 +2,7 @@
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
+from fastapi import BackgroundTasks
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
@@ -17,23 +18,28 @@ class BaseRagApi:
         super().__init_subclass__(**kwargs)
         BaseRagApi.subclasses = BaseRagApi.subclasses + (cls,)
 
-    def chat(
+    async def chat(
         self,
         session_id: str,
         chat_request: ChatRequest,
     ) -> ChatResponse: ...
 
-    def remove_source_documents(
+    async def evaluate(
+        self,
+        background_tasks: BackgroundTasks,
+    ) -> None: ...
+
+    async def remove_source_documents(
         self,
         delete_request: DeleteRequest,
     ) -> None: ...
 
-    def search(
+    async def search(
         self,
         search_request: SearchRequest,
     ) -> SearchResponse: ...
 
-    def upload_source_documents(
+    async def upload_source_documents(
         self,
         upload_source_document: List[UploadSourceDocument],
     ) -> None: ...

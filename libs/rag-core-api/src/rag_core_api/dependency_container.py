@@ -4,11 +4,15 @@ from dependency_injector.providers import Configuration, List, Selector, Singlet
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama
 from langchain_qdrant import Qdrant
+from langfuse import Langfuse
 from langchain.retrievers.document_compressors.flashrank_rerank import FlashrankRerank
 from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
 from rag_core_api.impl.settings.reranker_settings import RerankerSettings
 from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
 from rag_core_lib.impl.data_types.content_type import ContentType
+from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
+from rag_core_lib.impl.langfuse_manager.llm_manager import LangfuseLLMManager
+from rag_core_lib.impl.langfuse_manager.prompt_manager import LangfusePromptManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
@@ -56,6 +60,8 @@ from rag_core_api.impl.settings.error_messages import ErrorMessages
 from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
+from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
+from rag_core_api.impl.settings.ragas_settings import RagasSettings
 from rag_core_api.impl.settings.embedder_class_type_settings import EmbedderClassTypeSettings
 
 
@@ -78,6 +84,7 @@ class DependencyContainer(DeclarativeContainer):
     stackit_myapi_llm_settings = StackitMyAPILLMSettings()
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
+    ragas_settings = RagasSettings()
     reranker_settings = RerankerSettings()
     embedder_class_type_settings = EmbedderClassTypeSettings()
 
@@ -203,4 +210,38 @@ class DependencyContainer(DeclarativeContainer):
         LangfuseTracedChain,
         inner_chain=chat_chain,
         settings=langfuse_settings,
+    )
+
+    langfuse = Singleton(
+        Langfuse,
+        public_key=langfuse_settings.public_key,
+        secret_key=langfuse_settings.secret_key,
+        host=langfuse_settings.host,
+    )
+
+    langfuse_manager = Singleton(
+        LangfuseManager,
+        langfuse,
+        ANSWER_GENERATION_PROMPT,
+        large_language_model,
+    )
+
+    langfuse_prompt_manager = Singleton(
+        LangfusePromptManager,
+        ANSWER_GENERATION_PROMPT,
+        langfuse_manager,
+    )
+
+    langfuse_llm_manager = Singleton(
+        LangfuseLLMManager,
+        langfuse_manager,
+        large_language_model,
+    )
+
+    evaluator = Singleton(
+        LangfuseRagasEvaluator,
+        chat_chain=traced_chat_chain,
+        settings=ragas_settings,
+        langfuse_manager=langfuse_llm_manager,
+        embedder=embedder,
     )

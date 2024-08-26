@@ -27,12 +27,19 @@ The `.env` needs to contain the following values:
 
 ```
 BASIC_AUTH=Zm9vOiRhcHIxJGh1VDVpL0ZKJG10elZQUm1IM29JQlBVMlZ4YkpUQy8K
-BASIC_AUTH_CLEAR=foo:bar
+
+S3_ACCESS_KEY_ID=...
+S3_SECRET_ACCESS_KEY=...
+
+VITE_AUTH_USERNAME=...
+VITE_AUTH_PASSWORD=...
 
 LANGFUSE_PUBLIC_KEY=pk-lf...
 LANGFUSE_SECRET_KEY=sk-lf...
 
 ALEPH_ALPHA_ALEPH_ALPHA_API_KEY=...
+
+OPENAI_API_KEY=...
 
 STACKIT_AUTH_CLIENT_ID=...
 STACKIT_AUTH_CLIENT_SECRET=...
@@ -86,10 +93,12 @@ kubectl logs test-pod-name
 kubectl delete po test-pod-name
 ```
 
-Under linux, *.localhost should be resolved :fire:, otherwise you have to adjust the hosts file. In windows and macOS append the hosts file with the following line:
+Under linux, *.localhost should be resolved :fire:, otherwise you have to adjust the hosts file. In windows and macOS append the hosts file with the following lines:
 
 ```shell
 127.0.0.1 registry.localhost
+127.0.0.1 admin.rag.localhost
+127.0.0.1 rag.localhost
 ```
 
 More information about adjusting the hosts file can be found in the section 'Access via ingress'.

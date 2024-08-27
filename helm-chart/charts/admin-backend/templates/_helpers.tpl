@@ -43,6 +43,10 @@
 {{- .Release.Name -}}-ragapi-configmap
 {{- end -}}
 
+{{- define "configmap.logging.name" -}}
+{{- .Release.Name -}}-logging-configmap
+{{- end -}}
+
 {{- define "configmap.redis.name" -}}
 {{- .Release.Name -}}-redis-configmap
 {{- end -}}

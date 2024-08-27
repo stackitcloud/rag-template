@@ -12,10 +12,17 @@ spec:
       labels:
         app: admin-backend
     spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "configmap.logging.name" . }}    
       imagePullSecrets:
           - name: {{ .Values.global.imagePullSecret.name }}
       containers:
       - name: admin-backend
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config      
         image: {{ template "adminbackendfullimagename" . }}
         imagePullPolicy: {{ .Values.admin_backend.image.pullPolicy }}
         {{- if not (empty .Values.admin_backend.image.command) }}

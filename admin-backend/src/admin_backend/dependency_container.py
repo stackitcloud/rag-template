@@ -18,6 +18,7 @@ from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAl
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
 
+from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
 from admin_backend.impl.mapper.informationpiece2document import InformationPiece2Document
 from admin_backend.impl.chunker.text_chunker import TextChunker
 from admin_backend.impl.file_services.s3_service import S3Service

@@ -10,7 +10,8 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
+import logging.config
+import yaml
 
 from fastapi import FastAPI
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
@@ -18,6 +19,10 @@ from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSett
 from admin_backend.apis.admin_api import router as AdminApiRouter
 from admin_backend.dependency_container import DependencyContainer
 
+
+with open("/config/logging.yaml", "r") as stream:
+    config = yaml.load(stream, Loader=yaml.FullLoader)
+logging.config.dictConfig(config)
 
 app = FastAPI(
     title="admin backend",

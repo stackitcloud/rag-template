@@ -1,5 +1,6 @@
 import io
 import logging
+import re
 import tempfile
 from pathlib import Path
 import json
@@ -124,6 +125,7 @@ class AdminApi(BaseAdminApi):
         key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
     ) -> None:
         content = await body.read()
+
         try:
             key_value_store.upsert(body.filename, Status.UPLOADING)
             background_tasks.add_task(self._save_new_document, content, body.filename, request)

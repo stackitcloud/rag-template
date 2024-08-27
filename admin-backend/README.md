@@ -2,12 +2,11 @@
 
 The main job of the admin-backend is file handling. Upload and deletion of files should be triggered here.
 
-The following endpoints are provided by the _admin-backend_:
-
--   `/delete_document/{id}`: Deletes the file from storage and vector database. The `id` can be retrieved from the `/all_documents` endpoint.
--   `/document_reference/{id}`: Returns the document.
--   `/all_documents`: Return the id of all available documents currently stored. Files will be available in this list immediately after the upload, however they might still be processed and are not yet available in the chat.
--   `/upload_documents`: Endpoint to upload PDF files.
+The following endpoints are provided by the *admin-backend*:
+- `/delete_document/{id}`: Deletes the file from storage and vector database. The `id` can be retrieved from the `/all_documents` endpoint.
+- `/document_reference/{id}`: Returns the document.
+- `/all_documents`: Return the id and status of all available documents currently stored.
+- `/upload_documents`: Endpoint to upload PDF files.
 
 # Requirements
 

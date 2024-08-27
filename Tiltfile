@@ -101,6 +101,7 @@ local_resource(
     "RAG Backend linting",
     create_linter_command(backend_context, "back"),
     labels=["linting"],
+    auto_init=False,
     trigger_mode=TRIGGER_MODE_AUTO,
     allow_parallel=True,
 )
@@ -110,6 +111,7 @@ local_resource(
     "RAG Backend testing",
     create_test_command(backend_context, "back"),
     labels=["test"],
+    auto_init=False,
     trigger_mode=TRIGGER_MODE_AUTO,
     allow_parallel=True,
 )
@@ -143,8 +145,8 @@ local_resource(
     "Admin backend linting",
     create_linter_command(admin_backend_context, "adminback"),
     labels=["linting"],
-    trigger_mode=TRIGGER_MODE_MANUAL,
     auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
 )
 
@@ -153,8 +155,8 @@ local_resource(
     "Admin backend testing",
     create_test_command(admin_backend_context, "adminback"),
     labels=["test"],
-    trigger_mode=TRIGGER_MODE_MANUAL,
     auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
 )
 
@@ -183,8 +185,8 @@ local_resource(
     "Extractor linting",
     create_linter_command(extractor_context, "extractor"),
     labels=["linting"],
-    trigger_mode=TRIGGER_MODE_MANUAL,
     auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
 )
 
@@ -193,8 +195,8 @@ local_resource(
     "Extractor testing",
     create_test_command(extractor_context, "extractor"),
     labels=["test"],
-    trigger_mode=TRIGGER_MODE_MANUAL,
     auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
     allow_parallel=True,
 )
 

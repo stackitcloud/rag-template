@@ -10,12 +10,18 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
+import logging.config
+import yaml
 
 from fastapi import FastAPI
 
 from openapi_server.apis.extractor_api import router as ExtractorApiRouter
 from openapi_server.container import Container
+
+
+with open("/config/logging.yaml", "r") as stream:
+    config = yaml.load(stream, Loader=yaml.FullLoader)
+logging.config.dictConfig(config)
 
 app = FastAPI(
     title="rag_pdf_extractor",

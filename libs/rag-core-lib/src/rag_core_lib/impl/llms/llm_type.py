@@ -6,3 +6,4 @@ class LLMType(StrEnum):
     MYAPI = "myapi"
     ALEPHALPHA = "alephalpha"
     OLLAMA = "ollama"
+    STACKIT = "stackit"

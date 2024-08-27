@@ -20,5 +20,5 @@ class RAGClassTypeSettings(BaseSettings):
         case_sensitive = False
 
     llm_type: LLMType = Field(
-        default=LLMType.MYAPI,
+        default=LLMType.STACKIT,
     )

@@ -1,14 +1,32 @@
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Configuration, List, Selector, Singleton
+from langchain.retrievers.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.llms import Ollama
+from langchain_community.llms import Ollama, VLLMOpenAI
 from langchain_qdrant import Qdrant
 from langfuse import Langfuse
-from langchain.retrievers.document_compressors.flashrank_rerank import FlashrankRerank
-from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
-from rag_core_api.impl.settings.reranker_settings import RerankerSettings
+from rag_core_api.impl import rag_api
+from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
+from rag_core_api.impl.api_endpoints.default_chat_chain import DefaultChatChain
+from rag_core_api.impl.api_endpoints.default_searcher import DefaultSearcher
+from rag_core_api.impl.api_endpoints.default_source_documents_remover import DefaultSourceDocumentsRemover
+from rag_core_api.impl.api_endpoints.default_source_documents_uploader import DefaultSourceDocumentsUploader
 from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
+from rag_core_api.impl.embeddings.langchain_community_embedder import LangchainCommunityEmbedder
+from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
+from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
+from rag_core_api.impl.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
+from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
+from rag_core_api.impl.retriever.composite_retriever import CompositeRetriever
+from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
+from rag_core_api.impl.settings.embedder_class_type_settings import EmbedderClassTypeSettings
+from rag_core_api.impl.settings.error_messages import ErrorMessages
+from rag_core_api.impl.settings.ragas_settings import RagasSettings
+from rag_core_api.impl.settings.reranker_settings import RerankerSettings
+from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
+from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
+from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.langfuse_manager.llm_manager import LangfuseLLMManager
@@ -16,53 +34,18 @@ from rag_core_lib.impl.langfuse_manager.prompt_manager import LangfusePromptMana
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
-from rag_core_lib.impl.secret_provider.dynamic_secret_provider import (
-    DynamicSecretProvider,
-)
+from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
 from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
-from rag_core_lib.impl.secret_provider.static_secret_provider import (
-    StaticSecretProvider,
-)
+from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
+from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
 from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
-from rag_core_lib.impl.settings.public_aleph_alpha_settings import (
-    PublicAlephAlphaSettings,
-)
+from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
-from rag_core_lib.impl.settings.stackit_myapi_llm_settings import (
-    StackitMyAPILLMSettings,
-)
+from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
+from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
-
-from rag_core_api.impl import rag_api
-from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
-from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
-    AnswerGenerationChain,
-)
-from rag_core_api.impl.api_endpoints.default_chat_chain import DefaultChatChain
-from rag_core_api.impl.api_endpoints.default_searcher import DefaultSearcher
-from rag_core_api.impl.api_endpoints.default_source_documents_remover import (
-    DefaultSourceDocumentsRemover,
-)
-from rag_core_api.impl.api_endpoints.default_source_documents_uploader import (
-    DefaultSourceDocumentsUploader,
-)
-from rag_core_api.impl.embeddings.langchain_community_embedder import (
-    LangchainCommunityEmbedder,
-)
-from rag_core_api.impl.prompt_templates.answer_generation_prompt import (
-    ANSWER_GENERATION_PROMPT,
-)
-from rag_core_api.impl.retriever.composite_retriever import CompositeRetriever
-from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
-from rag_core_api.impl.settings.error_messages import ErrorMessages
-from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
-from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
-from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
-from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
-from rag_core_api.impl.settings.ragas_settings import RagasSettings
-from rag_core_api.impl.settings.embedder_class_type_settings import EmbedderClassTypeSettings
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -80,6 +63,7 @@ class DependencyContainer(DeclarativeContainer):
     aleph_alpha_settings = AlephAlphaSettings()
     ollama_settings = OllamaSettings()
     langfuse_settings = LangfuseSettings()
+    stackit_vllm_settings = StackitVllmSettings()
     error_messages = ErrorMessages()
     stackit_myapi_llm_settings = StackitMyAPILLMSettings()
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
@@ -96,14 +80,19 @@ class DependencyContainer(DeclarativeContainer):
     llm_secret_provider = Selector(
         class_selector_config.llm_type,
         myapi=Singleton(DynamicSecretProvider, stackit_myapi_llm_settings),
-        alephalpha=Singleton(StaticSecretProvider, aleph_alpha_settings),
+        alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
         ollama=Singleton(NoSecretProvider),
+        stackit=Singleton(StaticSecretProviderStackit, stackit_vllm_settings),
     )
 
     embedder = Selector(
         class_selector_config.embedder_type,
-        myapi=Singleton(AlephAlphaEmbedder, aleph_alpha_settings, llm_secret_provider),
-        alephalpha=Singleton(AlephAlphaEmbedder, aleph_alpha_settings, llm_secret_provider),
+        myapi=Singleton(
+            AlephAlphaEmbedder, aleph_alpha_settings, Singleton(DynamicSecretProvider, stackit_myapi_llm_settings)
+        ),
+        alephalpha=Singleton(
+            AlephAlphaEmbedder, aleph_alpha_settings, Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings)
+        ),
         ollama=Singleton(
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_settings.model_dump())
         ),
@@ -178,6 +167,7 @@ class DependencyContainer(DeclarativeContainer):
         myapi=Singleton(llm_provider, aleph_alpha_settings),
         alephalpha=Singleton(llm_provider, aleph_alpha_settings),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
+        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
     )
 
     # Add secret provider to model
@@ -186,6 +176,7 @@ class DependencyContainer(DeclarativeContainer):
         myapi=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
         alephalpha=Singleton(SecuredLLM, llm=aleph_alpha_settings, secret_provider=llm_secret_provider),
         ollama=large_language_model,
+        stackit=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
     )
 
     prompt = ANSWER_GENERATION_PROMPT

@@ -12,10 +12,17 @@ spec:
       labels:
         app: extractor
     spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "configmap.logging.name" . }}    
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret.name }}    
       containers:
       - name: extractor
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config      
         image: {{ template "extractorfullimagename" . }}
         imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
         {{- if not (empty .Values.extractor.image.command) }}

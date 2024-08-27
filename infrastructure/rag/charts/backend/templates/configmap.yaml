@@ -116,3 +116,12 @@ data:
   {{- range $key, $value := .Values.global.config.envs.ragas }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.stackit-vllm.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.stackit_vllm }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

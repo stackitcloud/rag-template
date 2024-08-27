@@ -78,6 +78,8 @@ spec:
               name: {{ template "configmap.usecase.name" . }}
           - configMapRef:
               name: {{ template "configmap.ragas.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.stackit-vllm.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:
@@ -86,6 +88,8 @@ spec:
               name: {{ template "secret.openai.name" . }}
           - secretRef:
               name: {{ template "secret.stackit-myapi-llm.name" . }}
+          - secretRef:
+              name: {{ template "secret.stackit-vllm.name" . }}
           - secretRef:
               name: {{ template "secret.usecase.name" . }}
         env:

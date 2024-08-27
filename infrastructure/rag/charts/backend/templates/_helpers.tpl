@@ -83,6 +83,14 @@
 {{- printf "%s/%s:%s" .Values.image.repository .Values.image.name .Values.image.tag | trimSuffix ":" }}
 {{- end -}}
 
+{{- define "secret.stackit-vllm.name" -}}
+{{- .Release.Name -}}-stackit-vllm-secret
+{{- end -}}
+
+{{- define "configmap.stackit-vllm.name" -}}
+{{- .Release.Name -}}-stackit-vllm-configmap
+{{- end -}}
+
 # ingress
 {{- define "ingress.fullname" -}}
 {{- .Release.Name -}}-backend-ingress

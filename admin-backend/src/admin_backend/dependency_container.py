@@ -1,4 +1,3 @@
-from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Singleton, Selector, List, Configuration
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -10,7 +9,7 @@ from rag_core_lib.impl.llms.secured_llm import SecuredLLM
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
 from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
-from rag_core_lib.impl.secret_provider.static_secret_provider import StaticSecretProvider
+from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
 from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
@@ -71,7 +70,7 @@ class DependencyContainer(DeclarativeContainer):
     llm_secret_provider = Selector(
         class_selector_config.llm_type,
         myapi=Singleton(DynamicSecretProvider, stackit_myapi_llm_settings),
-        alephalpha=Singleton(StaticSecretProvider, aleph_alpha_settings),
+        alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
         ollama=Singleton(NoSecretProvider),
     )
     key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)

@@ -15,14 +15,14 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: {{ template "configmap.logging.name" . }}    
+            name: {{ template "configmap.logging.name" . }}
       imagePullSecrets:
           - name: {{ .Values.global.imagePullSecret.name }}
       containers:
       - name: admin-backend
         volumeMounts:
         - name: config-volume
-          mountPath: /config      
+          mountPath: /config
         image: {{ template "adminbackendfullimagename" . }}
         imagePullPolicy: {{ .Values.admin_backend.image.pullPolicy }}
         {{- if not (empty .Values.admin_backend.image.command) }}
@@ -70,8 +70,6 @@ spec:
               name: {{ template "configmap.ragapi.name" . }}
           - configMapRef:
               name: {{ template "configmap.pdfextractor.name" . }}
-          - configMapRef:
-              name: {{ template "configmap.redis.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:

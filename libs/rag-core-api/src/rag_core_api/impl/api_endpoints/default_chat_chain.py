@@ -55,20 +55,24 @@ class DefaultChatChain(ChatChain):
             # failure in search. Forward error
             return retrieved_documents
 
-        retrieved_documents = [
+        retrieved_langchain_documents = [
             self._mapper.source_document2langchain_document(x) for x in retrieved_documents.documents
         ]
 
-        if not retrieved_documents:
+        if not retrieved_langchain_documents:
             return ChatResponse(answer=self.error_messages.no_documents_message, citations=[], finish_reason="")
 
-        answer_generation_input = AnswerChainInputData(question=input.message, retrieved_documents=retrieved_documents)
+        answer_generation_input = AnswerChainInputData(
+            question=input.message, retrieved_documents=retrieved_langchain_documents
+        )
 
         answer = self._answer_generation_chain.invoke(answer_generation_input, config)
 
         logger.info("GENERATED answer: %s", answer)
 
-        response = ChatResponse(answer=answer, citations=[], finish_reason="")
+        response = ChatResponse(
+            answer=answer, citations=retrieved_documents.documents, finish_reason=""
+        )  # TODO: get finish_reason. Might be impossible/difficult depending on used llm
         return response
 
     def _search_documents(self, prompt: str, composed_retriever: Retriever, metadata: dict = None) -> list[Document]:

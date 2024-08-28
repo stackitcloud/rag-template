@@ -6,6 +6,27 @@ from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama, VLLMOpenAI
 from langchain_qdrant import Qdrant
 from langfuse import Langfuse
+
+from rag_core_lib.impl.data_types.content_type import ContentType
+from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
+from rag_core_lib.impl.langfuse_manager.llm_manager import LangfuseLLMManager
+from rag_core_lib.impl.langfuse_manager.prompt_manager import LangfusePromptManager
+from rag_core_lib.impl.llms.llm_factory import llm_provider
+from rag_core_lib.impl.llms.llm_type import LLMType
+from rag_core_lib.impl.llms.secured_llm import SecuredLLM
+from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
+from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
+from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
+from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
+from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
+from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
+from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
+from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
+from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
+from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
+from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
+from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
+
 from rag_core_api.impl import rag_api
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
 from rag_core_api.impl.api_endpoints.default_chat_chain import DefaultChatChain
@@ -27,25 +48,6 @@ from rag_core_api.impl.settings.reranker_settings import RerankerSettings
 from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
-from rag_core_lib.impl.data_types.content_type import ContentType
-from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.langfuse_manager.llm_manager import LangfuseLLMManager
-from rag_core_lib.impl.langfuse_manager.prompt_manager import LangfusePromptManager
-from rag_core_lib.impl.llms.llm_factory import llm_provider
-from rag_core_lib.impl.llms.llm_type import LLMType
-from rag_core_lib.impl.llms.secured_llm import SecuredLLM
-from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
-from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
-from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
-from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
-from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
-from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
-from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
-from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
-from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
-from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
-from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
-from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
 
 
 class DependencyContainer(DeclarativeContainer):

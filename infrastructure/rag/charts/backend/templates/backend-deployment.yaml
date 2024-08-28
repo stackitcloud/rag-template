@@ -92,6 +92,8 @@ spec:
               name: {{ template "secret.stackit-vllm.name" . }}
           - secretRef:
               name: {{ template "secret.usecase.name" . }}
+          - secretRef:
+              name: {{ template "secret.stackit-vllm.name" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.pythonPathEnv.PYTHONPATH }}

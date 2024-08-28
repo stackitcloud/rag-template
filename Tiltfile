@@ -233,12 +233,9 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "global.secrets.aleph_alpha.aleph_alpha_aleph_alpha_api_key=%s"
-    % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    "global.secrets.stackit_myapi_llm.auth_client_id=%s"
-    % os.environ["STACKIT_AUTH_CLIENT_ID"],
-    "global.secrets.stackit_myapi_llm.auth_client_secret=%s"
-    % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
+    "global.secrets.aleph_alpha.aleph_alpha_aleph_alpha_api_key=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
+    "global.secrets.stackit_myapi_llm.auth_client_id=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
+    "global.secrets.stackit_myapi_llm.auth_client_secret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
     "global.secrets.openai.api_key=%s" % os.environ["OPENAI_API_KEY"],
     "global.secrets.s3.access_key=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "global.secrets.s3.secret_key=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
@@ -246,6 +243,7 @@ value_override = [
     "global.secrets.langfuse.public_key=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "global.secrets.langfuse.secret_key=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     "global.secrets.vite_auth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
+    "global.secrets.stackit_vllm.api_key=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     "global.secrets.vite_auth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
     # variables
     "global.debug.backend.enabled=%s" % backend_debug,

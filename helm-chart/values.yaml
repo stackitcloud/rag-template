@@ -97,9 +97,9 @@ global:
         USECASE_KEYVALUE_HOST: "rag-keydb"
       ragapi:
         RAG_API_HOST: "http://backend:8080"
-      redis:
-        USECASE_KEYVALUE_HOST: "rag-keydb"
-        USECASE_KEYVALUE_PORT: "6379"
+      stackit_myapi_llm:
+        STACKIT_TOKEN_LIFETIME_MARGIN: 30
+        STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
       frontend:
         VITE_API_URL: "http://rag.localhost/api"
         VITE_CHAT_URL: "http://rag.localhost"

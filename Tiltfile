@@ -135,7 +135,8 @@ docker_build(
     },
     live_update=[
         sync(admin_backend_context, "/app/admin-backend"),
-        sync(core_library_context, "/app/rag-core-library"),
+        sync(core_library_context, "/app/rag-core-library/Dockerfile.base"),
+        sync(core_library_context, "/app/rag-core-library/rag-core-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
 )

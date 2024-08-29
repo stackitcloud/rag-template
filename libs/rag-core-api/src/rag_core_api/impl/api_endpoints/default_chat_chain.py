@@ -63,7 +63,9 @@ class DefaultChatChain(ChatChain):
             return ChatResponse(answer=self.error_messages.no_documents_message, citations=[], finish_reason="")
 
         answer_generation_input = AnswerChainInputData(
-            question=input.message, retrieved_documents=retrieved_langchain_documents
+            question=input.message,
+            retrieved_documents=retrieved_langchain_documents,
+            history="\n".join([f"{x.role}: {x.message}" for x in input.history.messages]),
         )
 
         answer = self._answer_generation_chain.invoke(answer_generation_input, config)

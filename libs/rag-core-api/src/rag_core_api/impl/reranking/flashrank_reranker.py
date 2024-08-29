@@ -1,5 +1,6 @@
 from typing import Optional
-from langchain.retrievers.document_compressors.flashrank_rerank import FlashrankRerank
+
+from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
 

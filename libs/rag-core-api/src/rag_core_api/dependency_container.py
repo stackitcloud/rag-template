@@ -1,7 +1,7 @@
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Configuration, List, Selector, Singleton
-from langchain.retrievers.document_compressors.flashrank_rerank import FlashrankRerank
+from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama, VLLMOpenAI
 from langchain_qdrant import Qdrant

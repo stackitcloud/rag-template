@@ -8,4 +8,5 @@ class AnswerChainInputData(BaseModel):
         orm_mode = True
 
     question: str
+    history: str
     retrieved_documents: List[Any]  # TODO: this should be a langchain document

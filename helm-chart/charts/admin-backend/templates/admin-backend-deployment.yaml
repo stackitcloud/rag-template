@@ -69,7 +69,9 @@ spec:
           - configMapRef:
               name: {{ template "configmap.ragapi.name" . }}
           - configMapRef:
-              name: {{ template "configmap.pdfextractor.name" . }}
+              name: {{ template "configmap.stackit-vllm.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.pdfextractor.name" . }}          
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:
@@ -80,6 +82,8 @@ spec:
               name: {{ template "secret.usecase.name" . }}
           - secretRef:
               name: {{ template "secret.s3.name" . }}
+          - secretRef:
+              name: {{ template "secret.stackit-vllm.name" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.pythonPathEnv.PYTHONPATH }}

@@ -243,6 +243,7 @@ value_override = [
     "global.secrets.basic_auth=%s" % os.environ["BASIC_AUTH"],
     "global.secrets.langfuse.public_key=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "global.secrets.langfuse.secret_key=%s" % os.environ["LANGFUSE_SECRET_KEY"],
+    "global.secrets.stackit_vllm.api_key=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     "global.secrets.vite_auth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
     "global.secrets.stackit_vllm.api_key=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     "global.secrets.vite_auth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],

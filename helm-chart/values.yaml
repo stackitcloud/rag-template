@@ -80,7 +80,7 @@ global:
         RAGAS_PROMPT_LANGUAGE: "german"
         RAGAS_BASE_URL: "https://api.openai.com/v1"
       rag_class_types:
-        RAG_CLASS_TYPE_LLM_TYPE: "myapi"
+        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
       public:
         PUBLIC_HOST: "https://api.aleph-alpha.com"
       pdfextractor:

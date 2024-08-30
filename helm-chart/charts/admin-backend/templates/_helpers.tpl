@@ -80,5 +80,10 @@
 {{- .Release.Name -}}-admin-backend-ingress
 {{- end -}}
 
+{{- define "secret.stackit-vllm.name" -}}
+{{- .Release.Name -}}-stackit-vllm-secret
+{{- end -}}
 
-
+{{- define "configmap.stackit-vllm.name" -}}
+{{- .Release.Name -}}-stackit-vllm-configmap
+{{- end -}}

@@ -14,6 +14,29 @@ In this example only the default behaviour is used and no components are changed
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
 The backend uses the base Dockerfile of the [rag-core-library](../rag-core-library/) and shares the system requirements with this library.
 
+## Requirement handling
+
+The backend uses [poetry](https://python-poetry.org/) for requirement management.
+To ensure the requirements are consistent you have to update the `poetry.lock` in addition to the `pyproject.toml` when updating/changing requirements.
+Additional requirements like *black* and *flake8* are provided for development. You can install them with `poetry install --with dev` inside of the subproject directory.
+> 📝 Before creating a pull request please run `black .`, as well as `flake8 .` and ensure there are no complaints by these tools.
+
+> 📝 Do not update the requirements in the `pyproject.toml` manually. Doing so will invalidate the `poetry.lock`. Use the *poetry* application for this.
+
+### Adding new requirements
+Run
+```bash
+poetry add <package>
+```
+insisde of the container in order to add new packages. This will automatically update the `pyproject.toml` and the `poetry.lock`.
+You can copy the content of these files using the following command
+```bash
+kubectl cp <namespace>/<backend container name>:/path/to/pyproject.toml ./pyproject.toml
+kubectl cp <namespace>/<backend container name>:/path/to/poetry.lock ./poetry.lock
+```
+
+System requirements have to manually be added to the `Dockerfile`.
+
 # Endpoints
 
 ## `/chat/{session_id}`

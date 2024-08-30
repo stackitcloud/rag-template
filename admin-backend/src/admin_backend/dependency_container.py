@@ -1,46 +1,43 @@
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
-from dependency_injector.providers import Singleton, Selector, List, Configuration
+from dependency_injector.providers import Configuration, List, Selector, Singleton
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.llms import Ollama
+from langchain_community.llms import Ollama, VLLMOpenAI
 
-from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
+from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
-from rag_core_lib.impl.llms.llm_factory import llm_provider
-from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
 from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
+from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
 from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
+from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
 from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
+from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
+from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
 
-from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
-from admin_backend.impl.mapper.informationpiece2document import InformationPiece2Document
+from admin_backend.document_extractor_client.openapi_client.api.extractor_api import ExtractorApi
+from admin_backend.document_extractor_client.openapi_client.api_client import ApiClient
+from admin_backend.document_extractor_client.openapi_client.configuration import Configuration as ExtractorConfiguration
+from admin_backend.impl import admin_api
 from admin_backend.impl.chunker.text_chunker import TextChunker
 from admin_backend.impl.file_services.s3_service import S3Service
 from admin_backend.impl.information_enhancer.general_enhancer import GeneralEnhancer
 from admin_backend.impl.information_enhancer.page_summary_enhancer import PageSummaryEnhancer
 from admin_backend.impl.information_enhancer.single_summary_enhancer import SingleSummaryEnhancer
-from admin_backend.document_extractor_client.openapi_client.api.extractor_api import (
-    ExtractorApi,
-)
-from admin_backend.document_extractor_client.openapi_client.api_client import ApiClient
-from admin_backend.document_extractor_client.openapi_client.configuration import (
-    Configuration as ExtractorConfiguration,
-)
-from admin_backend.impl.summarizer.langchain_summarizer import LangchainSummarizer
+from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_backend.impl.mapper.informationpiece2document import InformationPiece2Document
 from admin_backend.impl.settings.chunker_settings import ChunkerSettings
-from admin_backend.impl.settings.s3_settings import S3Settings
 from admin_backend.impl.settings.document_extractor_settings import DocumentExtractorSettings
-from admin_backend.impl.settings.rag_api_settings import RAGAPISettings
-from admin_backend.rag_backend_client.openapi_client.api_client import ApiClient as RagApiClient
-from admin_backend.rag_backend_client.openapi_client.api.rag_api import RagApi
-from admin_backend.impl import admin_api
 from admin_backend.impl.settings.key_value_settings import KeyValueSettings
-
+from admin_backend.impl.settings.rag_api_settings import RAGAPISettings
+from admin_backend.impl.settings.s3_settings import S3Settings
+from admin_backend.impl.summarizer.langchain_summarizer import LangchainSummarizer
+from admin_backend.rag_backend_client.openapi_client.api.rag_api import RagApi
+from admin_backend.rag_backend_client.openapi_client.api_client import ApiClient as RagApiClient
 
 class DependencyContainer(DeclarativeContainer):
     """
@@ -58,6 +55,7 @@ class DependencyContainer(DeclarativeContainer):
     ollama_settings = OllamaSettings()
     langfuse_settings = LangfuseSettings()
     stackit_myapi_llm_settings = StackitMyAPILLMSettings()
+    stackit_vllm_settings = StackitVllmSettings()
     document_extractor_settings = DocumentExtractorSettings()
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
@@ -72,6 +70,7 @@ class DependencyContainer(DeclarativeContainer):
         myapi=Singleton(DynamicSecretProvider, stackit_myapi_llm_settings),
         alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
         ollama=Singleton(NoSecretProvider),
+        stackit=Singleton(StaticSecretProviderStackit, stackit_vllm_settings),
     )
     key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)
     file_service = Singleton(S3Service, s3_settings=s3_settings)
@@ -96,6 +95,7 @@ class DependencyContainer(DeclarativeContainer):
         myapi=Singleton(llm_provider, aleph_alpha_settings),
         alephalpha=Singleton(llm_provider, aleph_alpha_settings),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
+        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
     )
 
     # Add secret provider to model
@@ -104,6 +104,7 @@ class DependencyContainer(DeclarativeContainer):
         myapi=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
         alephalpha=Singleton(SecuredLLM, llm=aleph_alpha_settings, secret_provider=llm_secret_provider),
         ollama=large_language_model,
+        stackit=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
     )
 
     summarizer = Singleton(LangchainSummarizer, large_language_model)

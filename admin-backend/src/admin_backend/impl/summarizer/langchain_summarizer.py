@@ -29,7 +29,8 @@ class LangchainSummarizer(Summarizer):
 
     def invoke(self, query: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
         config = ensure_config(config)
-        tries_remaining = config.get("tries_remaining", 3)
+        tries_remaining = config.get("configurable", {}).get("tries_remaining", 3)
+
 
         if tries_remaining < 0:
             raise Exception("Summary creation failed.")

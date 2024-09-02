@@ -48,6 +48,8 @@ from rag_core_api.impl.settings.reranker_settings import RerankerSettings
 from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
+from rag_core_api.impl.embeddings.stackit_embedder import StackitEmbedder
+from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -73,6 +75,7 @@ class DependencyContainer(DeclarativeContainer):
     ragas_settings = RagasSettings()
     reranker_settings = RerankerSettings()
     embedder_class_type_settings = EmbedderClassTypeSettings()
+    stackit_embedder_settings = StackitEmbedderSettings()
 
     class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
 
@@ -98,6 +101,7 @@ class DependencyContainer(DeclarativeContainer):
         ollama=Singleton(
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_settings.model_dump())
         ),
+        stackit=Singleton(StackitEmbedder, stackit_embedder_settings)
     )
 
     vectordb_client = Singleton(

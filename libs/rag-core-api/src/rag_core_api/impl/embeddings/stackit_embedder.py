@@ -33,8 +33,7 @@ class StackitEmbedder(Embedder, Embeddings):
             input=texts,
             model=self._settings.model,
         )
-        for data in responses.data:
-            print(data.embedding)
+
         return [data.embedding for data in responses.data]
 
     def embed_query(self, text: str) -> List[float]:

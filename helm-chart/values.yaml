@@ -1,0 +1,111 @@
+global:
+  ssl: true
+  imagePullSecret:
+    create: false
+    name: cr-credentials
+  secrets:
+    s3:
+      access_key: admin
+      secret_key: password
+    openai:
+      api_key: "sk-123456"
+    aleph_alpha:
+      aleph_alpha_aleph_alpha_api_key: "sk-123456"
+    basic_auth: ""
+    vite_auth:
+      VITE_AUTH_USERNAME: ""
+      VITE_AUTH_PASSWORD: ""
+    langfuse:
+      public_key: "pk-lf"
+      secret_key: "sk-lf"
+    stackit_myapi_llm:
+      auth_client_id: auth-client-id
+      auth_client_secret: auth-client-secret
+
+  config:
+    dns:
+      - admin.rag.ai.mmmake.com
+      - rag.ai.mmmake.com
+    tls:
+      enabled: true
+      host: rag.ai.mmmake.com
+      secretName: tls-certificate
+    envs:
+      chunker:
+        CHUNKER_MAX_SIZE: 1000
+        CHUNKER_OVERLAP: 300
+      s3:
+        S3_ENDPOINT: http://rag-minio:9000
+        S3_BUCKET: documents
+      database:
+        VECTOR_DB_COLLECTION_NAME: rag-db
+        VECTOR_DB_URL: http://rag-qdrant:6333
+      retriever:
+        RETRIEVER_THRESHOLD: 0.3
+        RETRIEVER_K_DOCUMENTS: 10
+        RETRIEVER_TOTAL_K: 7
+        RETRIEVER_SUMMARY_THRESHOLD: 0.3
+        RETRIEVER_SUMMARY_K_DOCUMENTS: 10
+        RETRIEVER_TABLE_THRESHOLD: 0.3
+        RETRIEVER_TABLE_K_DOCUMENTS: 10
+        RETRIEVER_IMAGE_THRESHOLD: 0.7
+        RETRIEVER_IMAGE_K_DOCUMENTS: 10
+      stackit_myapi_llm:
+        STACKIT_TOKEN_LIFETIME_MARGIN: 30
+        STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
+      aleph_alpha:
+        ALEPH_ALPHA_MODEL: llama-3-8b-instruct
+        ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1
+        ALEPH_ALPHA_TOP_K: 0
+        ALEPH_ALPHA_TOP_P: 0
+        ALEPH_ALPHA_PRESENCE_PENALTY: 0
+        ALEPH_ALPHA_FREQUENCY_PENALTY: 10
+        ALEPH_ALPHA_MAXIMUM_TOKENS: 256
+        ALEPH_ALPHA_TEMPERATURE: 0
+        ALEPH_ALPHA_N: 1
+        ALEPH_ALPHA_BEST_OF: 2
+      errormessages:
+        ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: Es tut mir leid, meine Antworten sind begrenzt. Sie müssen die richtigen Fragen stellen.
+        ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: Es wurden keine Dokumente zum durchsuchen bereitgestellt.
+        ERROR_MESSAGES_NO_PRODUCT_NAME_MESSAGE: "Es wurde kein Produktname im chat-verlauf gefunden. Ich habe derzeit Informationen über folgende Produkte:"
+      langfuse:
+        LANGFUSE_DATASET_NAME: "rag_test_ds"
+        LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+        LANGFUSE_HOST: "http://rag-langfuse:3000" #NOTE: http protocol needs to be defined!
+      ragas:
+        RAGAS_IS_DEBUG: false
+        RAGAS_MODEL: "gpt-3.5-turbo-0125"
+        RAGAS_TIMEOUT: 60
+        RAGAS_ADAPT_PROMPTS_TO_LANG: false
+        RAGAS_PROMPT_LANGUAGE: "german"
+        RAGAS_BASE_URL: "https://api.openai.com/v1"
+      rag_class_types:
+        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+      public:
+        PUBLIC_HOST: "https://api.aleph-alpha.com"
+      pdfextractor:
+        PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME: "connection_diagrams"
+        PDF_EXTRACTOR_FOOTER_HEIGHT: 155
+      ollama:
+        OLLAMA_MODEL: "llama3:instruct"
+        OLLAMA_BASE_URL: "http://rag-ollama:11434"
+        OLLAMA_TOP_K: 0
+        OLLAMA_TOP_P: 0
+        OLLAMA_TEMPERATURE: 0
+      usecase:
+        USECASE_KEYVALUE_PORT: 6379
+        USECASE_KEYVALUE_HOST: "rag-keydb"
+      ragapi:
+        RAG_API_HOST: "http://backend:8080"
+      stackit_myapi_llm:
+        STACKIT_TOKEN_LIFETIME_MARGIN: 30
+        STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
+      frontend:
+        VITE_API_URL: "http://rag.localhost/api"
+        VITE_CHAT_URL: "http://rag.localhost"
+        VITE_ADMIN_URL: "http://admin.rag.localhost"
+        VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
+
+  debug:
+    backend:
+      enabled: false

@@ -1,0 +1,11 @@
+{
+  "chat": {
+    "send": "Senden",
+    "justAsk": "Frag mich einfach...",
+    "sources": "Quellen",
+    "documents": "Dokumente verwalten",
+    "error": {
+      "requestError": "Fehler bei der Anfrage. Bitte versuche es erneut."
+    }
+  }
+}

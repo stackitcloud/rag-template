@@ -1,0 +1,24 @@
+rag-base:
+  langfuse:
+    enabled: true
+  qdrant:
+    enabled: true
+  frontend_flag:
+    enabled: false
+
+  backend:
+    image:
+      repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+      name: rag-backend
+      tag: "443892"
+    ingress:
+      host:
+        name: rag.localhost
+  frontend:
+    image:
+      repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+      name: frontend
+      tag: "443892"
+    ingress:
+      host:
+        name: rag.localhost

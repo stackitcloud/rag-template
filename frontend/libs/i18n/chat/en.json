@@ -1,0 +1,11 @@
+{
+  "chat": {
+    "send": "Send",
+    "justAsk": "Just ask me...",
+    "sources": "Sources",
+    "documents": "Manage documents",
+    "error": {
+      "requestError": "An error occurred during the request. Please try again."
+    }
+  }
+}

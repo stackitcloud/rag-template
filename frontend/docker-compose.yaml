@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  chat-app:
+    build:
+      context: .
+      dockerfile: apps/chat-app/Dockerfile
+    ports:
+      - "8080:8080"
+  admin-app:
+    build:
+      context: .
+      dockerfile: apps/admin-app/Dockerfile
+    ports:
+      - "8081:8080"

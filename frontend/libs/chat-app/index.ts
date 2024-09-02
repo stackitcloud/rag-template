@@ -1,0 +1,1 @@
+export { default as ChatView } from './feature-chat/ChatView.vue';

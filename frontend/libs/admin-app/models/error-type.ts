@@ -1,0 +1,1 @@
+export type ErrorType = 'delete' | 'upload' | 'load';

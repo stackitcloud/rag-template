@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extractor
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: extractor
+  template:
+    metadata:
+      labels:
+        app: extractor
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "configmap.logging.name" . }}    
+      imagePullSecrets:
+        - name: {{ .Values.global.imagePullSecret.name }}    
+      containers:
+      - name: extractor
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config      
+        image: {{ template "extractorfullimagename" . }}
+        imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
+        {{- if not (empty .Values.extractor.image.command) }}
+        command: 
+        {{- range $cmd :=  .Values.extractor.image.command }}
+        - {{ $cmd -}}
+        {{ end }}
+        {{- end }}
+        {{- if not .Values.global.debug.backend.enabled }}
+        {{- if not (empty .Values.extractor.image.args) }}
+        args:
+        {{- range $arg :=  .Values.extractor.image.args }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- else }}
+        {{- if not (empty .Values.extractor.image.debugArgs) }}
+        args:
+        {{- range $arg :=  .Values.extractor.image.debugArgs }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}       
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        {{- if .Values.global.debug.backend.enabled }}
+        - containerPort: 31415
+        {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.s3.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.pdfextractor.name" . }}
+          - secretRef:
+              name: {{ template "secret.s3.name" . }}          
+        env:
+          - name: PYTHONPATH
+            value: {{ .Values.pythonPathEnv.PYTHONPATH }}          

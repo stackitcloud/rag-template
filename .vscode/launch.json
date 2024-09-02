@@ -2,22 +2,72 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger",
+            "name": "rag_backend",
             "type": "python",
             "request": "attach",
             "host": "localhost",
             "port": 31415,
             "justMyCode": false,
             "env": {
-                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600"
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "/app"
+                    "localRoot": "${workspaceFolder}/rag-backend",
+                    "remoteRoot": "/app/rag-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
+                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
+                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                }
+            ]
+        },
+        {
+            "name": "document_extractor",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31416,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/document-extractor",
+                    "remoteRoot": "/app/document-extractor"
+                }
+            ]
+        },
+        {
+            "name": "rag_admin_backend",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31417,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/admin-backend",
+                    "remoteRoot": "/app/admin-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
+                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
                 }
             ]
         }
+
 
     ]
 }

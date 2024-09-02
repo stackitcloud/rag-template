@@ -1,4 +1,8 @@
-
+*.tgz
+*/Chart.lock
+helm-chart/charts/admin-backend-0.0.1.tgz
+helm-chart/charts/adminfrontend-0.0.1.tgz
+helm-chart/charts/rag-0.0.1.tgz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

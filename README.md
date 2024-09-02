@@ -1,4 +1,4 @@
-# Introduction 
+# Introduction
 This is a very basic example of how to use the rag-template.
 It also gives an example of how to replace modules of the core template.
 
@@ -27,12 +27,19 @@ The `.env` needs to contain at least the following values:
 
 ```
 BASIC_AUTH=Zm9vOiRhcHIxJGh1VDVpL0ZKJG10elZQUm1IM29JQlBVMlZ4YkpUQy8K
-BASIC_AUTH_CLEAR=foo:bar
+
+S3_ACCESS_KEY_ID=...
+S3_SECRET_ACCESS_KEY=...
+
+VITE_AUTH_USERNAME=...
+VITE_AUTH_PASSWORD=...
 
 LANGFUSE_PUBLIC_KEY=pk-lf...
 LANGFUSE_SECRET_KEY=sk-lf...
 
 ALEPH_ALPHA_ALEPH_ALPHA_API_KEY=...
+
+OPENAI_API_KEY=...
 
 STACKIT_AUTH_CLIENT_ID=...
 STACKIT_AUTH_CLIENT_SECRET=...
@@ -41,7 +48,6 @@ STACKIT_VLLM_API_KEY=...
 STACKIT_EMBEDDER_API_KEY=...
 
 OPENAI_API_KEY=...
-
 ```
 
 This results in a basic auth with username=`foo` and password=`bar`.
@@ -96,6 +102,8 @@ Under linux, *.localhost should be resolved :fire:, otherwise you have to adjust
 
 ```shell
 127.0.0.1 registry.localhost
+127.0.0.1 admin.rag.localhost
+127.0.0.1 rag.localhost
 ```
 
 More information about adjusting the hosts file can be found in the section 'Access via ingress'.
@@ -132,7 +140,7 @@ tilt up -- --debug=true
 The backend will wait until your debugger is connected before it will fully start.
 The debugger used is `debugpy` which is compatible with Vscode.
 To connect the debugger you can use the following `launch.json`:
-'''json
+```json
 {
     "version": "0.2.0",
     "configurations": [
@@ -144,18 +152,69 @@ To connect the debugger you can use the following `launch.json`:
             "port": 31415,
             "justMyCode": false,
             "env": {
-                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600"
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
             },
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}/rag-backend",
-                    "remoteRoot": "/app"
+                    "remoteRoot": "/app/rag-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
+                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
+                    "remoteRoot": "/app/rag-core-library/rag-core-api"
                 }
             ]
-        }        
+        },
+        {
+            "name": "document_extractor",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31416,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/document-extractor",
+                    "remoteRoot": "/app/document-extractor"
+                }
+            ]
+        },
+        {
+            "name": "rag_admin_backend",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31417,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/admin-backend",
+                    "remoteRoot": "/app/admin-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
+                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                }
+            ]
+        }
+
+
     ]
 }
-'''
+```
 
 The following will delete everything deployed with `tilt up` command
 
@@ -165,7 +224,7 @@ tilt down
 
 ### Access via ingress
 
-To access the ingress by its hostname, the hosts file need to be adjusted. On *linux/macOS*, you have to adjust `/etc/hosts` as follows. 
+To access the ingress by its hostname, the hosts file need to be adjusted. On *linux/macOS*, you have to adjust `/etc/hosts` as follows.
 
 ```shell
 echo "127.0.0.1 rag.localhost" | sudo tee -a /etc/hosts > /dev/null
@@ -173,7 +232,7 @@ echo "127.0.0.1 rag.localhost" | sudo tee -a /etc/hosts > /dev/null
 
 Afterwards the services should be accessible from [http://rag.localhost](http://rag.localhost)
 
-Note: The command above has only been tested on *Ubnutu 22.04 LTS*. 
+Note: The command above has only been tested on *Ubnutu 22.04 LTS*.
 
 On *Windows* you can adjust the hosts file as described [here](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
 

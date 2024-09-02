@@ -1,6 +1,15 @@
-# syntax = edrevo/dockerfile-plus
+FROM python:3.11.7-bookworm
 
-INCLUDE+ rag-core-library/Dockerfile.base
+ARG dev=0
+
+WORKDIR /app
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make
+
+RUN pip install poetry==1.8.3
+
+COPY rag-core-library rag-core-library
 
 WORKDIR /app/rag-backend
 COPY rag-backend/pyproject.toml pyproject.toml

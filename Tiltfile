@@ -6,12 +6,32 @@ if os.path.exists(".env"):
 config.define_bool("debug")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
+core_library_context = "./rag-core-library"
+
 
 def create_linter_command(folder_name, name):
-    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile .;docker run --rm "+name+" make lint"
+    return (
+        "docker build -t "
+        + name
+        + " --build-arg dev=1 -f "
+        + folder_name
+        + "/Dockerfile .;docker run --rm "
+        + name
+        + " make lint"
+    )
+
 
 def create_test_command(folder_name, name):
-    return "docker build -t " +name+" --build-arg dev=1 -f "+folder_name+"/Dockerfile .;docker run --rm "+name+" make test"
+    return (
+        "docker build -t "
+        + name
+        + " --build-arg dev=1 -f "
+        + folder_name
+        + "/Dockerfile .;docker run --rm "
+        + name
+        + " make test"
+    )
+
 
 ########################################################################################################################
 ########################################## build helm charts ###########################################################
@@ -52,7 +72,7 @@ create_namespace_if_notexist(namespace)
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
 registry = "ghcr.io/mmmake-gmbh/rag"
-rag_api_image_name = "rag_api"
+rag_api_image_name = "rag-api"
 
 backend_context = "./rag-backend"
 rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
@@ -70,6 +90,7 @@ local_resource(
     "RAG Backend linting",
     create_linter_command(backend_context, "back"),
     labels=["linting"],
+    auto_init=False,
     trigger_mode=TRIGGER_MODE_AUTO,
     allow_parallel=True,
 )
@@ -79,9 +100,11 @@ local_resource(
     "RAG Backend testing",
     create_test_command(backend_context, "back"),
     labels=["test"],
+    auto_init=False,
     trigger_mode=TRIGGER_MODE_AUTO,
     allow_parallel=True,
 )
+
 ########################################################################################################################
 ############################ deploy local doctopus chart (back-/frontend) and forward port #############################
 ########################################################################################################################
@@ -96,6 +119,8 @@ value_override = [
     "global.secrets.basic_auth=%s" % os.environ["BASIC_AUTH"],
     "global.secrets.langfuse.public_key=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "global.secrets.langfuse.secret_key=%s" % os.environ["LANGFUSE_SECRET_KEY"],
+    "global.secrets.stackit_vllm.api_key=%s" % os.environ["STACKIT_VLLM_API_KEY"],
+    "global.secrets.stackit_embedder.STACKIT_EMBEDDER_API_KEY=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
     # variables
     "global.debug.backend.enabled=%s" % backend_debug,
     "frontend.enabled=false",

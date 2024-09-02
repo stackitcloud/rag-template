@@ -23,7 +23,7 @@ The following is a list of the dependencies. If you miss one of the dependencies
 
 For local deployment a view env variables need to be provided by an `.env` file (here: .)
 
-The `.env` needs to contain the following values:
+The `.env` needs to contain at least the following values:
 
 ```
 BASIC_AUTH=Zm9vOiRhcHIxJGh1VDVpL0ZKJG10elZQUm1IM29JQlBVMlZ4YkpUQy8K
@@ -36,6 +36,12 @@ ALEPH_ALPHA_ALEPH_ALPHA_API_KEY=...
 
 STACKIT_AUTH_CLIENT_ID=...
 STACKIT_AUTH_CLIENT_SECRET=...
+
+STACKIT_VLLM_API_KEY=...
+STACKIT_EMBEDDER_API_KEY=...
+
+OPENAI_API_KEY=...
+
 ```
 
 This results in a basic auth with username=`foo` and password=`bar`.

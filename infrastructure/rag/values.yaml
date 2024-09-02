@@ -20,12 +20,15 @@ global:
     stackit_myapi_llm:
       auth_client_id: auth-client-id
       auth_client_secret: auth-client-secret
+    stackit_embedder:
+      STACKIT_EMBEDDER_API_KEY: ""
     vite_auth:
       VITE_AUTH_USERNAME: ""
       VITE_AUTH_PASSWORD: ""
     openai:
       api_key: "sk-123456"
     usecase:
+
   config:
     dns:
     - rag.localhost
@@ -70,7 +73,7 @@ global:
         LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
         LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
       rag_class_types:
-        RAG_CLASS_TYPE_LLM_TYPE: "myapi"
+        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
       ragas:
         RAGAS_IS_DEBUG: false
         RAGAS_MODEL: "gpt-3.5-turbo-0125"
@@ -80,7 +83,10 @@ global:
         RAGAS_BASE_URL: "https://api.openai.com/v1"
         RAGAS_EVALUATION_DATASET_NAME: "eval-data"
       embedder_class_types:
-        EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "myapi"
+        EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
+      stackit_embedder:
+        STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
+        STACKIT_EMBEDDER_BASE_URL: "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1"
       public:
         PUBLIC_HOST: "https://api.aleph-alpha.com"
       ollama:

@@ -125,3 +125,12 @@ data:
   {{- range $key, $value := .Values.global.config.envs.stackit_vllm }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.stackit-embedder.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.stackit_embedder }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

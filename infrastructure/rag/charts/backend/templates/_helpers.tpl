@@ -91,6 +91,14 @@
 {{- .Release.Name -}}-stackit-vllm-configmap
 {{- end -}}
 
+{{- define "configmap.stackit-embedder.name" -}}
+{{- .Release.Name -}}-stackit-embedder-configmap
+{{- end -}}
+
+{{- define "secret.stackit-embedder.name" -}}
+{{- .Release.Name -}}-stackit-embedder-secret
+{{- end -}}
+
 # ingress
 {{- define "ingress.fullname" -}}
 {{- .Release.Name -}}-backend-ingress

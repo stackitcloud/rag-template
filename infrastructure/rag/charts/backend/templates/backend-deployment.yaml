@@ -80,6 +80,8 @@ spec:
               name: {{ template "configmap.ragas.name" . }}
           - configMapRef:
               name: {{ template "configmap.stackit-vllm.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.stackit-embedder.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:
@@ -94,6 +96,8 @@ spec:
               name: {{ template "secret.usecase.name" . }}
           - secretRef:
               name: {{ template "secret.stackit-vllm.name" . }}
+          - secretRef:
+              name: {{ template "secret.stackit-embedder.name" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.pythonPathEnv.PYTHONPATH }}

@@ -3,7 +3,7 @@ rag-base:
     image:
       repository: ghcr.io/langfuse/langfuse
       pullPolicy: Always
-      tag: "2"
+      tag: "2.75.2"
     postgresql:
       deploy: true
       auth:

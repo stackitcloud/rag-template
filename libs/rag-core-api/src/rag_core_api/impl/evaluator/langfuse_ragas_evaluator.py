@@ -111,7 +111,7 @@ class LangfuseRagasEvaluator(Evaluator):
             )
 
             if not (response and response.citations):
-                return
+                continue
 
             item.link(langfuse_generation, experiment_name)
             eval_data = Dataset.from_dict(

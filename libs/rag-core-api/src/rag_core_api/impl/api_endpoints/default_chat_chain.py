@@ -6,6 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.documents import Document
 
 from rag_core_api.models.search_request import SearchRequest
+from rag_core_api.models.chat_history import ChatHistory
 from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
@@ -41,6 +42,7 @@ class DefaultChatChain(ChatChain):
 
         # TODO: use the chat history for something ]:->
         current_question = input.message
+        history = input.history if input.history else ChatHistory(messages=[])
 
         logger.info(
             "RECEIVED question: %s",
@@ -65,7 +67,7 @@ class DefaultChatChain(ChatChain):
         answer_generation_input = AnswerChainInputData(
             question=input.message,
             retrieved_documents=retrieved_langchain_documents,
-            history="\n".join([f"{x.role}: {x.message}" for x in input.history.messages]),
+            history="\n".join([f"{x.role}: {x.message}" for x in history.messages]),
         )
 
         answer = self._answer_generation_chain.invoke(answer_generation_input, config)

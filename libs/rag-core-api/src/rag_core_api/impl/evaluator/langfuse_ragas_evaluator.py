@@ -109,11 +109,16 @@ class LangfuseRagasEvaluator(Evaluator):
                 start_time=generation_time,
                 end_time=datetime.now(),
             )
+            item.link(langfuse_generation, experiment_name)
 
             if not (response and response.citations):
+                for metric in self.METRICS:
+                    langfuse_generation.score(
+                        name=metric.name,
+                        value=self.DEFAULT_SCORE_VALUE,
+                    )
                 continue
 
-            item.link(langfuse_generation, experiment_name)
             eval_data = Dataset.from_dict(
                 {
                     "question": [item.input],

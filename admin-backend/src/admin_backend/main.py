@@ -16,12 +16,12 @@ import yaml
 from fastapi import FastAPI
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 
-from admin_backend.apis.admin_api import router as AdminApiRouter
+from admin_backend.apis.admin_api import router
 from admin_backend.dependency_container import DependencyContainer
 
 
 with open("/config/logging.yaml", "r") as stream:
-    config = yaml.load(stream, Loader=yaml.FullLoader)
+    config = yaml.safe_load(stream)
 logging.config.dictConfig(config)
 
 app = FastAPI(
@@ -33,4 +33,4 @@ container = DependencyContainer()
 container.class_selector_config.from_dict(RAGClassTypeSettings().model_dump())
 app.container = container
 
-app.include_router(AdminApiRouter)
+app.include_router(router)

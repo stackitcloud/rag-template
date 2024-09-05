@@ -16,12 +16,12 @@ class BaseAdminApi:
 
     async def delete_document(
         self,
-        id: str,
+        identification: str,
     ) -> None: ...
 
     async def document_reference_id_get(
         self,
-        id: str,
+        identification: str,
     ) -> Response: ...
 
     async def get_all_documents(

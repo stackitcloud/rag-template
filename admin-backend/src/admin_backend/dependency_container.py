@@ -1,5 +1,5 @@
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
-from dependency_injector.providers import Configuration, List, Selector, Singleton
+from dependency_injector.providers import Configuration, List, Selector, Singleton  # noqa: WOT001
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.llms import Ollama, VLLMOpenAI
 
@@ -38,6 +38,7 @@ from admin_backend.impl.settings.s3_settings import S3Settings
 from admin_backend.impl.summarizer.langchain_summarizer import LangchainSummarizer
 from admin_backend.rag_backend_client.openapi_client.api.rag_api import RagApi
 from admin_backend.rag_backend_client.openapi_client.api_client import ApiClient as RagApiClient
+
 
 class DependencyContainer(DeclarativeContainer):
     """

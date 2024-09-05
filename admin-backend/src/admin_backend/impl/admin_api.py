@@ -1,6 +1,5 @@
 import io
 import logging
-import re
 import tempfile
 from pathlib import Path
 import json
@@ -41,26 +40,26 @@ class AdminApi(BaseAdminApi):
     @inject
     async def delete_document(
         self,
-        id: str,
+        identification: str,
         file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
         rag_api: RagApi = Depends(Provide[DependencyContainer.rag_api]),
         key_value_store: FileStatusKeyValueStore = Depends(Provide[DependencyContainer.key_value_store]),
     ) -> None:
         error_messages = ""
         # Delete the document from file service and vector database
-        logger.debug("Deleting existing document: %s", id)
+        logger.debug("Deleting existing document: %s", identification)
         try:
-            key_value_store.remove(id)
-            file_service.delete_file(id)
+            key_value_store.remove(identification)
+            file_service.delete_file(identification)
         except Exception as e:
-            error_messages += "Error while deleting %s from file storage\n %s\n" % (id, str(e))
+            error_messages += "Error while deleting %s from file storage\n %s\n" % (identification, str(e))
         try:
             rag_api.remove_source_documents(
-                DeleteRequest(metadata=[KeyValuePair(key="document", value=json.dumps(id))])
+                DeleteRequest(metadata=[KeyValuePair(key="document", value=json.dumps(identification))])
             )
-            logger.info("Deleted documents belonging to %s from rag.", id)
+            logger.info("Deleted documents belonging to %s from rag.", identification)
         except Exception as e:
-            error_messages += "Error while deleting %s from vector db\n%s" % (id, str(e))
+            error_messages += "Error while deleting %s from vector db\n%s" % (identification, str(e))
         if error_messages:
             raise HTTPException(404, error_messages)
 
@@ -75,7 +74,7 @@ class AdminApi(BaseAdminApi):
     @inject
     async def document_reference_id_get(
         self,
-        id: str,
+        identification: str,
         file_service: FileService = Depends(Provide[DependencyContainer.file_service]),
     ) -> Response:
         """
@@ -89,29 +88,27 @@ class AdminApi(BaseAdminApi):
             bytes: The document in binary form.
         """
         try:
-
-            document_name = id
-            logger.debug("START retrieving document with id: %s", document_name)
+            logger.debug("START retrieving document with id: %s", identification)
             document_buffer = io.BytesIO()
             try:
-                file_service.download_file(document_name, document_buffer)
-                logger.debug("DONE retrieving document with id: %s", document_name)
+                file_service.download_file(identification, document_buffer)
+                logger.debug("DONE retrieving document with id: %s", identification)
                 document_data = document_buffer.getvalue()
             except Exception as e:
-                logger.error("Error retrieving document with id: %s. Error: %s", document_name, e)
-                raise ValueError(f"Document with id '{document_name}' not found.")
+                logger.error("Error retrieving document with id: %s. Error: %s", identification, e)
+                raise ValueError(f"Document with id '{identification}' not found.")
             finally:
                 document_buffer.close()
         except ValueError as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-        if document_name.endswith(".pdf"):
+        if identification.endswith(".pdf"):
             media_type = "application/pdf"
         else:
             media_type = "application/octet-stream"
 
         headers = {
-            "Content-Disposition": f'inline; filename="{id}"',
+            "Content-Disposition": f'inline; filename="{identification}"',
             "Content-Type": media_type,
         }
         return Response(document_data, status_code=200, headers=headers, media_type=media_type)

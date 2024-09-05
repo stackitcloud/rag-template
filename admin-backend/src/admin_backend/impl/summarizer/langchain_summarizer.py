@@ -31,7 +31,6 @@ class LangchainSummarizer(Summarizer):
         config = ensure_config(config)
         tries_remaining = config.get("configurable", {}).get("tries_remaining", 3)
 
-
         if tries_remaining < 0:
             raise Exception("Summary creation failed.")
         try:

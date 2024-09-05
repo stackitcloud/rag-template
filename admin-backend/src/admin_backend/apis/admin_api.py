@@ -38,7 +38,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 
 
 @router.delete(
-    "/delete_document/{id}",
+    "/delete_document/{identification}",
     responses={
         200: {"description": "Deleted"},
         500: {"description": "Internal server error"},
@@ -47,15 +47,15 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def delete_document(
-    id: str = Path(..., description=""),
+    identification: str = Path(..., description=""),
 ) -> None:
     if not BaseAdminApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseAdminApi.subclasses[0]().delete_document(id)
+    return await BaseAdminApi.subclasses[0]().delete_document(identification)
 
 
 @router.get(
-    "/document_reference/{id}",
+    "/document_reference/{identification}",
     responses={
         200: {"model": UploadFile, "description": "Returns the pdf in binary form."},
         400: {"model": str, "description": "Bad request"},
@@ -66,11 +66,11 @@ async def delete_document(
     response_model_by_alias=True,
 )
 async def document_reference_id_get(
-    id: str = Path(..., description="Identifier of the pdf document."),
+    identification: str = Path(..., description="Identifier of the pdf document."),
 ) -> Response:
     if not BaseAdminApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseAdminApi.subclasses[0]().document_reference_id_get(id)
+    return await BaseAdminApi.subclasses[0]().document_reference_id_get(identification)
 
 
 @router.get(

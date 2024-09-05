@@ -23,19 +23,19 @@ class SummaryEnhancer(InformationEnhancer):
         super().__init__()
         self._summarizer = summarizer
 
+    @staticmethod
+    def _is_relevant(information: Document) -> bool:
+        match information.metadata.get(SummaryEnhancer.INFORMATION_METADATA_TYPE, ContentType.SUMMARY):  # noqa:R503
+            case ContentType.SUMMARY | ContentType.IMAGE:
+                return False
+            case _:
+                return True
+
     def invoke(self, information: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
         config = ensure_config(config)
         pieces_to_summarize = [info for info in information if self._is_relevant(info)]
         summaries = self._create_summary(pieces_to_summarize, config)
         return information + summaries
-
-    @staticmethod
-    def _is_relevant(information: Document) -> bool:
-        match information.metadata.get(SummaryEnhancer.INFORMATION_METADATA_TYPE, None):
-            case ContentType.SUMMARY | ContentType.IMAGE:
-                return False
-            case _:
-                return True
 
     @abstractmethod
     def _create_summary(self, informations: list[Document], config: Optional[RunnableConfig]) -> list[Document]: ...

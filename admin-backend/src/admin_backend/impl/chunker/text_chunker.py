@@ -1,5 +1,3 @@
-from typing import List
-
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
@@ -25,7 +23,7 @@ class TextChunker(Chunker):
         #       for that reason, we use the recursive splitter
         self._splitter = splitter
 
-    def chunk(self, documents: Document) -> List[Document]:
+    def chunk(self, documents: Document) -> list[Document]:
         """
         Chunk the given documents into smaller chunks.
 

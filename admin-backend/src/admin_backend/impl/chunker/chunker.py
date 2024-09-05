@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from langchain_core.documents import Document
 
@@ -10,7 +9,7 @@ class Chunker(ABC):
     """
 
     @abstractmethod
-    def chunk(self, documents: Document) -> List[Document]:
+    def chunk(self, documents: Document) -> list[Document]:
         """
         Abstract method to chunk the given documents into smaller parts.
 

@@ -7,14 +7,14 @@ info:
 servers:
 - url: /
 paths:
-  /document_reference/{id}:
+  /document_reference/{identification}:
     get:
       operationId: document_reference_id_get
       parameters:
       - description: Identifier of the pdf document.
         explode: false
         in: path
-        name: id
+        name: identification
         required: true
         schema:
           type: string
@@ -68,13 +68,13 @@ paths:
           description: Internal server error
       tags:
       - admin
-  /delete_document/{id}:
+  /delete_document/{identification}:
     delete:
       operationId: delete_document
       parameters:
       - explode: false
         in: path
-        name: id
+        name: identification
         required: true
         schema:
           type: string

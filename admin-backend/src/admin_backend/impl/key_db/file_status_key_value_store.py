@@ -1,5 +1,4 @@
 import json
-from typing import Tuple
 from redis import Redis
 
 from admin_backend.impl.settings.key_value_settings import KeyValueSettings
@@ -14,6 +13,23 @@ class FileStatusKeyValueStore:
     def __init__(self, settings: KeyValueSettings):
         self._redis = Redis(host=settings.host, port=settings.port, decode_responses=True)
 
+    @staticmethod
+    def _to_str(file_name: str, file_status: Status) -> str:
+        return json.dumps(
+            {
+                FileStatusKeyValueStore.INNER_FILENAME_KEY: file_name,
+                FileStatusKeyValueStore.INNER_STATUS_KEY: file_status,
+            }
+        )
+
+    @staticmethod
+    def _from_str(redis_content: str) -> tuple[str, Status]:
+        content_dict = json.loads(redis_content)
+        return (
+            content_dict[FileStatusKeyValueStore.INNER_FILENAME_KEY],
+            content_dict[FileStatusKeyValueStore.INNER_STATUS_KEY],
+        )
+
     def upsert(self, file_name: str, file_status: Status) -> None:
         self.remove(file_name)
         self._redis.sadd(self.STORAGE_KEY, FileStatusKeyValueStore._to_str(file_name, file_status))
@@ -26,23 +42,6 @@ class FileStatusKeyValueStore:
                 self.STORAGE_KEY, FileStatusKeyValueStore._to_str(file_name_related[0], file_name_related[1])
             )
 
-    def get_all(self) -> list[Tuple[str, Status]]:
+    def get_all(self) -> list[tuple[str, Status]]:
         all_file_informations = list(self._redis.smembers(self.STORAGE_KEY))
         return [FileStatusKeyValueStore._from_str(x) for x in all_file_informations]
-
-    @staticmethod
-    def _to_str(file_name: str, file_status: Status) -> str:
-        return json.dumps(
-            {
-                FileStatusKeyValueStore.INNER_FILENAME_KEY: file_name,
-                FileStatusKeyValueStore.INNER_STATUS_KEY: file_status,
-            }
-        )
-
-    @staticmethod
-    def _from_str(redis_content: str) -> Tuple[str, Status]:
-        content_dict = json.loads(redis_content)
-        return (
-            content_dict[FileStatusKeyValueStore.INNER_FILENAME_KEY],
-            content_dict[FileStatusKeyValueStore.INNER_STATUS_KEY],
-        )

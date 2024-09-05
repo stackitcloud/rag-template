@@ -1,4 +1,5 @@
-"Contains the settings for the class types, if multiple classes can be selected"
+"""Contains the settings for the class types, if multiple classes can be selected"""
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 

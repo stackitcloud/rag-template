@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 
 from langchain_core.documents import Document
 
-from typing import Optional, Tuple
+from typing import Optional
 from langchain_core.runnables import Runnable, RunnableConfig
 
 
-RerankerInput = Tuple[str, list[Document]]
+RerankerInput = tuple[str, list[Document]]
 RerankerOutput = list[Document]
 
 

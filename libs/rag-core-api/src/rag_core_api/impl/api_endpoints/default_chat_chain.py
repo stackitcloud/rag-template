@@ -16,6 +16,8 @@ from rag_core_api.api_endpoints.chat_chain import ChatChain
 from rag_core_api.api_endpoints.searcher import Searcher
 from rag_core_api.impl.answer_generation_chains.answer_chain_input_data import AnswerChainInputData
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
+from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.answer_generation_chains.rephrasing_chain_input_data import RephrasingChainInputData
 from rag_core_api.impl.settings.error_messages import ErrorMessages
 
 
@@ -28,6 +30,7 @@ class DefaultChatChain(ChatChain):
         self,
         composed_retriever: Retriever,
         answer_generation_chain: AnswerGenerationChain,
+        rephrasing_chain: RephrasingChain,
         searcher: Searcher,
         mapper: SourceDocumentMapper,
         error_messages: ErrorMessages,
@@ -36,21 +39,26 @@ class DefaultChatChain(ChatChain):
         self._answer_generation_chain = answer_generation_chain
         self._searcher = searcher
         self._mapper = mapper
+        self._rephrasing_chain = rephrasing_chain
         self.error_messages = error_messages
 
-    def invoke(self, input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse:
-
-        # TODO: use the chat history for something ]:->
-        current_question = input.message
-        history = input.history if input.history else ChatHistory(messages=[])
+    def invoke(self, chain_input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse:
+        current_question = chain_input.message
+        history = chain_input.history if chain_input.history else ChatHistory(messages=[])
 
         logger.info(
             "RECEIVED question: %s",
             current_question,
         )
 
+        rephrasing_input = RephrasingChainInputData(
+            question=chain_input.message, history="\n".join([f"{x.role}: {x.message}" for x in history.messages])
+        )
+
+        rephrased_question = self._rephrasing_chain.invoke(chain_input=rephrasing_input, config=config)
+
         retrieved_documents = self._searcher.search(
-            search_request=SearchRequest(search_term=current_question)
+            search_request=SearchRequest(search_term=rephrased_question)
         ).actual_instance
 
         if not isinstance(retrieved_documents, SourceDocuments):
@@ -65,7 +73,7 @@ class DefaultChatChain(ChatChain):
             return ChatResponse(answer=self.error_messages.no_documents_message, citations=[], finish_reason="")
 
         answer_generation_input = AnswerChainInputData(
-            question=input.message,
+            question=chain_input.message,
             retrieved_documents=retrieved_langchain_documents,
             history="\n".join([f"{x.role}: {x.message}" for x in history.messages]),
         )
@@ -74,10 +82,9 @@ class DefaultChatChain(ChatChain):
 
         logger.info("GENERATED answer: %s", answer)
 
-        response = ChatResponse(
+        return ChatResponse(
             answer=answer, citations=retrieved_documents.documents, finish_reason=""
         )  # TODO: get finish_reason. Might be impossible/difficult depending on used llm
-        return response
 
     def _search_documents(self, prompt: str, composed_retriever: Retriever, metadata: dict = None) -> list[Document]:
         config = RunnableConfig(metadata=metadata)

@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -9,4 +9,4 @@ class AnswerChainInputData(BaseModel):
 
     question: str
     history: str
-    retrieved_documents: List[Any]  # TODO: this should be a langchain document
+    retrieved_documents: list[Any]  # TODO: this should be a langchain document

@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Type
+from typing import Callable, Type
 
 from langchain_community.llms.aleph_alpha import AlephAlpha
 from langchain_core.language_models.llms import LLM
@@ -8,7 +8,8 @@ from rag_core_lib.impl.settings.llm_settings import LLMSettings
 
 
 def _generic_llm_factory(
-    llm_class: Type[LLM], configurable_fields: Dict[str, ConfigurableField]
+    llm_class: Type[LLM],
+    configurable_fields: dict[str, ConfigurableField],
 ) -> Callable[[LLMSettings], LLM]:
     def factory(settings: LLMSettings) -> LLM:
         llm_instance = llm_class(**settings.dict())
@@ -17,7 +18,7 @@ def _generic_llm_factory(
     return factory
 
 
-def get_configurable_fields_from(settings: LLMSettings) -> Dict[str, ConfigurableField]:
+def get_configurable_fields_from(settings: LLMSettings) -> dict[str, ConfigurableField]:
     _fields = {}
     for field_name in settings.__fields__:
         settings_of_interest = settings.__fields__[field_name]

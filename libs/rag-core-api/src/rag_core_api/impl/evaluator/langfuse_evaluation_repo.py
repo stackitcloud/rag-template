@@ -1,17 +1,12 @@
 import logging
 import os
 import json
-from typing import Dict, List
 from datetime import datetime
 import math
 from uuid import uuid4
 
-from langchain.prompts import PromptTemplate
-from langchain_core.language_models.llms import LLM
-from langchain_core.runnables import RunnableConfig
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse import Langfuse
-from langfuse.callback import CallbackHandler
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 
 from rag_core_api.evaluator.evaluation_repo import EvaluationRepo
@@ -88,13 +83,6 @@ class LangfuseEvaluationRepo(EvaluationRepo):
                     value=self.DEFAULT_SCORE_VALUE,
                 )
 
-    def _init_generation_metadata(self, dataset_name: str):
-        generation_start_time = datetime.now()
-        self._generation_metadata = {
-            "generation_start_time": generation_start_time,
-            "experiment_name": f'eval-{dataset_name}-{generation_start_time.strftime("%Y%m%d-%H%M%S")}',
-        }
-
     def get_dataset(self, dataset_name: str):
         """
         Retrieves a dataset with the given name from LangFuse. If Dataset is empty or does not exist,
@@ -121,22 +109,28 @@ class LangfuseEvaluationRepo(EvaluationRepo):
 
         return dataset
 
+    def _init_generation_metadata(self, dataset_name: str):
+        generation_start_time = datetime.now()
+        self._generation_metadata = {
+            "generation_start_time": generation_start_time,
+            "experiment_name": f'eval-{dataset_name}-{generation_start_time.strftime("%Y%m%d-%H%M%S")}',
+        }
+
     def _create_dataset(self, dataset_name: str = None):
         self._langfuse.create_dataset(dataset_name)
 
         data = self._load_dataset_items()
         self._store_items_in_dataset(data, dataset_name)
 
-    def _load_dataset_items(self) -> List[Dict] | None:
-        data = None
+    def _load_dataset_items(self) -> list[dict] | None:
         if not os.path.exists(self._settings.dataset_filename):
             logger.info("Dataset file does not exist.")
-        else:
-            with open(self._settings.dataset_filename, "r", encoding="utf-8") as file:
-                data = json.load(file)
-        return data
+            return None
 
-    def _store_items_in_dataset(self, data: List[Dict], dataset_name: str):
+        with open(self._settings.dataset_filename, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    def _store_items_in_dataset(self, data: list[dict], dataset_name: str):
         if not data:
             logger.info("No data to store in dataset.")
             raise FileNotFoundError("No data to store in dataset.")

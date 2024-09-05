@@ -19,12 +19,12 @@ class LangfuseManager:
     def __init__(
         self,
         langfuse: Langfuse,
-        base_answer_generation_prompt: PromptTemplate,
+        managed_prompts: dict[str, str],
         llm: LLM,
     ):
         self._langfuse = langfuse
         self._llm = llm
-        self._base_answer_generation_prompt = base_answer_generation_prompt
+        self._managed_prompts = managed_prompts
 
     def get_langfuse_prompt(self, base_prompt_name: str) -> Optional[TextPromptClient]:
         """
@@ -42,7 +42,7 @@ class LangfuseManager:
             }
             self._langfuse.create_prompt(
                 name=base_prompt_name,
-                prompt=self._base_answer_generation_prompt.template,
+                prompt=self._managed_prompts[base_prompt_name],
                 config=llm_configurable_configs,
                 is_active=True,
             )
@@ -55,3 +55,32 @@ class LangfuseManager:
             return None
 
         return langfuse_prompt
+
+    def get_base_llm(self, name: str) -> LLM:
+        """
+        Get the base Langfuse Language Model (LLM).
+
+        Returns:
+            LLM: The base Langfuse Language Model.
+        """
+        langfuse_prompt = self.get_langfuse_prompt(name)
+        if not langfuse_prompt:
+            logger.error("Using fallback for llm")
+            return self._llm
+
+        return self._llm.with_config({"configurable": langfuse_prompt.config})
+
+    def get_base_prompt(self, name: str) -> PromptTemplate:
+        """
+        Retrieves the base prompt from Langfuse Prompt Management.
+
+        Returns:
+            PromptTemplate: The base prompt template.
+        """
+        langfuse_prompt = self.get_langfuse_prompt(name)
+        if not langfuse_prompt:
+            logger.error("Could not retrieve prompt template from langfuse. Using fallback value.")
+            return PromptTemplate.from_template(self._managed_prompts[name])
+
+        langchain_prompt = langfuse_prompt.get_langchain_prompt()
+        return PromptTemplate.from_template(langchain_prompt)

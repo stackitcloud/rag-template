@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from langchain_core.documents import Document
 from langchain_core.runnables import (
@@ -43,13 +43,13 @@ class RetrieverQuark(Retriever):
         if not self._vector_database.collection_available:
             raise NoOrEmptyCollectionError()
 
-    def invoke(self, input: str, config: Optional[RunnableConfig] = None) -> List[Document]:
+    def invoke(self, retriever_input: str, config: Optional[RunnableConfig] = None) -> list[Document]:
         config = ensure_config(config)
         self.verify_readiness()
         if self.TYPE_KEY not in config["metadata"]["filter_kwargs"].keys():
             config["metadata"]["filter_kwargs"] = config["metadata"]["filter_kwargs"] | self._filter_kwargs
         return self._vector_database.search(
-            query=input,
+            query=retriever_input,
             search_kwargs=self._search_kwargs,
             filter_kwargs=config["metadata"]["filter_kwargs"],
         )

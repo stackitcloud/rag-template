@@ -16,8 +16,7 @@ class FlashrankReranker(Reranker):
     def invoke(self, rerank_input: RerankerInput, config: Optional[RunnableConfig] = None) -> RerankerOutput:
         input_documents, question = rerank_input
         reranked = self._reranker.compress_documents(documents=input_documents, query=question)
-        reranked_with_metadata = [self._re_add_metadata(input_documents, x) for x in reranked]
-        return reranked_with_metadata
+        return [self._re_add_metadata(input_documents, x) for x in reranked]
 
     def _re_add_metadata(
         self,

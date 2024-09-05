@@ -1,4 +1,3 @@
-from typing import List
 from langchain_core.embeddings import Embeddings
 
 from rag_core_api.embeddings.embedder import Embedder
@@ -21,8 +20,8 @@ class LangchainCommunityEmbedder(Embedder, Embeddings):
         """
         return self
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return self._embedder.embed_documents(texts)
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         return self._embedder.embed_query(text)

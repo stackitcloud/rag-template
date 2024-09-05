@@ -1,11 +1,10 @@
 from abc import ABC
-from typing import Any, List, Optional
+from typing import Any, Optional
 
-from langchain.prompts import PromptTemplate
 from langchain_core.documents import Document
-from langchain_core.language_models.llms import LLM
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
 
+from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 
 from rag_core_api.impl.answer_generation_chains.answer_chain_input_data import (
     AnswerChainInputData,
@@ -20,21 +19,22 @@ class AnswerGenerationChain(Runnable[RunnableInput, RunnableOutput], ABC):
     Base class for LLM answer generation chain.
     """
 
-    def __init__(self, llm: LLM, prompt: PromptTemplate):
-        self._llm = llm
-        self._chain = self._create_chain(prompt)
-
-    def _create_chain(self, prompt: PromptTemplate) -> Runnable:
-        return (
-            RunnablePassthrough.assign(context=(lambda x: self._format_docs(x["retrieved_documents"])))
-            | prompt
-            | self._llm
-        )
-
-    def invoke(self, input: RunnableInput, config: Optional[RunnableConfig] = None, **kwargs: Any) -> RunnableOutput:
-        prompt_input = input.model_dump()
-        return self._chain.invoke(prompt_input, config=config)
+    def __init__(self, langfuse_manager: LangfuseManager):
+        self._langfuse_manager = langfuse_manager
 
     @staticmethod
-    def _format_docs(docs: List[Document]) -> str:
+    def _format_docs(docs: list[Document]) -> str:
         return "\n\n".join(doc.page_content for doc in docs)
+
+    def invoke(
+        self, chain_input: RunnableInput, config: Optional[RunnableConfig] = None, **kwargs: Any
+    ) -> RunnableOutput:
+        prompt_input = chain_input.model_dump()
+        return self._create_chain().invoke(prompt_input, config=config)
+
+    def _create_chain(self) -> Runnable:
+        return (
+            RunnablePassthrough.assign(context=(lambda x: self._format_docs(x["retrieved_documents"])))
+            | self._langfuse_manager.get_base_prompt(self.__class__.__name__)
+            | self._langfuse_manager.get_base_llm(self.__class__.__name__)
+        )

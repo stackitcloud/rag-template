@@ -25,6 +25,19 @@ class VectorDatabase(ABC):
         self._embedder = embedder
         self._vectorstore = vectorstore
 
+    @property
+    @abstractmethod
+    def collection_available(self) -> bool:
+        """Check if the collection is available in the vector database.
+
+        Returns:
+            bool: True if the collection is available, False otherwise.
+
+        Raises:
+            NotImplementedError: _description_
+        """
+        raise NotImplementedError()
+
     @abstractmethod
     def search(self, query: str, search_kwargs: dict, filter_kwargs: dict) -> list[Document]:
         """Search in a vectordatabase for points fitting the query and the search_kwargs.
@@ -35,19 +48,6 @@ class VectorDatabase(ABC):
 
         Return:
             List of langchain documents
-
-        Raises:
-            NotImplementedError: _description_
-        """
-        raise NotImplementedError()
-
-    @property
-    @abstractmethod
-    def collection_available(self) -> bool:
-        """Check if the collection is available in the vector database.
-
-        Returns:
-            bool: True if the collection is available, False otherwise.
 
         Raises:
             NotImplementedError: _description_

@@ -2,7 +2,6 @@ import json
 import logging
 import math
 import os
-from typing import Dict, Tuple
 from uuid import uuid4
 from json import JSONDecodeError
 from datetime import datetime
@@ -28,7 +27,7 @@ from ragas.metrics import (
 from ragas.metrics.critique import harmfulness
 from ragas.run_config import RunConfig
 from tqdm import tqdm
-from rag_core_lib.impl.langfuse_manager.llm_manager import LangfuseLLMManager
+from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 
 from rag_core_api.api_endpoints.chat_chain import ChatChain
 from rag_core_api.embeddings.embedder import Embedder
@@ -57,14 +56,10 @@ class LangfuseRagasEvaluator(Evaluator):
         answer_similarity,  # adapt for different languages not implemented
     ]
 
-    EVAL_PARAMS_FN = "/tmp/eval_params.json"
-    INDICES_OI_FN = "/tmp/indices_oi.txt"
-    IS_DEBUG = False
-
     def __init__(
         self,
         chat_chain: ChatChain,
-        langfuse_manager: LangfuseLLMManager,
+        langfuse_manager: LangfuseManager,
         settings: RagasSettings,
         embedder: Embedder,
     ) -> None:
@@ -82,70 +77,73 @@ class LangfuseRagasEvaluator(Evaluator):
         # ensure prompt is initialized on langfuse
         langfuse_manager.get_base_llm()
 
-    def _auto_answer_generation4evaluation_questions(self, dataset) -> Tuple[int, Dataset]:
+    def evaluate(self):
+        evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
+
+        self._auto_answer_generation4evaluation_questions(evaluation_dataset)
+
+    def _auto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
         session_id = str(uuid4())
         generation_time = datetime.now()
         experiment_name = f'eval-{self._settings.evaluation_dataset_name}-{generation_time.strftime("%Y%m%d-%H%M%S")}'
         config = RunnableConfig(tags=[], callbacks=[], recursion_limit=25, session_id=session_id)
 
         for item in tqdm(dataset.items):
-            chat_request = ChatRequest(message=item.input)
+            self._evaluate_question(item, experiment_name, generation_time, config)
 
-            try:
-                response = self._chat_chain.invoke(chat_request, config)
-            except Exception as e:
-                logger.info("Error while answering question %s: %s", item.input, e)
-                response = None
+    def _evaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
+        chat_request = ChatRequest(message=item.input)
 
-            if response and response.citations:
-                output = {"answer": response.answer, "documents": [x.content for x in response.citations]}
-            else:
-                output = {"answer": None, "documents": None}
+        try:
+            response = self._chat_chain.invoke(chat_request, config)
+        except Exception as e:
+            logger.info("Error while answering question %s: %s", item.input, e)
+            response = None
 
-            langfuse_generation = self._langfuse.generation(
-                name=self._settings.evaluation_dataset_name,
-                input=item.input,
-                output=output,
-                start_time=generation_time,
-                end_time=datetime.now(),
-            )
-            item.link(langfuse_generation, experiment_name)
+        if response and response.citations:
+            output = {"answer": response.answer, "documents": [x.content for x in response.citations]}
+        else:
+            output = {"answer": None, "documents": None}
 
-            if not (response and response.citations):
-                for metric in self.METRICS:
-                    langfuse_generation.score(
-                        name=metric.name,
-                        value=self.DEFAULT_SCORE_VALUE,
-                    )
-                continue
+        langfuse_generation = self._langfuse.generation(
+            name=self._settings.evaluation_dataset_name,
+            input=item.input,
+            output=output,
+            start_time=generation_time,
+            end_time=datetime.now(),
+        )
+        item.link(langfuse_generation, experiment_name)
 
-            eval_data = Dataset.from_dict(
-                {
-                    "question": [item.input],
-                    "answer": [output["answer"]],
-                    "contexts": [output["documents"]],
-                    "ground_truth": [item.expected_output],
-                }
-            )
-
-            result = ragas.evaluate(
-                eval_data,
-                metrics=self.METRICS,
-                llm=self._openai_llm_wrapped,
-                embeddings=self._embedder,
-            )
-            for metric, score in result.scores[0].items():
-                if math.isnan(score):
-                    score = self.DEFAULT_SCORE_VALUE
+        if not (response and response.citations):
+            for metric in self.METRICS:
                 langfuse_generation.score(
-                    name=metric,
-                    value=score,
+                    name=metric.name,
+                    value=self.DEFAULT_SCORE_VALUE,
                 )
+            return
 
-    def evaluate(self):
-        evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
+        eval_data = Dataset.from_dict(
+            {
+                "question": [item.input],
+                "answer": [output["answer"]],
+                "contexts": [output["documents"]],
+                "ground_truth": [item.expected_output],
+            }
+        )
 
-        self._auto_answer_generation4evaluation_questions(evaluation_dataset)
+        result = ragas.evaluate(
+            eval_data,
+            metrics=self.METRICS,
+            llm=self._openai_llm_wrapped,
+            embeddings=self._embedder,
+        )
+        for metric, score in result.scores[0].items():
+            if math.isnan(score):
+                score = self.DEFAULT_SCORE_VALUE
+            langfuse_generation.score(
+                name=metric,
+                value=score,
+            )
 
     def _get_dataset(self, dataset_name: str) -> DatasetClient:
         """
@@ -179,16 +177,15 @@ class LangfuseRagasEvaluator(Evaluator):
         data = self._load_dataset_items()
         self._store_items_in_dataset(data, dataset_name)
 
-    def _load_dataset_items(self) -> list[Dict] | None:
-        data = None
+    def _load_dataset_items(self) -> list[dict] | None:
         if not os.path.exists(self._settings.dataset_filename):
             logger.error("Dataset file does not exist. Filename: %s", self._settings.dataset_filename)
-        else:
-            with open(self._settings.dataset_filename, "r", encoding="utf-8") as file:
-                data = json.load(file)
-        return data
+            return None
 
-    def _store_items_in_dataset(self, data: list[Dict], dataset_name: str):
+        with open(self._settings.dataset_filename, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    def _store_items_in_dataset(self, data: list[dict], dataset_name: str):
         if not data:
             logger.info("No data to store in dataset.")
             raise FileNotFoundError("No data to store in dataset.")

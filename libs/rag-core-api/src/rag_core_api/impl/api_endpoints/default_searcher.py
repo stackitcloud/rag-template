@@ -31,7 +31,9 @@ class DefaultSearcher(Searcher):
         search_metadata = {meta.key: meta.value for meta in search_request.metadata} if search_request.metadata else {}
         config = RunnableConfig(metadata={"filter_kwargs": search_metadata})
         try:
-            retrieved_documents = self._composed_retriever.invoke(input=search_request.search_term, config=config)
+            retrieved_documents = self._composed_retriever.invoke(
+                retriever_input=search_request.search_term, config=config
+            )
         except NoOrEmptyCollectionError:
             logger.warning("No documents available in vector database.")
             return SearchResponse(
@@ -47,7 +49,7 @@ class DefaultSearcher(Searcher):
         source_documents = [
             self._mapper.langchain_document2source_document(document)
             for document in retrieved_documents
-            if document.metadata.get("type", None) != ContentType.SUMMARY.value
+            if document.metadata.get("type", ContentType.SUMMARY.value) != ContentType.SUMMARY.value
         ]
 
         return SearchResponse(SourceDocuments(documents=source_documents))

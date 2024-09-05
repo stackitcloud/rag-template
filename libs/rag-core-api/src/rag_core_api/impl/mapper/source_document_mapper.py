@@ -39,21 +39,6 @@ class SourceDocumentMapper:
         return SourceDocument(content=langchain_document.page_content, metadata=metadata)
 
     @staticmethod
-    def _dict2key_value_pair(metadata: dict[str, any]) -> list[KeyValuePair]:
-        mapped_values = []
-        for key, value in metadata.items():
-            mapped_item: KeyValuePair = ...
-
-            match value:
-                case dict():
-                    mapped_item = KeyValuePair(key=key, value=json.dumps(value))
-                case _:
-                    mapped_item = KeyValuePair(key=key, value=json.dumps(str(value)))
-
-            mapped_values.append(mapped_item)
-        return mapped_values
-
-    @staticmethod
     def internal_content2external_content(
         internal_content_type: str,
     ) -> ExternalContentType:
@@ -76,3 +61,18 @@ class SourceDocumentMapper:
             ExternalContentType.TEXT.value: InternalContentType.TEXT,
         }
         return lookup_table[external_content_type]
+
+    @staticmethod
+    def _dict2key_value_pair(metadata: dict[str, any]) -> list[KeyValuePair]:
+        mapped_values = []
+        for key, value in metadata.items():
+            mapped_item: KeyValuePair = ...
+
+            match value:
+                case dict():
+                    mapped_item = KeyValuePair(key=key, value=json.dumps(value))
+                case _:
+                    mapped_item = KeyValuePair(key=key, value=json.dumps(str(value)))
+
+            mapped_values.append(mapped_item)
+        return mapped_values

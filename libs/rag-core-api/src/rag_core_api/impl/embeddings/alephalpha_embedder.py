@@ -1,4 +1,3 @@
-from typing import List
 from langchain_community.embeddings import AlephAlphaAsymmetricSemanticEmbedding
 from langchain_core.embeddings import Embeddings
 
@@ -29,14 +28,6 @@ class AlephAlphaEmbedder(Embedder, Embeddings):
         self._settings = settings
         self._size = size
 
-    def _create_embedder(self):
-        return AlephAlphaAsymmetricSemanticEmbedding(
-            normalize=True,
-            compress_to_size=self._size,
-            aleph_alpha_api_key=self._secret_provider.provide_token()[self._secret_provider.provided_key],
-            host=self._settings.host,
-        )
-
     def get_embedder(self):
         """
         Returns the embedder instance.
@@ -46,8 +37,16 @@ class AlephAlphaEmbedder(Embedder, Embeddings):
         """
         return self
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return self._create_embedder().embed_documents(texts)
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         return self._create_embedder().embed_query(text)
+
+    def _create_embedder(self):
+        return AlephAlphaAsymmetricSemanticEmbedding(
+            normalize=True,
+            compress_to_size=self._size,
+            aleph_alpha_api_key=self._secret_provider.provide_token()[self._secret_provider.provided_key],
+            host=self._settings.host,
+        )

@@ -31,6 +31,25 @@ flake8 = "^7.1.0"
 flake8-black = "^0.3.6"
 flake8-pyproject = "^1.2.3"
 coverage = "^7.5.4"
+flake8-quotes = "^3.4.0"
+flake8-return = "^1.2.0"
+flake8-annotations-complexity = "^0.0.8"
+flake8-bandit = "^4.1.1"
+flake8-bugbear = "^24.8.19"
+flake8-builtins = "^2.5.0"
+flake8-comprehensions = "^3.15.0"
+flake8-eradicate = "^1.5.0"
+flake8-expression-complexity = "^0.0.11"
+# flake8-logging-format = "^2024.24.12"
+# flake8-docstrings = "^1.7.0"
+flake8-pytest-style = "^2.0.0"
+pep8-naming = "^0.14.1"
+flake8-eol = "^0.0.8"
+flake8-exceptions = "^0.0.1a0"
+flake8-simplify = "^0.21.0"
+flake8-wot = "^0.2.0"
+flake8-function-order = "^0.0.5"
+flake8-tidy-imports = "^4.10.0"
 
 [tool.flake8]
 exclude= [".eggs", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
@@ -38,7 +57,7 @@ statistics = true
 show-source = false
 max-complexity = 8
 max-annotations-complexity = 3
-docstring-convent = 'numpy'
+docstring-convention = 'numpy'
 max-line-length = 120
 ignore = ["E203", "W503", "E704"]
 inline-quotes = '"'
@@ -46,7 +65,7 @@ docstring-quotes = '"""'
 multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
-per-file-ignores = """./src/rag_core/impl/prompt_templates/answer_generation_prompt.py: E501"""
+per-file-ignores = """./src/rag_core/impl/prompt_templates/answer_generation_prompt.py: E501,./tests/*: S101"""
 
 [tool.black]
 line-length = 120

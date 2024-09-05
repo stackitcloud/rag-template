@@ -1,5 +1,3 @@
-from typing import List
-
 from openai import OpenAI
 from langchain_core.embeddings import Embeddings
 
@@ -28,7 +26,7 @@ class StackitEmbedder(Embedder, Embeddings):
         """
         return self
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         responses = self._client.embeddings.create(
             input=texts,
             model=self._settings.model,
@@ -36,5 +34,5 @@ class StackitEmbedder(Embedder, Embeddings):
 
         return [data.embedding for data in responses.data]
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         return self.embed_documents([text])[0]

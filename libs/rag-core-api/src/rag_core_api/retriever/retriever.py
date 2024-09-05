@@ -12,5 +12,5 @@ RetrieverOutput = list[Document]
 class Retriever(Runnable[RetrieverInput, RetrieverOutput], ABC):
 
     @abstractmethod
-    def invoke(self, query: str, config: Optional[RunnableConfig] = None) -> list[Document]:
+    def invoke(self, retriever_input: str, config: Optional[RunnableConfig] = None) -> list[Document]:
         pass

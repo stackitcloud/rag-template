@@ -1,5 +1,3 @@
-from typing import List
-
 from langchain_qdrant import Qdrant
 from langchain_core.documents import Document
 from qdrant_client.http import models
@@ -42,14 +40,13 @@ class QdrantDatabase(VectorDatabase):
         if self._vectorstore.collection_name in [c.name for c in self.get_collections()]:
             collection = self._vectorstore.client.get_collection(self._vectorstore.collection_name)
             return collection.points_count > 0
-        else:
-            return False
+        return False
 
     @staticmethod
     def _search_kwargs_builder(search_kwargs: dict, filter_kwargs: dict):
         return search_kwargs | {"filter": filter_kwargs}
 
-    def search(self, query: str, search_kwargs: dict, filter_kwargs: dict | None = None) -> List[Document]:
+    def search(self, query: str, search_kwargs: dict, filter_kwargs: dict | None = None) -> list[Document]:
         retriever = self._vectorstore.as_retriever(
             query=query,
             search_kwargs=(
@@ -64,20 +61,14 @@ class QdrantDatabase(VectorDatabase):
             related_results += self._get_related(res.metadata["related"])
         return results + related_results
 
-    def _get_related(self, related_ids: List[str]) -> List[Document]:
-        result = []
-        for id in related_ids:
-            result += self.get_specific_document(id)
-        return result
-
-    def get_specific_document(self, id: str) -> List[Document]:
+    def get_specific_document(self, document_id: str) -> list[Document]:
         requested = self._vectorstore.client.scroll(
             collection_name=self._vectorstore.collection_name,
             scroll_filter=Filter(
                 must=[
                     FieldCondition(
                         key="metadata.id",
-                        match=MatchValue(value=id),
+                        match=MatchValue(value=document_id),
                     )
                 ]
             ),
@@ -100,7 +91,7 @@ class QdrantDatabase(VectorDatabase):
         Save the given documents to the Qdrant database.
 
         Args:
-            documents (List[Document]): The list of documents to be saved.
+            documents (list[Document]): The list of documents to be saved.
 
         Returns:
             None
@@ -143,3 +134,9 @@ class QdrantDatabase(VectorDatabase):
         Get all collection names from the vector database
         """
         return self._vectorstore.client.get_collections().collections
+
+    def _get_related(self, related_ids: list[str]) -> list[Document]:
+        result = []
+        for document_id in related_ids:
+            result += self.get_specific_document(document_id)
+        return result

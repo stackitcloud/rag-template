@@ -1,6 +1,6 @@
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
-from dependency_injector.providers import Configuration, List, Selector, Singleton
+from dependency_injector.providers import Configuration, Selector, Singleton, List  # noqa: WOT001
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama, VLLMOpenAI
@@ -9,8 +9,6 @@ from langfuse import Langfuse
 
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.langfuse_manager.llm_manager import LangfuseLLMManager
-from rag_core_lib.impl.langfuse_manager.prompt_manager import LangfusePromptManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
@@ -38,6 +36,7 @@ from rag_core_api.impl.embeddings.langchain_community_embedder import LangchainC
 from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
 from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
 from rag_core_api.impl.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
+from rag_core_api.impl.prompt_templates.answer_rephrasing_prompt import ANSWER_REPHRASING_PROMPT
 from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
 from rag_core_api.impl.retriever.composite_retriever import CompositeRetriever
 from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
@@ -50,6 +49,7 @@ from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
 from rag_core_api.impl.embeddings.stackit_embedder import StackitEmbedder
 from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
+from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -101,7 +101,7 @@ class DependencyContainer(DeclarativeContainer):
         ollama=Singleton(
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_settings.model_dump())
         ),
-        stackit=Singleton(StackitEmbedder, stackit_embedder_settings)
+        stackit=Singleton(StackitEmbedder, stackit_embedder_settings),
     )
 
     vectordb_client = Singleton(
@@ -186,17 +186,40 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     prompt = ANSWER_GENERATION_PROMPT
+    rephrasing_prompt = ANSWER_REPHRASING_PROMPT
+
+    langfuse = Singleton(
+        Langfuse,
+        public_key=langfuse_settings.public_key,
+        secret_key=langfuse_settings.secret_key,
+        host=langfuse_settings.host,
+    )
+
+    langfuse_manager = Singleton(
+        LangfuseManager,
+        langfuse=langfuse,
+        managed_prompts={
+            AnswerGenerationChain.__name__: prompt,
+            RephrasingChain.__name__: rephrasing_prompt,
+        },
+        llm=large_language_model,
+    )
 
     answer_generation_chain = Singleton(
         AnswerGenerationChain,
-        llm=large_language_model,
-        prompt=prompt,
+        langfuse_manager=langfuse_manager,
+    )
+
+    rephrasing_chain = Singleton(
+        RephrasingChain,
+        langfuse_manager=langfuse_manager,
     )
 
     chat_chain = Singleton(
         DefaultChatChain,
         composed_retriever=composed_retriever,
         searcher=searcher,
+        rephrasing_chain=rephrasing_chain,
         mapper=source_document_mapper,
         answer_generation_chain=answer_generation_chain,
         error_messages=error_messages,
@@ -209,36 +232,10 @@ class DependencyContainer(DeclarativeContainer):
         settings=langfuse_settings,
     )
 
-    langfuse = Singleton(
-        Langfuse,
-        public_key=langfuse_settings.public_key,
-        secret_key=langfuse_settings.secret_key,
-        host=langfuse_settings.host,
-    )
-
-    langfuse_manager = Singleton(
-        LangfuseManager,
-        langfuse,
-        ANSWER_GENERATION_PROMPT,
-        large_language_model,
-    )
-
-    langfuse_prompt_manager = Singleton(
-        LangfusePromptManager,
-        ANSWER_GENERATION_PROMPT,
-        langfuse_manager,
-    )
-
-    langfuse_llm_manager = Singleton(
-        LangfuseLLMManager,
-        langfuse_manager,
-        large_language_model,
-    )
-
     evaluator = Singleton(
         LangfuseRagasEvaluator,
         chat_chain=traced_chat_chain,
         settings=ragas_settings,
-        langfuse_manager=langfuse_llm_manager,
+        langfuse_manager=langfuse_manager,
         embedder=embedder,
     )

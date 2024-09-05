@@ -13,4 +13,6 @@ class ChatChain(Runnable[ChatRequest, ChatResponse], ABC):
     """
 
     @abstractmethod
-    def invoke(self, input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse: ...
+    def invoke(
+        self, chain_input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any
+    ) -> ChatResponse: ...

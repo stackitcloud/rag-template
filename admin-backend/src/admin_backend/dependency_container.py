@@ -2,10 +2,12 @@ from dependency_injector.containers import DeclarativeContainer, WiringConfigura
 from dependency_injector.providers import Configuration, List, Selector, Singleton  # noqa: WOT001
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.llms import Ollama, VLLMOpenAI
+from langfuse import Langfuse
 
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
+from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
 from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
 from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
@@ -38,6 +40,8 @@ from admin_backend.impl.settings.s3_settings import S3Settings
 from admin_backend.impl.summarizer.langchain_summarizer import LangchainSummarizer
 from admin_backend.rag_backend_client.openapi_client.api.rag_api import RagApi
 from admin_backend.rag_backend_client.openapi_client.api_client import ApiClient as RagApiClient
+from admin_backend.impl.settings.summarizer_settings import SummarizerSettings
+from admin_backend.impl.prompt_templates.summarize_prompt import SUMMARIZE_PROMPT
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -62,6 +66,7 @@ class DependencyContainer(DeclarativeContainer):
     rag_class_type_settings = RAGClassTypeSettings()
     rag_api_settings = RAGAPISettings()
     key_value_store_settings = KeyValueSettings()
+    summarizer_settings = SummarizerSettings()
 
     if rag_class_type_settings.llm_type == LLMType.ALEPHALPHA.value:
         aleph_alpha_settings.host = public_aleph_alpha_settings.host
@@ -107,8 +112,28 @@ class DependencyContainer(DeclarativeContainer):
         ollama=large_language_model,
         stackit=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
     )
+    summary_text_splitter = Singleton(RecursiveCharacterTextSplitter)(
+        chunk_size=summarizer_settings.maximum_input_size, chunk_overlap=chunker_settings.overlap
+    )
 
-    summarizer = Singleton(LangchainSummarizer, large_language_model)
+    langfuse = Singleton(
+        Langfuse,
+        public_key=langfuse_settings.public_key,
+        secret_key=langfuse_settings.secret_key,
+        host=langfuse_settings.host,
+    )
+
+    langfuse_manager = Singleton(
+        LangfuseManager,
+        langfuse=langfuse,
+        managed_prompts={
+            LangchainSummarizer.__name__: SUMMARIZE_PROMPT,
+        },
+        llm=large_language_model,
+    )
+
+    summarizer = Singleton(LangchainSummarizer, langfuse_manager=langfuse_manager, chunker=summary_text_splitter)
+
     summary_enhancer = List(
         Singleton(PageSummaryEnhancer, summarizer),
         Singleton(SingleSummaryEnhancer, summarizer),

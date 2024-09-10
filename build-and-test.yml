@@ -1,0 +1,118 @@
+pr:
+  - develop
+  - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+- name: DOCKER_IMAGE_NAME
+  value: temp:$(Build.SourceBranchName)-$(Build.BuildId)
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildAndTestAdminBackend
+    steps:
+    - task: InstallSSHKey@0
+      displayName: Install SSH Key
+      inputs:
+        sshKeySecureFile: "id_rsa"
+        knownHostsEntry: "ssh.dev.azure.com"
+    - script: |
+        old_url="https://schwarzit-wiking@dev.azure.com/schwarzit-wiking/schwarzit.rag-template-sit-stackit/_git/full-use-case-example"
+        new_url="git@ssh.dev.azure.com:v3/schwarzit-wiking/schwarzit.rag-template-sit-stackit/full-use-case-example"
+
+        sed -i "s|$old_url|$new_url|g" $(Build.SourcesDirectory)/.git/config
+        ls $(Build.SourcesDirectory)/rag-infrastructure
+        git submodule init
+        git submodule update
+        git pull
+
+        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 -f admin-backend/Dockerfile .
+      displayName: "Building docker image."
+    # Note that the pyproject.toml is already copied into the docker image. Also note that copy
+    # pasting the whole /app folder will overwrite the existing .venv folder in the docker image
+    - script: |
+        docker run --rm $DOCKER_IMAGE_NAME make lint
+        LINTING_EXIT_CODE=$(echo $?)
+        echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
+        echo "##vso[task.setvariable variable=LINTING_EXIT_CODE]$LINTING_EXIT_CODE"
+      displayName: "Generating lint report."
+    - script: |
+        docker run --rm $DOCKER_IMAGE_NAME make test
+      displayName: "Running unit tests"
+    - script: |
+        echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
+        if [ $LINTING_EXIT_CODE -eq 0 ]; then
+          echo "Linting successful ==> continuing pipeline ..."
+        else
+            echo "Linting failed ==> aborting pipeline ..."
+          exit $LINTING_EXIT_CODE
+        fi
+      displayName: "Linting successful check"
+  - job: BuildAndTestDocumentExtractor
+    steps:
+    - script: |
+        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 -f document-extractor/Dockerfile .
+      displayName: "Building docker image."
+    # Note that the pyproject.toml is already copied into the docker image. Also note that copy
+    # pasting the whole /app folder will overwrite the existing .venv folder in the docker image
+    - script: |
+        docker run --rm  $DOCKER_IMAGE_NAME make lint
+        LINTING_EXIT_CODE=$(echo $?)
+        echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
+        echo "##vso[task.setvariable variable=LINTING_EXIT_CODE]$LINTING_EXIT_CODE"
+      displayName: "Generating lint report."
+    - script: |
+        docker run --rm $DOCKER_IMAGE_NAME make test
+      displayName: "Running unit tests"
+    - script: |
+        echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
+        if [ $LINTING_EXIT_CODE -eq 0 ]; then
+          echo "Linting successful ==> continuing pipeline ..."
+        else
+            echo "Linting failed ==> aborting pipeline ..."
+          exit $LINTING_EXIT_CODE
+        fi
+      displayName: "Linting successful check"
+  - job: BuildAndTestRAGBackend
+    steps:
+    # TODO: fix pulling of submodules
+    - task: InstallSSHKey@0
+      displayName: Install SSH Key
+      inputs:
+        sshKeySecureFile: "id_rsa"
+        knownHostsEntry: "ssh.dev.azure.com"
+    - script: |
+        old_url="https://schwarzit-wiking@dev.azure.com/schwarzit-wiking/schwarzit.rag-template-sit-stackit/_git/full-use-case-example"
+        new_url="git@ssh.dev.azure.com:v3/schwarzit-wiking/schwarzit.rag-template-sit-stackit/full-use-case-example"
+
+        sed -i "s|$old_url|$new_url|g" $(Build.SourcesDirectory)/.git/config
+        ls $(Build.SourcesDirectory)/rag-infrastructure
+        git submodule init
+        git submodule update
+        git pull
+
+        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 -f rag-backend/Dockerfile .
+      displayName: "Building docker image."
+    # Note that the pyproject.toml is already copied into the docker image. Also note that copy
+    # pasting the whole /app folder will overwrite the existing .venv folder in the docker image
+    - script: |
+        docker run --rm $DOCKER_IMAGE_NAME make lint
+        LINTING_EXIT_CODE=$(echo $?)
+        echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
+        echo "##vso[task.setvariable variable=LINTING_EXIT_CODE]$LINTING_EXIT_CODE"
+      displayName: "Generating lint report."
+    - script: |
+        docker run --rm $DOCKER_IMAGE_NAME make test
+      displayName: "Running unit tests"
+    - script: |
+        echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
+        if [ $LINTING_EXIT_CODE -eq 0 ]; then
+          echo "Linting successful ==> continuing pipeline ..."
+        else
+            echo "Linting failed ==> aborting pipeline ..."
+          exit $LINTING_EXIT_CODE
+        fi
+      displayName: "Linting successful check"

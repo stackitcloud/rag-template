@@ -1,0 +1,12 @@
+{
+    "python.analysis.extraPaths": [
+        "./admin-backend/src",
+        "./admin-backend/src/admin_backend/document_extractor_client",
+        "./admin-backend/src/admin_backend/rag_backend_client",
+        "./document-extractor/src",
+        "./rag-backend/src/doctopus_rag",
+        "./rag-backend/src",
+        "./rag-core-library/rag-core-api/src",
+        "./rag-core-library/rag-core-lib/src",
+    ],
+}

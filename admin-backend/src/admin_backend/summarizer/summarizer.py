@@ -3,12 +3,12 @@ from typing import Optional
 
 from langchain_core.runnables import Runnable, RunnableConfig
 
-RetrieverInput = str
-RetrieverOutput = str
+SummarizerInput = str
+SummarizerOutput = str
 
 
-class Summarizer(Runnable[RetrieverInput, RetrieverOutput], ABC):
+class Summarizer(Runnable[SummarizerInput, SummarizerOutput], ABC):
 
     @abstractmethod
-    def invoke(self, query: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
+    def invoke(self, query: SummarizerInput, config: Optional[RunnableConfig] = None) -> SummarizerOutput:
         pass

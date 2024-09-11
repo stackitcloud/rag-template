@@ -50,7 +50,8 @@ export const useChatStore = defineStore('chat', () => {
         return Promise.all(documents.map(async o => {
             const chunk = await marked(o.content);
             return {
-                chunk // TODO keyto name
+              chunk, // TODO keyto name
+              ...o
             } as DocumentResponseModel;
         }));
     }

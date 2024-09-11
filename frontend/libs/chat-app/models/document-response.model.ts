@@ -1,5 +1,9 @@
+export interface DocumentResponseMetadataModel {
+  key: string;
+  value: object | [] | string;  // TODO: handle nested json-text values correctly
+}
+
 export interface DocumentResponseModel {
-    name: string;
-    chunk: string;
-    url: string;
+  metadata: DocumentResponseMetadataModel[],
+  content: string
 }

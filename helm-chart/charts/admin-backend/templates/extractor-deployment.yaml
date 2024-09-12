@@ -25,23 +25,23 @@ spec:
           mountPath: /config      
         image: {{ template "extractorfullimagename" . }}
         imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
-        {{- if not (empty .Values.extractor.image.command) }}
+        {{- if not (empty .Values.extractor.command) }}
         command: 
-        {{- range $cmd :=  .Values.extractor.image.command }}
+        {{- range $cmd :=  .Values.extractor.command }}
         - {{ $cmd -}}
         {{ end }}
         {{- end }}
         {{- if not .Values.global.debug.backend.enabled }}
-        {{- if not (empty .Values.extractor.image.args) }}
+        {{- if not (empty .Values.extractor.args) }}
         args:
-        {{- range $arg :=  .Values.extractor.image.args }}
+        {{- range $arg :=  .Values.extractor.args }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}
         {{- else }}
-        {{- if not (empty .Values.extractor.image.debugArgs) }}
+        {{- if not (empty .Values.extractor.debugArgs) }}
         args:
-        {{- range $arg :=  .Values.extractor.image.debugArgs }}
+        {{- range $arg :=  .Values.extractor.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}       

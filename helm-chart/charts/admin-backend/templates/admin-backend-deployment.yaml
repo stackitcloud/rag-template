@@ -25,23 +25,23 @@ spec:
           mountPath: /config
         image: {{ template "adminbackendfullimagename" . }}
         imagePullPolicy: {{ .Values.admin_backend.image.pullPolicy }}
-        {{- if not (empty .Values.admin_backend.image.command) }}
+        {{- if not (empty .Values.admin_backend.command) }}
         command:
-        {{- range $cmd :=  .Values.admin_backend.image.command }}
+        {{- range $cmd :=  .Values.admin_backend.command }}
         - {{ $cmd -}}
         {{ end }}
         {{- end }}
         {{- if not .Values.global.debug.backend.enabled }}
-        {{- if not (empty .Values.admin_backend.image.args) }}
+        {{- if not (empty .Values.admin_backend.args) }}
         args:
-        {{- range $arg :=  .Values.admin_backend.image.args }}
+        {{- range $arg :=  .Values.admin_backend.args }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}
         {{- else }}
-        {{- if not (empty .Values.admin_backend.image.debugArgs) }}
+        {{- if not (empty .Values.admin_backend.debugArgs) }}
         args:
-        {{- range $arg :=  .Values.admin_backend.image.debugArgs }}
+        {{- range $arg :=  .Values.admin_backend.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}

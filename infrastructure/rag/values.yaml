@@ -27,6 +27,8 @@ global:
       VITE_AUTH_PASSWORD: ""
     openai:
       api_key: "sk-123456"
+    stackit_vllm:
+      api_key: "sk-123"
     usecase:
 
   config:

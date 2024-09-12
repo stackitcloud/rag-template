@@ -1,43 +1,46 @@
 replicaCount: 1
 
 image:
-  # TODO: Change to jfrog/azure or something else
   repository: ghcr.io/mmmake-gmbh/rag
   name: rag-api
   pullPolicy: Always
   tag: "dev-ba20c7b"
 
-  command:
-  - "poetry"
-  - "run"
-  args:
-  - "python"
-  - "-m"
-  - "uvicorn"
-  - "main:perfect_rag_app"
-  - "--host"
-  - "0.0.0.0"
-  - "--port"
-  - "8080"
-  - "--root-path"
-  - "/api"
-  debugArgs:
-  - "python"
-  - "-m"
-  - "debugpy"
-  - "--wait-for-client"
-  - "--listen"
-  - "0.0.0.0:31415"
-  - "-m"
-  - "uvicorn"
-  - "main:perfect_rag_app"
-  - "--host"
-  - "0.0.0.0"
-  - "--port"
-  - "8080"
-  - "--reload"
-  - "--root-path"
-  - "/api"
+command:
+- "poetry"
+- "run"
+args:
+- "python"
+- "-m"
+- "uvicorn"
+- "main:perfect_rag_app"
+- "--host"
+- "0.0.0.0"
+- "--port"
+- "8080"
+- "--root-path"
+- "/api"
+
+workers: 3
+ws_max_queue: 6
+
+debugArgs:
+- "python"
+- "-m"
+- "debugpy"
+- "--wait-for-client"
+- "--listen"
+- "0.0.0.0:31415"
+- "-m"
+- "uvicorn"
+- "main:perfect_rag_app"
+- "--host"
+- "0.0.0.0"
+- "--port"
+- "8080"
+- "--reload"
+- "--root-path"
+- "/api"
 
 service:
   type: ClusterIP

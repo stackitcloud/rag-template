@@ -25,23 +25,27 @@ spec:
           mountPath: /config
         image: {{ include "fullimagename" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if not (empty .Values.image.command) }}
+        {{- if not (empty .Values.command) }}
         command:
-        {{- range $cmd :=  .Values.image.command }}
+        {{- range $cmd :=  .Values.command }}
         - {{ $cmd -}}
         {{ end }}
         {{- end }}
         {{- if not .Values.global.debug.backend.enabled }}
-        {{- if not (empty .Values.image.args) }}
+        {{- if not (empty .Values.args) }}
         args:
-        {{- range $arg :=  .Values.image.args }}
+        {{- range $arg :=  .Values.args }}
         - {{ $arg | quote -}}
         {{ end }}
+        - "--workers"
+        - {{ .Values.workers }}
+        - "--ws-max-queue"
+        - {{ .Values.ws_max_queue }}
         {{- end }}
         {{- else }}
-        {{- if not (empty .Values.image.debugArgs) }}
+        {{- if not (empty .Values.debugArgs) }}
         args:
-        {{- range $arg :=  .Values.image.debugArgs }}
+        {{- range $arg :=  .Values.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}

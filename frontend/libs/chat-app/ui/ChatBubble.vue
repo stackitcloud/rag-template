@@ -20,7 +20,7 @@
 
 <template>
     <div :class="[
-        'chat',
+        'chat overflow-hidden',
         {
             'chat-start slide-in-left': props.align === 'left',
             'chat-end slide-in-right': props.align === 'right',
@@ -41,7 +41,7 @@
 
             <div v-if="props.text !== undefined"
                  class="flex flex-col">
-                <p class="flex-1"
+                <p class="flex-1 text-pretty break-words chat-text"
                    v-html="props.text"></p>
 
                 <!-- Document jump anchors-->
@@ -68,6 +68,13 @@
 
 <style scoped
        lang="css">
+    .chat-text > * {
+        word-break: break-word;
+        overflow-wrap: break-word;
+        white-space: break-spaces;
+        flex-wrap: wrap;
+    }
+
     .jumping-dots span {
         position: relative;
         bottom: 0px;

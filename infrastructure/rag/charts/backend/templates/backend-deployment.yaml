@@ -38,9 +38,9 @@ spec:
         - {{ $arg | quote -}}
         {{ end }}
         - "--workers"
-        - {{ .Values.workers }}
+        - {{ .Values.workers  | quote}}
         - "--ws-max-queue"
-        - {{ .Values.ws_max_queue }}
+        - {{ .Values.ws_max_queue | quote }}
         {{- end }}
         {{- else }}
         {{- if not (empty .Values.debugArgs) }}

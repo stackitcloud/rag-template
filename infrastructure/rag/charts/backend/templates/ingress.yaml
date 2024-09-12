@@ -4,7 +4,6 @@ kind: Ingress
 metadata:
   name: {{ include "ingress.fullname" . }}
   annotations:
-    nginx.ingress.kubernetes.io/cors-allow-origin: "{{ .Values.ingress.host.name }}, admin.{{ .Values.ingress.host.name }}"
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
@@ -16,8 +15,10 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     {{- if .Values.global.config.tls.enabled }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.ingress.host.name }}, https://admin.{{ .Values.ingress.host.name }}"
     {{- else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://{{ .Values.ingress.host.name }}, http://admin.{{ .Values.ingress.host.name }}"
     {{- end }}
 spec:
   {{- if .Values.global.config.tls.enabled }}

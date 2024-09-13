@@ -4,6 +4,7 @@
     "justAsk": "Just ask me...",
     "sources": "Sources",
     "documents": "Manage documents",
+    "noSourcesHint": "Source document references will show up here.",
     "error": {
       "requestError": "An error occurred during the request. Please try again."
     }

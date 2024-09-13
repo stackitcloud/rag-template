@@ -4,6 +4,7 @@
     "justAsk": "Frag mich einfach...",
     "sources": "Quellen",
     "documents": "Dokumente verwalten",
+    "noSourcesHint": "Quelldokumente werden hier referenziert.",
     "error": {
       "requestError": "Fehler bei der Anfrage. Bitte versuche es erneut."
     }

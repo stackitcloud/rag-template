@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}      
+        app: {{ .Chart.Name }}
     spec:
       volumes:
       - name: frontend
@@ -26,12 +26,12 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
-          name: frontend        
+          name: frontend
         command: ["cp","-r", "/app/frontend/.", "/usr/share/nginx/html"]
       - name: vite-workaround
-        command: 
+        command:
           - /bin/sh
-        args: 
+        args:
           - /app/env.sh
         image: {{ template "fullimagename" . }}
         envFrom:
@@ -42,11 +42,11 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
-          name: frontend        
+          name: frontend
       containers:
       - name: {{ .Chart.Name }}
         image: {{ template "fullimagename" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}        
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend
@@ -55,7 +55,10 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.name" . }}
+          {{- if .Values.global.config.basic_auth.enabled }}
           - secretRef:
               name: "vite-auth"
+          {{- end }}
+
       imagePullSecrets:
       - name: {{ .Values.global.imagePullSecret.name }}

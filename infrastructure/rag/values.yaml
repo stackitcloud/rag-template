@@ -34,6 +34,8 @@ global:
   config:
     dns:
     - rag.localhost
+    basic_auth:
+      enabled: true
     tls:
       enabled: true
       host: rag.localhost

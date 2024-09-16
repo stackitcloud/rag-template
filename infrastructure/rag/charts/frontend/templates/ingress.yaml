@@ -4,8 +4,10 @@ kind: Ingress
 metadata:
   name: {{ include "ingress.frontend.fullname" . }}
   annotations:
+    {{- if .Values.global.config.basic_auth.enabled }}
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    {{- end }}
     {{- if .Values.global.config.tls.enabled }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     {{- else }}

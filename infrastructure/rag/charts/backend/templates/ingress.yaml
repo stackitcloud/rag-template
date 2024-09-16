@@ -4,8 +4,10 @@ kind: Ingress
 metadata:
   name: {{ include "ingress.fullname" . }}
   annotations:
+    {{- if .Values.global.config.basic_auth.enabled }}
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    {{- end }}
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "6000"

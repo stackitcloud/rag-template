@@ -26,6 +26,8 @@ global:
     dns:
       - admin.rag.ai.mmmake.com
       - rag.ai.mmmake.com
+    basic_auth:
+      enabled: true
     tls:
       enabled: true
       host: rag.ai.mmmake.com
@@ -101,6 +103,7 @@ global:
         STACKIT_TOKEN_LIFETIME_MARGIN: 30
         STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
       frontend:
+        VITE_CHAT_AUTH_ENABLED: true
         VITE_API_URL: "http://rag.localhost/api"
         VITE_CHAT_URL: "http://rag.localhost"
         VITE_ADMIN_URL: "http://admin.rag.localhost"

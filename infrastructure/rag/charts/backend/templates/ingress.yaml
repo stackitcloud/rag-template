@@ -14,7 +14,7 @@ metadata:
     nginx.ingress.kubernetes.io/cors-max-age: "100"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, DELETE, OPTIONS"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /chat/$2
     {{- if .Values.global.config.tls.enabled }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.ingress.host.name }}, https://admin.{{ .Values.ingress.host.name }}"

@@ -53,6 +53,6 @@ ingress:
   enabled: true
   host:
     name: rag.localhost
-    path: /api(/|$)(.*)
+    path: /api/chat(/|$)(.*)
     pathType: ImplementationSpecific
     port: 8080

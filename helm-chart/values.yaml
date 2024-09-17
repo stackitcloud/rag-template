@@ -21,6 +21,11 @@ global:
     stackit_myapi_llm:
       auth_client_id: auth-client-id
       auth_client_secret: auth-client-secret
+    stackit_embedder:
+      STACKIT_EMBEDDER_API_KEY: ""
+    stackit_vllm:
+      api_key: "sk-123"
+    usecase:
 
   config:
     dns:
@@ -69,7 +74,6 @@ global:
       errormessages:
         ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: Es tut mir leid, meine Antworten sind begrenzt. Sie müssen die richtigen Fragen stellen.
         ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: Es wurden keine Dokumente zum durchsuchen bereitgestellt.
-        ERROR_MESSAGES_NO_PRODUCT_NAME_MESSAGE: "Es wurde kein Produktname im chat-verlauf gefunden. Ich habe derzeit Informationen über folgende Produkte:"
       langfuse:
         LANGFUSE_DATASET_NAME: "rag_test_ds"
         LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
@@ -94,9 +98,14 @@ global:
         OLLAMA_TOP_K: 0
         OLLAMA_TOP_P: 0
         OLLAMA_TEMPERATURE: 0
+      stackit_embedder:
+        STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
+        STACKIT_EMBEDDER_BASE_URL: "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1"
       usecase:
         USECASE_KEYVALUE_PORT: 6379
         USECASE_KEYVALUE_HOST: "rag-keydb"
+      reranker:
+        RERANKER_TOTAL_K: 5
       ragapi:
         RAG_API_HOST: "http://backend:8080"
       stackit_myapi_llm:

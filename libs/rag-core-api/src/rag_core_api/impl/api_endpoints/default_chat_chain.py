@@ -42,7 +42,9 @@ class DefaultChatChain(ChatChain):
         self._rephrasing_chain = rephrasing_chain
         self.error_messages = error_messages
 
-    def invoke(self, chain_input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any) -> ChatResponse:
+    async def ainvoke(
+        self, chain_input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any
+    ) -> ChatResponse:
         current_question = chain_input.message
         history = chain_input.history if chain_input.history else ChatHistory(messages=[])
 
@@ -55,7 +57,7 @@ class DefaultChatChain(ChatChain):
             question=chain_input.message, history="\n".join([f"{x.role}: {x.message}" for x in history.messages])
         )
 
-        rephrased_question = self._rephrasing_chain.invoke(chain_input=rephrasing_input, config=config)
+        rephrased_question = await self._rephrasing_chain.ainvoke(chain_input=rephrasing_input, config=config)
 
         retrieved_documents = self._searcher.search(
             search_request=SearchRequest(search_term=rephrased_question)
@@ -78,7 +80,7 @@ class DefaultChatChain(ChatChain):
             history="\n".join([f"{x.role}: {x.message}" for x in history.messages]),
         )
 
-        answer = self._answer_generation_chain.invoke(answer_generation_input, config)
+        answer = await self._answer_generation_chain.ainvoke(answer_generation_input, config)
 
         logger.info("GENERATED answer: %s", answer)
 

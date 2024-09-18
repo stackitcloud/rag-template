@@ -29,3 +29,14 @@ class SecuredLLM(LLM):
         """Run the LLM on the given prompt and input."""
         secrets = self.secret_provider.provide_token()
         return self.llm.with_config({"configurable": secrets}).invoke(prompt, stop, **kwargs)
+
+    async def _acall(
+        self,
+        prompt: str,
+        stop: Optional[list[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+        """Run the LLM on the given prompt and input."""
+        secrets = self.secret_provider.provide_token()
+        return await self.llm.with_config({"configurable": secrets}).ainvoke(prompt, stop, **kwargs)

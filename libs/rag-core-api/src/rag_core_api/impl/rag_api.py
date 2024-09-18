@@ -37,7 +37,7 @@ class RagApi(BaseRagApi):
             recursion_limit=25,
             metadata={"session_id": session_id},
         )
-        return chat_chain.invoke(chat_request, config)
+        return await chat_chain.ainvoke(chat_request, config)
 
     @inject
     async def evaluate(

@@ -1,8 +1,11 @@
 # coding: utf-8
 
-from typing import Dict, List  # noqa: F401
+from typing import List, Any, Awaitable  # noqa: F401
 import importlib
 import pkgutil
+
+from fastapi import Request
+from asyncio import CancelledError, wait, create_task, FIRST_COMPLETED, sleep
 
 from rag_core_api.apis.rag_api_base import BaseRagApi
 import rag_core_api.impl
@@ -38,6 +41,16 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 
 
+async def disconnected(request: Request) -> None:
+    while True:
+        try:
+            if await request.is_disconnected():
+                break
+            await sleep(1.0)
+        except CancelledError:
+            break
+
+
 @router.post(
     "/chat/{session_id}",
     responses={
@@ -48,10 +61,24 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def chat(
+    request: Request,
     session_id: str = Path(..., description=""),
     chat_request: ChatRequest = Body(None, description="Chat with RAG."),
-) -> ChatResponse:
-    return await BaseRagApi.subclasses[0]().chat(session_id, chat_request)
+) -> ChatResponse | None:
+    disconnect_task = create_task(disconnected(request))
+    chat_task = create_task(BaseRagApi.subclasses[0]().chat(session_id, chat_request))
+    _, pending = await wait(
+        [disconnect_task, chat_task],
+        return_when=FIRST_COMPLETED,
+    )
+
+    # cancel all remaining tasks
+    for task in pending:
+        task.cancel()
+        await task
+    if chat_task.done():
+        return chat_task.result()
+    return None
 
 
 @router.post(

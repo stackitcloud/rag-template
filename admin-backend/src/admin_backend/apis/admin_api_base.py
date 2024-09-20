@@ -4,7 +4,7 @@ from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
 from admin_backend.models.document_status import DocumentStatus
 from fastapi.responses import StreamingResponse  # noqa: F401
-from fastapi import BackgroundTasks, UploadFile, Request, Response
+from fastapi import UploadFile, Request, Response
 
 
 class BaseAdminApi:
@@ -32,7 +32,6 @@ class BaseAdminApi:
         self,
         body: UploadFile,
         request: Request,
-        background_tasks: BackgroundTasks,
     ) -> None:
         """Uploads user selected pdf documents."""
         ...

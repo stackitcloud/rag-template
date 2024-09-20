@@ -22,3 +22,4 @@ RUN if [ "$dev" = "1" ]; then \
     fi
 
 COPY rag-backend .
+

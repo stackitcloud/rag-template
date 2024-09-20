@@ -23,15 +23,15 @@ class TextChunker(Chunker):
         #       for that reason, we use the recursive splitter
         self._splitter = splitter
 
-    def chunk(self, documents: Document) -> list[Document]:
+    def chunk(self, documents: list[Document]) -> list[Document]:
         """
         Chunk the given documents into smaller chunks.
 
         Args:
-            documents (Document): The documents to be chunked.
+            documents list[Document]: The documents to be chunked.
 
         Returns:
-            List[Document]: The list of chunked documents.
+            list[Document]: The list of chunked documents.
 
         """
         return self._splitter.split_documents(documents)

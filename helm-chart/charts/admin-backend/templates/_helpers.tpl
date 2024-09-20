@@ -23,6 +23,10 @@
 {{- .Release.Name -}}-s3-configmap
 {{- end -}}
 
+{{- define "configmap.summarizer.name" -}}
+{{- .Release.Name -}}-summarizer-configmap
+{{- end -}}
+
 {{- define "configmap.chunker.name" -}}
 {{- .Release.Name -}}-chunker-configmap
 {{- end -}}

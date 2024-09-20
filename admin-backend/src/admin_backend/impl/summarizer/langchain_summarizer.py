@@ -1,4 +1,6 @@
+from asyncio import Semaphore
 import logging
+import traceback
 from typing import Optional
 
 from langchain_core.runnables import (
@@ -19,14 +21,13 @@ logger = logging.getLogger(__name__)
 class LangchainSummarizer(Summarizer):
 
     def __init__(
-        self,
-        langfuse_manager: LangfuseManager,
-        chunker: RecursiveCharacterTextSplitter,
+        self, langfuse_manager: LangfuseManager, chunker: RecursiveCharacterTextSplitter, semaphore: Semaphore
     ):
         self._chunker = chunker
         self._langfuse_manager = langfuse_manager
+        self._semaphore = semaphore
 
-    def invoke(self, query: SummarizerInput, config: Optional[RunnableConfig] = None) -> SummarizerOutput:
+    async def ainvoke(self, query: SummarizerInput, config: Optional[RunnableConfig] = None) -> SummarizerOutput:
         assert query, "Query is empty: %s" % query  # noqa S101
         config = ensure_config(config)
         tries_remaining = config.get("configurable", {}).get("tries_remaining", 3)
@@ -39,12 +40,17 @@ class LangchainSummarizer(Summarizer):
 
         outputs = []
         for langchain_document in langchain_documents:
-            try:
-                outputs.append(self._create_chain().invoke({"text": langchain_document.page_content}, config))
-            except Exception as e:
-                logger.error("Error in summarizing langchain doc: %s" % e)
-                config["tries_remaining"] = tries_remaining - 1
-                outputs.append(self._create_chain().invoke({"text": langchain_document.page_content}, config))
+            async with self._semaphore:
+                try:
+                    outputs.append(
+                        await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
+                    )
+                except Exception as e:
+                    logger.error("Error in summarizing langchain doc: %s %s", e, traceback.format_exc())
+                    config["tries_remaining"] = tries_remaining - 1
+                    outputs.append(
+                        await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
+                    )
 
         if len(outputs) == 1:
             return outputs[0]
@@ -53,7 +59,7 @@ class LangchainSummarizer(Summarizer):
             "Reduced number of chars from %d to %d"
             % (len("".join([x.page_content for x in langchain_documents])), len(summary))
         )
-        return self.invoke(summary, config)
+        return await self.ainvoke(summary, config)
 
     def _create_chain(self) -> Runnable:
         return self._langfuse_manager.get_base_prompt(self.__class__.__name__) | self._langfuse_manager.get_base_llm(

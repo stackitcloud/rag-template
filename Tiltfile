@@ -244,7 +244,7 @@ value_override = [
     "global.secrets.langfuse.secret_key=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     "global.secrets.stackit_vllm.api_key=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     "global.secrets.stackit_embedder.STACKIT_EMBEDDER_API_KEY=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
-    "global.secrets.vite_auth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],    
+    "global.secrets.vite_auth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
     "global.secrets.vite_auth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
     # variables
     "global.debug.backend.enabled=%s" % backend_debug,
@@ -275,12 +275,17 @@ k8s_yaml(yaml)
 k8s_resource(
     "backend",
     links=[
-        link("http://rag.localhost/api/docs", "Swagger UI"),
+        link("http://localhost:8888/api/docs", "Swagger UI"),
     ],
     port_forwards=[
         port_forward(
             31415,
             container_port=31415,
+            name="Backend-Debugger",
+        ),
+        port_forward(
+            8888,
+            container_port=8080,
             name="Backend-Debugger",
         ),
     ],

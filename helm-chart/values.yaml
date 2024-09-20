@@ -117,6 +117,9 @@ global:
         VITE_CHAT_URL: "http://rag.localhost"
         VITE_ADMIN_URL: "http://admin.rag.localhost"
         VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
+      summarizer:
+        SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
+        SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
 
   debug:
     backend:

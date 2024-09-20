@@ -14,3 +14,4 @@ class SummarizerSettings(BaseSettings):
         case_sensitive = False
 
     maximum_input_size: int = Field(default=8000)
+    maximum_concurrreny: int = Field(default=10)

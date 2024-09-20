@@ -1,3 +1,4 @@
+from asyncio import Semaphore
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Configuration, List, Selector, Singleton  # noqa: WOT001
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -132,7 +133,12 @@ class DependencyContainer(DeclarativeContainer):
         llm=large_language_model,
     )
 
-    summarizer = Singleton(LangchainSummarizer, langfuse_manager=langfuse_manager, chunker=summary_text_splitter)
+    summarizer = Singleton(
+        LangchainSummarizer,
+        langfuse_manager=langfuse_manager,
+        chunker=summary_text_splitter,
+        semaphore=Semaphore(summarizer_settings.maximum_concurrreny),
+    )
 
     summary_enhancer = List(
         Singleton(PageSummaryEnhancer, summarizer),

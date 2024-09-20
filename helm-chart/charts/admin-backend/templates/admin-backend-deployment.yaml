@@ -55,6 +55,8 @@ spec:
           - configMapRef:
               name: {{ template "configmap.rag-class-types.name" . }}
           - configMapRef:
+              name: {{ template "configmap.summarizer.name" . }}
+          - configMapRef:
               name: {{ template "configmap.alephalpha.name" . }}
           - configMapRef:
               name: {{ template "configmap.langfuse.name" . }}
@@ -71,7 +73,7 @@ spec:
           - configMapRef:
               name: {{ template "configmap.stackit-vllm.name" . }}
           - configMapRef:
-              name: {{ template "configmap.pdfextractor.name" . }}          
+              name: {{ template "configmap.pdfextractor.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:

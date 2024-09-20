@@ -101,9 +101,8 @@ async def get_all_documents() -> List[DocumentStatus]:
 async def upload_documents_post(
     body: UploadFile,
     request: Request,
-    background_tasks: BackgroundTasks,
 ) -> None:
     """Uploads user selected pdf documents."""
     if not BaseAdminApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseAdminApi.subclasses[0]().upload_documents_post(body, request, background_tasks)
+    return await BaseAdminApi.subclasses[0]().upload_documents_post(body, request)

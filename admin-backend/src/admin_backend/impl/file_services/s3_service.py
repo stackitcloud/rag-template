@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+import traceback
 from typing import BinaryIO
 
 import boto3
@@ -125,5 +126,5 @@ class S3Service(FileService):
             self._s3_client.delete_object(Bucket=self._s3_settings.bucket, Key=file_name)
             logger.info(f"File {file_name} successfully deleted.")
         except Exception as e:
-            logger.error(f"Error deleting file {file_name}: {e}")
+            logger.error("Error deleting file %s: %s %s" % (file_name, e, traceback.format_exc()))
             raise

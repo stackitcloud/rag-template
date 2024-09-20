@@ -1,3 +1,4 @@
+from asyncio import gather
 from typing import Optional
 
 from langchain_core.runnables import (
@@ -17,8 +18,10 @@ class GeneralEnhancer(InformationEnhancer):
         super().__init__()
         self._enhancers = enhancers
 
-    def invoke(self, information: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
+    async def ainvoke(self, information: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
         config = ensure_config(config)
-        for enhancer in self._enhancers:
-            information = enhancer.invoke(information, config)
+        summarize_tasks = [enhancer.ainvoke(information, config) for enhancer in self._enhancers]
+        summary_results = await gather(*summarize_tasks)
+        for summaries in summary_results:
+            information += summaries
         return information

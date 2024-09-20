@@ -31,11 +31,12 @@ class SummaryEnhancer(InformationEnhancer):
             case _:
                 return True
 
-    def invoke(self, information: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
+    async def ainvoke(self, information: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
         config = ensure_config(config)
         pieces_to_summarize = [info for info in information if self._is_relevant(info)]
-        summaries = self._create_summary(pieces_to_summarize, config)
-        return information + summaries
+        return await self._acreate_summary(pieces_to_summarize, config)
 
     @abstractmethod
-    def _create_summary(self, informations: list[Document], config: Optional[RunnableConfig]) -> list[Document]: ...
+    async def _acreate_summary(
+        self, information: list[Document], config: Optional[RunnableConfig]
+    ) -> list[Document]: ...

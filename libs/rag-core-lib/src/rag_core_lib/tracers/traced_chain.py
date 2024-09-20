@@ -1,14 +1,9 @@
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Optional
-import uuid
 
-from langchain_core.runnables import (
-    Runnable,
-    RunnableConfig,
-    ensure_config,
-)
+from langchain_core.runnables import Runnable, RunnableConfig, ensure_config
 from rag_core_lib.chains.async_chain import AsyncChain
-
 
 RunnableInput = Any
 RunnableOutput = Any
@@ -17,6 +12,7 @@ RunnableOutput = Any
 class TracedChain(AsyncChain[RunnableInput, RunnableOutput], ABC):
 
     SESSION_ID_KEY = "session_id"
+    METADATA_KEY = "metadata"
 
     def __init__(self, inner_chain: Runnable):
         self._inner_chain = inner_chain
@@ -33,4 +29,4 @@ class TracedChain(AsyncChain[RunnableInput, RunnableOutput], ABC):
     def _add_tracing_callback(self, session_id: str, config: Optional[RunnableConfig]) -> RunnableConfig: ...
 
     def _get_session_id(self, config: Optional[RunnableConfig]) -> str:
-        return config.get(self.SESSION_ID_KEY, str(uuid.uuid4()))
+        return config.get(self.METADATA_KEY, {}).get(self.SESSION_ID_KEY, str(uuid.uuid4()))

@@ -7,6 +7,7 @@ from langchain_community.llms import Ollama, VLLMOpenAI
 from langchain_qdrant import Qdrant
 from langfuse import Langfuse
 
+from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
@@ -27,7 +28,7 @@ from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
 
 from rag_core_api.impl import rag_api
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
-from rag_core_api.impl.api_endpoints.default_chat_chain import DefaultChatChain
+from rag_core_api.impl.api_endpoints.default_chat_graph import DefaultChatGraph
 from rag_core_api.impl.api_endpoints.default_searcher import DefaultSearcher
 from rag_core_api.impl.api_endpoints.default_source_documents_remover import DefaultSourceDocumentsRemover
 from rag_core_api.impl.api_endpoints.default_source_documents_uploader import DefaultSourceDocumentsUploader
@@ -60,6 +61,7 @@ class DependencyContainer(DeclarativeContainer):
     wiring_config = WiringConfiguration(modules=[rag_api])
 
     class_selector_config = Configuration()
+    chat_history_config = Configuration()
 
     # Settings
     vector_database_settings = VectorDatabaseSettings()
@@ -76,6 +78,8 @@ class DependencyContainer(DeclarativeContainer):
     reranker_settings = RerankerSettings()
     embedder_class_type_settings = EmbedderClassTypeSettings()
     stackit_embedder_settings = StackitEmbedderSettings()
+    chat_history_settings = ChatHistorySettings()
+    chat_history_config.from_dict(chat_history_settings.model_dump())
 
     class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
 
@@ -170,19 +174,18 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        myapi=Singleton(llm_provider, aleph_alpha_settings),
-        alephalpha=Singleton(llm_provider, aleph_alpha_settings),
+        myapi=Singleton(
+            SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
+        ),
+        alephalpha=Singleton(
+            SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
+        ),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
-        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
-    )
-
-    # Add secret provider to model
-    large_language_model = Selector(
-        class_selector_config.llm_type,
-        myapi=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
-        alephalpha=Singleton(SecuredLLM, llm=aleph_alpha_settings, secret_provider=llm_secret_provider),
-        ollama=large_language_model,
-        stackit=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
+        stackit=Singleton(
+            SecuredLLM,
+            llm=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
+            secret_provider=llm_secret_provider,
+        ),
     )
 
     prompt = ANSWER_GENERATION_PROMPT
@@ -215,9 +218,8 @@ class DependencyContainer(DeclarativeContainer):
         langfuse_manager=langfuse_manager,
     )
 
-    chat_chain = Singleton(
-        DefaultChatChain,
-        composed_retriever=composed_retriever,
+    chat_graph = Singleton(
+        DefaultChatGraph,
         searcher=searcher,
         rephrasing_chain=rephrasing_chain,
         mapper=source_document_mapper,
@@ -225,16 +227,16 @@ class DependencyContainer(DeclarativeContainer):
         error_messages=error_messages,
     )
 
-    # wrap chain in tracer
-    traced_chat_chain = Singleton(
+    # wrap graph in tracer
+    traced_chat_graph = Singleton(
         LangfuseTracedChain,
-        inner_chain=chat_chain,
+        inner_chain=chat_graph,
         settings=langfuse_settings,
     )
 
     evaluator = Singleton(
         LangfuseRagasEvaluator,
-        chat_chain=traced_chat_chain,
+        chat_chain=traced_chat_graph,
         settings=ragas_settings,
         langfuse_manager=langfuse_manager,
         embedder=embedder,

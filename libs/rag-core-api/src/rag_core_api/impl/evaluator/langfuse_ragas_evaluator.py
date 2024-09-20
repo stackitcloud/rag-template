@@ -30,7 +30,7 @@ from ragas.run_config import RunConfig
 from tqdm import tqdm
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 
-from rag_core_api.api_endpoints.chat_chain import ChatChain
+from rag_core_api.api_endpoints.chat_graph import ChatGraph
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.evaluator.evaluator import Evaluator
 from rag_core_api.impl.settings.ragas_settings import RagasSettings
@@ -59,7 +59,7 @@ class LangfuseRagasEvaluator(Evaluator):
 
     def __init__(
         self,
-        chat_chain: ChatChain,
+        chat_chain: ChatGraph,
         langfuse_manager: LangfuseManager,
         settings: RagasSettings,
         embedder: Embedder,

@@ -1,11 +1,11 @@
-"""Contains settings regarding the aleph_alpha embedder."""
+"""Contains settings regarding the error messages."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
 class ErrorMessages(BaseSettings):
-    """Contains settings regarding the aleph_alpha embedder."""
+    """Contains settings regarding the error messages."""
 
     class Config:
         """Config class for reading Fields from env."""
@@ -18,4 +18,12 @@ class ErrorMessages(BaseSettings):
     )
     no_or_empty_collection: str = Field(
         default="Es tut mir leid, aber es wurden keine Dokumente bereitgestellt, welche ich durchsuchen könnte."
+    )
+
+    harmful_question: str = Field(
+        default="Es tut mir leid, aber auf schädliche Anfragen kann nicht eingegangen werden."
+    )
+
+    no_answer_found: str = Field(
+        default="Es tut mir leid, mit dem mir bereitgestellten Kontext konnte ich keine Antwort finden."
     )

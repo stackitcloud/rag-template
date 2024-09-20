@@ -6,13 +6,15 @@ from fastapi import Depends
 from dependency_injector.wiring import Provide, inject
 from langchain_core.runnables import RunnableConfig
 
+from rag_core_api.impl.graph_state.graph_state import AnswerGraphState
+from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
 from rag_core_api.models.search_request import SearchRequest
 from rag_core_api.models.search_response import SearchResponse
 from rag_core_api.models.upload_source_document import UploadSourceDocument
-from rag_core_api.api_endpoints.chat_chain import ChatChain
+from rag_core_api.api_endpoints.chat_graph import ChatGraph
 from rag_core_api.api_endpoints.searcher import Searcher
 from rag_core_api.api_endpoints.source_documents_remover import SourceDocumentsRemover
 from rag_core_api.api_endpoints.source_documents_uploader import SourceDocumentsUploader
@@ -35,7 +37,8 @@ class RagApi(BaseRagApi):
         self,
         session_id: str,
         chat_request: ChatRequest,
-        chat_chain: ChatChain = Depends(Provide[DependencyContainer.traced_chat_chain]),
+        chat_graph: ChatGraph = Depends(Provide[DependencyContainer.traced_chat_graph]),
+        chat_history_config: ChatHistorySettings = Depends(Provide[DependencyContainer.chat_history_config]),
     ) -> ChatResponse:
         config = RunnableConfig(
             tags=[],
@@ -43,7 +46,25 @@ class RagApi(BaseRagApi):
             recursion_limit=25,
             metadata={"session_id": session_id},
         )
-        return await chat_chain.ainvoke(chat_request, config)
+        history_of_interest = chat_request.history.messages[-chat_history_config["limit"] :]
+        if chat_history_config["reverse"]:
+            paris = list(zip(history_of_interest[::2], history_of_interest[1::2]))
+            reversed_paris = paris[::-1]
+            history_of_interest = [item for sublist in reversed_paris for item in sublist]
+        history = "\n".join([f"{x.role}: {x.message}" for x in history_of_interest])
+        state = AnswerGraphState(
+            question=chat_request.message,
+            rephrased_question=None,
+            history=history,
+            source_documents=None,
+            answer_text=None,
+            response=None,
+            retries=0,
+            is_harmful=True,
+            is_from_context=False,
+            answer_is_relevant=False,
+        )
+        return await chat_graph.ainvoke(state, config)
 
     @inject
     async def evaluate(

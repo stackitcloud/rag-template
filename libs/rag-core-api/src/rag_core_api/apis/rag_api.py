@@ -1,38 +1,38 @@
 # coding: utf-8
 
-from typing import List, Any, Awaitable  # noqa: F401
+from contextlib import suppress
 import importlib
+import logging
 import pkgutil
+from asyncio import FIRST_COMPLETED, CancelledError, create_task, sleep, wait
+from typing import Any, Awaitable, List  # noqa: F401
 
-from fastapi import Request
-from asyncio import CancelledError, wait, create_task, FIRST_COMPLETED, sleep
-
-from rag_core_api.apis.rag_api_base import BaseRagApi
 import rag_core_api.impl
-
 from fastapi import (  # noqa: F401
     APIRouter,
-    Body,
     BackgroundTasks,
+    Body,
     Cookie,
     Depends,
     Form,
     Header,
     Path,
     Query,
+    Request,
     Response,
     Security,
     status,
 )
-
-from rag_core_api.models.extra_models import TokenModel  # noqa: F401
+from rag_core_api.apis.rag_api_base import BaseRagApi
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
+from rag_core_api.models.extra_models import TokenModel  # noqa: F401
 from rag_core_api.models.search_request import SearchRequest
 from rag_core_api.models.search_response import SearchResponse
 from rag_core_api.models.upload_source_document import UploadSourceDocument
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -67,7 +67,7 @@ async def chat(
 ) -> ChatResponse | None:
     disconnect_task = create_task(disconnected(request))
     chat_task = create_task(BaseRagApi.subclasses[0]().chat(session_id, chat_request))
-    _, pending = await wait(
+    done, pending = await wait(
         [disconnect_task, chat_task],
         return_when=FIRST_COMPLETED,
     )
@@ -75,9 +75,11 @@ async def chat(
     # cancel all remaining tasks
     for task in pending:
         task.cancel()
-        await task
-    if chat_task.done():
+        with suppress(CancelledError):
+            await task
+    if chat_task in done:
         return chat_task.result()
+    logger.info("Request got cancelled!")
     return None
 
 

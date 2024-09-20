@@ -18,8 +18,8 @@ args:
 - "0.0.0.0"
 - "--port"
 - "8080"
-- "--root-path"
-- "/api"
+- "--loop"
+- "asyncio"
 
 workers: 3
 ws_max_queue: 6
@@ -39,8 +39,8 @@ debugArgs:
 - "--port"
 - "8080"
 - "--reload"
-- "--root-path"
-- "/api"
+- "--loop"
+- "asyncio"
 
 service:
   type: ClusterIP

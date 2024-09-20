@@ -22,7 +22,7 @@ data:
       console:
         # logger for console output
         class: logging.StreamHandler
-        level: DEBUG
+        level: INFO
         formatter: format
         stream: ext://sys.stdout
 

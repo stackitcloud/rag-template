@@ -21,8 +21,10 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.name" . }}
+          {{- if .Values.global.config.basic_auth.enabled }}
           - secretRef:
               name: "vite-auth"
+          {{- end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
@@ -37,8 +39,10 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.name" . }}
+          {{- if .Values.global.config.basic_auth.enabled }}
           - secretRef:
               name: "vite-auth"
+          {{- end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html

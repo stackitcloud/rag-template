@@ -105,6 +105,9 @@ global:
         VITE_API_URL: "http://rag.localhost/api"
         VITE_CHAT_URL: "http://rag.localhost"
       usecase:
+      chat_history:
+        CHAT_HISTORY_LIMIT: 4
+        CHAT_HISTORY_REVERSE: true
 
   debug:
     backend:

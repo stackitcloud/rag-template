@@ -86,6 +86,8 @@ spec:
               name: {{ template "configmap.stackit-vllm.name" . }}
           - configMapRef:
               name: {{ template "configmap.stackit-embedder.name" . }}
+          - configMapRef:
+              name: {{ template "configmap.chat-history.name" . }}
           - secretRef:
               name: {{ template "secret.alephalpha.name" . }}
           - secretRef:

@@ -95,6 +95,10 @@
 {{- .Release.Name -}}-stackit-embedder-configmap
 {{- end -}}
 
+{{- define "configmap.chat-history.name" -}}
+{{- .Release.Name -}}-chat-history-configmap
+{{- end -}}
+
 {{- define "secret.stackit-embedder.name" -}}
 {{- .Release.Name -}}-stackit-embedder-secret
 {{- end -}}

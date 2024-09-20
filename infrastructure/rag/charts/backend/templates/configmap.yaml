@@ -134,3 +134,12 @@ data:
   {{- range $key, $value := .Values.global.config.envs.stackit_embedder }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.chat-history.name" . }}
+data:
+  {{- range $key, $value := .Values.global.config.envs.chat_history }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

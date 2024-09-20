@@ -26,6 +26,10 @@ class LangfuseManager:
         self._llm = llm
         self._managed_prompts = managed_prompts
 
+    def init_prompts(self) -> None:
+        for key in list(self._managed_prompts.keys()):
+            self.get_langfuse_prompt(key)
+
     def get_langfuse_prompt(self, base_prompt_name: str) -> Optional[TextPromptClient]:
         """
         Retrieves the prompt from Langfuse Prompt Management.

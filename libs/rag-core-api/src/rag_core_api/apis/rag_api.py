@@ -90,10 +90,8 @@ async def chat(
     tags=["rag"],
     response_model_by_alias=True,
 )
-async def evaluate(
-    background_tasks: BackgroundTasks,
-) -> None:
-    return await BaseRagApi.subclasses[0]().evaluate(background_tasks)
+async def evaluate() -> None:
+    return await BaseRagApi.subclasses[0]().evaluate()
 
 
 @router.post(

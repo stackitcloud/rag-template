@@ -1,6 +1,8 @@
+from asyncio import run
 import logging
+from threading import Thread
 
-from fastapi import Depends, BackgroundTasks
+from fastapi import Depends
 from dependency_injector.wiring import Provide, inject
 from langchain_core.runnables import RunnableConfig
 
@@ -24,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 class RagApi(BaseRagApi):
 
+    def __init__(self):
+        super().__init__()
+        self._background_threads = []
+
     @inject
     async def chat(
         self,
@@ -42,10 +48,13 @@ class RagApi(BaseRagApi):
     @inject
     async def evaluate(
         self,
-        background_tasks: BackgroundTasks,
         evaluator: Evaluator = Depends(Provide[DependencyContainer.evaluator]),
     ) -> None:
-        background_tasks.add_task(evaluator.evaluate)
+        # cleanup threads
+        self._background_threads = [t for t in self._background_threads if t.is_alive()]
+        thread = Thread(target=lambda: run(evaluator.aevaluate()))
+        thread.start()
+        self._background_threads.append(thread)
 
     @inject
     async def remove_source_documents(

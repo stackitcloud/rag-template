@@ -2,7 +2,6 @@
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
-from fastapi import BackgroundTasks
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
@@ -26,7 +25,6 @@ class BaseRagApi:
 
     async def evaluate(
         self,
-        background_tasks: BackgroundTasks,
     ) -> None: ...
 
     async def remove_source_documents(

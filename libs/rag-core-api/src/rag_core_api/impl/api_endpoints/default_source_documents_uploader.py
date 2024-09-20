@@ -17,9 +17,6 @@ class DefaultSourceDocumentsUploader(SourceDocumentsUploader):
             SourceDocumentMapper.source_document2langchain_document(document) for document in source_document
         ]
         try:
-            # TODO: maybe put in background task. Just writing to the database should not take so incredibly long
-            # (for moderate number of documents). If more users are using the system and upload in parallel,
-            # we should think, how to handle that best.
             self._vector_database.upload(langchain_documents)
         except ValueError as e:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))

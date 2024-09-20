@@ -1,3 +1,4 @@
+from asyncio import gather
 import json
 import logging
 import math
@@ -75,27 +76,29 @@ class LangfuseRagasEvaluator(Evaluator):
             adapt(self.METRICS[:-2], language=settings.prompt_language, llm=self._openai_llm)
 
         # ensure prompt is initialized on langfuse
-        langfuse_manager.get_base_llm()
+        langfuse_manager.init_prompts()
 
-    def evaluate(self):
+    async def aevaluate(self):
         evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
 
-        self._auto_answer_generation4evaluation_questions(evaluation_dataset)
+        await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)
 
-    def _auto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
+    async def _aauto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
         session_id = str(uuid4())
         generation_time = datetime.now()
         experiment_name = f'eval-{self._settings.evaluation_dataset_name}-{generation_time.strftime("%Y%m%d-%H%M%S")}'
         config = RunnableConfig(tags=[], callbacks=[], recursion_limit=25, session_id=session_id)
 
-        for item in tqdm(dataset.items):
-            self._evaluate_question(item, experiment_name, generation_time, config)
+        evaluate_tasks = [
+            self._aevaluate_question(item, experiment_name, generation_time, config) for item in tqdm(dataset.items)
+        ]
+        await gather(*evaluate_tasks)
 
-    def _evaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
+    async def _aevaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
         chat_request = ChatRequest(message=item.input)
 
         try:
-            response = self._chat_chain.invoke(chat_request, config)
+            response = await self._chat_chain.ainvoke(chat_request, config)
         except Exception as e:
             logger.info("Error while answering question %s: %s", item.input, e)
             response = None

@@ -28,3 +28,14 @@ const scrollReveal = (anchorId: string) => {
         </div>
     </div>
 </template>
+<style lang="css">
+.document-text h1, .document-text h2, .document-text h3, .document-text h4 {
+  font-size: small;
+}
+.document-text > * {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: break-spaces;
+    flex-wrap: wrap;
+}
+</style>

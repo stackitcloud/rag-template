@@ -20,6 +20,7 @@
             const isHuman = message.role === 'user';
             const backgroundColor = isHuman ? 'bg-base-200' : 'bg-primary';
             const textColor = isHuman ? 'text-black' : 'text-white';
+            const proseDark = isHuman ? '' : 'prose-dark';
             const avatarSrc = isHuman ? USER_AVATAR : AI_AVATAR;
             const align = isHuman ? 'right' : 'left';
             const time = message.dateTime ? extractTime(message.dateTime) : undefined;
@@ -33,6 +34,7 @@
                 backgroundColor,
                 anchorIds,
                 textColor,
+                proseDark,
                 avatarSrc,
                 align,
                 time
@@ -74,6 +76,7 @@
                         :align="message.align"
                         :backgroundColor="message.backgroundColor"
                         :textColor="message.textColor"
+                        :proseDark="message.proseDark"
                         :anchorIds="message.anchorIds" />
         </div>
     </div>

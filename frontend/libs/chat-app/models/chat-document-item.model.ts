@@ -8,8 +8,8 @@ export interface ChatDocumentItemModel {
     source: string;
 }
 
-export const mapToDocumentItem = (index: number, document: ChatDocumentModel): ChatDocumentItemModel => ({
-    index,
+export const mapToDocumentItem = (document: ChatDocumentModel): ChatDocumentItemModel => ({
+    index: document.index,
     source: document.url,
     text: document.chunk,
     title: document.name,

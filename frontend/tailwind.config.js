@@ -6,9 +6,38 @@ module.exports = {
     "libs/**/*.{vue,js,ts}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      typography: (theme) => ({
+        dark: {
+          css: {
+            color: theme('colors.white'),
+            'h1, h2, h3, h4': {
+              color: theme('colors.white'),
+            },
+            a: {
+              color: theme('colors.white'),
+            },
+            strong: {
+              color: theme('colors.white'),
+            },
+            'ol > li::marker': {
+              color: theme('colors.white'),
+            },
+            'ul > li::marker': {
+              color: theme('colors.white'),
+            },
+            li: {
+              color: theme('colors.white'), // For list items themselves
+            },
+            blockquote: {
+              color: theme('colors.white'),
+            },
+          },
+        },
+      }),
+    },
   },
-  plugins: [require("daisyui")],
+  plugins: [require('@tailwindcss/typography'), require("daisyui")],
   daisyui: {
     themes: [
       {
@@ -16,7 +45,7 @@ module.exports = {
           "secondary": "#f6d860",
           "primary": "#045462",
           "primary-content": "#ffff",
-          
+
           "accent": "#F8EC17",
           "accent-content": "#045462",
 
@@ -28,7 +57,7 @@ module.exports = {
           "base-300": "#D1D5DB",
 
           "info": "#41AEF5",
-          
+
           '--scrollbar-track': '#ffff',
           '--scrollbar-thumb': 'rgba(0, 0, 0, .3)',
           "--base-200-highlight": "#E5EDEF",
@@ -38,6 +67,5 @@ module.exports = {
     utils: true,
     logs: false,
     themeRoot: "#app",
-  },
+  }
 }
-

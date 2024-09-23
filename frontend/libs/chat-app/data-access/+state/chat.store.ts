@@ -50,8 +50,8 @@ export const useChatStore = defineStore('chat', () => {
         return Promise.all(documents.map(async o => {
             const chunk = await marked(o.content);
             return {
-              chunk, // TODO keyto name
-              ...o
+              ...o,
+              content: chunk,
             } as DocumentResponseModel;
         }));
     }
@@ -61,7 +61,9 @@ export const useChatStore = defineStore('chat', () => {
         try {
             const requestMessages = prepareInferenceRequest(prompt);
             console.log(requestMessages);
-            addHistory(prompt);
+
+            const promptAsMd = await marked(prompt)
+            addHistory(promptAsMd);
 
             const response = await ChatAPI.callInference(requestMessages);
 

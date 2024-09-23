@@ -7,5 +7,6 @@ export interface ChatBubbleModel {
     align: "left" | "right";
     backgroundColor: string;
     textColor: string;
+    proseDark: "prose-dark" | "";
     anchorIds: number[] | undefined;
 }

@@ -12,13 +12,12 @@ const data = defineProps<ChatDocumentGroupModel>();
             </div>
         </div> -->
         <div class="flex-1 break-words text-ellipsis overflow-hidden flex flex-col">
-            <h4 class="font-medium flex items-center gap-2 mb-1">
-                {{ data.title }}
-
-                <a class="text-sm text-primary cursor-pointer hover:opacity-75" :href="data.source" target="_blank">
-                    <ArrowTopRightOnSquareIcon class="h-4 w-4" />
+            <h2 class="font-medium mb-1">
+                <a class="font-bold font-underline hover:opacity-75 flex items-center gap-2" :href="data.source" target="_blank">
+                    {{ data.title }}
+                    <ArrowTopRightOnSquareIcon class="text-sm text-primary cursor-pointer h-4 w-4" />
                 </a>
-            </h4>
+            </h2>
             <slot></slot>
         </div>
     </div>

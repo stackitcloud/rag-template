@@ -23,7 +23,8 @@
         "vue": "^3.4.3",
         "vue-i18n": "^9.8.0",
         "vue-router": "^4.2.5",
-        "@heroicons/vue": "^2.1.1"
+        "@heroicons/vue": "^2.1.1",
+        "@tailwindcss/typography": "^0.5.15"
     },
     "devDependencies": {
         "@intlify/unplugin-vue-i18n": "^2.0.0",

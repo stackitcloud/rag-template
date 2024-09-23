@@ -17,14 +17,13 @@ const scrollReveal = (anchorId: string) => {
 }
 </script>
 <template>
-    <div class="pt-1 pr-2 flex gap-4" :id="data.index.toString()">
+    <div class="pt-2 pr-2 flex gap-4 hover:opacity-75" :id="data.index.toString()">
         <div class="flex-1 break-words text-ellipsis overflow-hidden flex flex-col">
-            <div class="text-xs">
-                <a class="text-info cursor-pointer hover:opacity-75 text-md"
-                    @click="scrollReveal(data.anchorId.toString())">
+            <div class="text-xs" @click="scrollReveal(data.anchorId.toString())">
+                <a class="text-info cursor-pointer hover:opacity-75 text-md">
                     [{{ data.index }}]
                 </a>
-                <span v-html="data.text"></span>
+                <article class="document-text flex-1 text-pretty break-words prose prose-sm max-w-none" v-html="data.text"></article>
             </div>
         </div>
     </div>

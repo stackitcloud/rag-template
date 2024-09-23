@@ -4,7 +4,7 @@ import ChatDocumentGroup from './ChatDocumentGroup.vue';
 import { computed } from "vue";
 import { useI18n } from 'vue-i18n';
 import { isNotEmpty } from '@shared/utils';
-import { ChatDocumentItemModel } from '../models/chat-document-item.model';
+import { ChatDocumentItemModel, mapToDocumentItem } from '../models/chat-document-item.model';
 import { SideBarContainer } from '@shared/ui';
 import { ChatDocumentModel } from '../models/chat-document.model';
 
@@ -14,16 +14,8 @@ const props = defineProps<{
     documents: Array<ChatDocumentModel>
 }>()
 
-const mapToDocumentItem = (document: ChatDocumentModel): ChatDocumentItemModel => ({
-    index: document.index,
-    source: document.url,
-    text: document.chunk,
-    title: document.name,
-    anchorId: document.messageId
-});
-
 const groupedDocuments = computed((): ChatDocumentItemModel[] => {
-    const documents = props.documents.map((message) => mapToDocumentItem(message));
+    const documents = props.documents.map((document) => mapToDocumentItem(document));
     const grouped = documents.reduce(
         (reduced: any, element: ChatDocumentItemModel) => {
             reduced[element.title] = reduced[element.title] || [];

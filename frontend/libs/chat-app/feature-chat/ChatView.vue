@@ -13,13 +13,13 @@ onMounted(() => chatStore.initiateConversation(newUid()));
 
 <template>
     <div data-testid="chat-view" class="md:container md:mx-auto h-full p-4 flex gap-4">
-        <div class="flex-1 flex flex-col">
+        <div class="flex-initial md:w-8/12 flex flex-col overflow-hidden">
             <div class="flex-1 mb-4 overflow-hidden">
                 <ChatMessages :messages="chatStore.chatHistory" :is-loading="chatStore.isLoading" />
             </div>
             <ChatInput :is-disabled="chatStore.isLoading" />
         </div>
-        <div class="w-full md:w-4/12">
+        <div class="flex-1 md:w-4/12 overflow-hidden">
             <ChatDocumentContainer :documents="chatStore.chatDocuments"></ChatDocumentContainer>
         </div>
     </div>

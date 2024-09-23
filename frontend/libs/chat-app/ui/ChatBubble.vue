@@ -41,8 +41,8 @@
 
             <div v-if="props.text !== undefined"
                  class="flex flex-col">
-                <p class="flex-1 text-pretty break-words chat-text"
-                   v-html="props.text"></p>
+                <article :class="['flex-1', 'text-pretty', 'break-words', 'prose', 'prose-sm', 'max-w-none', 'chat-text', props.proseDark]"
+                   v-html="props.text"></article>
 
                 <!-- Document jump anchors-->
                 <div v-if="props.anchorIds !== undefined"
@@ -69,9 +69,9 @@
 <style scoped
        lang="css">
     .chat-text > * {
-        word-break: break-word;
+        word-break: break-all;
         overflow-wrap: break-word;
-        white-space: break-spaces;
+        white-space: normal;
         flex-wrap: wrap;
     }
 

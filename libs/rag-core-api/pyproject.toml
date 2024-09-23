@@ -31,6 +31,7 @@ ragas = "^0.1.14"
 flashrank = "^0.2.5"
 pyyaml = "^6.0.2"
 openai = "^1.42.0"
+langgraph = "^0.2.23"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"

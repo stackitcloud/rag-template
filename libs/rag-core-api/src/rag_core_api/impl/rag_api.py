@@ -52,11 +52,14 @@ class RagApi(BaseRagApi):
             reversed_paris = paris[::-1]
             history_of_interest = [item for sublist in reversed_paris for item in sublist]
         history = "\n".join([f"{x.role}: {x.message}" for x in history_of_interest])
-        state = AnswerGraphState(
+        state = AnswerGraphState.create(
             question=chat_request.message,
-            rephrased_question=None,
             history=history,
-            source_documents=None,
+            error_messages=[],
+            finish_reasons=[],
+            source_documents=[],
+            langchain_documents=[],
+            rephrased_question=None,
             answer_text=None,
             response=None,
             retries=0,

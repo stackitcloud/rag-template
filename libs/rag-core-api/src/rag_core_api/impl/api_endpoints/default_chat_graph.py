@@ -30,6 +30,7 @@ class GraphNodeNames(StrEnum):
     ANSWER_CHECK_SINK = "answer_check_sink"
     INCREMENT_RETRIES = "increment_retries"
     ERROR_NODE = "error_node"
+    GENERATE_SINK = "generate_sink"
 
 
 class DefaultChatGraph(ChatGraph):
@@ -96,8 +97,8 @@ class DefaultChatGraph(ChatGraph):
         # TODO
         response = {"is_harmful": False}
         if response["is_harmful"]:
-            response["error_message"] = self.error_messages.harmful_question
-            response["finish_reason"] = "Harmful question"
+            response["error_messages"] = [self.error_messages.harmful_question]
+            response["finish_reasons"] = ["Harmful question"]
         return response
 
     async def _retrieve_node(self, state: dict) -> dict:
@@ -110,13 +111,13 @@ class DefaultChatGraph(ChatGraph):
         ]
 
         response = {
-            "source_documents": retrieved_documents.documents,
-            "langchain_documents": retrieved_langchain_documents,
+            "source_documents": [retrieved_documents.documents[0]],
+            "langchain_documents": [retrieved_langchain_documents[0]],
         }
 
         if not response["source_documents"]:
-            response["error_message"] = self.error_messages.no_documents_found
-            response["finish_reason"] = "No documents found"
+            response["error_messages"] = [self.error_messages.no_documents_found]
+            response["finish_reasons"] = ["No documents found"]
 
         return response
 
@@ -131,17 +132,20 @@ class DefaultChatGraph(ChatGraph):
     async def _increment_retries_node(self, state: dict) -> dict:
         response = {"retries": state["retries"] + 1}
         if response["retries"] > self.RETRY_LIMIT:
-            response["error_message"] = self.error_messages.no_answer_found
-            response["finish_reason"] = "Maximum retries exceeded, no answer found"
+            response["error_message"] = [self.error_messages.no_answer_found]
+            response["finish_reason"] = ["Maximum retries exceeded, no answer found"]
         return response
 
     async def _sink_node(self, state: dict) -> dict:
         return state
 
     async def _error_node(self, state: dict) -> dict:
-        return {
-            "response": ChatResponse(answer=state["error_message"], citations=[], finish_reason=state["finish_reason"])
-        }
+        error_message = " ".join(state["error_messages"])
+        finish_reson = " ".join(state["finish_reasons"])
+        return {"response": ChatResponse(answer=error_message, citations=[], finish_reason=finish_reson)}
+
+    async def _generate_sink_node(self, state: dict) -> dict:
+        return state
 
     #####################
     # conditional edges #
@@ -162,7 +166,7 @@ class DefaultChatGraph(ChatGraph):
         return GraphNodeNames.INCREMENT_RETRIES
 
     def _retries_exceeded_edge(self, state: dict) -> str:
-        if state["error_message"]:
+        if state["error_messages"]:
             return GraphNodeNames.ERROR_NODE
         return GraphNodeNames.REPHRASE
 
@@ -171,6 +175,7 @@ class DefaultChatGraph(ChatGraph):
         self._state_graph.add_node(GraphNodeNames.SAFE_GUARD, self._is_harmful_node)
         self._state_graph.add_node(GraphNodeNames.RETRIEVE, self._retrieve_node)
         self._state_graph.add_node(GraphNodeNames.GENERATE, self._generate_node_builder)
+        self._state_graph.add_node(GraphNodeNames.GENERATE_SINK, self._generate_sink_node)
         self._state_graph.add_node(GraphNodeNames.ANSWER_RELEVANCY, self._answer_relevancy_node)
         self._state_graph.add_node(GraphNodeNames.ANSWER_FROM_CONTEXT, self._answer_from_context_node)
         self._state_graph.add_node(GraphNodeNames.ANSWER_CHECK_SINK, self._sink_node)
@@ -181,26 +186,27 @@ class DefaultChatGraph(ChatGraph):
         self._state_graph.add_edge(START, GraphNodeNames.REPHRASE)
         self._state_graph.add_edge(START, GraphNodeNames.SAFE_GUARD)
         self._state_graph.add_edge(GraphNodeNames.REPHRASE, GraphNodeNames.RETRIEVE)
+
         self._state_graph.add_conditional_edges(
-            GraphNodeNames.RETRIEVE,
-            self._docs_retrieved_edge,
+            GraphNodeNames.RETRIEVE, self._docs_retrieved_edge, [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE]
         )
-        self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)
+
+        self._state_graph.add_edge([GraphNodeNames.GENERATE, GraphNodeNames.SAFE_GUARD], GraphNodeNames.GENERATE_SINK)
 
         successors = [GraphNodeNames.ERROR_NODE, GraphNodeNames.ANSWER_RELEVANCY, GraphNodeNames.ANSWER_FROM_CONTEXT]
-        self._state_graph.add_conditional_edges(GraphNodeNames.GENERATE, self._decide_if_harmful_edge, successors)
-        self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)
+        self._state_graph.add_conditional_edges(GraphNodeNames.GENERATE_SINK, self._decide_if_harmful_edge, successors)
 
-        for node in successors[1:]:
-            self._state_graph.add_edge(node, GraphNodeNames.ANSWER_CHECK_SINK)
+        self._state_graph.add_edge(successors[1:], GraphNodeNames.ANSWER_CHECK_SINK)
 
         self._state_graph.add_conditional_edges(
             GraphNodeNames.ANSWER_CHECK_SINK,
             self._question_answered_and_from_context_edge,
+            [GraphNodeNames.INCREMENT_RETRIES, END],
         )
 
         self._state_graph.add_conditional_edges(
             GraphNodeNames.INCREMENT_RETRIES,
             self._retries_exceeded_edge,
+            [GraphNodeNames.REPHRASE, GraphNodeNames.ERROR_NODE],
         )
         self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)

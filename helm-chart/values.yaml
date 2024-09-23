@@ -29,8 +29,8 @@ global:
 
   config:
     dns:
-      - admin.rag.ai.mmmake.com
-      - rag.ai.mmmake.com
+    - admin.rag.ai.mmmake.com
+    - rag.ai.mmmake.com
     basic_auth:
       enabled: true
     tls:
@@ -117,6 +117,9 @@ global:
         VITE_CHAT_URL: "http://rag.localhost"
         VITE_ADMIN_URL: "http://admin.rag.localhost"
         VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
+      chat_history:
+        CHAT_HISTORY_LIMIT: 4
+        CHAT_HISTORY_REVERSE: true
       summarizer:
         SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
         SUMMARIZER_MAXIMUM_CONCURRENCY: "10"

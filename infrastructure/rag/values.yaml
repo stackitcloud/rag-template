@@ -86,6 +86,7 @@ global:
         RAGAS_PROMPT_LANGUAGE: "german"
         RAGAS_BASE_URL: "https://api.openai.com/v1"
         RAGAS_EVALUATION_DATASET_NAME: "eval-data"
+        RAGAS_MAX_CONCURRENCY: "5"
       embedder_class_types:
         EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
       stackit_embedder:

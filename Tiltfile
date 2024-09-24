@@ -93,9 +93,13 @@ docker_build(
     build_args={
         "dev": "1" if backend_debug else "0",
     },
-    live_update=[sync(backend_context, "/app")],
+    live_update=[
+        sync(backend_context, "/app/rag-backend"),
+        sync(core_library_context, "/app/rag-core-library"),
+    ],
     dockerfile=backend_context + "/Dockerfile",
 )
+
 # Add linter trigger
 local_resource(
     "RAG Backend linting",
@@ -134,7 +138,6 @@ docker_build(
     },
     live_update=[
         sync(admin_backend_context, "/app/admin-backend"),
-        sync(core_library_context, "/app/rag-core-library/Dockerfile.base"),
         sync(core_library_context, "/app/rag-core-library/rag-core-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",

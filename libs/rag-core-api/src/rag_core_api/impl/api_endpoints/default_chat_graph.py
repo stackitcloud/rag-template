@@ -111,8 +111,8 @@ class DefaultChatGraph(ChatGraph):
         ]
 
         response = {
-            "source_documents": [retrieved_documents.documents[0]],
-            "langchain_documents": [retrieved_langchain_documents[0]],
+            "source_documents": retrieved_documents.documents,
+            "langchain_documents": retrieved_langchain_documents,
         }
 
         if not response["source_documents"]:

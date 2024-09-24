@@ -1,3 +1,4 @@
+from asyncio import Semaphore
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Configuration, Selector, Singleton, List  # noqa: WOT001
@@ -240,4 +241,5 @@ class DependencyContainer(DeclarativeContainer):
         settings=ragas_settings,
         langfuse_manager=langfuse_manager,
         embedder=embedder,
+        semaphor=Semaphore(ragas_settings.max_concurrency),
     )

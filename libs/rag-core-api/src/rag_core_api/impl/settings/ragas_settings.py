@@ -21,3 +21,4 @@ class RagasSettings(BaseSettings):
     prompt_language: str = Field(default="german")
     evaluation_dataset_name: str = Field(default="eval-data")  # TODO: add config param in deployment
     dataset_filename: str = Field(default="test_data.json")
+    max_concurrency: int = Field(default=5)

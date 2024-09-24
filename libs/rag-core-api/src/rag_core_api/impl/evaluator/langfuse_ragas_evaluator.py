@@ -1,4 +1,4 @@
-from asyncio import gather
+from asyncio import Semaphore, gather
 import json
 import logging
 import math
@@ -63,10 +63,12 @@ class LangfuseRagasEvaluator(Evaluator):
         langfuse_manager: LangfuseManager,
         settings: RagasSettings,
         embedder: Embedder,
+        semaphore: Semaphore,
     ) -> None:
         self._chat_chain = chat_chain
         self._settings = settings
         self._embedder = embedder
+        self._semaphore = semaphore
         self._metrics = [faithfulness, answer_relevancy, context_precision, harmfulness]
         self._openai_llm = ChatOpenAI(model=settings.model, timeout=settings.timeout, openai_api_base=settings.base_url)
         self._langfuse = Langfuse()
@@ -95,58 +97,59 @@ class LangfuseRagasEvaluator(Evaluator):
         await gather(*evaluate_tasks)
 
     async def _aevaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
-        chat_request = ChatRequest(message=item.input)
+        with self._semaphore:
+            chat_request = ChatRequest(message=item.input)
 
-        try:
-            response = await self._chat_chain.ainvoke(chat_request, config)
-        except Exception as e:
-            logger.info("Error while answering question %s: %s", item.input, e)
-            response = None
+            try:
+                response = await self._chat_chain.ainvoke(chat_request, config)
+            except Exception as e:
+                logger.info("Error while answering question %s: %s", item.input, e)
+                response = None
 
-        if response and response.citations:
-            output = {"answer": response.answer, "documents": [x.content for x in response.citations]}
-        else:
-            output = {"answer": None, "documents": None}
+            if response and response.citations:
+                output = {"answer": response.answer, "documents": [x.content for x in response.citations]}
+            else:
+                output = {"answer": None, "documents": None}
 
-        langfuse_generation = self._langfuse.generation(
-            name=self._settings.evaluation_dataset_name,
-            input=item.input,
-            output=output,
-            start_time=generation_time,
-            end_time=datetime.now(),
-        )
-        item.link(langfuse_generation, experiment_name)
-
-        if not (response and response.citations):
-            for metric in self.METRICS:
-                langfuse_generation.score(
-                    name=metric.name,
-                    value=self.DEFAULT_SCORE_VALUE,
-                )
-            return
-
-        eval_data = Dataset.from_dict(
-            {
-                "question": [item.input],
-                "answer": [output["answer"]],
-                "contexts": [output["documents"]],
-                "ground_truth": [item.expected_output],
-            }
-        )
-
-        result = ragas.evaluate(
-            eval_data,
-            metrics=self.METRICS,
-            llm=self._openai_llm_wrapped,
-            embeddings=self._embedder,
-        )
-        for metric, score in result.scores[0].items():
-            if math.isnan(score):
-                score = self.DEFAULT_SCORE_VALUE
-            langfuse_generation.score(
-                name=metric,
-                value=score,
+            langfuse_generation = self._langfuse.generation(
+                name=self._settings.evaluation_dataset_name,
+                input=item.input,
+                output=output,
+                start_time=generation_time,
+                end_time=datetime.now(),
             )
+            item.link(langfuse_generation, experiment_name)
+
+            if not (response and response.citations):
+                for metric in self.METRICS:
+                    langfuse_generation.score(
+                        name=metric.name,
+                        value=self.DEFAULT_SCORE_VALUE,
+                    )
+                return
+
+            eval_data = Dataset.from_dict(
+                {
+                    "question": [item.input],
+                    "answer": [output["answer"]],
+                    "contexts": [output["documents"]],
+                    "ground_truth": [item.expected_output],
+                }
+            )
+
+            result = ragas.evaluate(
+                eval_data,
+                metrics=self.METRICS,
+                llm=self._openai_llm_wrapped,
+                embeddings=self._embedder,
+            )
+            for metric, score in result.scores[0].items():
+                if math.isnan(score):
+                    score = self.DEFAULT_SCORE_VALUE
+                langfuse_generation.score(
+                    name=metric,
+                    value=score,
+                )
 
     def _get_dataset(self, dataset_name: str) -> DatasetClient:
         """

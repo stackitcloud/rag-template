@@ -7,6 +7,8 @@ from uuid import uuid4
 from json import JSONDecodeError
 from datetime import datetime
 
+from rag_core_api.impl.graph_state.graph_state import AnswerGraphState
+from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 import ragas
 from datasets import Dataset
 from langchain_core.runnables import RunnableConfig
@@ -64,7 +66,9 @@ class LangfuseRagasEvaluator(Evaluator):
         settings: RagasSettings,
         embedder: Embedder,
         semaphore: Semaphore,
+        chat_history_config: ChatHistorySettings,
     ) -> None:
+        self._chat_history_config = chat_history_config
         self._chat_chain = chat_chain
         self._settings = settings
         self._embedder = embedder
@@ -89,7 +93,12 @@ class LangfuseRagasEvaluator(Evaluator):
         session_id = str(uuid4())
         generation_time = datetime.now()
         experiment_name = f'eval-{self._settings.evaluation_dataset_name}-{generation_time.strftime("%Y%m%d-%H%M%S")}'
-        config = RunnableConfig(tags=[], callbacks=[], recursion_limit=25, session_id=session_id)
+        config = RunnableConfig(
+            tags=[],
+            callbacks=[],
+            recursion_limit=25,
+            metadata={"session_id": session_id},
+        )
 
         evaluate_tasks = [
             self._aevaluate_question(item, experiment_name, generation_time, config) for item in tqdm(dataset.items)
@@ -97,11 +106,27 @@ class LangfuseRagasEvaluator(Evaluator):
         await gather(*evaluate_tasks)
 
     async def _aevaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
-        with self._semaphore:
+        async with self._semaphore:
             chat_request = ChatRequest(message=item.input)
-
+            history_of_interest = []
+            history = "\n".join([f"{x.role}: {x.message}" for x in history_of_interest])
+            state = AnswerGraphState.create(
+                question=chat_request.message,
+                history=history,
+                error_messages=[],
+                finish_reasons=[],
+                source_documents=[],
+                langchain_documents=[],
+                rephrased_question=None,
+                answer_text=None,
+                response=None,
+                retries=0,
+                is_harmful=True,
+                is_from_context=False,
+                answer_is_relevant=False,
+            )
             try:
-                response = await self._chat_chain.ainvoke(chat_request, config)
+                response = await self._chat_chain.ainvoke(state, config)
             except Exception as e:
                 logger.info("Error while answering question %s: %s", item.input, e)
                 response = None

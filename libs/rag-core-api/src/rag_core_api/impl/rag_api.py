@@ -40,6 +40,7 @@ class RagApi(BaseRagApi):
         chat_graph: ChatGraph = Depends(Provide[DependencyContainer.traced_chat_graph]),
         chat_history_config: ChatHistorySettings = Depends(Provide[DependencyContainer.chat_history_config]),
     ) -> ChatResponse:
+        # TODO: There is too much logic here. This is no longer easily replaceable
         config = RunnableConfig(
             tags=[],
             callbacks=None,

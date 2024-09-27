@@ -241,5 +241,6 @@ class DependencyContainer(DeclarativeContainer):
         settings=ragas_settings,
         langfuse_manager=langfuse_manager,
         embedder=embedder,
-        semaphor=Semaphore(ragas_settings.max_concurrency),
+        semaphore=Semaphore(ragas_settings.max_concurrency),
+        chat_history_config=chat_history_config,
     )

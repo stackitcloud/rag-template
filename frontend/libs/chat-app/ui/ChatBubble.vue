@@ -71,7 +71,7 @@
     .chat-text > * {
         word-break: break-all;
         overflow-wrap: break-word;
-        white-space: normal;
+        white-space: break-spaces;
         flex-wrap: wrap;
     }
 

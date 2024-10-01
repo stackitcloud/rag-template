@@ -39,6 +39,12 @@ debugArgs:
 - "--port"
 - "8080"
 - "--reload"
+- "--reload-dir"
+- "/app/rag-backend"
+- "--reload-dir"
+- "/app/rag-core-library/rag-core-api"
+- "--reload-dir"
+- "/app/rag-core-library/rag-core-lib"
 - "--loop"
 - "asyncio"
 

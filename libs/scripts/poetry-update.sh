@@ -99,10 +99,15 @@ case $action in
         ;;
 esac
 
+
+cd_cmd=""
+
 # Determine source folder if not provided
 if [ -z "$source_folder" ]; then
     current_dir=$(basename "$PWD")
     source_folder="/app/$current_dir"
+else 
+    cd_cmd="cd $source_folder &&"
 fi
 
 # Get all matching pod names
@@ -131,15 +136,15 @@ echo "Using source folder: $source_folder"
 case $action in
     add)
         echo "Adding dependency: $dependency"
-        kubectl exec --stdin --tty "$pod_name" -n "$namespace" -- poetry add "$dependency"
+        kubectl exec --stdin --tty "$pod_name" -n "$namespace" -- bash -c "${cd_cmd} poetry add $dependency"
         ;;
     remove)
         echo "Removing dependency: $dependency"
-        kubectl exec --stdin --tty "$pod_name" -n "$namespace" -- poetry remove "$dependency"
+        kubectl exec --stdin --tty "$pod_name" -n "$namespace" -- bash -c "${cd_cmd} poetry remove $dependency"
         ;;
     lock)
         echo "Updating poetry.lock file"
-        kubectl exec --stdin --tty "$pod_name" -n "$namespace" -- poetry lock
+        kubectl exec --stdin --tty "$pod_name" -n "$namespace" -- bash -c "${cd_cmd} poetry lock"
         ;;
 esac
 

@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import List
 
 from openapi_server.document_parser.file_type import FileType
+from openapi_server.document_parser.information_piece import InformationPiece
 from openapi_server.file_services.file_service import FileService
-from openapi_server.models.information_piece import InformationPiece
 
 
 class InformationExtractor(ABC):

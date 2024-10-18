@@ -1,22 +1,23 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { ChatAPI } from "../chat.api";
-import { ChatMessageModel } from "../../models/chat-message.model";
-import { ChatRequestModel, mapToChatRequestModel } from "../../models/chat-request.model";
-import { marked } from "marked";
-import { newUid } from "@shared/utils";
-import { ChatDocumentModel, mapToChatDocuments } from "../../models/chat-document.model";
-import { DocumentResponseModel } from "libs/chat-app/models/document-response.model";
-import { SourceDocument } from "libs/chat-app/models/chat-response.model";
+import {defineStore} from 'pinia';
+import {ref, computed} from 'vue';
+import {ChatAPI} from "../chat.api";
+import {ChatMessageModel} from "../../models/chat-message.model";
+import {ChatRequestModel, mapToChatRequestModel} from "../../models/chat-request.model";
+import {marked} from "marked";
+import {newUid} from "@shared/utils";
+import {useI18n} from 'vue-i18n';
+import {ChatDocumentModel, mapToChatDocuments} from "../../models/chat-document.model";
+import {DocumentResponseModel} from "libs/chat-app/models/document-response.model";
+import {SourceDocument} from "libs/chat-app/models/chat-response.model";
 
 export const useChatStore = defineStore('chat', () => {
+    const {t, locale} = useI18n();
     const conversationId = ref();
     const chatHistory = ref<ChatMessageModel[]>([]);
     const chatDocuments = ref<ChatDocumentModel[]>([]);
     const isLoading = ref(false);
     const hasError = ref(false);
-    //TODO Add an enviroment variable for the initial message and use the current one as default
-    const initialMessage = "Hi👋 \n\nIch bin rag und Du kannst mir Fragen zum Inhalt von PDFs stellen.\n\nDokumente werden DSGVO-konform auf der STACKIT Cloud verarbeitet.\n\nStell mir doch einfach eine Frage zu einem der hochgeladenen Dokumente!\n\nHier etwas Inspiration:\n\nWie muss ich R3G500PA2803 anschließen?\n\nWie hoch ist die Stromaufnahme von R3G500PA2803?";
+    const initialMessage = computed(() => t('chat.initialMessage'));
     const lastMessage = () => chatHistory.value[chatHistory.value.length - 1];
 
     function addHistory(prompt: string) {
@@ -50,8 +51,8 @@ export const useChatStore = defineStore('chat', () => {
         return Promise.all(documents.map(async o => {
             const chunk = await marked(o.content);
             return {
-              ...o,
-              content: chunk,
+                ...o,
+                content: chunk,
             } as DocumentResponseModel;
         }));
     }
@@ -79,7 +80,7 @@ export const useChatStore = defineStore('chat', () => {
 
             chatDocuments.value.push(...documents);
 
-        } catch (error) {
+        } catch(error) {
             updateLatestMessage({
                 hasError: true,
                 dateTime: new Date()
@@ -99,5 +100,5 @@ export const useChatStore = defineStore('chat', () => {
         });
     }
 
-    return { chatDocuments, chatHistory, isLoading, hasError, conversationId, callInference, initiateConversation };
+    return {chatDocuments, chatHistory, isLoading, hasError, conversationId, callInference, initiateConversation};
 });

@@ -1,5 +1,6 @@
 {
   "chat": {
+    "initialMessage": "Hi 👋, ich bin dein KI-Assistent und und hier, um dich bei allen Fragen zu den bereitgestellten Dokumenten zu unterstützen!",
     "send": "Senden",
     "justAsk": "Frag mich einfach...",
     "sources": "Quellen",
@@ -7,6 +8,7 @@
     "noSourcesHint": "Quelldokumente werden hier referenziert.",
     "error": {
       "requestError": "Fehler bei der Anfrage. Bitte versuche es erneut."
-    }
+    },
+    "disclaimer": "Der Assistent kann Fehler machen. Bitte überprüfe wichtige Informationen. Die Antworten sind nicht rechtsverbindlich."
   }
 }

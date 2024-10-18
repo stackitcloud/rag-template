@@ -1,67 +1,108 @@
-<script lang="ts"
-        setup>
-        import { useI18n } from 'vue-i18n'
-        import { onMounted, ref } from 'vue'
-        import { useChatStore } from "../data-access/+state/chat.store";
-        import { computed } from "vue";
-        import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
+<script lang="ts" setup>
+import { useI18n } from 'vue-i18n'
+import { onMounted, ref, computed } from 'vue'
+import { useChatStore } from "../data-access/+state/chat.store"
+import { PaperAirplaneIcon } from '@heroicons/vue/24/outline'
 
-        const chatStore = useChatStore();
-        const { t } = useI18n()
-        const inputRef = ref<HTMLInputElement>()
-        const isLoading = computed(() => chatStore.isLoading)
+const chatStore = useChatStore()
+const { t } = useI18n()
+const textareaRef = ref<HTMLTextAreaElement>()
+const isLoading = computed(() => chatStore.isLoading)
 
-        const onCallInference = async (event: Event) => {
-            event.preventDefault();
+const onCallInference = async (event: Event) => {
+  event.preventDefault()
+  const textarea = textareaRef.value
+  if (!textarea || !textarea.value.trim()) {
+    return
+  }
 
-            const input = inputRef.value;
-            if (input == null || input.value == null) {
-                return
-            }
+  try {
+    await chatStore.callInference(textarea.value)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    textarea.value = ''
+    textarea.style.height = '40px'
+    textarea.focus()
+  }
+}
 
-            try {
-                await chatStore.callInference(input.value)
-            } catch (e) {
-                console.error(e)
-            } finally {
-                input.value = ''
-                input.focus()
-            }
-        }
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault()
+    onCallInference(event)
+  }
+}
 
-        const props = defineProps<{
-            isDisabled: boolean
-        }>()
+const adjustTextareaHeight = () => {
+  const textarea = textareaRef.value
+  if (textarea) {
+    textarea.style.height = '1.5rem' // Reset to initial height
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 5 * 24)}px`
+  }
+}
 
-        onMounted(() => {
-            inputRef.value?.focus()
-        })
+const props = defineProps<{
+  isDisabled: boolean
+}>()
+
+onMounted(() => {
+  textareaRef.value?.focus()
+})
 </script>
 
 <template>
-    <div class="flex gap-2 md:gap-4 p-2 md:p-8 rounded-box border">
-        <input type="text"
-               ref="inputRef"
-               required
-               :disabled="props.isDisabled"
-               :placeholder="t('chat.justAsk')"
-               @keydown.enter="onCallInference"
-               class="input bg-base-200 flex-1 focus:border-base-300 " />
+  <div class="flex bg-base-200 rounded-box gap-2 items-center">
+    <textarea
+      ref="textareaRef"
+      required
+      :disabled="props.isDisabled"
+      :placeholder="t('chat.justAsk')"
+      @keydown="handleKeyDown"
+      @input="adjustTextareaHeight"
+      class="flex-1 bg-base-200 input h-10 min-h-[40px] max-h-[120px] overflow-y-auto resize-none outline-none focus:outline-none focus:border-none py-2 px-3"
+    ></textarea>
 
-        <button type="button"
-                @click="onCallInference"
-                class="btn btn-accent w-10 md:w-32"
-                :disabled="props.isDisabled">
-            <div v-if="isLoading"
-                 class="text-center">
-                <span class="loading loading-spinner w-4 h-4"></span>
-            </div>
+    <button
+      type="button"
+      @click="onCallInference"
+      class="btn btn-accent h-10 self-end"
+      :disabled="props.isDisabled"
+    >
+      <div v-if="isLoading" class="text-center">
+        <span class="loading loading-spinner w-4 h-4"></span>
+      </div>
 
-            <div v-else
-                 class="flex gap-2 justify-center items-center">
-                <PaperAirplaneIcon class="w-4 h-4" />
-                <span class="hidden md:block">{{ t('chat.send') }}</span>
-            </div>
-        </button>
-    </div>
+      <div v-else class="flex gap-2 justify-center items-center">
+        <PaperAirplaneIcon class="w-4 h-4" />
+      </div>
+    </button>
+  </div>
 </template>
+
+<style scoped>
+textarea {
+  line-height: 1.5rem;
+}
+
+textarea::placeholder {
+  line-height: 1.5rem;
+}
+
+textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7);
+}
+</style>

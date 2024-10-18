@@ -19,7 +19,6 @@
         {{ t('chat.documents') }}
       </a>
     </NavigationContainer>
-    <LogoContainer />
     <RouterView class="flex-1 overflow-hidden" />
   </main>
 </template>

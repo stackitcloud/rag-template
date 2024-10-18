@@ -1,4 +1,4 @@
-import { DocumentResponseModel } from "./document-response.model";
+import {DocumentResponseModel} from "./document-response.model";
 
 export interface ChatDocumentModel {
   index: number;
@@ -9,15 +9,18 @@ export interface ChatDocumentModel {
 }
 
 export const mapToChatDocuments = (startIncrementId: number, documents: DocumentResponseModel[], messageId: string) => documents.map((doc, index) => {
-  const name = (
-    (doc.metadata.find(meta => (meta.key === "title"))?.value as string).replace(/^"+|"+$/g, '') ||  // TODO: handle nested json-text values correctly
-    (doc.metadata.find(meta => (meta.key === "document"))?.value as string).replace(/^"+|"+$/g, '')  // TODO: handle nested json-text values correctly
-  )
+  const getMetadataValue = (key: string): string => {
+    const metaItem = doc.metadata.find(meta => meta.key === key);
+    return metaItem ? (metaItem.value as string).replace(/^"+|"+$/g, '') : '';
+  };
+
+  const name = getMetadataValue('title') || getMetadataValue('document') || '?';
+  const url = getMetadataValue('document_url');
   return {
     index: startIncrementId + index,
     messageId: messageId,
-    name: name || "?",
+    name: name,
     chunk: doc.content,
-    url: (doc.metadata.find(meta => meta.key === "document_url")?.value as string).replace(/^"+|"+$/g, '') || "",  // TODO: handle nested json-text values correctly
-  } as ChatDocumentModel
+    url: url
+  } as ChatDocumentModel;
 });

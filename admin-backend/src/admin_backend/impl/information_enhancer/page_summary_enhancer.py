@@ -12,12 +12,13 @@ from admin_backend.impl.information_enhancer.summary_enhancer import SummaryEnha
 
 class PageSummaryEnhancer(SummaryEnhancer):
     BASE64_IMAGE_KEY = "base64_image"
+    DEFAULT_PAGE_NR = 1
 
     async def _acreate_summary(self, information: list[Document], config: Optional[RunnableConfig]) -> list[Document]:
-        # group infos by page
+        # group infos by page, defaulting to page 1 if no page metadata
         grouped = [
-            [info for info in information if info.metadata["page"] == page]
-            for page in {info_piece.metadata["page"] for info_piece in information}
+            [info for info in information if info.metadata.get("page", self.DEFAULT_PAGE_NR) == page]
+            for page in {info_piece.metadata.get("page", self.DEFAULT_PAGE_NR) for info_piece in information}
         ]
 
         summary_tasks = [self._asummarize_page(info_group, config) for info_group in tqdm(grouped)]

@@ -30,7 +30,6 @@ from admin_backend.impl.chunker.text_chunker import TextChunker
 from admin_backend.impl.file_services.s3_service import S3Service
 from admin_backend.impl.information_enhancer.general_enhancer import GeneralEnhancer
 from admin_backend.impl.information_enhancer.page_summary_enhancer import PageSummaryEnhancer
-from admin_backend.impl.information_enhancer.single_summary_enhancer import SingleSummaryEnhancer
 from admin_backend.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
 from admin_backend.impl.mapper.informationpiece2document import InformationPiece2Document
 from admin_backend.impl.settings.chunker_settings import ChunkerSettings
@@ -142,7 +141,6 @@ class DependencyContainer(DeclarativeContainer):
 
     summary_enhancer = List(
         Singleton(PageSummaryEnhancer, summarizer),
-        Singleton(SingleSummaryEnhancer, summarizer),
     )
     untraced_information_enhancer = Singleton(
         GeneralEnhancer,

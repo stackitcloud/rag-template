@@ -15,11 +15,11 @@ from pdf2image import convert_from_path
 import pandas as pd
 
 
+from openapi_server.document_parser.table_coverters.dataframe_converter import DataframeConverter
 from openapi_server.document_parser.information_extractor import (
     InformationExtractor,
 )
 from openapi_server.settings.pdf_extractor_settings import PDFExtractorSettings
-from openapi_server.impl.mapper.dataframe_converter import DataframeConverter
 from openapi_server.document_parser.file_type import FileType
 from openapi_server.document_parser.information_piece import InformationPiece
 from openapi_server.document_parser.content_type import ContentType
@@ -61,26 +61,6 @@ class PDFExtractor(InformationExtractor):
     def compatible_file_types(self) -> List[FileType]:
         return [FileType.PDF]
 
-    def _replace_cariage_returns(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.replace(r"\r", " ", regex=True)
-
-    def _replace_new_lines(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.replace(r"\n", " ", regex=True)
-
-    def _drop_empty_rows(self, df: pd.DataFrame) -> pd.DataFrame:
-        df.replace("", pd.NA, inplace=True)
-        df = df.dropna(axis=0, how="all")
-        df = df.dropna(axis=1, how="all")
-
-        return df
-
-    def _fill_splitted_cells(self, df: pd.DataFrame) -> pd.DataFrame:
-        for col in range(1, len(df.columns)):
-            df.iloc[:, col] = df.iloc[:, col].fillna(df.iloc[:, col - 1])
-        df.apply(lambda col: col.ffill())
-        df.replace(pd.NA, "", inplace=True)
-        return df
-
     def _extract_tabluar_data(
         self,
         page: Page,
@@ -94,12 +74,9 @@ class PDFExtractor(InformationExtractor):
         table_strings = []
         for table in pdfplumber_tables:
             table_df = pd.DataFrame(table.extract(x_tolerance=text_x_tolerance, y_tolerance=text_y_tolerance))
-            table_df = self._drop_empty_rows(table_df)
-            if not len(table_df):
+            converted_table = self._dataframe_converter.convert(table_df)
+            if converted_table == "":
                 continue
-            table_df = self._replace_cariage_returns(table_df)
-            table_df = self._replace_new_lines(table_df)
-            table_df = self._fill_splitted_cells(table_df)
             table_strings.append(self._dataframe_converter.convert(table_df))
 
         if table_strings:

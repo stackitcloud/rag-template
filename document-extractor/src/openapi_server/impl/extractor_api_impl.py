@@ -25,7 +25,9 @@ class ExtractorApiImpl(BaseExtractorApi):
     ) -> List[InformationPiece]:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file_path = Path(temp_dir) / extraction_request.path_on_s3
-            temp_file = open(temp_file_path, "wb")
-            file_service.download_file(extraction_request.path_on_s3, temp_file)
+
+            with open(temp_file_path, "wb") as temp_file:
+                file_service.download_file(extraction_request.path_on_s3, temp_file)
+
             results = information_extractor.extract_content(temp_file_path)
             return [mapper.map(x) for x in results]

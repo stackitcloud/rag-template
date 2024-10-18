@@ -166,7 +166,8 @@ class AdminApi(BaseAdminApi):
                     logger.debug("Temporary file created at %s.", temp_file_path)
                     temp_file.write(file_content)
                     logger.debug("Temp file created and content written.")
-                    await self._aparse_document(Path(temp_file_path), request)
+
+                await self._aparse_document(Path(temp_file_path), request)
         except Exception as e:
             logger.error("Error during document parsing: %s %s", e, traceback.format_exc())
             key_value_store.upsert(filename, Status.ERROR)
@@ -191,7 +192,6 @@ class AdminApi(BaseAdminApi):
         key_value_store.upsert(filename, Status.PROCESSING)
         information_pieces = document_extractor.extract_information(ExtractionRequest(path_on_s3=filename))
         documents = [information_mapper.information_piece2document(x) for x in information_pieces]
-        documents = await information_enhancer.ainvoke(documents)
         host_base_url = str(request.base_url)
 
         document_url = f"{host_base_url.rstrip('/')}/document_reference/{urllib.parse.quote_plus(filename)}"
@@ -208,6 +208,7 @@ class AdminApi(BaseAdminApi):
                     "document_url": document_url,
                 }
             )
+        documents = await information_enhancer.ainvoke(documents)
 
         rag_api_documents = []
         for document in chunked_documents:

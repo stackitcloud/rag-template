@@ -73,7 +73,7 @@
                 <input ref="fileInputRef"
                        type="file"
                        multiple
-                       accept=".pdf"
+                       accept=".pdf,.docx,.pptx,.xml"
                        @change="onFileInputChange"
                        class="hidden" />
             </div>

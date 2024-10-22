@@ -13,9 +13,10 @@
         const fileInputRef = ref<HTMLInputElement>();
         const uploadedDocuments = computed((): UploadedDocument[] => store.uploadedDocuments);
         const isInvalidFileType = ref(false);
+        const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml'];
 
         const uploadDocuments = (files: File[]) => {
-            if (files.some(file => file.type !== 'application/pdf')) {
+            if (files.some(file => !allowedFileTypes.includes(file.type))) {
                 isInvalidFileType.value = true;
                 return;
             }

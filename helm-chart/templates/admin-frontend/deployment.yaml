@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.adminFrontend.name }}
+spec:
+  replicas: {{ .Values.adminFrontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.adminFrontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.adminFrontend.name }}
+    spec:
+      volumes:
+      - name: {{ .Values.adminFrontend.name }}
+        emptyDir: {}
+      initContainers:
+      - name: admin-frontend-copy
+        image: {{ template "adminFrontend.fullImageName" . }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.frontendName" . }}
+          - secretRef:
+              name: "vite-auth"
+        imagePullPolicy: {{ .Values.adminFrontend.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: {{ .Values.adminFrontend.name }}
+        command: ["cp","-r", "/app/frontend/.", "/usr/share/nginx/html"]
+      - name: vite-workaround
+        command:
+          - /bin/sh
+        args:
+          - /app/env.sh
+        image: {{ template "adminFrontend.fullImageName" . }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.frontendName" . }}
+          - secretRef:
+              name: "vite-auth"
+        imagePullPolicy: {{ .Values.adminFrontend.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: {{ .Values.adminFrontend.name }}
+      containers:
+      - name: {{ .Values.adminFrontend.name }}
+        image: {{ template "adminFrontend.fullImageName" . }}
+        imagePullPolicy: {{ .Values.adminFrontend.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: {{ .Values.adminFrontend.name }}
+        ports:
+        - containerPort: {{ .Values.adminFrontend.service.port }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.frontendName" . }}
+          - secretRef:
+              name: "vite-auth"
+      imagePullSecrets:
+      - name: {{ .Values.global.imagePullSecret.name }}

@@ -9,4 +9,10 @@
         "./rag-core-library/rag-core-api/src",
         "./rag-core-library/rag-core-lib/src",
     ],
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.formatOnType": true,
+        "editor.autoIndent": "advanced"
+    },
 }

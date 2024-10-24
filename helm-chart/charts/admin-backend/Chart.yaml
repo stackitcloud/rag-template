@@ -1,6 +1,0 @@
-apiVersion: v2
-name: admin-backend
-description: The admin and extractor backends of rag
-type: application
-version: 0.0.1
-appVersion: "0.0.1"

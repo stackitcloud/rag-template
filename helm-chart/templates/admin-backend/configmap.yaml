@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.chunkerName" . }}
+data:
+  {{- range $key, $value := .Values.adminBackend.envs.chunker }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ragapiName" . }}
+data:
+  {{- range $key, $value := .Values.adminBackend.envs.ragapi }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.summarizerName" . }}
+data:
+  {{- range $key, $value := .Values.adminBackend.envs.summarizer }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

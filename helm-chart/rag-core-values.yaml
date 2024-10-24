@@ -1,4 +1,4 @@
-rag-base:
+ragBase:
   langfuse:
     enabled: true
   qdrant:
@@ -7,14 +7,111 @@ rag-base:
     enabled: false
 
   backend:
+    name: backend
+
     image:
       repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
       name: rag-backend
       tag: "443892"
+
     ingress:
       host:
         name: rag.localhost
+
+    secrets:
+      openai:
+        apiKey: "sk-123456"
+      alephAlpha:
+        apiKey: "sk-123456"
+      basicAuth: ""
+      langfuse:
+        publicKey: "pk-lf"
+        secretKey: "sk-lf"
+      stackitMyapiLlm:
+        authClientId: auth-client-id
+        authClientSecret: auth-client-secret
+      stackitEmbedder:
+        STACKIT_EMBEDDER_API_KEY: ""
+      stackitVllm:
+        apiKey: "sk-123"
+      usecase:
+
+    envs:
+      faithfulness:
+        FAITHFULNESS_CLEAN: false
+        FAITHFULNESS_CHAR_SPAN: false
+        FAITHFULNESS_LANGUAGE: "en"
+        FAITHFULNESS_THRESHOLD: 0.5
+
+      database:
+        VECTOR_DB_COLLECTION_NAME: rag-db
+        VECTOR_DB_URL: http://rag-qdrant:6333
+      retriever:
+        RETRIEVER_THRESHOLD: 0.3
+        RETRIEVER_K_DOCUMENTS: 10
+        RETRIEVER_TOTAL_K: 7
+        RETRIEVER_SUMMARY_THRESHOLD: 0.3
+        RETRIEVER_SUMMARY_K_DOCUMENTS: 10
+        RETRIEVER_TABLE_THRESHOLD: 0.3
+        RETRIEVER_TABLE_K_DOCUMENTS: 10
+        RETRIEVER_IMAGE_THRESHOLD: 0.7
+        RETRIEVER_IMAGE_K_DOCUMENTS: 10
+      stackitMyapiLlm:
+        STACKIT_TOKEN_LIFETIME_MARGIN: 30
+        STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
+      alephAlpha:
+        ALEPH_ALPHA_MODEL: llama-3-8b-instruct
+        ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1
+        ALEPH_ALPHA_TOP_K: 0
+        ALEPH_ALPHA_TOP_P: 0
+        ALEPH_ALPHA_PRESENCE_PENALTY: 0
+        ALEPH_ALPHA_FREQUENCY_PENALTY: 10
+        ALEPH_ALPHA_MAXIMUM_TOKENS: 256
+        ALEPH_ALPHA_TEMPERATURE: 0
+        ALEPH_ALPHA_N: 1
+        ALEPH_ALPHA_BEST_OF: 2
+      errorMessages:
+        ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: Es tut mir leid, meine Antworten sind begrenzt. Sie müssen die richtigen Fragen stellen.
+        ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: Es wurden keine Dokumente zum durchsuchen bereitgestellt.
+      langfuse:
+        LANGFUSE_DATASET_NAME: "rag_test_ds"
+        LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+        LANGFUSE_HOST: "http://rag-langfuse:3000" #NOTE: http protocol needs to be defined!
+      ragas:
+        RAGAS_IS_DEBUG: false
+        RAGAS_MODEL: "gpt-3.5-turbo-0125"
+        RAGAS_TIMEOUT: 60
+        RAGAS_ADAPT_PROMPTS_TO_LANG: false
+        RAGAS_PROMPT_LANGUAGE: "german"
+        RAGAS_BASE_URL: "https://api.openai.com/v1"
+      ragClassTypes:
+        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+      public:
+        PUBLIC_HOST: "https://api.aleph-alpha.com"
+      ollama:
+        OLLAMA_MODEL: "llama3:instruct"
+        OLLAMA_BASE_URL: "http://rag-ollama:11434"
+        OLLAMA_TOP_K: 0
+        OLLAMA_TOP_P: 0
+        OLLAMA_TEMPERATURE: 0
+      stackitEmbedder:
+        STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
+        STACKIT_EMBEDDER_BASE_URL: "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1"
+      usecase:
+        USECASE_KEYVALUE_PORT: 6379
+        USECASE_KEYVALUE_HOST: "rag-keydb"
+      reranker:
+        RERANKER_K_DOCUMENTS: 5
+        RERANKER_MIN_RELEVANCE_SCORE: 0.001
+
+      chatHistory:
+        CHAT_HISTORY_LIMIT: 4
+        CHAT_HISTORY_REVERSE: true
+
+
   frontend:
+    name: frontend
+
     image:
       repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
       name: frontend
@@ -22,3 +119,16 @@ rag-base:
     ingress:
       host:
         name: rag.localhost
+
+    secrets:
+      viteAuth:
+        VITE_AUTH_USERNAME: ""
+        VITE_AUTH_PASSWORD: ""
+
+    envs:
+      vite:
+        VITE_CHAT_AUTH_ENABLED: true
+        VITE_API_URL: "http://rag.localhost/api"
+        VITE_CHAT_URL: "http://rag.localhost"
+        VITE_ADMIN_URL: "http://admin.rag.localhost"
+        VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"

@@ -210,6 +210,7 @@ local_resource(
 
 frontend_context = "./frontend"
 frontend_image_name = "%s/frontend" % (registry)
+
 docker_build(
     frontend_image_name,
     ".",
@@ -218,11 +219,11 @@ docker_build(
 )
 
 ########################################################################################################################
-################################## build adminfrontend image and do live update ########################################
+################################## build admin frontend image and do live update ########################################
 ########################################################################################################################
 
 adminfrontend_context = "./frontend"
-adminfrontend_image_name = "%s/adminfrontend" % (registry)
+adminfrontend_image_name = "%s/admin-frontend" % (registry)
 docker_build(
     adminfrontend_image_name,
     ".",
@@ -236,26 +237,26 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "global.secrets.aleph_alpha.aleph_alpha_aleph_alpha_api_key=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    "global.secrets.stackit_myapi_llm.auth_client_id=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
-    "global.secrets.stackit_myapi_llm.auth_client_secret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
-    "global.secrets.openai.api_key=%s" % os.environ["OPENAI_API_KEY"],
-    "global.secrets.s3.access_key=%s" % os.environ["S3_ACCESS_KEY_ID"],
-    "global.secrets.s3.secret_key=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
-    "global.secrets.basic_auth=%s" % os.environ["BASIC_AUTH"],
-    "global.secrets.langfuse.public_key=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
-    "global.secrets.langfuse.secret_key=%s" % os.environ["LANGFUSE_SECRET_KEY"],
-    "global.secrets.stackit_vllm.api_key=%s" % os.environ["STACKIT_VLLM_API_KEY"],
-    "global.secrets.stackit_embedder.STACKIT_EMBEDDER_API_KEY=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
-    "global.secrets.vite_auth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
-    "global.secrets.vite_auth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
+    "ragBase.backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
+    "ragBase.backend.secrets.stackitMyapiLlm.authClientId=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
+    "ragBase.backend.secrets.stackitMyapiLlm.authClientSecret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
+    "ragBase.backend.secrets.openai.apiKey=%s" % os.environ["OPENAI_API_KEY"],
+    "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
+    "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
+    "ragBase.backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
+    "ragBase.backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
+    "ragBase.backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
+    "ragBase.backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
+    "ragBase.backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
+    "ragBase.frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
+    "ragBase.frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
     # variables
     "global.debug.backend.enabled=%s" % backend_debug,
-    "frontend.enabled=true",
+    "ragBase.frontend.enabled=true",
     "global.config.tls.enabled=false",
     "global.ssl=false",
     # ingress host names
-    "backend.ingress.host.name=rag.localhost",
+    "ragBase.backend.ingress.host.name=rag.localhost",
 ]
 
 yaml = helm(
@@ -278,7 +279,7 @@ k8s_yaml(yaml)
 k8s_resource(
     "backend",
     links=[
-        link("http://localhost:8888/api/docs", "Swagger UI"),
+        link("http://localhost:8888/docs", "Swagger UI"),
     ],
     port_forwards=[
         port_forward(
@@ -336,7 +337,7 @@ k8s_resource(
 )
 
 k8s_resource(
-    "adminfrontend",
+    "admin-frontend",
     links=[
         link("http://admin.rag.localhost/", "Chat Admin App"),
     ],

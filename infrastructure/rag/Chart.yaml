@@ -2,24 +2,17 @@ apiVersion: v2
 name: rag
 description: |
   This helm chart deploys a front- and backend microservice. Together, those components
-  form rag. rag is an application, where you can upload you own documents and
-  ask question about their content and rag will answer them.
+  form rag. rag is an application, where you can upload your own documents and
+  ask question about their content and the rag will answer them.
 type: application
 version: 0.0.1
 appVersion: "0.0.1"
 dependencies:
-  - name: langfuse
-    repository: https://langfuse.github.io/langfuse-k8s
-    version: "0.2.1"
-    condition: langfuse.enabled
-  - name: qdrant
-    version: 0.9.1
-    repository: "https://qdrant.github.io/qdrant-helm"
-    condition: qdrant.enabled
-  - name: backend
-    version: 0.0.1
-    repository: file://./charts/backend
-  - name: frontend
-    version: 0.0.1
-    repository: file://./charts/frontend
-    condition: frontend.enabled
+- name: langfuse
+  repository: https://langfuse.github.io/langfuse-k8s
+  version: "0.2.1"
+  condition: langfuse.enabled
+- name: qdrant
+  version: 0.9.1
+  repository: "https://qdrant.github.io/qdrant-helm"
+  condition: qdrant.enabled

@@ -61,4 +61,4 @@ data:
         handlers: [console, file]
 kind: ConfigMap
 metadata:
-  name: {{ template "configmap.logging.name" . }}
+  name: {{ template "configmap.loggingName" . }}

@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.databaseName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.database }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.retrieverName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.retriever }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.alephalphaName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.alephAlpha }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.langfuseName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.langfuse }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.errorMessagesName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.errorMessages }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ragClassTypesName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.ragClassTypes }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.rerankerName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.reranker }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.embedderClassTypesName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.embedderClassTypes }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.stackitMyApiLlmName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.stackitMyapiLlm }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.publicName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.public }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ollamaName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.ollama }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.usecaseName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.usecase }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ragasName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.ragas }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.stackitVllmName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.stackitVllm }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.stackitEmbedderName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.stackitEmbedder }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.chatHistoryName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.chatHistory }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

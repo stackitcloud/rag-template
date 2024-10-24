@@ -5,111 +5,216 @@ qdrant:
 frontend_flag:
   enabled: true
 
+backend:
+  name: backend
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/mmmake-gmbh/rag
+    name: rag-api
+    pullPolicy: Always
+    tag: "dev-ba20c7b"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_rag_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--loop"
+  - "asyncio"
+
+  workers: 3
+  wsMaxQueue: 6
+
+  debugArgs:
+  - "python"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_rag_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/rag-backend"
+  - "--reload-dir"
+  - "/app/rag-core-library/rag-core-api"
+  - "--reload-dir"
+  - "/app/rag-core-library/rag-core-lib"
+  - "--loop"
+  - "asyncio"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+  ingress:
+    enabled: true
+    host:
+      name: rag.localhost
+      path: /api/chat(/|$)(.*)
+      pathType: ImplementationSpecific
+      port: 8080
+
+  secrets:
+    alephAlpha:
+      apiKey: "sk-123456"
+    basicAuth: ""
+    langfuse:
+      publicKey: "pk-lf"
+      secretKey: "sk-lf"
+    stackitMyapiLlm:
+      authClientId: auth-client-id
+      authClientSecret: auth-client-secret
+    stackitEmbedder:
+      apiKey: ""
+    openai:
+      apiKey: "sk-123456"
+    stackitVllm:
+      apiKey: "sk-123"
+    usecase:
+
+  envs:
+    database:
+      VECTOR_DB_COLLECTION_NAME: rag-db
+      VECTOR_DB_URL: http://qdrant:6333
+    retriever:
+      RETRIEVER_THRESHOLD: 0.3
+      RETRIEVER_K_DOCUMENTS: 10
+      RETRIEVER_TOTAL_K: 7
+      RETRIEVER_SUMMARY_THRESHOLD: 0.3
+      RETRIEVER_SUMMARY_K_DOCUMENTS: 10
+      RETRIEVER_TABLE_THRESHOLD: 0.3
+      RETRIEVER_TABLE_K_DOCUMENTS: 10
+      RETRIEVER_IMAGE_THRESHOLD: 0.7
+      RETRIEVER_IMAGE_K_DOCUMENTS: 10
+    stackitMyapiLlm:
+      STACKIT_TOKEN_LIFETIME_MARGIN: 30
+      STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
+    alephAlpha:
+      ALEPH_ALPHA_MODEL: llama-3-70b-instruct
+      ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1
+      ALEPH_ALPHA_TOP_K: 0
+      ALEPH_ALPHA_TOP_P: 0
+      ALEPH_ALPHA_PRESENCE_PENALTY: 0
+      ALEPH_ALPHA_FREQUENCY_PENALTY: 0
+      ALEPH_ALPHA_MAXIMUM_TOKENS: 256
+      ALEPH_ALPHA_TEMPERATURE: 0
+      ALEPH_ALPHA_N: 1
+      ALEPH_ALPHA_BEST_OF: 2
+    errorMessages:
+      ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: "I'm sorry, my responses are limited. You must ask the right questions."
+      ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: "No documents were provided for searching."
+      ERROR_MESSAGES_HARMFUL_QUESTION: "I'm sorry, but harmful requests cannot be processed."
+      ERROR_MESSAGES_NO_ANSWER_FOUND: "I'm sorry, I couldn't find an answer with the context provided."
+    langfuse:
+      LANGFUSE_DATASET_NAME: "test_ds"
+      LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+      LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
+    ragClassTypes:
+      RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+    ragas:
+      RAGAS_IS_DEBUG: false
+      RAGAS_MODEL: "gpt-3.5-turbo-0125"
+      RAGAS_TIMEOUT: 60
+      RAGAS_ADAPT_PROMPTS_TO_LANG: false
+      RAGAS_PROMPT_LANGUAGE: "german"
+      RAGAS_BASE_URL: "https://api.openai.com/v1"
+      RAGAS_EVALUATION_DATASET_NAME: "eval-data"
+      RAGAS_MAX_CONCURRENCY: "5"
+    embedderClassTypes:
+      EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
+    stackitEmbedder:
+      STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
+      STACKIT_EMBEDDER_BASE_URL: "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1"
+    public:
+      PUBLIC_HOST: "https://api.aleph-alpha.com"
+    ollama:
+      OLLAMA_MODEL: "llama3:instruct"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_TOP_K: 0
+      OLLAMA_TOP_P: 0
+      OLLAMA_TEMPERATURE: 0
+    reranker:
+      RERANKER_K_DOCUMENTS: 5
+      RERANKER_MIN_RELEVANCE_SCORE: 0.001
+    usecase:
+    chatHistory:
+      CHAT_HISTORY_LIMIT: 4
+      CHAT_HISTORY_REVERSE: true
+
+frontend:
+  name: frontend
+  replicaCount: 1
+  image:
+    # TODO: Change to jfrog/azure or something else
+    repository: ghcr.io/mmmake-gmbh/rag
+    name: frontend
+    pullPolicy: Always
+    tag: "dev-e12f8cc"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  config:
+    envs:
+      VITE_API_URL: http://rag.localhost/api
+      VITE_CHAT_URL: http://rag.localhost
+
+  exports:
+    chartName:
+      frontendChartName: frontend
+
+  ingress:
+    enabled: true
+    host:
+      name: rag.localhost
+      path: /
+      pathType: ImplementationSpecific
+      port: 8080
+
+  secrets:
+    viteAuth:
+      VITE_AUTH_USERNAME: ""
+      VITE_AUTH_PASSWORD: ""
+
+  envs:
+    vite:
+      VITE_API_URL: "http://rag.localhost/api"
+      VITE_CHAT_URL: "http://rag.localhost"
+
+
 global:
+
   ssl: true
+
   imagePullSecret:
     create: false
     name: cr-credentials
-  secrets:
-    aleph_alpha:
-      aleph_alpha_aleph_alpha_api_key: "sk-123456"
-    basic_auth: ""
-    langfuse:
-      public_key: "pk-lf"
-      secret_key: "sk-lf"
-    stackit_myapi_llm:
-      auth_client_id: auth-client-id
-      auth_client_secret: auth-client-secret
-    stackit_embedder:
-      STACKIT_EMBEDDER_API_KEY: ""
-    vite_auth:
-      VITE_AUTH_USERNAME: ""
-      VITE_AUTH_PASSWORD: ""
-    openai:
-      api_key: "sk-123456"
-    stackit_vllm:
-      api_key: "sk-123"
-    usecase:
 
   config:
     dns:
     - rag.localhost
-    basic_auth:
+    basicAuth:
       enabled: true
     tls:
       enabled: true
       host: rag.localhost
       secretName: tls-certificate
-    envs:
-      database:
-        VECTOR_DB_COLLECTION_NAME: rag-db
-        VECTOR_DB_URL: qdrant:6333
-      retriever:
-        RETRIEVER_THRESHOLD: 0.3
-        RETRIEVER_K_DOCUMENTS: 10
-        RETRIEVER_TOTAL_K: 7
-        RETRIEVER_SUMMARY_THRESHOLD: 0.3
-        RETRIEVER_SUMMARY_K_DOCUMENTS: 10
-        RETRIEVER_TABLE_THRESHOLD: 0.3
-        RETRIEVER_TABLE_K_DOCUMENTS: 10
-        RETRIEVER_IMAGE_THRESHOLD: 0.7
-        RETRIEVER_IMAGE_K_DOCUMENTS: 10
-      stackit_myapi_llm:
-        STACKIT_TOKEN_LIFETIME_MARGIN: 30
-        STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
-      aleph_alpha:
-        ALEPH_ALPHA_MODEL: llama-3-70b-instruct
-        ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1
-        ALEPH_ALPHA_TOP_K: 0
-        ALEPH_ALPHA_TOP_P: 0
-        ALEPH_ALPHA_PRESENCE_PENALTY: 0
-        ALEPH_ALPHA_FREQUENCY_PENALTY: 0
-        ALEPH_ALPHA_MAXIMUM_TOKENS: 256
-        ALEPH_ALPHA_TEMPERATURE: 0
-        ALEPH_ALPHA_N: 1
-        ALEPH_ALPHA_BEST_OF: 2
-      errormessages:
-        ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: Es tut mir leid, meine Antworten sind begrenzt. Sie müssen die richtigen Fragen stellen.
-        ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: Es wurden keine Dokumente zum durchsuchen bereitgestellt.
-        ERROR_MESSAGES_NO_PRODUCT_NAME_MESSAGE: "Es wurde kein Produktname im chat-verlauf gefunden. Ich habe derzeit Informationen über folgende Produkte:"
-      langfuse:
-        LANGFUSE_DATASET_NAME: "test_ds"
-        LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
-        LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
-      rag_class_types:
-        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
-      ragas:
-        RAGAS_IS_DEBUG: false
-        RAGAS_MODEL: "gpt-3.5-turbo-0125"
-        RAGAS_TIMEOUT: 60
-        RAGAS_ADAPT_PROMPTS_TO_LANG: false
-        RAGAS_PROMPT_LANGUAGE: "german"
-        RAGAS_BASE_URL: "https://api.openai.com/v1"
-        RAGAS_EVALUATION_DATASET_NAME: "eval-data"
-        RAGAS_MAX_CONCURRENCY: "5"
-      embedder_class_types:
-        EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
-      stackit_embedder:
-        STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
-        STACKIT_EMBEDDER_BASE_URL: "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1"
-      public:
-        PUBLIC_HOST: "https://api.aleph-alpha.com"
-      ollama:
-        OLLAMA_MODEL: "llama3:instruct"
-        OLLAMA_BASE_URL: "http://ollama:11434"
-        OLLAMA_TOP_K: 0
-        OLLAMA_TOP_P: 0
-        OLLAMA_TEMPERATURE: 0
-      reranker:
-        RERANKER_TOTAL_K: 5
-      frontend:
-        VITE_API_URL: "http://rag.localhost/api"
-        VITE_CHAT_URL: "http://rag.localhost"
-      usecase:
-      chat_history:
-        CHAT_HISTORY_LIMIT: 4
-        CHAT_HISTORY_REVERSE: true
-
-  debug:
-    backend:
-      enabled: false

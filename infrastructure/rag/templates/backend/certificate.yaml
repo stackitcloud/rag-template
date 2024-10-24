@@ -5,8 +5,8 @@ metadata:
   name: rag-certificate
 spec:
   dnsNames:
-    {{- range .Values.global.config.dns }} 
-    - {{.}} 
+    {{- range .Values.global.config.dns }}
+    - {{.}}
     {{- end }}
   secretName: tls-certificate
   issuerRef:

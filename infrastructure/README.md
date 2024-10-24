@@ -1,8 +1,8 @@
 # Components
 
 This Repository contains the helmchart for the following RAG components:
-- [langfuse](https://langfuse.com/)
-- [qdrant](https://qdrant.tech/)
+- [langfuse](https://langfuse.com/) (dependency)
+- [qdrant](https://qdrant.tech/) (dependency)
 - frontend
 - backend
 

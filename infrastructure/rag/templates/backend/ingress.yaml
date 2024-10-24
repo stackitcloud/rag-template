@@ -1,10 +1,10 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.backend.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "ingress.fullname" . }}
+  name: {{ include "backend.ingressFullName" . }}
   annotations:
-    {{- if .Values.global.config.basic_auth.enabled }}
+    {{- if .Values.global.config.basicAuth.enabled }}
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
     {{- end }}
@@ -17,10 +17,10 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /chat/$2
     {{- if .Values.global.config.tls.enabled }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.ingress.host.name }}, https://admin.{{ .Values.ingress.host.name }}"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.backend.ingress.host.name }}, https://admin.{{ .Values.backend.ingress.host.name }}"
     {{- else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://{{ .Values.ingress.host.name }}, http://admin.{{ .Values.ingress.host.name }}"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://{{ .Values.backend.ingress.host.name }}, http://admin.{{ .Values.backend.ingress.host.name }}"
     {{- end }}
 spec:
   {{- if .Values.global.config.tls.enabled }}
@@ -31,14 +31,14 @@ spec:
   {{- end }}
   ingressClassName: nginx
   rules:
-  - host: {{ .Values.ingress.host.name }}
+  - host: {{ .Values.backend.ingress.host.name }}
     http:
       paths:
-        - path: {{ .Values.ingress.host.path }}
-          pathType: {{ .Values.ingress.host.pathType }}
+        - path: {{ .Values.backend.ingress.host.path }}
+          pathType: {{ .Values.backend.ingress.host.pathType }}
           backend:
             service:
-              name: {{ $.Chart.Name }}
+              name: {{ $.Values.backend.name }}
               port:
-                number: {{ .Values.ingress.host.port }}
+                number: {{ .Values.backend.ingress.host.port }}
 {{- end }}

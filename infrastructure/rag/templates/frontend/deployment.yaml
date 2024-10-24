@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Values.frontend.name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.frontend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: {{ .Values.frontend.name }}
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: {{ .Values.frontend.name }}
     spec:
       volumes:
       - name: frontend
         emptyDir: {}
       initContainers:
       - name: frontend-copy
-        image: {{ template "fullimagename" . }}
+        image: {{ template "frontend.fullImageName" . }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.name" . }}
-          {{- if .Values.global.config.basic_auth.enabled }}
+              name: {{ template "configmap.frontendName" . }}
+          {{- if .Values.global.config.basicAuth.enabled }}
           - secretRef:
               name: "vite-auth"
           {{- end }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend
@@ -35,31 +35,31 @@ spec:
           - /bin/sh
         args:
           - /app/env.sh
-        image: {{ template "fullimagename" . }}
+        image: {{ template "frontend.fullImageName" . }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.name" . }}
-          {{- if .Values.global.config.basic_auth.enabled }}
+              name: {{ template "configmap.frontendName" . }}
+          {{- if .Values.global.config.basicAuth.enabled }}
           - secretRef:
               name: "vite-auth"
           {{- end }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend
       containers:
-      - name: {{ .Chart.Name }}
-        image: {{ template "fullimagename" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+      - name: {{ .Values.frontend.name }}
+        image: {{ template "frontend.fullImageName" . }}
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend
         ports:
-        - containerPort: {{ .Values.service.port }}
+        - containerPort: {{ .Values.frontend.service.port }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.name" . }}
-          {{- if .Values.global.config.basic_auth.enabled }}
+              name: {{ template "configmap.frontendName" . }}
+          {{- if .Values.global.config.basicAuth.enabled }}
           - secretRef:
               name: "vite-auth"
           {{- end }}

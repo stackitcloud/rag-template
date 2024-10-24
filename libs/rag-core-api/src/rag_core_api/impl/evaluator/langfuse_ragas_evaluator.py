@@ -1,4 +1,4 @@
-from asyncio import Semaphore, gather
+from asyncio import gather
 import json
 import logging
 import math
@@ -31,6 +31,7 @@ from ragas.metrics.critique import harmfulness
 from ragas.run_config import RunConfig
 from tqdm import tqdm
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
+from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 from rag_core_api.api_endpoints.chat_graph import ChatGraph
 from rag_core_api.embeddings.embedder import Embedder
@@ -65,7 +66,7 @@ class LangfuseRagasEvaluator(Evaluator):
         langfuse_manager: LangfuseManager,
         settings: RagasSettings,
         embedder: Embedder,
-        semaphore: Semaphore,
+        semaphore: AsyncThreadsafeSemaphore,
         chat_history_config: ChatHistorySettings,
     ) -> None:
         self._chat_history_config = chat_history_config

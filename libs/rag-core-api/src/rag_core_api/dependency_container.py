@@ -1,4 +1,3 @@
-from asyncio import Semaphore
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Configuration, Selector, Singleton, List  # noqa: WOT001
@@ -26,6 +25,7 @@ from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSett
 from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
+from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 from rag_core_api.impl import rag_api
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
@@ -241,6 +241,6 @@ class DependencyContainer(DeclarativeContainer):
         settings=ragas_settings,
         langfuse_manager=langfuse_manager,
         embedder=embedder,
-        semaphore=Semaphore(ragas_settings.max_concurrency),
+        semaphore=Singleton(AsyncThreadsafeSemaphore, ragas_settings.max_concurrency),
         chat_history_config=chat_history_config,
     )

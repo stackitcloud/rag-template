@@ -1,4 +1,3 @@
-from asyncio import Semaphore
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 from dependency_injector.providers import Configuration, List, Selector, Singleton  # noqa: WOT001
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -21,6 +20,7 @@ from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSett
 from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
+from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 from admin_backend.document_extractor_client.openapi_client.api.extractor_api import ExtractorApi
 from admin_backend.document_extractor_client.openapi_client.api_client import ApiClient
@@ -136,7 +136,7 @@ class DependencyContainer(DeclarativeContainer):
         LangchainSummarizer,
         langfuse_manager=langfuse_manager,
         chunker=summary_text_splitter,
-        semaphore=Semaphore(summarizer_settings.maximum_concurrreny),
+        semaphore=Singleton(AsyncThreadsafeSemaphore, summarizer_settings.maximum_concurrreny),
     )
 
     summary_enhancer = List(

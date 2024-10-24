@@ -1,4 +1,4 @@
-rag-base:
+ragBase:
   langfuse:
     postgresql:
       deploy: true

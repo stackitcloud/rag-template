@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: extractor
+  name: {{ .Values.extractor.name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.extractor.replicaCount }}
   selector:
     matchLabels:
-      app: extractor
+      app: {{ .Values.extractor.name }}
   template:
     metadata:
       labels:
-        app: extractor
+        app: {{ .Values.extractor.name }}
     spec:
       volumes:
         - name: config-volume
           configMap:
-            name: {{ template "configmap.logging.name" . }}    
+            name: {{ template "configmap.loggingName" . }}
       imagePullSecrets:
-        - name: {{ .Values.global.imagePullSecret.name }}    
+        - name: {{ .Values.global.imagePullSecret.name }}
       containers:
-      - name: extractor
+      - name: {{ .Values.extractor.name }}
         volumeMounts:
         - name: config-volume
-          mountPath: /config      
-        image: {{ template "extractorfullimagename" . }}
+          mountPath: /config
+        image: {{ template "extractor.fullImageName" . }}
         imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
         {{- if not (empty .Values.extractor.command) }}
-        command: 
+        command:
         {{- range $cmd :=  .Values.extractor.command }}
         - {{ $cmd -}}
         {{ end }}
@@ -44,20 +44,20 @@ spec:
         {{- range $arg :=  .Values.extractor.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
-        {{- end }}       
+        {{- end }}
         {{- end }}
         ports:
-        - containerPort: {{ .Values.service.port }}
+        - containerPort: {{ .Values.extractor.service.port }}
         {{- if .Values.global.debug.backend.enabled }}
         - containerPort: 31415
         {{- end }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.s3.name" . }}
+              name: {{ template "configmap.s3Name" . }}
           - configMapRef:
-              name: {{ template "configmap.pdfextractor.name" . }}
+              name: {{ template "configmap.pdfextractorName" . }}
           - secretRef:
-              name: {{ template "secret.s3.name" . }}          
+              name: {{ template "secret.s3Name" . }}
         env:
           - name: PYTHONPATH
-            value: {{ .Values.pythonPathEnv.PYTHONPATH }}          
+            value: {{ .Values.extractor.pythonPathEnv.PYTHONPATH }}

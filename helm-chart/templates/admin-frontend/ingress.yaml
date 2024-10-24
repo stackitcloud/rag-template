@@ -1,8 +1,8 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.adminFrontend.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "ingress.adminfrontend.fullname" . }}
+  name: {{ include "ingress.adminFrontendFullname" . }}
   annotations:
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: basic-auth
@@ -20,14 +20,14 @@ spec:
   {{- end }}
   ingressClassName: nginx
   rules:
-    - host: {{ .Values.ingress.host.name }}
+    - host: {{ .Values.adminFrontend.ingress.host.name }}
       http:
         paths:
-          - path: {{ .Values.ingress.host.path }}
-            pathType: {{ .Values.ingress.host.pathType }}
+          - path: {{ .Values.adminFrontend.ingress.host.path }}
+            pathType: {{ .Values.adminFrontend.ingress.host.pathType }}
             backend:
               service:
-                name: {{ $.Chart.Name }}
+                name: {{ .Values.adminFrontend.name }}
                 port:
-                  number: {{ .Values.ingress.host.port }}
+                  number: {{ .Values.adminFrontend.ingress.host.port }}
 {{- end }}

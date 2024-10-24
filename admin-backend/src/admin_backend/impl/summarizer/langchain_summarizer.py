@@ -1,4 +1,3 @@
-from asyncio import Semaphore
 import logging
 import traceback
 from typing import Optional
@@ -10,8 +9,8 @@ from langchain_core.runnables import (
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
+from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 from admin_backend.summarizer.summarizer import SummarizerInput, SummarizerOutput, Summarizer
 
@@ -21,7 +20,10 @@ logger = logging.getLogger(__name__)
 class LangchainSummarizer(Summarizer):
 
     def __init__(
-        self, langfuse_manager: LangfuseManager, chunker: RecursiveCharacterTextSplitter, semaphore: Semaphore
+        self,
+        langfuse_manager: LangfuseManager,
+        chunker: RecursiveCharacterTextSplitter,
+        semaphore: AsyncThreadsafeSemaphore,
     ):
         self._chunker = chunker
         self._langfuse_manager = langfuse_manager

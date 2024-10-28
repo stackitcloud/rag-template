@@ -4,7 +4,7 @@ qdrant:
   image:
     repository: docker.io/qdrant/qdrant
     pullPolicy: IfNotPresent
-    tag: ""
+    tag: "v1.9.4"
     useUnprivilegedImage: false
 
   imagePullSecrets: []
@@ -23,21 +23,21 @@ qdrant:
     annotations: {}
     loadBalancerIP: ""
     ports:
-      - name: http
-        port: 6333
-        targetPort: 6333
-        protocol: TCP
-        checksEnabled: true
-      - name: grpc
-        port: 6334
-        targetPort: 6334
-        protocol: TCP
-        checksEnabled: false
-      - name: p2p
-        port: 6335
-        targetPort: 6335
-        protocol: TCP
-        checksEnabled: false
+    - name: http
+      port: 6333
+      targetPort: 6333
+      protocol: TCP
+      checksEnabled: true
+    - name: grpc
+      port: 6334
+      targetPort: 6334
+      protocol: TCP
+      checksEnabled: false
+    - name: p2p
+      port: 6335
+      targetPort: 6335
+      protocol: TCP
+      checksEnabled: false
 
   ingress:
     enabled: false
@@ -46,11 +46,11 @@ qdrant:
     annotations: {}
     # kubernetes.io/ingress.class: alb
     hosts:
-      - host: qdrant.local
-        paths:
-          - path: /
-            pathType: Prefix
-            servicePort: 6333
+    - host: qdrant.local
+      paths:
+      - path: /
+        pathType: Prefix
+        servicePort: 6333
     tls: []
     # - hosts:
     #    - example-domain.com

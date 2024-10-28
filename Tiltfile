@@ -257,6 +257,18 @@ value_override = [
     "global.ssl=false",
     # ingress host names
     "ragBase.backend.ingress.host.name=rag.localhost",
+    # langfuse
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_ORG_ID=%s" % os.environ["LANGFUSE_INIT_ORG_ID"],
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_ID=%s" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_PUBLIC_KEY=%s" % os.environ[
+        "LANGFUSE_INIT_PROJECT_PUBLIC_KEY"
+    ],
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_SECRET_KEY=%s" % os.environ[
+        "LANGFUSE_INIT_PROJECT_SECRET_KEY"
+    ],
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_EMAIL=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_PASSWORD=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
+    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_NAME=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
 ]
 
 yaml = helm(

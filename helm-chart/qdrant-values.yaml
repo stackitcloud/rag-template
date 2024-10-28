@@ -5,7 +5,7 @@ ragBase:
     image:
       repository: docker.io/qdrant/qdrant
       pullPolicy: IfNotPresent
-      tag: ""
+      tag: "v1.9.4"
       useUnprivilegedImage: false
 
     imagePullSecrets: []

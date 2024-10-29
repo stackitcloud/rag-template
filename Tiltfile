@@ -77,7 +77,34 @@ def create_namespace_if_notexist(namespace):
 create_namespace_if_notexist(namespace)
 
 ########################################################################################################################
-################################## build backend_rag image and do live update ##############################################
+################################## core testing & linting ##############################################################
+########################################################################################################################
+
+# Add linter trigger
+local_resource(
+    "RAG Core linting",
+    """docker build -t rag_core -f rag-core-library/Dockerfile rag-core-library;
+    docker run --rm rag_core make lint""",
+    labels=["linting"],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
+
+# Add linter trigger
+local_resource(
+    "RAG Core testing",
+    """docker build -t rag_core -f rag-core-library/Dockerfile rag-core-library;
+    docker run --rm rag_core make test""",
+    labels=["test"],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
+
+
+########################################################################################################################
+################################## build backend_rag image and do live update ##########################################
 ########################################################################################################################
 
 # NOTE: full image names should match the one in the helm chart values.yaml!

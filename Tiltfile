@@ -13,11 +13,11 @@ def create_linter_command(folder_name, name):
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 -f "
+        + " --build-arg dev=1 --build-arg TAG=debug -f "
         + folder_name
-        + "/Dockerfile .;docker run --rm "
+        + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
-        + " make lint"
+        + " lint"
     )
 
 
@@ -25,11 +25,11 @@ def create_test_command(folder_name, name):
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 -f "
+        + " --build-arg dev=1 --build-arg TAG=debug -f "
         + folder_name
-        + "/Dockerfile .;docker run --rm "
+        + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
-        + " make test"
+        + " test"
     )
 
 
@@ -118,6 +118,7 @@ docker_build(
     ".",
     build_args={
         "dev": "1" if backend_debug else "0",
+        "TAG": "debug-nonroot" if backend_debug else "nonroot",
     },
     live_update=[
         sync(backend_context, "/app/rag-backend"),
@@ -162,6 +163,7 @@ docker_build(
     ".",
     build_args={
         "dev": "1" if backend_debug else "0",
+        "TAG": "debug-nonroot" if backend_debug else "nonroot",
     },
     live_update=[
         sync(admin_backend_context, "/app/admin-backend"),
@@ -205,6 +207,7 @@ docker_build(
     ".",
     build_args={
         "dev": "1" if backend_debug else "0",
+        "TAG": "debug-nonroot" if backend_debug else "nonroot",
     },
     live_update=[sync(extractor_context, "/app/document-extractor")],
     dockerfile=extractor_context + "/Dockerfile",

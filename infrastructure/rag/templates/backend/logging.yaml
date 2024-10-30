@@ -31,7 +31,7 @@ data:
         class: logging.FileHandler
         level: DEBUG
         formatter: format
-        filename: logfile.log     # file to store LogRecords
+        filename: log/logfile.log     # file to store LogRecords
         mode: w     # write mode of this handler:
                     # In mode `w` the file is overwritten; i.e. at any time there are LogRecords originating from not
                     # more than one session available.

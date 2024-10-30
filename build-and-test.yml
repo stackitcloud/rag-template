@@ -1,6 +1,6 @@
 pr:
-  - develop
-  - main
+- develop
+- main
 
 pool:
   vmImage: "ubuntu-latest"
@@ -29,18 +29,18 @@ stages:
         git submodule update
         git pull
 
-        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 -f admin-backend/Dockerfile .
+        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 --build-arg TAG=debug -f admin-backend/Dockerfile .
       displayName: "Building docker image."
     # Note that the pyproject.toml is already copied into the docker image. Also note that copy
     # pasting the whole /app folder will overwrite the existing .venv folder in the docker image
     - script: |
-        docker run --rm $DOCKER_IMAGE_NAME make lint
+        docker run --rm --entrypoint make $DOCKER_IMAGE_NAME lint
         LINTING_EXIT_CODE=$(echo $?)
         echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
         echo "##vso[task.setvariable variable=LINTING_EXIT_CODE]$LINTING_EXIT_CODE"
       displayName: "Generating lint report."
     - script: |
-        docker run --rm $DOCKER_IMAGE_NAME make test
+        docker run --rm --entrypoint make $DOCKER_IMAGE_NAME test
       displayName: "Running unit tests"
     - script: |
         echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
@@ -54,18 +54,18 @@ stages:
   - job: BuildAndTestDocumentExtractor
     steps:
     - script: |
-        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 -f document-extractor/Dockerfile .
+        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 --build-arg TAG=debug -f document-extractor/Dockerfile .
       displayName: "Building docker image."
     # Note that the pyproject.toml is already copied into the docker image. Also note that copy
     # pasting the whole /app folder will overwrite the existing .venv folder in the docker image
     - script: |
-        docker run --rm  $DOCKER_IMAGE_NAME make lint
+        docker run --rm --entrypoint make $DOCKER_IMAGE_NAME lint
         LINTING_EXIT_CODE=$(echo $?)
         echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
         echo "##vso[task.setvariable variable=LINTING_EXIT_CODE]$LINTING_EXIT_CODE"
       displayName: "Generating lint report."
     - script: |
-        docker run --rm $DOCKER_IMAGE_NAME make test
+        docker run --rm --entrypoint make $DOCKER_IMAGE_NAME test
       displayName: "Running unit tests"
     - script: |
         echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
@@ -94,18 +94,18 @@ stages:
         git submodule update
         git pull
 
-        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 -f rag-backend/Dockerfile .
+        docker build -t $DOCKER_IMAGE_NAME --build-arg dev=1 --build-arg TAG=debug -f rag-backend/Dockerfile .
       displayName: "Building docker image."
     # Note that the pyproject.toml is already copied into the docker image. Also note that copy
     # pasting the whole /app folder will overwrite the existing .venv folder in the docker image
     - script: |
-        docker run --rm $DOCKER_IMAGE_NAME make lint
+        docker run --rm --entrypoint make $DOCKER_IMAGE_NAME lint
         LINTING_EXIT_CODE=$(echo $?)
         echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."
         echo "##vso[task.setvariable variable=LINTING_EXIT_CODE]$LINTING_EXIT_CODE"
       displayName: "Generating lint report."
     - script: |
-        docker run --rm $DOCKER_IMAGE_NAME make test
+        docker run --rm --entrypoint make $DOCKER_IMAGE_NAME test
       displayName: "Running unit tests"
     - script: |
         echo "LINTING_EXIT_CODE is equal to '${LINTING_EXIT_CODE}'."

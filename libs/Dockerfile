@@ -1,4 +1,4 @@
-FROM python:3.11.7-bookworm
+FROM --platform=linux/amd64 python:3.11.7-bookworm
 
 ARG dev=0
 

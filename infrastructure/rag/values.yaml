@@ -91,6 +91,9 @@ backend:
     usecase:
 
   envs:
+    stackitVllm:
+      STACKIT_VLLM_MODEL: neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8
+      STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
     database:
       VECTOR_DB_COLLECTION_NAME: rag-db
       VECTOR_DB_URL: http://qdrant:6333

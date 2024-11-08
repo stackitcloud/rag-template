@@ -109,6 +109,13 @@ class DefaultChatGraph(ChatGraph):
             search_request=SearchRequest(search_term=state["rephrased_question"])
         ).actual_instance
 
+        if isinstance(retrieved_documents, ChatResponse):
+            # error case; occurs when no or empty collection has been encountered
+            return {
+                "error_messages": [self.error_messages.no_documents_found, retrieved_documents.answer],
+                "finish_reasons": ["No documents found"],
+            }
+
         retrieved_langchain_documents = [
             self._mapper.source_document2langchain_document(x) for x in retrieved_documents.documents
         ]

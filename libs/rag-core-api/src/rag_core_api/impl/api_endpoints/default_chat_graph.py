@@ -1,10 +1,15 @@
+import io
 import logging
-from typing import Any, Optional, Sequence
-from functools import partial
 from enum import StrEnum
+from functools import partial
+from pathlib import Path
+from time import time
+from typing import Any, Optional
 
 from langchain_core.runnables import RunnableConfig
+from langchain_core.runnables.graph import MermaidDrawMethod
 from langgraph.graph import END, START, StateGraph
+from PIL import Image
 
 from rag_core_api.models.search_request import SearchRequest
 from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
@@ -22,20 +27,12 @@ logger = logging.getLogger(__name__)
 
 class GraphNodeNames(StrEnum):
     REPHRASE = "rephrase"
-    SAFE_GUARD = "safe_guard"
     RETRIEVE = "retrieve"
     GENERATE = "generate"
-    ANSWER_RELEVANCY = "answer_relevancy"
-    ANSWER_FROM_CONTEXT = "answer_from_context"
-    ANSWER_CHECK_SINK = "answer_check_sink"
-    INCREMENT_RETRIES = "increment_retries"
     ERROR_NODE = "error_node"
-    GENERATE_SINK = "generate_sink"
 
 
 class DefaultChatGraph(ChatGraph):
-
-    RETRY_LIMIT = 3
 
     def __init__(
         self,
@@ -51,9 +48,6 @@ class DefaultChatGraph(ChatGraph):
         self._mapper = mapper
         self._rephrasing_chain = rephrasing_chain
         self.error_messages = error_messages
-        self._safe_guard_chain = None  # TODO: add safe guard
-        self._anwer_relevancy_chain = None  # TODO: add answer relevancy chain
-        self._answer_from_context_chain = None  # TODO: add answer from context chain
         self._rephrase_node_builder = partial(self._rephrase_node)
         self._generate_node_builder = partial(self._generate_node)
         self._graph = self._setup_graph()
@@ -71,6 +65,23 @@ class DefaultChatGraph(ChatGraph):
         logger.info("GENERATED answer: %s", response_state["answer_text"])
 
         return response_state["response"]
+
+    def draw_graph(self, relative_dir_path: Optional[str] = None) -> None:
+        """Draw the graph and save as png."""
+        img = Image.open(
+            io.BytesIO(
+                self._graph.get_graph().draw_mermaid_png(
+                    draw_method=MermaidDrawMethod.API,
+                )
+            )
+        )
+        if relative_dir_path:
+            p = Path.cwd() / relative_dir_path
+        else:
+            p = Path.cwd()
+
+        p.mkdir(parents=True, exist_ok=True)
+        img.save(p / f"graph_{str(time()).replace('.', '_')}.png")
 
     def _setup_graph(self):
         self._add_nodes()
@@ -93,14 +104,6 @@ class DefaultChatGraph(ChatGraph):
         )
         return {"answer_text": answer_text, "response": chat_response}
 
-    async def _is_harmful_node(self, state: dict) -> dict:
-        # TODO
-        response = {"is_harmful": False}
-        if response["is_harmful"]:
-            response["error_messages"] = [self.error_messages.harmful_question]
-            response["finish_reasons"] = ["Harmful question"]
-        return response
-
     async def _retrieve_node(self, state: dict) -> dict:
         retrieved_documents = self._searcher.search(
             search_request=SearchRequest(search_term=state["rephrased_question"])
@@ -121,31 +124,10 @@ class DefaultChatGraph(ChatGraph):
 
         return response
 
-    async def _answer_relevancy_node(self, state: dict) -> dict:
-        # TODO
-        return {"answer_is_relevant": True}
-
-    async def _answer_from_context_node(self, state: dict) -> dict:
-        # TODO add answer from context logic
-        return {"is_from_context": True}
-
-    async def _increment_retries_node(self, state: dict) -> dict:
-        response = {"retries": state["retries"] + 1}
-        if response["retries"] > self.RETRY_LIMIT:
-            response["error_message"] = [self.error_messages.no_answer_found]
-            response["finish_reason"] = ["Maximum retries exceeded, no answer found"]
-        return response
-
-    async def _sink_node(self, state: dict) -> dict:
-        return state
-
     async def _error_node(self, state: dict) -> dict:
-        error_message = " ".join(state["error_messages"])
-        finish_reson = " ".join(state["finish_reasons"])
+        error_message = " ".join(set(state["error_messages"]))
+        finish_reson = " ".join(set(state["finish_reasons"]))
         return {"response": ChatResponse(answer=error_message, citations=[], finish_reason=finish_reson)}
-
-    async def _generate_sink_node(self, state: dict) -> dict:
-        return state
 
     #####################
     # conditional edges #
@@ -155,58 +137,17 @@ class DefaultChatGraph(ChatGraph):
             return GraphNodeNames.GENERATE
         return GraphNodeNames.ERROR_NODE
 
-    def _decide_if_harmful_edge(self, state: dict) -> Sequence[str]:
-        if state["is_harmful"]:
-            return [GraphNodeNames.ERROR_NODE]
-        return [GraphNodeNames.ANSWER_RELEVANCY, GraphNodeNames.ANSWER_FROM_CONTEXT]
-
-    def _question_answered_and_from_context_edge(self, state: dict) -> str:
-        if state["answer_is_relevant"] and state["is_from_context"]:
-            return END
-        return GraphNodeNames.INCREMENT_RETRIES
-
-    def _retries_exceeded_edge(self, state: dict) -> str:
-        if state["error_messages"]:
-            return GraphNodeNames.ERROR_NODE
-        return GraphNodeNames.REPHRASE
-
     def _add_nodes(self):
         self._state_graph.add_node(GraphNodeNames.REPHRASE, self._rephrase_node_builder)
-        self._state_graph.add_node(GraphNodeNames.SAFE_GUARD, self._is_harmful_node)
         self._state_graph.add_node(GraphNodeNames.RETRIEVE, self._retrieve_node)
         self._state_graph.add_node(GraphNodeNames.GENERATE, self._generate_node_builder)
-        self._state_graph.add_node(GraphNodeNames.GENERATE_SINK, self._generate_sink_node)
-        self._state_graph.add_node(GraphNodeNames.ANSWER_RELEVANCY, self._answer_relevancy_node)
-        self._state_graph.add_node(GraphNodeNames.ANSWER_FROM_CONTEXT, self._answer_from_context_node)
-        self._state_graph.add_node(GraphNodeNames.ANSWER_CHECK_SINK, self._sink_node)
-        self._state_graph.add_node(GraphNodeNames.INCREMENT_RETRIES, self._increment_retries_node)
         self._state_graph.add_node(GraphNodeNames.ERROR_NODE, self._error_node)
 
     def _wire_graph(self):
         self._state_graph.add_edge(START, GraphNodeNames.REPHRASE)
-        self._state_graph.add_edge(START, GraphNodeNames.SAFE_GUARD)
         self._state_graph.add_edge(GraphNodeNames.REPHRASE, GraphNodeNames.RETRIEVE)
-
         self._state_graph.add_conditional_edges(
             GraphNodeNames.RETRIEVE, self._docs_retrieved_edge, [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE]
         )
-
-        self._state_graph.add_edge([GraphNodeNames.GENERATE, GraphNodeNames.SAFE_GUARD], GraphNodeNames.GENERATE_SINK)
-
-        successors = [GraphNodeNames.ERROR_NODE, GraphNodeNames.ANSWER_RELEVANCY, GraphNodeNames.ANSWER_FROM_CONTEXT]
-        self._state_graph.add_conditional_edges(GraphNodeNames.GENERATE_SINK, self._decide_if_harmful_edge, successors)
-
-        self._state_graph.add_edge(successors[1:], GraphNodeNames.ANSWER_CHECK_SINK)
-
-        self._state_graph.add_conditional_edges(
-            GraphNodeNames.ANSWER_CHECK_SINK,
-            self._question_answered_and_from_context_edge,
-            [GraphNodeNames.INCREMENT_RETRIES, END],
-        )
-
-        self._state_graph.add_conditional_edges(
-            GraphNodeNames.INCREMENT_RETRIES,
-            self._retries_exceeded_edge,
-            [GraphNodeNames.REPHRASE, GraphNodeNames.ERROR_NODE],
-        )
+        self._state_graph.add_edge(GraphNodeNames.GENERATE, END)
         self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)

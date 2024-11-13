@@ -1,9 +1,6 @@
-ARG TAG=nonroot
-
 FROM --platform=linux/amd64 python:3.11.7-bookworm AS build
 
 ARG dev=0
-
 ENV POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv
 ENV POETRY_VERSION=1.8.3
 
@@ -15,7 +12,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && $POETRY_VIRTUALENVS_PATH/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
-COPY rag-core-library rag-core-library
+COPY rag-core-library/rag-core-lib /app/rag-core-library/rag-core-lib
+COPY rag-core-library/rag-core-api /app/rag-core-library/rag-core-api
 
 WORKDIR /app/rag-backend
 COPY rag-backend/pyproject.toml rag-backend/poetry.lock ./
@@ -29,20 +27,42 @@ RUN if [ "$dev" = "1" ]; then \
     poetry install --no-interaction --no-ansi --no-root; \
     fi
 
-FROM --platform=linux/amd64 gcr.io/distroless/python3-debian12:${TAG}
+FROM --platform=linux/amd64 python:3.11.7-bookworm
+ARG dev=0
+
+RUN adduser --disabled-password --gecos "" nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv
 COPY --from=build ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
+# COPY --from=build /home/nonroot/.config/pypoetry /home/nonroot/.config/pypoetry
 
-COPY rag-core-library /app/rag-core-library
+
+COPY rag-core-library/rag-core-lib /app/rag-core-library/rag-core-lib
+COPY rag-core-library/rag-core-api /app/rag-core-library/rag-core-api
 
 WORKDIR /app/rag-backend
 COPY rag-backend .
+
+
+# cleanup
+RUN apt-get clean autoclean
+RUN apt-get autoremove --yes
+RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN if [ "$dev" = "0" ]; then \
+        while read -r shell; do rm -f "$shell"; done < /etc/shells; \
+    else \
+        echo "POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv" >> /etc/environment;\
+        export POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv;\
+        export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
+        chown -R nonroot:nonroot /app/rag-backend;\
+        chown -R nonroot:nonroot /app/rag-core-library;\
+    fi
+
+
+USER nonroot
 COPY --from=build --chown=nonroot:nonroot  /app/rag-backend/log /app/rag-backend/log
-
-
 
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"

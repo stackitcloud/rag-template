@@ -1,4 +1,4 @@
-import {DocumentResponseModel} from "./document-response.model";
+import { DocumentResponseModel } from "./document-response.model";
 
 export interface ChatDocumentModel {
   index: number;
@@ -20,7 +20,7 @@ export const mapToChatDocuments = (startIncrementId: number, documents: Document
     index: startIncrementId + index,
     messageId: messageId,
     name: name,
-    chunk: doc.content,
+    chunk: doc.page_content,
     url: url
   } as ChatDocumentModel;
 });

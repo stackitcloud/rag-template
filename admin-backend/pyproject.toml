@@ -54,7 +54,7 @@ max-line-length = 120
 name = "admin_backend"
 version = "0.0.1"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and getting particular documents or document lists."
-authors = ["mmmake GmbH"]
+authors = ["STACKIT GmbH & Co. KG"]
 readme = "README.md"
 
 [tool.poetry.group.dev.dependencies]
@@ -89,7 +89,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-rag-core-lib = { path = "../rag-core-library/rag-core-lib", develop = true}
 python = "^3.11"
 uvicorn = "^0.30.1"
 fastapi = "^0.111.0"
@@ -106,3 +105,4 @@ langfuse = "^2.39.1"
 redis = "^5.0.8"
 openai = "^1.42.0"
 pyyaml = "^6.0.2"
+admin-api-lib = {path = "../rag-core-library/admin-api-lib", develop = true}

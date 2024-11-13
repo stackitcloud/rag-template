@@ -1,7 +1,7 @@
 export interface ChatResponseModel {
     answer: string;
     finish_reason: string;
-    citations: SourceDocument[];
+    citations: InformationPiece[];
 }
 
 export interface KeyValuePair {
@@ -9,7 +9,7 @@ export interface KeyValuePair {
     value: string;
 }
 
-export interface SourceDocument {
-    content: string;
+export interface InformationPiece {
+    page_content: string;
     metadata: KeyValuePair[];
 }

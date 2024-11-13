@@ -24,7 +24,12 @@
                 {
                     "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
                     "remoteRoot": "/app/rag-core-library/rag-core-api"
-                }
+                },
+                // avoid tilt warning of missing path mapping
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
+                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                },
             ]
         },
         {
@@ -42,7 +47,20 @@
                 {
                     "localRoot": "${workspaceFolder}/document-extractor",
                     "remoteRoot": "/app/document-extractor"
-                }
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/extractor-api-lib",
+                    "remoteRoot": "/app/rag-core-library/extractor-api-lib"
+                },
+                // avoid tilt warning of missing path mapping
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
+                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
+                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                },
             ]
         },
         {
@@ -64,6 +82,15 @@
                 {
                     "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
                     "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
+                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                },
+                // avoid tilt warning of missing path mapping
+                {
+                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
+                    "remoteRoot": "/app/rag-core-library/rag-core-api"
                 }
             ]
         }

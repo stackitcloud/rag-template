@@ -2,7 +2,7 @@
 name = "rag-usecase-example"
 version = "0.1.0"
 description = ""
-authors = ["Nobody"]
+authors = ["STACKIT GmbH & Co. KG"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

@@ -10,7 +10,7 @@ axios.defaults.auth = {
 export class DocumentAPI {
     static async loadDocuments(): Promise<DocumentModel[]> {
         try {
-            const response = await axios.get<DocumentModel[]>('/all_documents');
+            const response = await axios.get<DocumentModel[]>('/all_documents_status');
             return response.data;
         } catch (error) {
             this.handleError(error);

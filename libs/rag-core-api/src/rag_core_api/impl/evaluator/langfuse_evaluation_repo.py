@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class LangfuseEvaluationRepo(EvaluationRepo):
-
     BASE_PROMPT_NAME: str = "base-answer-generation"
     DATASET_INPUT_KEY: str = "question"
     DATASET_EXPECTED_OUTPUT_KEY: str = "ground_truth"

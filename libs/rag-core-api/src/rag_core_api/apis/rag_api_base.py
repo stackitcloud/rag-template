@@ -5,9 +5,7 @@ from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
-from rag_core_api.models.search_request import SearchRequest
-from rag_core_api.models.search_response import SearchResponse
-from rag_core_api.models.upload_source_document import UploadSourceDocument
+from rag_core_api.models.information_piece import InformationPiece
 
 
 class BaseRagApi:
@@ -21,23 +19,22 @@ class BaseRagApi:
         self,
         session_id: str,
         chat_request: ChatRequest,
-    ) -> ChatResponse: ...
+    ) -> ChatResponse:
+        ...
 
     async def evaluate(
         self,
-    ) -> None: ...
+    ) -> None:
+        ...
 
-    async def remove_source_documents(
+    async def remove_information_piece(
         self,
         delete_request: DeleteRequest,
-    ) -> None: ...
+    ) -> None:
+        ...
 
-    async def search(
+    async def upload_information_piece(
         self,
-        search_request: SearchRequest,
-    ) -> SearchResponse: ...
-
-    async def upload_source_documents(
-        self,
-        upload_source_document: List[UploadSourceDocument],
-    ) -> None: ...
+        information_piece: List[InformationPiece],
+    ) -> None:
+        ...

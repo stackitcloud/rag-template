@@ -1,0 +1,132 @@
+openapi: 3.0.2
+info:
+  description: The API is used for the communication between the admin frontend and
+    the admin backend in the rag project.
+  title: admin-api-lib
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /document_reference/{identification}:
+    get:
+      operationId: document_reference_id_get
+      parameters:
+      - description: Identifier of the pdf document.
+        explode: false
+        in: path
+        name: identification
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: Returns the pdf in binary form.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Document not found.
+        "500":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Internal server error
+      tags:
+      - admin
+  /upload_documents:
+    post:
+      description: Uploads user selected pdf documents.
+      operationId: upload_documents_post
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              format: binary
+              type: string
+        description: The PDF document to upload.
+        required: true
+      responses:
+        "200":
+          description: ok
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      tags:
+      - admin
+  /delete_document/{identification}:
+    delete:
+      operationId: delete_document
+      parameters:
+      - explode: false
+        in: path
+        name: identification
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Deleted
+        "500":
+          description: Internal server error
+      tags:
+      - admin
+  /all_documents_status:
+    get:
+      operationId: get_all_documents_status
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/document_status'
+                type: array
+          description: List of document links
+        "500":
+          description: Internal server error
+      tags:
+      - admin
+components:
+  schemas:
+    status:
+      description: ""
+      enum:
+      - UPLOADING
+      - PROCESSING
+      - READY
+      - ERROR
+      title: status
+      type: string
+    document_status:
+      description: ""
+      example:
+        name: name
+        status: UPLOADING
+      properties:
+        name:
+          description: ""
+          title: name
+          type: string
+        status:
+          $ref: '#/components/schemas/status'
+      required:
+      - name
+      - status
+      title: document_status
+      type: object

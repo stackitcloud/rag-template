@@ -11,7 +11,8 @@ class AsyncChain(Runnable[Input, Output], ABC):
     """
 
     @abstractmethod
-    async def ainvoke(self, chain_input: Input, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Output: ...
+    async def ainvoke(self, chain_input: Input, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Output:
+        ...
 
     def invoke(self, chain_input: Input, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Output:
         raise NotImplementedError("Please use the async implementation.")

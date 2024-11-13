@@ -43,12 +43,12 @@ class RetrieverQuark(Retriever):
         if not self._vector_database.collection_available:
             raise NoOrEmptyCollectionError()
 
-    def invoke(self, retriever_input: str, config: Optional[RunnableConfig] = None) -> list[Document]:
+    async def ainvoke(self, retriever_input: str, config: Optional[RunnableConfig] = None) -> list[Document]:
         config = ensure_config(config)
         self.verify_readiness()
         if self.TYPE_KEY not in config["metadata"]["filter_kwargs"].keys():
             config["metadata"]["filter_kwargs"] = config["metadata"]["filter_kwargs"] | self._filter_kwargs
-        return self._vector_database.search(
+        return await self._vector_database.asearch(
             query=retriever_input,
             search_kwargs=self._search_kwargs,
             filter_kwargs=config["metadata"]["filter_kwargs"],

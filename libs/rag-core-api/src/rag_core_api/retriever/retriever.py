@@ -10,7 +10,9 @@ RetrieverOutput = list[Document]
 
 
 class Retriever(Runnable[RetrieverInput, RetrieverOutput], ABC):
-
     @abstractmethod
-    def invoke(self, retriever_input: str, config: Optional[RunnableConfig] = None) -> list[Document]:
+    async def ainvoke(self, retriever_input: str, config: Optional[RunnableConfig] = None) -> list[Document]:
         pass
+
+    def invoke(self, retriever_input: list[float], config: RunnableConfig | None = None) -> list[Document]:
+        raise NotImplementedError("Please use the async implementation.")

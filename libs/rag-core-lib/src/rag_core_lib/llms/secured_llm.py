@@ -11,7 +11,6 @@ from rag_core_lib.secret_provider.secret_provider import SecretProvider
 
 
 class SecuredLLM(LLM):
-
     llm: Any
     secret_provider: SecretProvider
 

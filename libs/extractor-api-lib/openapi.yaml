@@ -1,0 +1,96 @@
+openapi: 3.0.2
+info:
+  title: extractor-api-lib
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /extract:
+    post:
+      operationId: extract_information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/extraction_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/information_piece'
+                type: array
+          description: List of extracted information.
+        "422":
+          description: Body is not a valid PDF.
+        "500":
+          description: Something somewhere went terribly wrong.
+      tags:
+      - extractor
+components:
+  schemas:
+    extraction_request:
+      description: ""
+      example:
+        path_on_s3: path on s3
+      properties:
+        path_on_s3:
+          description: ""
+          title: PathOnS3
+          type: string
+      required:
+      - path_on_s3
+      title: ExtractionRequest
+      type: object
+    key_value_pair:
+      description: ""
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          description: ""
+          title: Key
+        value:
+          description: ""
+          title: Value
+      title: MetaInformationPiece
+      type: object
+    content_type:
+      description: ""
+      enum:
+      - IMAGE
+      - TABLE
+      - TEXT
+      title: InformationType
+      type: string
+    information_piece:
+      description: A piece of information that has been extracted.
+      example:
+        metadata:
+        - key: key
+          value: value
+        - key: key
+          value: value
+        page_content: some text
+        type: TEXT
+      properties:
+        metadata:
+          description: ""
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: MetaInformation
+          type: array
+        page_content:
+          description: ""
+          type: string
+        type:
+          $ref: '#/components/schemas/content_type'
+      required:
+      - metadata
+      - page_content
+      - type
+      title: InformationPiece
+      type: object

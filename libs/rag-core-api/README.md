@@ -8,9 +8,9 @@ A minimal example use case which replaces the `chat_chain` can be found [here](h
 
 The following endpoints are provided by the *backend*:
 - `/chat/{session_id}`: The endpoint for chatting.
-- `/source_documents/remove`: Endpoint to remove documents from the vector database.
+- `/information_pieces/remove`: Endpoint to remove documents from the vector database.
 - `/search`: Endpoint to search documents. This is the same search that is internally used when using the chat-endpoint.
-- `/source_documents`: Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity a Langchain Documents like format is used.
+- `/information_pieces`: Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity a Langchain Documents like format is used.
 
 # Requirements
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
@@ -25,13 +25,10 @@ make
 ## `/chat/{session_id}`
 This endpoint is used for chatting.
 
-## `/source_documents/remove`
+## `/information_pieces/remove`
 Endpoint to remove documents from the vector database.
 
-## `/search`
-Endpoint to search documents. This is the same search that is internally used when using the chat-endpoint.
-
-## `/source_documents`
+## `/information_pieces`
 Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity a Langchain Documents like format is used.
 Uploaded documents are required to contain the following metadata:
 - `document_url` that points to a download link to the source document.

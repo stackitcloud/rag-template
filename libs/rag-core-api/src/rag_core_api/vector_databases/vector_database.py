@@ -39,7 +39,7 @@ class VectorDatabase(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def search(self, query: str, search_kwargs: dict, filter_kwargs: dict) -> list[Document]:
+    async def asearch(self, query: str, search_kwargs: dict, filter_kwargs: dict) -> list[Document]:
         """Search in a vectordatabase for points fitting the query and the search_kwargs.
 
         Args:

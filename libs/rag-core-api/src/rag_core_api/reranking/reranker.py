@@ -11,7 +11,9 @@ RerankerOutput = list[Document]
 
 
 class Reranker(Runnable[RerankerInput, RerankerOutput], ABC):
-
     @abstractmethod
-    def invoke(self, rerank_input: RerankerInput, config: Optional[RunnableConfig] = None) -> RerankerOutput:
+    async def ainvoke(self, rerank_input: RerankerInput, config: Optional[RunnableConfig] = None) -> RerankerOutput:
         pass
+
+    def invoke(self, rerank_input: RerankerInput, config: RunnableConfig | None = None) -> RerankerOutput:
+        raise NotImplementedError("Please use the async implementation.")

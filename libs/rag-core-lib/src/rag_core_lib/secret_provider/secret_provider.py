@@ -8,7 +8,8 @@ class SecretProvider(ABC):
 
     @property
     @abstractmethod
-    def provided_key(self) -> str: ...
+    def provided_key(self) -> str:
+        ...
 
     @abstractmethod
     def provide_token(self) -> dict:

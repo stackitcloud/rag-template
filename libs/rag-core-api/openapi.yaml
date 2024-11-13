@@ -17,26 +17,6 @@ paths:
           description: Internal Server Error.
       tags:
       - rag
-  /search:
-    post:
-      operationId: search
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/search_request'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/search_response'
-          description: "200."
-        "500":
-          description: Internal Server Error.
-      tags:
-      - rag
   /chat/{session_id}:
     post:
       operationId: chat
@@ -67,15 +47,36 @@ paths:
       tags:
       - rag
     summary: QNA or Rag Chat.
-  /source_documents:
+  /information_pieces/remove:
     post:
-      operationId: upload-source-documents
+      operationId: remove_information_piece
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_request'
+        required: true
+      responses:
+        "202":
+          description: Accepted.
+        "404":
+          description: Ressource not Found
+        "422":
+          description: ID or metadata missing.
+        "500":
+          description: Internal Server Error.
+      summary: remove information piece
+      tags:
+      - rag
+  /information_pieces/upload:
+    post:
+      operationId: upload_information_piece
       requestBody:
         content:
           application/json:
             schema:
               items:
-                $ref: '#/components/schemas/upload_source_document'
+                $ref: '#/components/schemas/information_piece'
               type: array
         required: true
       responses:
@@ -93,27 +94,7 @@ paths:
               schema:
                 type: string
           description: Internal Server Error.
-      summary: Upload Files for RAG.
-      tags:
-      - rag
-  /source_documents/remove:
-    post:
-      operationId: remove-source-documents
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/delete_request'
-        required: true
-      responses:
-        "202":
-          description: Accepted.
-        "404":
-          description: Ressource not Found
-        "422":
-          description: ID or metadata missing.
-        "500":
-          description: Internal Server Error.
+      summary: Upload information pieces for vectordatabase
       tags:
       - rag
 components:
@@ -170,23 +151,6 @@ components:
       - role
       title: chat_history_message
       type: object
-    search_request:
-      description: ""
-      properties:
-        search_term:
-          description: ""
-          title: search_term
-          type: string
-        metadata:
-          description: ""
-          items:
-            $ref: '#/components/schemas/key_value_pair'
-          title: metadata
-          type: array
-      required:
-      - search_term
-      title: search_request
-      type: object
     content_type:
       description: ""
       enum:
@@ -206,31 +170,6 @@ components:
           title: metadata
           type: array
       title: file_request
-      type: object
-    source_document:
-      description: Uploading a json with chunks and metadata.
-      example:
-        metadata:
-        - value: value
-          key: key
-        - value: value
-          key: key
-        content: content
-      properties:
-        metadata:
-          description: The metadata of the documents that are stored in the vectordatabase.
-          items:
-            $ref: '#/components/schemas/key_value_pair'
-          title: metadata
-          type: array
-        content:
-          description: ""
-          title: content
-          type: string
-      required:
-      - content
-      - metadata
-      title: file
       type: object
     chat_request:
       description: ""
@@ -275,7 +214,7 @@ components:
         citations:
           description: ""
           items:
-            $ref: '#/components/schemas/source_document'
+            $ref: '#/components/schemas/information_piece'
           title: citations
           type: array
       required:
@@ -284,56 +223,32 @@ components:
       - finish_reason
       title: chat_response
       type: object
-    upload_source_document:
-      description: ""
-      properties:
-        content_type:
-          $ref: '#/components/schemas/content_type'
+    information_piece:
+      description: Uploading a json with chunks and metadata.
+      example:
         metadata:
-          description: ""
+        - key: key
+          value: value
+        - key: key
+          value: value
+        page_content: some text
+        type: TEXT
+      properties:
+        metadata:
+          description: The metadata of the documents that are stored in the vectordatabase.
           items:
             $ref: '#/components/schemas/key_value_pair'
           title: metadata
           type: array
-        content:
-          description: ""
+        page_content:
+          description: The content of the document
           title: content
           type: string
+        type:
+          $ref: '#/components/schemas/content_type'
       required:
-      - content
-      - content_type
       - metadata
-      title: upload_doc
+      - page_content
+      - type
+      title: file
       type: object
-    source_documents:
-      description: ""
-      example:
-        documents:
-        - metadata:
-          - value: value
-            key: key
-          - value: value
-            key: key
-          content: content
-        - metadata:
-          - value: value
-            key: key
-          - value: value
-            key: key
-          content: content
-      properties:
-        documents:
-          description: ""
-          items:
-            $ref: '#/components/schemas/source_document'
-          title: documents
-          type: array
-      required:
-      - documents
-      title: source_documents
-      type: object
-    search_response:
-      oneOf:
-      - $ref: '#/components/schemas/source_documents'
-      - $ref: '#/components/schemas/chat_response'
-      title: search_response

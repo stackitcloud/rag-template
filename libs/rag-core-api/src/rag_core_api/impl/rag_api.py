@@ -4,20 +4,14 @@ from threading import Thread
 
 from fastapi import Depends
 from dependency_injector.wiring import Provide, inject
-from langchain_core.runnables import RunnableConfig
 
-from rag_core_api.impl.graph_state.graph_state import AnswerGraphState
-from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
+from rag_core_api.api_endpoints.chat import Chat
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
-from rag_core_api.models.search_request import SearchRequest
-from rag_core_api.models.search_response import SearchResponse
-from rag_core_api.models.upload_source_document import UploadSourceDocument
-from rag_core_api.api_endpoints.chat_graph import ChatGraph
-from rag_core_api.api_endpoints.searcher import Searcher
-from rag_core_api.api_endpoints.source_documents_remover import SourceDocumentsRemover
-from rag_core_api.api_endpoints.source_documents_uploader import SourceDocumentsUploader
+from rag_core_api.models.information_piece import InformationPiece
+from rag_core_api.api_endpoints.information_piece_remover import InformationPieceRemover
+from rag_core_api.api_endpoints.information_piece_uploader import InformationPiecesUploader
 from rag_core_api.dependency_container import DependencyContainer
 from rag_core_api.apis.rag_api_base import BaseRagApi
 from rag_core_api.evaluator.evaluator import Evaluator
@@ -27,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class RagApi(BaseRagApi):
-
     def __init__(self):
         super().__init__()
         self._background_threads = []
@@ -37,38 +30,9 @@ class RagApi(BaseRagApi):
         self,
         session_id: str,
         chat_request: ChatRequest,
-        chat_graph: ChatGraph = Depends(Provide[DependencyContainer.traced_chat_graph]),
-        chat_history_config: ChatHistorySettings = Depends(Provide[DependencyContainer.chat_history_config]),
+        chat_endpoint: Chat = Depends(Provide[DependencyContainer.chat_endpoint]),
     ) -> ChatResponse:
-        # TODO: There is too much logic here. This is no longer easily replaceable
-        config = RunnableConfig(
-            tags=[],
-            callbacks=None,
-            recursion_limit=25,
-            metadata={"session_id": session_id},
-        )
-        history_of_interest = chat_request.history.messages[-chat_history_config["limit"] :]
-        if chat_history_config["reverse"]:
-            paris = list(zip(history_of_interest[::2], history_of_interest[1::2]))
-            reversed_paris = paris[::-1]
-            history_of_interest = [item for sublist in reversed_paris for item in sublist]
-        history = "\n".join([f"{x.role}: {x.message}" for x in history_of_interest])
-        state = AnswerGraphState.create(
-            question=chat_request.message,
-            history=history,
-            error_messages=[],
-            finish_reasons=[],
-            source_documents=[],
-            langchain_documents=[],
-            rephrased_question=None,
-            answer_text=None,
-            response=None,
-            retries=0,
-            is_harmful=True,
-            is_from_context=False,
-            answer_is_relevant=False,
-        )
-        return await chat_graph.ainvoke(state, config)
+        return await chat_endpoint.achat(session_id, chat_request)
 
     @inject
     async def evaluate(
@@ -82,29 +46,21 @@ class RagApi(BaseRagApi):
         self._background_threads.append(thread)
 
     @inject
-    async def remove_source_documents(
+    async def remove_information_piece(
         self,
         delete_request: DeleteRequest,
-        source_documents_remover: SourceDocumentsRemover = Depends(
-            Provide[DependencyContainer.source_documents_remover]
+        information_pieces_remover: InformationPieceRemover = Depends(
+            Provide[DependencyContainer.information_pieces_remover]
         ),
     ) -> None:
-        source_documents_remover.remove_source_documents(delete_request)
+        information_pieces_remover.remove_information_piece(delete_request)
 
     @inject
-    async def search(
+    async def upload_information_piece(
         self,
-        search_request: SearchRequest,
-        searcher: Searcher = Depends(Provide[DependencyContainer.searcher]),
-    ) -> SearchResponse:
-        return searcher.search(search_request)
-
-    @inject
-    async def upload_source_documents(
-        self,
-        upload_source_document: list[UploadSourceDocument],
-        source_documents_uploader: SourceDocumentsUploader = Depends(
-            Provide[DependencyContainer.source_documents_uploader]
+        information_piece: list[InformationPiece],
+        information_pieces_uploader: InformationPiecesUploader = Depends(
+            Provide[DependencyContainer.information_pieces_uploader]
         ),
     ) -> None:
-        source_documents_uploader.upload_source_documents(upload_source_document)
+        information_pieces_uploader.upload_information_piece(information_piece)

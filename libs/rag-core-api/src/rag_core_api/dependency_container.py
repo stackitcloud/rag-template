@@ -7,6 +7,7 @@ from langchain_community.llms import Ollama, VLLMOpenAI
 from langchain_qdrant import Qdrant
 from langfuse import Langfuse
 
+from rag_core_api.impl.api_endpoints.default_chat import DefaultChat
 from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
@@ -24,19 +25,18 @@ from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAl
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
-from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedChain
+from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 from rag_core_api.impl import rag_api
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
-from rag_core_api.impl.api_endpoints.default_chat_graph import DefaultChatGraph
-from rag_core_api.impl.api_endpoints.default_searcher import DefaultSearcher
-from rag_core_api.impl.api_endpoints.default_source_documents_remover import DefaultSourceDocumentsRemover
-from rag_core_api.impl.api_endpoints.default_source_documents_uploader import DefaultSourceDocumentsUploader
+from rag_core_api.impl.graph.chat_graph import DefaultChatGraph
+from rag_core_api.impl.api_endpoints.default_information_pieces_remover import DefaultInformationPiecesRemover
+from rag_core_api.impl.api_endpoints.default_information_pieces_uploader import DefaultInformationPiecesUploader
 from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
 from rag_core_api.impl.embeddings.langchain_community_embedder import LangchainCommunityEmbedder
 from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
-from rag_core_api.impl.mapper.source_document_mapper import SourceDocumentMapper
+from rag_core_api.impl.mapper.information_piece_mapper import InformationPieceMapper
 from rag_core_api.impl.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
 from rag_core_api.impl.prompt_templates.answer_rephrasing_prompt import ANSWER_REPHRASING_PROMPT
 from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
@@ -130,9 +130,9 @@ class DependencyContainer(DeclarativeContainer):
     flashrank_reranker = Singleton(FlashrankRerank, top_n=reranker_settings.k_documents)
     reranker = Singleton(FlashrankReranker, flashrank_reranker)
 
-    source_documents_uploader = Singleton(DefaultSourceDocumentsUploader, vector_database)
+    information_pieces_uploader = Singleton(DefaultInformationPiecesUploader, vector_database)
 
-    source_documents_remover = Singleton(DefaultSourceDocumentsRemover, vector_database)
+    information_pieces_remover = Singleton(DefaultInformationPiecesRemover, vector_database)
 
     image_retriever = Singleton(
         RetrieverQuark,
@@ -169,9 +169,7 @@ class DependencyContainer(DeclarativeContainer):
         reranker,
     )
 
-    source_document_mapper = Singleton(SourceDocumentMapper)
-
-    searcher = Singleton(DefaultSearcher, composed_retriever, source_document_mapper, error_messages)
+    information_piece_mapper = Singleton(InformationPieceMapper)
 
     large_language_model = Selector(
         class_selector_config.llm_type,
@@ -221,23 +219,26 @@ class DependencyContainer(DeclarativeContainer):
 
     chat_graph = Singleton(
         DefaultChatGraph,
-        searcher=searcher,
+        composed_retriever=composed_retriever,
         rephrasing_chain=rephrasing_chain,
-        mapper=source_document_mapper,
+        mapper=information_piece_mapper,
         answer_generation_chain=answer_generation_chain,
         error_messages=error_messages,
+        chat_history_settings=chat_history_settings,
     )
 
     # wrap graph in tracer
     traced_chat_graph = Singleton(
-        LangfuseTracedChain,
+        LangfuseTracedGraph,
         inner_chain=chat_graph,
         settings=langfuse_settings,
     )
 
+    chat_endpoint = Singleton(DefaultChat, traced_chat_graph)
+
     evaluator = Singleton(
         LangfuseRagasEvaluator,
-        chat_chain=traced_chat_graph,
+        chat_endpoint=chat_endpoint,
         settings=ragas_settings,
         langfuse_manager=langfuse_manager,
         embedder=embedder,

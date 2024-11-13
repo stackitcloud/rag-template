@@ -6,8 +6,9 @@ import os
 from uuid import uuid4
 from json import JSONDecodeError
 from datetime import datetime
+from time import sleep
 
-from rag_core_api.impl.graph_state.graph_state import AnswerGraphState
+from langfuse.api.core.api_error import ApiError
 from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 import ragas
 from datasets import Dataset
@@ -33,7 +34,7 @@ from tqdm import tqdm
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
-from rag_core_api.api_endpoints.chat_graph import ChatGraph
+from rag_core_api.api_endpoints.chat import Chat
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.evaluator.evaluator import Evaluator
 from rag_core_api.impl.settings.ragas_settings import RagasSettings
@@ -43,7 +44,6 @@ logger = logging.getLogger(__name__)
 
 
 class LangfuseRagasEvaluator(Evaluator):
-
     BASE_PROMPT_NAME: str = "base-answer-generation"
     DATASET_INPUT_KEY: str = "question"
     DATASET_EXPECTED_OUTPUT_KEY: str = "ground_truth"
@@ -60,9 +60,11 @@ class LangfuseRagasEvaluator(Evaluator):
         answer_similarity,  # adapt for different languages not implemented
     ]
 
+    MAX_RETRIES = 3
+
     def __init__(
         self,
-        chat_chain: ChatGraph,
+        chat_endpoint: Chat,
         langfuse_manager: LangfuseManager,
         settings: RagasSettings,
         embedder: Embedder,
@@ -70,7 +72,7 @@ class LangfuseRagasEvaluator(Evaluator):
         chat_history_config: ChatHistorySettings,
     ) -> None:
         self._chat_history_config = chat_history_config
-        self._chat_chain = chat_chain
+        self._chat_endpoint = chat_endpoint
         self._settings = settings
         self._embedder = embedder
         self._semaphore = semaphore
@@ -85,10 +87,12 @@ class LangfuseRagasEvaluator(Evaluator):
         # ensure prompt is initialized on langfuse
         langfuse_manager.init_prompts()
 
-    async def aevaluate(self):
-        evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
-
-        await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)
+    async def aevaluate(self) -> None:
+        try:
+            evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
+            await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)
+        except Exception as e:
+            logger.error("Failed to evaluate questions: %s", e)
 
     async def _aauto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
         session_id = str(uuid4())
@@ -109,31 +113,15 @@ class LangfuseRagasEvaluator(Evaluator):
     async def _aevaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
         async with self._semaphore:
             chat_request = ChatRequest(message=item.input)
-            history_of_interest = []
-            history = "\n".join([f"{x.role}: {x.message}" for x in history_of_interest])
-            state = AnswerGraphState.create(
-                question=chat_request.message,
-                history=history,
-                error_messages=[],
-                finish_reasons=[],
-                source_documents=[],
-                langchain_documents=[],
-                rephrased_question=None,
-                answer_text=None,
-                response=None,
-                retries=0,
-                is_harmful=True,
-                is_from_context=False,
-                answer_is_relevant=False,
-            )
+
             try:
-                response = await self._chat_chain.ainvoke(state, config)
+                response = await self._chat_endpoint.achat(config["metadata"]["session_id"], chat_request)
             except Exception as e:
                 logger.info("Error while answering question %s: %s", item.input, e)
                 response = None
 
             if response and response.citations:
-                output = {"answer": response.answer, "documents": [x.content for x in response.citations]}
+                output = {"answer": response.answer, "documents": [x.page_content for x in response.citations]}
             else:
                 output = {"answer": None, "documents": None}
 
@@ -144,7 +132,7 @@ class LangfuseRagasEvaluator(Evaluator):
                 start_time=generation_time,
                 end_time=datetime.now(),
             )
-            item.link(langfuse_generation, experiment_name)
+            self._link_item2generation(item, langfuse_generation, experiment_name)
 
             if not (response and response.citations):
                 for metric in self.METRICS:
@@ -176,6 +164,17 @@ class LangfuseRagasEvaluator(Evaluator):
                     name=metric,
                     value=score,
                 )
+
+    def _link_item2generation(self, item, generation, experiment_name, retries: int = 0):
+        try:
+            item.link(generation, experiment_name)
+        except ApiError as e:
+            logger.warning("Failed to link item to generation: %s", e)
+            retries += 1
+            if retries > self.MAX_RETRIES:
+                raise e
+            sleep(1)
+            self._link_item2generation(item, generation, experiment_name, retries)
 
     def _get_dataset(self, dataset_name: str) -> DatasetClient:
         """

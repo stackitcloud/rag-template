@@ -20,7 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from rag_core_api.models.source_document import SourceDocument
+from rag_core_api.models.information_piece import InformationPiece
 
 try:
     from typing import Self
@@ -33,7 +33,7 @@ class ChatResponse(BaseModel):
 
     answer: StrictStr
     finish_reason: StrictStr = Field(description="    ")
-    citations: List[SourceDocument]
+    citations: List[InformationPiece]
     __properties: ClassVar[List[str]] = ["answer", "finish_reason", "citations"]
 
     model_config = {

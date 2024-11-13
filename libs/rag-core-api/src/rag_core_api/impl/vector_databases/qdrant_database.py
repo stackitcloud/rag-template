@@ -46,7 +46,7 @@ class QdrantDatabase(VectorDatabase):
     def _search_kwargs_builder(search_kwargs: dict, filter_kwargs: dict):
         return search_kwargs | {"filter": filter_kwargs}
 
-    def search(self, query: str, search_kwargs: dict, filter_kwargs: dict | None = None) -> list[Document]:
+    async def asearch(self, query: str, search_kwargs: dict, filter_kwargs: dict | None = None) -> list[Document]:
         retriever = self._vectorstore.as_retriever(
             query=query,
             search_kwargs=(
@@ -55,7 +55,7 @@ class QdrantDatabase(VectorDatabase):
                 else self._search_kwargs_builder(search_kwargs=search_kwargs, filter_kwargs=filter_kwargs)
             ),
         )
-        results = retriever.invoke(query)
+        results = await retriever.ainvoke(query)
         related_results = []
         for res in results:
             related_results += self._get_related(res.metadata["related"])

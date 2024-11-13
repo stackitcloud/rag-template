@@ -9,8 +9,7 @@ RunnableInput = Any
 RunnableOutput = Any
 
 
-class TracedChain(AsyncChain[RunnableInput, RunnableOutput], ABC):
-
+class TracedGraph(AsyncChain[RunnableInput, RunnableOutput], ABC):
     SESSION_ID_KEY = "session_id"
     METADATA_KEY = "metadata"
 
@@ -26,7 +25,8 @@ class TracedChain(AsyncChain[RunnableInput, RunnableOutput], ABC):
         return await self._inner_chain.ainvoke(chain_input, config=config_with_tracing)
 
     @abstractmethod
-    def _add_tracing_callback(self, session_id: str, config: Optional[RunnableConfig]) -> RunnableConfig: ...
+    def _add_tracing_callback(self, session_id: str, config: Optional[RunnableConfig]) -> RunnableConfig:
+        ...
 
     def _get_session_id(self, config: Optional[RunnableConfig]) -> str:
         return config.get(self.METADATA_KEY, {}).get(self.SESSION_ID_KEY, str(uuid.uuid4()))

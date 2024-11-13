@@ -16,6 +16,7 @@ from fastapi import (  # noqa: F401
     Depends,
     Form,
     Header,
+    HTTPException,
     Path,
     Query,
     Request,
@@ -27,10 +28,7 @@ from rag_core_api.apis.rag_api_base import BaseRagApi
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
-from rag_core_api.models.extra_models import TokenModel  # noqa: F401
-from rag_core_api.models.search_request import SearchRequest
-from rag_core_api.models.search_response import SearchResponse
-from rag_core_api.models.upload_source_document import UploadSourceDocument
+from rag_core_api.models.information_piece import InformationPiece
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +95,7 @@ async def evaluate() -> None:
 
 
 @router.post(
-    "/source_documents/remove",
+    "/information_pieces/remove",
     responses={
         202: {"description": "Accepted."},
         404: {"description": "Ressource not Found"},
@@ -105,41 +103,27 @@ async def evaluate() -> None:
         500: {"description": "Internal Server Error."},
     },
     tags=["rag"],
+    summary="remove information piece",
     response_model_by_alias=True,
 )
-async def remove_source_documents(
+async def remove_information_piece(
     delete_request: DeleteRequest = Body(None, description=""),
 ) -> None:
-    return await BaseRagApi.subclasses[0]().remove_source_documents(delete_request)
+    return await BaseRagApi.subclasses[0]().remove_information_piece(delete_request)
 
 
 @router.post(
-    "/search",
-    responses={
-        200: {"model": SearchResponse, "description": "200."},
-        500: {"description": "Internal Server Error."},
-    },
-    tags=["rag"],
-    response_model_by_alias=True,
-)
-async def search(
-    search_request: SearchRequest = Body(None, description=""),
-) -> SearchResponse:
-    return await BaseRagApi.subclasses[0]().search(search_request)
-
-
-@router.post(
-    "/source_documents",
+    "/information_pieces/upload",
     responses={
         201: {"description": "The file was successful uploaded."},
         422: {"model": str, "description": "Wrong json format."},
         500: {"model": str, "description": "Internal Server Error."},
     },
     tags=["rag"],
-    summary="Upload Files for RAG.",
+    summary="Upload information pieces for vectordatabase",
     response_model_by_alias=True,
 )
-async def upload_source_documents(
-    upload_source_document: List[UploadSourceDocument] = Body(None, description=""),
+async def upload_information_piece(
+    information_piece: List[InformationPiece] = Body(None, description=""),
 ) -> None:
-    return await BaseRagApi.subclasses[0]().upload_source_documents(upload_source_document)
+    return await BaseRagApi.subclasses[0]().upload_information_piece(information_piece)

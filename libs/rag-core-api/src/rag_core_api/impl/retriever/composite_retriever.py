@@ -31,11 +31,15 @@ class CompositeRetriever(Retriever):
         for retriever in self._retrievers:
             retriever.verify_readiness()
 
-    def invoke(self, retriever_input: str, config: Optional[RunnableConfig] = None, **kwargs: Any) -> list[Document]:
+    async def ainvoke(
+        self, retriever_input: str, config: Optional[RunnableConfig] = None, **kwargs: Any
+    ) -> list[Document]:
         results = []
+        if config is None:
+            config = RunnableConfig(metadata={"filter_kwargs": {}})
         for retriever in self._retrievers:
             tmp_config = deepcopy(config)
-            results += retriever.invoke(retriever_input, config=tmp_config)
+            results += await retriever.ainvoke(retriever_input, config=tmp_config)
 
         # remove summaries
         results = [x for x in results if x.metadata["type"] != ContentType.SUMMARY.value]
@@ -48,6 +52,6 @@ class CompositeRetriever(Retriever):
             return_val.append(result)
 
         if self._reranker:
-            return_val = self._reranker.invoke((return_val, retriever_input), config=config)
+            return_val = await self._reranker.ainvoke((return_val, retriever_input), config=config)
 
         return return_val

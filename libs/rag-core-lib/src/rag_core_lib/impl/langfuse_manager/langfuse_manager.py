@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class LangfuseManager:
-
     API_KEY_FILTER: str = "api_key"
 
     def __init__(

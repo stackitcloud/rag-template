@@ -2,12 +2,11 @@ from typing import Optional
 from langfuse.callback import CallbackHandler
 from langchain_core.runnables import RunnableConfig, Runnable
 
-from rag_core_lib.tracers.traced_chain import TracedChain
+from rag_core_lib.tracers.traced_chain import TracedGraph
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 
 
-class LangfuseTracedChain(TracedChain):
-
+class LangfuseTracedGraph(TracedGraph):
     CONFIG_CALLBACK_KEY = "callbacks"
 
     def __init__(self, inner_chain: Runnable, settings: LangfuseSettings):

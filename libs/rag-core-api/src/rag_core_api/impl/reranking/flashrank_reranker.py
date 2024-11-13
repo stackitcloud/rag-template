@@ -8,14 +8,13 @@ from rag_core_api.reranking.reranker import Reranker, RerankerInput, RerankerOut
 
 
 class FlashrankReranker(Reranker):
-
     def __init__(self, reranker: FlashrankRerank, **kwargs):
         super().__init__(**kwargs)
         self._reranker = reranker
 
-    def invoke(self, rerank_input: RerankerInput, config: Optional[RunnableConfig] = None) -> RerankerOutput:
+    async def ainvoke(self, rerank_input: RerankerInput, config: Optional[RunnableConfig] = None) -> RerankerOutput:
         input_documents, question = rerank_input
-        reranked = self._reranker.compress_documents(documents=input_documents, query=question)
+        reranked = await self._reranker.acompress_documents(documents=input_documents, query=question)
         return [self._re_add_metadata(input_documents, x) for x in reranked]
 
     def _re_add_metadata(

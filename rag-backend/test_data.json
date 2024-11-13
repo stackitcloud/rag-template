@@ -1,0 +1,122 @@
+[
+    {
+        "id": "stackit-docs-1",
+        "question": "What are virtual machine flavors?",
+        "ground_truth": "In OpenStack, flavors define hardware configuration like a compute, memory and storage capacity of computing instances.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-2",
+        "question": "What does the vm flavor name tell me?",
+        "ground_truth": "The flavor names are composed of variant (e.g. m = Memory-optimized instances with a CPU/RAM-ratio of 1:8), version (e.g. c1.4, CPU Architecture: Intel Broadwell) and indicator ('d': instances without cpu overprovisioning, 'g': instances with gpus, the numer after the g is the amount of gpus). Example of a flavor name: 'c1a.8d'.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-3",
+        "question": "Is there a naming scheme for the vm flavors?",
+        "ground_truth": "The flavor names are composed of variant (e.g. m = Memory-optimized instances with a CPU/RAM-ratio of 1:8), version (e.g. c1.4, CPU Architecture: Intel Broadwell) and indicator ('d': instances without cpu overprovisioning, 'g': instances with gpus, the numer after the g is the amount of gpus). Example of a flavor name: 'c1a.8d'.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-4",
+        "question": "Are there any VMs without overprovisioning?",
+        "ground_truth": "Yes, all flavors with name ending 'd' are without overprovisioning. E.g. c1a.8d: Processor-optimized instance with 8 vCPUs and 16 GB RAM.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-5",
+        "question": "Are there any VMs with GPUs? What kind of GPUs do they have?",
+        "ground_truth": "Yes, all flavors with name ending 'g' and a number indicate VMs with GPUs. E.g. 'n2.28d.g2' has two Nvidia L40s GPUs. 'n1' flavors have Nvidia A100 GPUs, while 'n2' flavors have Nvidia L40s GPUs.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-6",
+        "question": "Which virtual machine flavors have GPUs attached?",
+        "ground_truth": "All flavors with name ending 'g' and a number indicate VMs with GPUs. E.g. 'n2.28d.g2' has two Nvidia L40s GPUs. 'n1' flavors have Nvidia A100 GPUs, while 'n2' flavors have Nvidia L40s GPUs.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-7",
+        "question": "Which architecture do the VMs have?",
+        "ground_truth": "c1.4: Intel Broadwell\nc2i.8: Intel Ice Lake\nc1a.8d: AMD EPYC Rome\ng1r.8d: ARM Ampere Altra\nn1.14d.g1: Intel Ice Lake\nn2.14d.g1: Intel Ice Sapphire Rapids",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/virtual-machine-flavors-75137231.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": true
+    },
+    {
+        "id": "stackit-docs-8",
+        "question": "What are the requirements for a password for the OpenStack API?",
+        "ground_truth": "To protect access via API, passwords for using the API must meet following rules:\n\nBlocking login attempts: 300 seconds after 5 failed attempts\nPassword complexity: At least one lowercase and uppercase letters and numbers.\nPassword length: At least 20 characters\nPassword age: Password must not have been used the last 13 times\nMinimum age: The password may only be changed again after at least 1 day\n\nOf course, it is possible to further increase the complexity of the password used and to adapt it to corporate requirements. This should be checked by the customer and taken into account in the password assignment.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/basic-concepts-infrastructureapi-10977435.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": false
+    },
+    {
+        "id": "stackit-docs-9",
+        "question": "How do I list all available images for the ARM architecture?",
+        "ground_truth": " openstack image list --public --tag ARM64",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/how-to-create-a-vm-via-infrastructure-api-29982721.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": false
+    },
+    {
+        "id": "stackit-docs-10",
+        "question": "Which provider do I need for terraform?",
+        "ground_truth": "The provider can be found here: https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/basic-concepts-infrastructureapi-10977435.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": false
+    },
+    {
+        "id": "stackit-docs-11",
+        "question": "Can I access my S3 content from all availabvility zones??",
+        "ground_truth": "Yes, the object storage data is distributed/replicated across all 3 availability zones.",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/object-storage-s3-compatible-71009778.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": false
+    },
+    {
+        "id": "stackit-docs-12",
+        "question": "Why should I use kubernetes?",
+        "ground_truth": "SKE provides vanilla Kubernetes clusters and offers you the advantages of a container-based management environment.\n\nAutomatic repairs and updates significantly reduce your operational effort.\n\nYou save costs significantly by switching off non-productive clusters, as you only pay for what you actually use (pay-per-use).",
+        "ground_truth_source": {
+            "url": "https://docs.stackit.cloud/stackit/en/kubernetes-engine-10125671.html",
+            "date": "2024-09-03"
+        },
+        "in_running_text": false
+    }
+]

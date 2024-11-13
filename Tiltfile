@@ -6,6 +6,7 @@ if os.path.exists(".env"):
 config.define_bool("debug")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
+
 core_library_context = "./rag-core-library"
 
 
@@ -13,7 +14,7 @@ def create_linter_command(folder_name, name):
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 --build-arg TAG=debug -f "
+        + " --build-arg dev=1 -f "
         + folder_name
         + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
@@ -25,7 +26,7 @@ def create_test_command(folder_name, name):
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 --build-arg TAG=debug -f "
+        + " --build-arg dev=1 -f "
         + folder_name
         + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
@@ -80,10 +81,11 @@ create_namespace_if_notexist(namespace)
 ################################## core testing & linting ##############################################################
 ########################################################################################################################
 
-# Add linter trigger
+# Add linting trigger
 local_resource(
-    "RAG Core linting",
-    """docker build -t rag_core -f rag-core-library/Dockerfile rag-core-library;
+    "RAG core library linting",
+    """set -e
+    docker build -t rag_core --build-arg TEST=0 -f rag-core-library/Dockerfile rag-core-library;
     docker run --rm rag_core make lint""",
     labels=["linting"],
     auto_init=False,
@@ -91,11 +93,45 @@ local_resource(
     allow_parallel=True,
 )
 
-# Add linter trigger
+# Add testing trigger
 local_resource(
-    "RAG Core testing",
-    """docker build -t rag_core -f rag-core-library/Dockerfile rag-core-library;
-    docker run --rm rag_core make test""",
+    "RAG core lib testing",
+    """set -e
+    docker build -t rag_core_lib --build-arg DIRECTORY=rag-core-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker run --rm rag_core_lib make test""",
+    labels=["test"],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
+
+local_resource(
+    "RAG core API testing",
+    """set -e
+    docker build -t rag_core_api --build-arg DIRECTORY=rag-core-api -f rag-core-library/Dockerfile rag-core-library;
+    docker run --rm rag_core_api make test""",
+    labels=["test"],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
+
+local_resource(
+    "Admin API lib testing",
+    """set -e
+    docker build -t admin_api_lib --build-arg DIRECTORY=admin-api-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker run --rm admin_api_lib make test""",
+    labels=["test"],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
+
+local_resource(
+    "Extractor API lib testing",
+    """set -e
+    docker build -t extractor_api_lib --build-arg DIRECTORY=extractor-api-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker run --rm extractor_api_lib make test""",
     labels=["test"],
     auto_init=False,
     trigger_mode=TRIGGER_MODE_AUTO,
@@ -118,18 +154,18 @@ docker_build(
     ".",
     build_args={
         "dev": "1" if backend_debug else "0",
-        "TAG": "debug-nonroot" if backend_debug else "nonroot",
     },
     live_update=[
         sync(backend_context, "/app/rag-backend"),
-        sync(core_library_context, "/app/rag-core-library"),
+        sync(core_library_context+"/rag-core-api", "/app/rag-core-library/rag-core-api"),
+        sync(core_library_context+"/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
 )
 
 # Add linter trigger
 local_resource(
-    "RAG Backend linting",
+    "RAG backend linting",
     create_linter_command(backend_context, "back"),
     labels=["linting"],
     auto_init=False,
@@ -139,7 +175,7 @@ local_resource(
 
 # Add test trigger
 local_resource(
-    "RAG Backend testing",
+    "RAG backend testing",
     create_test_command(backend_context, "back"),
     labels=["test"],
     auto_init=False,
@@ -163,11 +199,11 @@ docker_build(
     ".",
     build_args={
         "dev": "1" if backend_debug else "0",
-        "TAG": "debug-nonroot" if backend_debug else "nonroot",
     },
     live_update=[
         sync(admin_backend_context, "/app/admin-backend"),
-        sync(core_library_context, "/app/rag-core-library/rag-core-lib"),
+        sync(core_library_context + "/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
+        sync(core_library_context + "/admin-api-lib", "/app/rag-core-library/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
 )
@@ -207,9 +243,12 @@ docker_build(
     ".",
     build_args={
         "dev": "1" if backend_debug else "0",
-        "TAG": "debug-nonroot" if backend_debug else "nonroot",
     },
-    live_update=[sync(extractor_context, "/app/document-extractor")],
+    live_update=[
+        sync(extractor_context, "/app/document-extractor"),
+        sync(core_library_context+"/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
+        sync(core_library_context +"/extractor-api-lib", "/app/rag-core-library/extractor-api-lib"),
+        ],
     dockerfile=extractor_context + "/Dockerfile",
 )
 
@@ -325,15 +364,15 @@ k8s_resource(
     ],
     port_forwards=[
         port_forward(
+            8888,
+            container_port=8080,
+            name="Backend-Service-Portforward",
+        ),
+        port_forward(
             31415,
             container_port=31415,
             name="Backend-Debugger",
-        ),
-        port_forward(
-            8888,
-            container_port=8080,
-            name="Backend-Debugger",
-        ),
+        )
     ],
     labels=["backend"],
 )
@@ -341,10 +380,14 @@ k8s_resource(
 k8s_resource(
     "extractor",
     links=[
-        link("http://localhost:8080/docs", "Swagger UI"),
+        link("http://localhost:8081/docs", "Swagger UI"),
     ],
     port_forwards=[
-        port_forward(8080, container_port=8080, name="-"),
+        port_forward(
+            8081,
+            container_port=8080,
+            name="Extractor-Service-Portforward",
+        ),
         port_forward(
             31416,
             container_port=31415,
@@ -428,7 +471,7 @@ k8s_resource(
     "rag-minio",
     port_forwards=[
         port_forward(
-            9000,
+            9001,
             container_port=9001,
             name="minio ui",
         ),

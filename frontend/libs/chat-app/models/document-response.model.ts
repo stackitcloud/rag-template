@@ -5,5 +5,5 @@ export interface DocumentResponseMetadataModel {
 
 export interface DocumentResponseModel {
   metadata: DocumentResponseMetadataModel[],
-  content: string
+  page_content: string
 }

@@ -1,4 +1,4 @@
-FROM node:21-slim as builder
+FROM --platform=linux/amd64 node:21-slim as builder
 
 WORKDIR /usr/src/app
 
@@ -10,7 +10,7 @@ COPY ./frontend .
 
 RUN npm run chat:build
 
-FROM nginx:alpine
+FROM --platform=linux/amd64 nginx:alpine
 
 WORKDIR /app
 

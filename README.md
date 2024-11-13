@@ -204,7 +204,7 @@ To connect the debugger you can use the following `launch.json`:
             ]
         },
         {
-            "name": "rag_admin_backend",
+            "name": "rag_admin_api_lib",
             "type": "python",
             "request": "attach",
             "host": "localhost",
@@ -272,9 +272,9 @@ The linting-settings can be changed in the `rag-backend/pyproject.toml` file und
 # Usage
 The following endpoints are provided:
 - `/chat/{session_id}': The endpoint for chatting.
-- '/source_documents/remove': Endpoint to remove documents from the vector database.
+- '/information_pieces/remove': Endpoint to remove documents from the vector database.
 - '/search': Endpoint to search documents. This is the same search that is internally used when using the chat-endpoint.
-- '/source_documents': Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity a Langchain Documents like format is used.
+- '/information_pieces': Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity a Langchain Documents like format is used.
 
 For further information on the endpoints please consult the Swagger API.
 

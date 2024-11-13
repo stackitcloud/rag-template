@@ -1,14 +1,14 @@
-import {defineStore} from 'pinia';
-import {ref, computed} from 'vue';
-import {ChatAPI} from "../chat.api";
-import {ChatMessageModel} from "../../models/chat-message.model";
-import {ChatRequestModel, mapToChatRequestModel} from "../../models/chat-request.model";
-import {marked} from "marked";
-import {newUid} from "@shared/utils";
-import {useI18n} from 'vue-i18n';
-import {ChatDocumentModel, mapToChatDocuments} from "../../models/chat-document.model";
-import {DocumentResponseModel} from "libs/chat-app/models/document-response.model";
-import {SourceDocument} from "libs/chat-app/models/chat-response.model";
+import { newUid } from "@shared/utils";
+import { InformationPiece } from "libs/chat-app/models/chat-response.model";
+import { DocumentResponseModel } from "libs/chat-app/models/document-response.model";
+import { marked } from "marked";
+import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ChatDocumentModel, mapToChatDocuments } from "../../models/chat-document.model";
+import { ChatMessageModel } from "../../models/chat-message.model";
+import { ChatRequestModel, mapToChatRequestModel } from "../../models/chat-request.model";
+import { ChatAPI } from "../chat.api";
 
 export const useChatStore = defineStore('chat', () => {
     const {t, locale} = useI18n();
@@ -47,12 +47,12 @@ export const useChatStore = defineStore('chat', () => {
         return requestMessages;
     }
 
-    function parseDocumentsAsMarkdown(documents: SourceDocument[]): Promise<DocumentResponseModel[]> {
+    function parseDocumentsAsMarkdown(documents: InformationPiece[]): Promise<DocumentResponseModel[]> {
         return Promise.all(documents.map(async o => {
-            const chunk = await marked(o.content);
+            const chunk = await marked(o.page_content);
             return {
                 ...o,
-                content: chunk,
+                page_content: chunk,
             } as DocumentResponseModel;
         }));
     }
@@ -61,7 +61,6 @@ export const useChatStore = defineStore('chat', () => {
         isLoading.value = true;
         try {
             const requestMessages = prepareInferenceRequest(prompt);
-            console.log(requestMessages);
 
             const promptAsMd = await marked(prompt)
             addHistory(promptAsMd);

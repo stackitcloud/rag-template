@@ -22,7 +22,7 @@ const onCallInference = async (event: Event) => {
     console.error(e)
   } finally {
     textarea.value = ''
-    textarea.style.height = '40px'
+    adjustTextareaHeight()
     textarea.focus()
   }
 }
@@ -37,8 +37,9 @@ const handleKeyDown = (event: KeyboardEvent) => {
 const adjustTextareaHeight = () => {
   const textarea = textareaRef.value
   if (textarea) {
-    textarea.style.height = '1.5rem' // Reset to initial height
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 5 * 24)}px`
+    textarea.style.height = '40px' // Reset to auto
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`
+    textarea.style.overflowY = textarea.scrollHeight > 120 ? 'auto' : 'hidden'
   }
 }
 
@@ -48,6 +49,7 @@ const props = defineProps<{
 
 onMounted(() => {
   textareaRef.value?.focus()
+  adjustTextareaHeight()
 })
 </script>
 
@@ -60,7 +62,7 @@ onMounted(() => {
       :placeholder="t('chat.justAsk')"
       @keydown="handleKeyDown"
       @input="adjustTextareaHeight"
-      class="flex-1 bg-base-200 input h-10 min-h-[40px] max-h-[120px] overflow-y-auto resize-none outline-none focus:outline-none focus:border-none py-2 px-3"
+      class="flex-1 bg-base-200 input min-h-[40px] max-h-[120px] resize-none outline-none focus:outline-none focus:border-none py-2 px-3"
     ></textarea>
 
     <button
@@ -83,6 +85,7 @@ onMounted(() => {
 <style scoped>
 textarea {
   line-height: 1.5rem;
+  overflow-y: hidden;
 }
 
 textarea::placeholder {

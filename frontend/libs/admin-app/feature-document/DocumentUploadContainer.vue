@@ -65,7 +65,7 @@
                  @drop.prevent="onDrop">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
                     <CloudArrowUpIcon class="w-10 h-10 mb-4 text-accent-content" />
-                    <p class="mb-1 font-bold">{{ t('documents.uploadSelectTitle') }}</p>
+                    <p class="mb-1 font-bold text-center">{{ t('documents.uploadSelectTitle') }}</p>
                     <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }}</p>
 
                     <button class="btn btn-sm mt-4 btn-accent"

@@ -32,7 +32,7 @@ RUN poetry config virtualenvs.create false &&\
 FROM --platform=linux/amd64 python:3.11.7-bookworm
 ARG dev=0
 
-RUN adduser --disabled-password --gecos "" nonroot
+RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/admin-backend/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}

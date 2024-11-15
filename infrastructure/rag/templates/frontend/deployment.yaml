@@ -13,47 +13,34 @@ spec:
         app: {{ .Values.frontend.name }}
     spec:
       volumes:
-      - name: frontend
+      - name: {{ .Values.frontend.name }}
         emptyDir: {}
-      initContainers:
-      - name: frontend-copy
-        image: {{ template "frontend.fullImageName" . }}
-        envFrom:
-          - configMapRef:
-              name: {{ template "configmap.frontendName" . }}
-          {{- if .Values.global.config.basicAuth.enabled }}
-          - secretRef:
-              name: "vite-auth"
-          {{- end }}
-        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
-        volumeMounts:
-        - mountPath: /usr/share/nginx/html
-          name: frontend
-        command: ["cp","-r", "/app/frontend/.", "/usr/share/nginx/html"]
-      - name: vite-workaround
-        command:
-          - /bin/sh
-        args:
-          - /app/env.sh
-        image: {{ template "frontend.fullImageName" . }}
-        envFrom:
-          - configMapRef:
-              name: {{ template "configmap.frontendName" . }}
-          {{- if .Values.global.config.basicAuth.enabled }}
-          - secretRef:
-              name: "vite-auth"
-          {{- end }}
-        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
-        volumeMounts:
-        - mountPath: /usr/share/nginx/html
-          name: frontend
+      - name: nginx-cache-dir
+        emptyDir: {}
+      - name: run-dir
+        emptyDir: {}
       containers:
       - name: {{ .Values.frontend.name }}
+        startupProbe:
+          exec:
+            command:
+            - /bin/sh
+            - "-c"
+            - "cp -r /app/frontend/. /usr/share/nginx/html && /bin/sh /app/env.sh"
+        securityContext:
+          runAsUser: 101
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         image: {{ template "frontend.fullImageName" . }}
         imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
           name: frontend
+        - mountPath: var/cache/nginx/
+          name: nginx-cache-dir
+        - mountPath: /var/run
+          name: run-dir
         ports:
         - containerPort: {{ .Values.frontend.service.port }}
         envFrom:
@@ -63,6 +50,5 @@ spec:
           - secretRef:
               name: "vite-auth"
           {{- end }}
-
       imagePullSecrets:
       - name: {{ .Values.global.imagePullSecret.name }}

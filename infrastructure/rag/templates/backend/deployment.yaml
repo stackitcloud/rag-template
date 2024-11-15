@@ -12,17 +12,45 @@ spec:
       labels:
         app: {{ .Values.backend.name }}
     spec:
+      securityContext:
+        runAsUser: 65532
+        runAsNonRoot: true
       volumes:
         - name: config-volume
           configMap:
             name: {{ template "configmap.loggingName" . }}
+        - name: log-dir
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret.name }}
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            touch /app/rag-backend/log/logfile.log && \
+            chmod 600 /app/rag-backend/log/logfile.log
+        volumeMounts:
+        - name: log-dir
+          mountPath: /app/rag-backend/log
       containers:
       - name: {{ .Values.backend.name }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          {{- if not .Values.global.debug.backend.enabled }}
+          readOnlyRootFilesystem: true
+          {{- end }}
         volumeMounts:
         - name: config-volume
           mountPath: /config
+        - name: log-dir
+          mountPath: /app/rag-backend/log
+        - name: tmp-dir
+          mountPath: /tmp
         image: {{ include "backend.fullImageName" . }}
         imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
         {{- if not (empty .Values.backend.command) }}

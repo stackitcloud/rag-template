@@ -26,6 +26,9 @@ EXPOSE 8080
 
 RUN chown -R nginx:nginx /var/cache/nginx
 RUN touch /var/run/nginx.pid && chown nginx:nginx /var/run/nginx.pid
+
+RUN apk del apk-tools && rm -rf /var/cache/apk/;
+
 USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]

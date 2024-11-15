@@ -12,17 +12,49 @@ spec:
       labels:
         app: {{ .Values.extractor.name }}
     spec:
+      securityContext:
+        runAsUser: 65532
+        runAsNonRoot: true
       volumes:
         - name: config-volume
           configMap:
             name: {{ template "configmap.loggingName" . }}
+        - name: log-dir
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
+        - name: nltk-data-dir
+          emptyDir: {}
       imagePullSecrets:
         - name: {{ .Values.global.imagePullSecret.name }}
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            touch /app/document-extractor/log/logfile.log && \
+            chmod 600 /app/document-extractor/log/logfile.log
+        volumeMounts:
+        - name: log-dir
+          mountPath: /app/document-extractor/log
       containers:
       - name: {{ .Values.extractor.name }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          {{- if not .Values.global.debug.backend.enabled }}
+          readOnlyRootFilesystem: true
+          {{- end }}
         volumeMounts:
         - name: config-volume
           mountPath: /config
+        - name: log-dir
+          mountPath: /app/document-extractor/log
+        - name: tmp-dir
+          mountPath: /tmp
+        - name: nltk-data-dir
+          mountPath: /home/nonroot/nltk_data
         image: {{ template "extractor.fullImageName" . }}
         imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
         {{- if not (empty .Values.extractor.command) }}

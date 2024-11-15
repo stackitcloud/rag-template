@@ -40,25 +40,24 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 
-COPY rag-core-library/admin-api-lib /app/rag-core-library/admin-api-lib
-COPY rag-core-library/rag-core-lib /app/rag-core-library/rag-core-lib
+COPY --chown=nonroot:nonroot rag-core-library/admin-api-lib /app/rag-core-library/admin-api-lib
+COPY --chown=nonroot:nonroot rag-core-library/rag-core-lib /app/rag-core-library/rag-core-lib
 
 WORKDIR /app/admin-backend
 
-COPY admin-backend .
+COPY --chown=nonroot:nonroot admin-backend .
 
 # cleanup
 RUN apt-get clean autoclean
 RUN apt-get autoremove --yes
-RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
+
 RUN if [ "$dev" = "0" ]; then \
         while read -r shell; do rm -f "$shell"; done < /etc/shells; \
+        rm -rf /var/lib/{apt,dpkg,cache,log}/ \
     else \
         echo "POETRY_VIRTUALENVS_PATH=/app/admin-backend/.venv" >> /etc/environment;\
         export POETRY_VIRTUALENVS_PATH=/app/admin-backend/.venv;\
         export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
-        chown -R nonroot:nonroot /app/admin-backend;\
-        chown -R nonroot:nonroot /app/rag-core-library;\
     fi
 
 

@@ -1,5 +1,8 @@
 load("ext://dotenv", "dotenv")
 
+# admin has been scrubbed, so all names including admin were very hard to read. To avoid that, scrubbing is disabled
+secret_settings(disable_scrub=True)
+
 if os.path.exists(".env"):
     dotenv(fn=".env")
 

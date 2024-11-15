@@ -12,17 +12,45 @@ spec:
       labels:
         app: {{ .Values.adminBackend.name }}
     spec:
+      securityContext:
+        runAsUser: 65532
+        runAsNonRoot: true
       volumes:
         - name: config-volume
           configMap:
             name: {{ template "configmap.loggingName" . }}
+        - name: log-dir
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
       imagePullSecrets:
           - name: {{ .Values.global.imagePullSecret.name }}
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            touch /app/admin-backend/log/logfile.log && \
+            chmod 600 /app/admin-backend/log/logfile.log
+        volumeMounts:
+        - name: log-dir
+          mountPath: /app/admin-backend/log
       containers:
       - name: {{ .Values.adminBackend.name }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          {{- if not .Values.global.debug.backend.enabled }}
+          readOnlyRootFilesystem: true
+          {{- end }}
         volumeMounts:
         - name: config-volume
           mountPath: /config
+        - name: log-dir
+          mountPath: /app/admin-backend/log
+        - name: tmp-dir
+          mountPath: /tmp
         image: {{ template "adminBackend.fullImageName" . }}
         imagePullPolicy: {{ .Values.adminBackend.image.pullPolicy }}
         {{- if not (empty .Values.adminBackend.command) }}

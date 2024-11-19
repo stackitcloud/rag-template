@@ -84,6 +84,10 @@ numpy = "^1.26.4"
 docx2txt = "^0.8"
 unstructured = {extras = ["docx", "pptx"], version = "^0.15.13"}
 html5lib = "^1.1"
+langchain-community = "^0.3.7"
+atlassian-python-api = "^3.41.16"
+markdownify = "^0.13.1"
+langchain-core = "^0.3.18"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.1"

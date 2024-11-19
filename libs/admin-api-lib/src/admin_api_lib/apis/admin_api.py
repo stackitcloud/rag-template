@@ -2,28 +2,18 @@
 
 import importlib
 import pkgutil
-from typing import Dict  # noqa: F401
 
 import admin_api_lib.impl
 from admin_api_lib.apis.admin_api_base import BaseAdminApi
 from admin_api_lib.models.document_status import DocumentStatus
 from fastapi import (  # noqa: F401
     APIRouter,
-    BackgroundTasks,
-    Body,
-    Cookie,
-    Depends,
-    Form,
-    Header,
-    HTTPException,
     Path,
-    Query,
     Request,
     Response,
-    Security,
     UploadFile,
-    status,
 )
+
 
 router = APIRouter()
 
@@ -75,6 +65,20 @@ async def document_reference_id_get(
 )
 async def get_all_documents_status() -> list[DocumentStatus]:
     return await BaseAdminApi.subclasses[0]().get_all_documents_status()
+
+
+@router.post(
+    "/load_confluence",
+    responses={
+        200: {"description": "Loading from confluence is successful"},
+        500: {"description": "Internal Server Error"},
+        501: {"description": "The confluence loader is not set up"},
+    },
+    tags=["admin"],
+    response_model_by_alias=True,
+)
+async def load_confluence_post() -> None:
+    return await BaseAdminApi.subclasses[0]().load_confluence_post()
 
 
 @router.post(

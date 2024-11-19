@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from typing import List  # noqa: F401
 import importlib
 import pkgutil
 
@@ -9,20 +10,9 @@ import extractor_api_lib.impl
 from fastapi import (  # noqa: F401
     APIRouter,
     Body,
-    Cookie,
-    Depends,
-    Form,
-    Header,
-    HTTPException,
-    Path,
-    Query,
-    Response,
-    Security,
-    status,
 )
 
-from extractor_api_lib.models.extra_models import TokenModel  # noqa: F401
-from typing import List
+from extractor_api_lib.models.confluence_parameters import ConfluenceParameters
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.models.information_piece import InformationPiece
 
@@ -35,16 +25,33 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 
 
 @router.post(
-    "/extract",
+    "/extract_from_confluence",
     responses={
-        200: {"model": list[InformationPiece], "description": "list of extracted information."},
+        200: {"model": List[InformationPiece], "description": "ok"},
+        404: {"description": "not found"},
+        422: {"description": "unprocessable entity"},
+        500: {"description": "internal server error"},
+    },
+    tags=["extractor"],
+    response_model_by_alias=True,
+)
+async def extract_from_confluence_post(
+    confluence_parameters: ConfluenceParameters = Body(None, description=""),
+) -> List[InformationPiece]:
+    return await BaseExtractorApi.subclasses[0]().extract_from_confluence_post(confluence_parameters)
+
+
+@router.post(
+    "/extract_from_file",
+    responses={
+        200: {"model": List[InformationPiece], "description": "List of extracted information."},
         422: {"description": "Body is not a valid PDF."},
         500: {"description": "Something somewhere went terribly wrong."},
     },
     tags=["extractor"],
     response_model_by_alias=True,
 )
-async def extract_information(
+async def extract_from_file_post(
     extraction_request: ExtractionRequest = Body(None, description=""),
 ) -> List[InformationPiece]:
-    return await BaseExtractorApi.subclasses[0]().extract_information(extraction_request)
+    return await BaseExtractorApi.subclasses[0]().extract_from_file_post(extraction_request)

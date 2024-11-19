@@ -1,12 +1,13 @@
-# Admin backend
+# Admin API Lib
 
-The main job of the admin-backend is file handling. Upload and deletion of files should be triggered here.
+The Admin API Library contains a default implementation and provides file management capabilities for RAG systems, handling document lifecycle operations.
 
 The following endpoints are provided by the *admin-backend*:
 - `/delete_document/{id}`: Deletes the file from storage and vector database. The `id` can be retrieved from the `/all_documents` endpoint.
 - `/document_reference/{id}`: Returns the document.
 - `/all_documents`: Return the id and status of all available documents currently stored.
-- `/upload_documents`: Endpoint to upload PDF files.
+- `/upload_documents`: Endpoint to upload PDF,PTTX,WORD,XML files.
+- `/load_confluence`: Endpoint to load a confluence space
 
 # Requirements
 
@@ -34,6 +35,12 @@ Will return a list of all available documents in the connected storage.
 
 PDF files can be uploaded here. This endpoint will process the document in a background and will extract information using the [document-extractor](../document-extractor/).
 The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-backend](../rag-backend/).
+
+## `/load_confluence`
+
+Loading all the content of a confluence space using the [document-extractor](../document-extractor/).
+The extracted information will be uploaded to vectore db using the [rag-backend](../rag-backend/).
+
 
 # Deployment
 

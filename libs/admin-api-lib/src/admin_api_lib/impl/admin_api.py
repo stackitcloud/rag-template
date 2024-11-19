@@ -1,5 +1,6 @@
 import logging
 
+from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.api_endpoints.document_reference_retriever import DocumentReferenceRetriever
 from admin_api_lib.api_endpoints.document_uploader import DocumentUploader
@@ -36,6 +37,13 @@ class AdminApi(BaseAdminApi):
         ),
     ) -> list[DocumentStatus]:
         return await document_status_retriever.aget_all_documents_status()
+
+    @inject
+    async def load_confluence_post(
+        self,
+        confluence_loader: ConfluenceLoader = Depends(Provide[DependencyContainer.confluence_loader]),
+    ) -> None:
+        await confluence_loader.aload_from_confluence()
 
     @inject
     async def document_reference_id_get(

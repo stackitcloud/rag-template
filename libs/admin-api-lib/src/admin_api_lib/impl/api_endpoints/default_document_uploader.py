@@ -107,7 +107,7 @@ class DefaultDocumentUploader(DocumentUploader):
         self._file_service.upload_file(s3_file_path, filename)
         self._key_value_store.upsert(filename, Status.PROCESSING)
 
-        information_pieces = self._document_extractor.extract_information(ExtractionRequest(path_on_s3=filename))
+        information_pieces = self._document_extractor.extract_from_file_post(ExtractionRequest(path_on_s3=filename))
         documents = [self._information_mapper.information_piece2document(x) for x in information_pieces]
         host_base_url = str(request.base_url)
         document_url = f"{host_base_url.rstrip('/')}/document_reference/{urllib.parse.quote_plus(filename)}"

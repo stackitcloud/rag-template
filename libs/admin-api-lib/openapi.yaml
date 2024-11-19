@@ -102,6 +102,18 @@ paths:
           description: Internal server error
       tags:
       - admin
+  /load_confluence:
+    post:
+      responses:
+        "200":
+          description: Loading from confluence is successful
+        "500":
+          description: Internal Server Error
+        "501":
+          description: The confluence loader is not set up
+      tags:
+      - admin
+    summary: Loading confluence to the vector db
 components:
   schemas:
     status:

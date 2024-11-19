@@ -1,8 +1,9 @@
-# Document Extractor
-The document extractor job is to parse the uploaded documents. It is not exposed by ingress and only for internal use.
+# Extractor API Lib
+The Extractor Library contains a default implementation and provides document parsing capabilities for various file formats. It is not exposed by ingress and only for internal use.
 
 The following endpoints are provided by the *documents_extractor*:
-- `/extract`: This endpoint extracts the information from pdf files.
+- `/extract_from_file`: This endpoint extracts the information from PDF,PTTX,WORD,XML files.
+- `/extract_from_confluence`: This endpoint extracts the information from a confluence space.
 
 # Requirements
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
@@ -19,12 +20,18 @@ tesseract-ocr-eng
 
 # Endpoints
 
-## `/extract`
-The extract endpoint will extract the information from PDF files.
+## `/extract_from_file`
+The extract from file endpoint will extract the information from PDF,PTTX,WORD,XML files.
 It requires the path to the file on the connected storage.
 The following types of information will be extracted:
 - `TEXT`: plain text
 - `TABLE`: data in tabular form found in the document
+
+## `/extract_from_confluence`
+The extract from confluence endpoint will extract the information from a confluence space.
+It requires the the credentials to the confluence space.
+The following types of information will be extracted:
+- `TEXT`: plain text
 
 # Deployment
 A detailed explanation of the deployment can be found in the [Readme](../README.md) of the project.

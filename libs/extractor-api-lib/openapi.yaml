@@ -5,9 +5,9 @@ info:
 servers:
 - url: /
 paths:
-  /extract:
+  /extract_from_file:
     post:
-      operationId: extract_information
+      operationId: extract_from_file_post
       requestBody:
         content:
           application/json:
@@ -27,6 +27,32 @@ paths:
           description: Body is not a valid PDF.
         "500":
           description: Something somewhere went terribly wrong.
+      tags:
+      - extractor
+  /extract_from_confluence:
+    post:
+      operationId: extract_from_confluence_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/confluence_parameters'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/information_piece'
+                type: array
+          description: ok
+        "404":
+          description: not found
+        "422":
+          description: unprocessable entity
+        "500":
+          description: internal server error
       tags:
       - extractor
 components:
@@ -93,4 +119,43 @@ components:
       - page_content
       - type
       title: InformationPiece
+      type: object
+    confluence_parameters:
+      description: ""
+      properties:
+        url:
+          description: url of the confluence space.
+          title: url
+          type: string
+        token:
+          description: api key to access confluence.
+          title: token
+          type: string
+        space_key:
+          description: the space key of the confluence pages.
+          title: space_key
+          type: string
+        include_attachments:
+          default: false
+          description: "whether to include file attachments (e.g., images, documents)\
+            \ in the parsed content. Default is `false`."
+          title: include_attachments
+          type: boolean
+        keep_markdown_format:
+          default: true
+          description: whether to preserve markdown formatting in the output. Default
+            is `true`.
+          title: keep_markdown_format
+          type: boolean
+        keep_newlines:
+          default: true
+          description: whether to retain newline characters in the output for better
+            readability. Default is `true`.
+          title: keep_newlines
+          type: boolean
+      required:
+      - space_key
+      - token
+      - url
+      title: confluence_parameters
       type: object

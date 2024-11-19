@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+from typing import ClassVar, Tuple  # noqa: F401
 
 from admin_api_lib.models.document_status import DocumentStatus
 from fastapi import Request, Response, UploadFile
@@ -28,6 +28,11 @@ class BaseAdminApi:
     async def get_all_documents_status(
         self,
     ) -> list[DocumentStatus]:
+        ...
+
+    async def load_confluence_post(
+        self,
+    ) -> None:
         ...
 
     async def upload_documents_post(

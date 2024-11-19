@@ -15,8 +15,9 @@ import yaml
 
 from fastapi import FastAPI
 
+from extractor_api_lib.dependency_container import DependencyContainer
 from extractor_api_lib.apis.extractor_api import router
-from extractor_api_lib.container import Container
+from extractor_api_lib.impl import extractor_api_impl
 
 
 with open("/config/logging.yaml", "r") as stream:
@@ -28,14 +29,14 @@ app = FastAPI(
     description="Extractor API lib",
     version="1.0.0",
 )
+container = DependencyContainer()
+container.wire(modules=[extractor_api_impl])
+app.container = container
 
 app.include_router(router)
 
-container = Container()
-app.container = container
 
-
-def register_dependency_container(new_container: Container):
+def register_dependency_container(new_container: DependencyContainer):
     # preserve old wiring
     wiring_target = container.wiring_config.modules
     app.container.override(new_container)

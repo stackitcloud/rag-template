@@ -1,6 +1,6 @@
 # RAG Core API
 
-The rag-core-api contains a default implementation of a RAG.
+The rag-core-api contains a default implementation of the RAG core api.
 For a default use case no adjustments should be required, but adjustments can easily be made.
 
 A minimal example use case which replaces the `chat_chain` can be found [here](https://dev.azure.com/schwarzit-wiking/schwarzit.rag-template-sit-stackit/_git/use-case-example)

@@ -14,6 +14,7 @@
 
 
 # import models into model package
+from admin_api_lib.extractor_api_client.openapi_client.models.confluence_parameters import ConfluenceParameters
 from admin_api_lib.extractor_api_client.openapi_client.models.content_type import ContentType
 from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import ExtractionRequest
 from admin_api_lib.extractor_api_client.openapi_client.models.information_piece import InformationPiece

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.backend.name }}
+  name: {{ .Values.adminBackend.name }}
 spec:
-  replicas: {{ .Values.backend.replicaCount }}
+  replicas: {{ .Values.adminBackend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.backend.name }}
+      app: {{ .Values.adminBackend.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.backend.name }}
+        app: {{ .Values.adminBackend.name }}
     spec:
       securityContext:
         runAsUser: 65532
@@ -24,7 +24,7 @@ spec:
         - name: tmp-dir
           emptyDir: {}
       imagePullSecrets:
-        - name: {{ .Values.shared.imagePullSecret.name }}
+          - name: {{ .Values.shared.imagePullSecret.name }}
       initContainers:
       - name: init-permissions
         image: busybox
@@ -32,13 +32,13 @@ spec:
           - sh
           - -c
           - |
-            touch /app/rag-backend/log/logfile.log && \
-            chmod 600 /app/rag-backend/log/logfile.log
+            touch /app/admin-backend/log/logfile.log && \
+            chmod 600 /app/admin-backend/log/logfile.log
         volumeMounts:
         - name: log-dir
-          mountPath: /app/rag-backend/log
+          mountPath: /app/admin-backend/log
       containers:
-      - name: {{ .Values.backend.name }}
+      - name: {{ .Values.adminBackend.name }}
         securityContext:
           allowPrivilegeEscalation: false
           {{- if not .Values.shared.debug.backend.enabled }}
@@ -48,88 +48,72 @@ spec:
         - name: config-volume
           mountPath: /config
         - name: log-dir
-          mountPath: /app/rag-backend/log
+          mountPath: /app/admin-backend/log
         - name: tmp-dir
           mountPath: /tmp
-        image: {{ include "backend.fullImageName" . }}
-        imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-        {{- if not (empty .Values.backend.command) }}
+        image: {{ template "adminBackend.fullImageName" . }}
+        imagePullPolicy: {{ .Values.adminBackend.image.pullPolicy }}
+        {{- if not (empty .Values.adminBackend.command) }}
         command:
-        {{- range $cmd :=  .Values.backend.command }}
+        {{- range $cmd :=  .Values.adminBackend.command }}
         - {{ $cmd -}}
         {{ end }}
         {{- end }}
         {{- if not .Values.shared.debug.backend.enabled }}
-        {{- if not (empty .Values.backend.args) }}
+        {{- if not (empty .Values.adminBackend.args) }}
         args:
-        {{- range $arg :=  .Values.backend.args }}
+        {{- range $arg :=  .Values.adminBackend.args }}
         - {{ $arg | quote -}}
         {{ end }}
-        - "--workers"
-        - {{ .Values.backend.workers  | quote}}
-        - "--ws-max-queue"
-        - {{ .Values.backend.wsMaxQueue | quote }}
         {{- end }}
         {{- else }}
-        {{- if not (empty .Values.backend.debugArgs) }}
+        {{- if not (empty .Values.adminBackend.debugArgs) }}
         args:
-        {{- range $arg :=  .Values.backend.debugArgs }}
+        {{- range $arg :=  .Values.adminBackend.debugArgs }}
         - {{ $arg | quote -}}
         {{ end }}
         {{- end }}
         {{- end }}
         ports:
-        - containerPort: {{ .Values.backend.service.port }}
+        - containerPort: {{ .Values.adminBackend.service.port }}
         {{- if .Values.shared.debug.backend.enabled }}
         - containerPort: 31415
         {{- end }}
         envFrom:
           - configMapRef:
-              name: {{ template "configmap.errorMessagesName" . }}
-          - configMapRef:
-              name: {{ template "configmap.databaseName" . }}
-          - configMapRef:
               name: {{ template "configmap.ragClassTypesName" . }}
           - configMapRef:
-              name: {{ template "configmap.embedderClassTypesName" . }}
-          - configMapRef:
-              name: {{ template "configmap.retrieverName" . }}
-          - configMapRef:
-              name: {{ template "configmap.rerankerName" . }}
+              name: {{ template "configmap.summarizerName" . }}
           - configMapRef:
               name: {{ template "configmap.alephalphaName" . }}
           - configMapRef:
               name: {{ template "configmap.langfuseName" . }}
           - configMapRef:
-              name: {{ template "configmap.publicName" . }}
-          - configMapRef:
               name: {{ template "configmap.ollamaName" . }}
           - configMapRef:
-              name: {{ template "configmap.stackitMyApiLlmName" . }}
+              name: {{ template "configmap.stackitMyapiLlmName" . }}
           - configMapRef:
               name: {{ template "configmap.usecaseName" . }}
           - configMapRef:
-              name: {{ template "configmap.ragasName" . }}
+              name: {{ template "configmap.s3Name" . }}
+          - configMapRef:
+              name: {{ template "configmap.ragapiName" . }}
           - configMapRef:
               name: {{ template "configmap.stackitVllmName" . }}
           - configMapRef:
-              name: {{ template "configmap.stackitEmbedderName" . }}
-          - configMapRef:
-              name: {{ template "configmap.chatHistoryName" . }}
+              name: {{ template "configmap.pdfextractorName" . }}
           - secretRef:
               name: {{ template "secret.alephalphaName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:
-              name: {{ template "secret.openaiName" . }}
-          - secretRef:
-              name: {{ template "secret.stackitMyApiLlmName" . }}
-          - secretRef:
-              name: {{ template "secret.stackitVllmName" . }}
+              name: {{ template "secret.stackitMyapiLlmName" . }}
           - secretRef:
               name: {{ template "secret.usecaseName" . }}
           - secretRef:
-              name: {{ template "secret.stackitEmbedderName" . }}
+              name: {{ template "secret.s3Name" . }}
+          - secretRef:
+              name: {{ template "secret.stackitVllmName" . }}
         env:
           - name: PYTHONPATH
-            value: {{ .Values.backend.pythonPathEnv.PYTHONPATH }}
+            value: {{ .Values.adminBackend.pythonPathEnv.PYTHONPATH }}

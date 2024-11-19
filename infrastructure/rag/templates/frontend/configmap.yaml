@@ -1,4 +1,4 @@
-{{ if .Values.frontend.config }}
+{{- if $.Values.features.frontend.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

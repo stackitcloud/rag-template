@@ -11,8 +11,20 @@ dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
   version: "0.2.1"
-  condition: langfuse.enabled
+  condition: features.langfuse.enabled
 - name: qdrant
   version: 0.9.1
   repository: "https://qdrant.github.io/qdrant-helm"
-  condition: qdrant.enabled
+  condition: features.qdrant.enabled
+- name: minio
+  repository: https://charts.bitnami.com/bitnami
+  version: "14.6.7"
+  condition: features.minio.enabled
+- name: keydb
+  repository: https://enapter.github.io/charts/
+  version: "0.48.0"
+- name: ollama
+  alias: ollama
+  version: 0.29.1
+  repository: https://otwld.github.io/ollama-helm/
+  condition: features.ollama.enabled

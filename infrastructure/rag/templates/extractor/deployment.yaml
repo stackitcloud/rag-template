@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.extractor.name }}
+spec:
+  replicas: {{ .Values.extractor.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.extractor.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.extractor.name }}
+    spec:
+      securityContext:
+        runAsUser: 65532
+        runAsNonRoot: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "configmap.loggingName" . }}
+        - name: log-dir
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
+        - name: nltk-data-dir
+          emptyDir: {}
+      imagePullSecrets:
+        - name: {{ .Values.shared.imagePullSecret.name }}
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            touch /app/document-extractor/log/logfile.log && \
+            chmod 600 /app/document-extractor/log/logfile.log
+        volumeMounts:
+        - name: log-dir
+          mountPath: /app/document-extractor/log
+      containers:
+      - name: {{ .Values.extractor.name }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          {{- if not .Values.shared.debug.backend.enabled }}
+          readOnlyRootFilesystem: true
+          {{- end }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: log-dir
+          mountPath: /app/document-extractor/log
+        - name: tmp-dir
+          mountPath: /tmp
+        - name: nltk-data-dir
+          mountPath: /home/nonroot/nltk_data
+        image: {{ template "extractor.fullImageName" . }}
+        imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
+        {{- if not (empty .Values.extractor.command) }}
+        command:
+        {{- range $cmd :=  .Values.extractor.command }}
+        - {{ $cmd -}}
+        {{ end }}
+        {{- end }}
+        {{- if not .Values.shared.debug.backend.enabled }}
+        {{- if not (empty .Values.extractor.args) }}
+        args:
+        {{- range $arg :=  .Values.extractor.args }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- else }}
+        {{- if not (empty .Values.extractor.debugArgs) }}
+        args:
+        {{- range $arg :=  .Values.extractor.debugArgs }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.extractor.service.port }}
+        {{- if .Values.shared.debug.backend.enabled }}
+        - containerPort: 31415
+        {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.s3Name" . }}
+          - configMapRef:
+              name: {{ template "configmap.pdfextractorName" . }}
+          - secretRef:
+              name: {{ template "secret.s3Name" . }}
+        env:
+          - name: PYTHONPATH
+            value: {{ .Values.extractor.pythonPathEnv.PYTHONPATH }}

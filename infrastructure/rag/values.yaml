@@ -1,17 +1,21 @@
-langfuse:
-  enabled: true
-qdrant:
-  enabled: true
-frontend_flag:
-  enabled: true
+features:
+  ollama:
+    enabled: false
+  langfuse:
+    enabled: true
+  qdrant:
+    enabled: true
+  frontend:
+    enabled: true
+
 
 backend:
   name: backend
   replicaCount: 1
 
   image:
-    repository: ghcr.io/mmmake-gmbh/rag
-    name: rag-api
+    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    name: rag-backend
     pullPolicy: Always
     tag: "dev-ba20c7b"
 
@@ -96,7 +100,7 @@ backend:
       STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
     database:
       VECTOR_DB_COLLECTION_NAME: rag-db
-      VECTOR_DB_URL: http://qdrant:6333
+      VECTOR_DB_URL: http://rag-qdrant:6333
     retriever:
       RETRIEVER_THRESHOLD: 0.3
       RETRIEVER_K_DOCUMENTS: 10
@@ -127,9 +131,9 @@ backend:
       ERROR_MESSAGES_HARMFUL_QUESTION: "I'm sorry, but harmful requests cannot be processed."
       ERROR_MESSAGES_NO_ANSWER_FOUND: "I'm sorry, I couldn't find an answer with the context provided."
     langfuse:
-      LANGFUSE_DATASET_NAME: "test_ds"
+      LANGFUSE_DATASET_NAME: "rag_test_ds"
       LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
-      LANGFUSE_HOST: "http://langfuse:3000" #NOTE: http protocol needs to be defined!
+      LANGFUSE_HOST: "http://rag-langfuse:3000" #NOTE: http protocol needs to be defined!
     ragClassTypes:
       RAG_CLASS_TYPE_LLM_TYPE: "stackit"
     ragas:
@@ -145,12 +149,12 @@ backend:
       EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
     stackitEmbedder:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
-      STACKIT_EMBEDDER_BASE_URL: "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1"
+      STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
     public:
       PUBLIC_HOST: "https://api.aleph-alpha.com"
     ollama:
       OLLAMA_MODEL: "llama3:instruct"
-      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_BASE_URL: "http://rag-ollama:11434"
       OLLAMA_TOP_K: 0
       OLLAMA_TOP_P: 0
       OLLAMA_TEMPERATURE: 0
@@ -158,6 +162,8 @@ backend:
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
     usecase:
+      USECASE_KEYVALUE_PORT: 6379
+      USECASE_KEYVALUE_HOST: "rag-keydb"
     chatHistory:
       CHAT_HISTORY_LIMIT: 4
       CHAT_HISTORY_REVERSE: true
@@ -167,7 +173,7 @@ frontend:
   replicaCount: 1
   image:
     # TODO: Change to jfrog/azure or something else
-    repository: ghcr.io/mmmake-gmbh/rag
+    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
     name: frontend
     pullPolicy: Always
     tag: "dev-e12f8cc"
@@ -180,10 +186,6 @@ frontend:
     envs:
       VITE_API_URL: http://rag.localhost/api
       VITE_CHAT_URL: http://rag.localhost
-
-  exports:
-    chartName:
-      frontendChartName: frontend
 
   ingress:
     enabled: true
@@ -200,13 +202,173 @@ frontend:
 
   envs:
     vite:
+      VITE_CHAT_AUTH_ENABLED: true
       VITE_API_URL: "http://rag.localhost/api"
       VITE_CHAT_URL: "http://rag.localhost"
+      VITE_ADMIN_URL: "http://admin.rag.localhost"
+      VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
 
 
-global:
 
+adminBackend:
+  replicaCount: 1
+
+  name: admin-backend
+
+  image:
+    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    name: admin-backend
+    pullPolicy: Always
+    tag: "443892"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_admin_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--root-path"
+  - "/api"
+  debugArgs:
+  - "python"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_admin_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/admin-backend"
+  - "--reload-dir"
+  - "/app/rag-core-library/rag-core-lib"
+  - "--reload-dir"
+  - "/app/rag-core-library/admin-api-lib"
+  - "--root-path"
+  - "/api"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+  ingress:
+    enabled: true
+    host:
+      name: admin.rag.localhost
+      path: /api(/|$)(.*)
+      pathType: ImplementationSpecific
+      port: 8080
+
+  minio:
+    enabled: true
+
+  envs:
+    summarizer:
+      SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
+      SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
+    ragapi:
+      RAG_API_HOST: "http://backend:8080"
+    chunker:
+      CHUNKER_MAX_SIZE: 1000
+      CHUNKER_OVERLAP: 300
+
+
+extractor:
+  replicaCount: 1
+  name: extractor
+  image:
+    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    name: document-extractor
+    pullPolicy: Always
+    tag: "443892"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_extractor_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  debugArgs:
+  - "python"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_extractor_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/document-extractor"
+  - "--reload-dir"
+  - "/app/rag-core-library/extractor-api-lib"
+
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+adminFrontend:
+  name: admin-frontend
+  replicaCount: 1
+  image:
+    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    name: admin-frontend
+    pullPolicy: Always
+    tag: "443892"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  exports:
+    chart_name:
+      adminFrontendChartName: admin-frontend
+
+  ingress:
+    enabled: true
+    host:
+      name: admin.rag.localhost
+      path: /
+      pathType: ImplementationSpecific
+      port: 8080
+
+shared:
+# These values are used accross all templates
   ssl: true
+
+  debug:
+    backend:
+      enabled: false
 
   imagePullSecret:
     create: false
@@ -215,9 +377,23 @@ global:
   config:
     dns:
     - rag.localhost
+    - admin.rag.localhost
     basicAuth:
       enabled: true
     tls:
       enabled: true
       host: rag.localhost
       secretName: tls-certificate
+
+  secrets:
+    s3:
+      accessKey: "admin"
+      secretKey: "password"
+
+  envs:
+    pdfExtractor:
+      PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME: "connection_diagrams"
+      PDF_EXTRACTOR_FOOTER_HEIGHT: 155
+    s3:
+      S3_ENDPOINT: http://rag-minio:9000
+      S3_BUCKET: documents

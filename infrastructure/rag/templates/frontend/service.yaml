@@ -1,3 +1,4 @@
+{{- if $.Values.features.frontend.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,3 +10,4 @@ spec:
     targetPort: {{ .Values.frontend.service.port }}
   selector:
     app: {{ .Values.frontend.name }}
+{{- end }}

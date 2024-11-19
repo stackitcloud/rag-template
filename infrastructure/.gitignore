@@ -1,4 +1,5 @@
 */terraform.tfstate
+*/Chart.lock
 *.tgz
 */.terraform/
 # Byte-compiled / optimized / DLL files

@@ -2,26 +2,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.frontend.name }}
+  name: {{ .Values.adminFrontend.name }}
 spec:
-  replicas: {{ .Values.frontend.replicaCount }}
+  replicas: {{ .Values.adminFrontend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.frontend.name }}
+      app: {{ .Values.adminFrontend.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.frontend.name }}
+        app: {{ .Values.adminFrontend.name }}
     spec:
       volumes:
-      - name: {{ .Values.frontend.name }}
+      - name: {{ .Values.adminFrontend.name }}
         emptyDir: {}
       - name: nginx-cache-dir
         emptyDir: {}
       - name: run-dir
         emptyDir: {}
       containers:
-      - name: {{ .Values.frontend.name }}
+      - name: {{ .Values.adminFrontend.name }}
         startupProbe:
           exec:
             command:
@@ -33,17 +33,17 @@ spec:
           runAsNonRoot: true
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
-        image: {{ template "frontend.fullImageName" . }}
-        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        image: {{ template "adminFrontend.fullImageName" . }}
+        imagePullPolicy: {{ .Values.adminFrontend.image.pullPolicy }}
         volumeMounts:
         - mountPath: /usr/share/nginx/html
-          name: frontend
+          name: {{ .Values.adminFrontend.name }}
         - mountPath: var/cache/nginx/
           name: nginx-cache-dir
         - mountPath: /var/run
           name: run-dir
         ports:
-        - containerPort: {{ .Values.frontend.service.port }}
+        - containerPort: {{ .Values.adminFrontend.service.port }}
         envFrom:
           - configMapRef:
               name: {{ template "configmap.frontendName" . }}

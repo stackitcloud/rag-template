@@ -44,21 +44,11 @@ local_resource(
     "core helm chart",
     cmd="cd ./rag-infrastructure/rag && helm dependency update",
     ignore=[
-        "rag-infrastructure/rag/charts/backend-0.0.1.tgz",
-        "rag-infrastructure/rag/charts/frontend-0.0.1.tgz",
-        "rag-infrastructure/rag/charts/langfuse-0.2.1.tgz",
+        "rag-infrastructure/rag/charts/keydb-0.48.0.tgz",
+        "rag-infrastructure/rag/charts/minio-14.6.7.tgz",
+        "rag-infrastructure/rag/charts/langfuse-0.29.1.tgz",
         "rag-infrastructure/rag/charts/qdrant-0.9.1.tgz",
-    ],
-    labels=["helm"],
-)
-local_resource(
-    "use case helm chart",
-    cmd="cd ./helm-chart && helm dependency update",
-    ignore=[
-        "helm-chart/charts/admin-backend-0.0.1.tgz",
-        "helm-chart/charts/keydb-0.48.0.tgz",
-        "helm-chart/charts/minio-14.6.7.tgz",
-        "helm-chart/charts/rag-0.0.1.tgz",
+        "rag-infrastructure/rag/charts/ollama-0.29.1.tgz",
     ],
     labels=["helm"],
 )
@@ -309,51 +299,44 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "ragBase.backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    "ragBase.backend.secrets.stackitMyapiLlm.authClientId=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
-    "ragBase.backend.secrets.stackitMyapiLlm.authClientSecret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
-    "ragBase.backend.secrets.openai.apiKey=%s" % os.environ["OPENAI_API_KEY"],
+    "backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
+    "backend.secrets.stackitMyapiLlm.authClientId=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
+    "backend.secrets.stackitMyapiLlm.authClientSecret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
+    "backend.secrets.openai.apiKey=%s" % os.environ["OPENAI_API_KEY"],
     "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
-    "ragBase.backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
-    "ragBase.backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
-    "ragBase.backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
-    "ragBase.backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
-    "ragBase.backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
-    "ragBase.frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
-    "ragBase.frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
+    "backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
+    "backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
+    "backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
+    "backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
+    "backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
+    "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
+    "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
     # variables
-    "global.debug.backend.enabled=%s" % backend_debug,
-    "ragBase.frontend.enabled=true",
-    "global.config.tls.enabled=false",
-    "global.ssl=false",
+    "shared.debug.backend.enabled=%s" % backend_debug,
+    "features.frontend.enabled=true",
+    "shared.config.tls.enabled=false",
+    "shared.ssl=false",
     # ingress host names
-    "ragBase.backend.ingress.host.name=rag.localhost",
+    "backend.ingress.host.name=rag.localhost",
     # langfuse
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_ORG_ID=%s" % os.environ["LANGFUSE_INIT_ORG_ID"],
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_ID=%s" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_PUBLIC_KEY=%s" % os.environ[
-        "LANGFUSE_INIT_PROJECT_PUBLIC_KEY"
-    ],
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_SECRET_KEY=%s" % os.environ[
-        "LANGFUSE_INIT_PROJECT_SECRET_KEY"
-    ],
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_EMAIL=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_PASSWORD=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
-    "ragBase.langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_NAME=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_ORG_ID=%s" % os.environ["LANGFUSE_INIT_ORG_ID"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_ID=%s" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_PUBLIC_KEY=%s" % os.environ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_SECRET_KEY=%s" % os.environ["LANGFUSE_INIT_PROJECT_SECRET_KEY"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_EMAIL=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_PASSWORD=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
+    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_NAME=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
 ]
 
 yaml = helm(
-    "./helm-chart",
+    "./rag-infrastructure/rag",
     name="rag",
     namespace="rag",
     values=[
-        "./helm-chart/values.yaml",
-        "./helm-chart/rag-core-values.yaml",
-        "./helm-chart/minio-values.yaml",
-        "./helm-chart/langfuse-values.yaml",
-        "./helm-chart/qdrant-values.yaml",
-        "./helm-chart/ollama-values.yaml",
+        "./rag-infrastructure/rag/values.yaml",
+        "./rag-infrastructure/rag/minio-values.yaml",
+        "./rag-infrastructure/rag/langfuse-values.yaml",
     ],
     set=value_override,
 )

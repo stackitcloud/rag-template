@@ -286,7 +286,12 @@ adminBackend:
     chunker:
       CHUNKER_MAX_SIZE: 1000
       CHUNKER_OVERLAP: 300
-
+    confluenceLoader:
+      CONFLUENCE_URL: ""
+      CONFLUENCE_SPACE_KEY: ""
+  secrets:
+    confluenceLoader:
+      token: ""
 
 extractor:
   replicaCount: 1

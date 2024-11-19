@@ -24,3 +24,12 @@ data:
   {{- range $key, $value := .Values.adminBackend.envs.summarizer }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.confluenceLoaderName" . }}
+data:
+  {{- range $key, $value := .Values.adminBackend.envs.confluenceLoader }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

@@ -9,6 +9,7 @@ export const useDocumentsStore = defineStore('chat', () => {
     const uploadedDocuments = ref<UploadedDocument[]>([]);
     const allDocuments = ref<DocumentModel[]>();
     const error = ref<ErrorType | null>(null);
+    const isLoadingConfluence = ref(false);
 
     function updateUploadedDocumentData(documentId: string, data: Partial<UploadedDocument>) {
         const document = uploadedDocuments.value.find((d: UploadedDocument) => d.id === documentId);
@@ -51,6 +52,25 @@ export const useDocumentsStore = defineStore('chat', () => {
         }
     };
 
+    const loadConfluence = async () => {
+        isLoadingConfluence.value = true;
+        error.value = null;
+        try {
+            await DocumentAPI.loadConfluence();
+            await loadDocuments(); // Refresh the document list after uploading
+        } catch(err) {
+            if (err.response && err.response.status === 501) {
+                error.value = "confluence_not_configured";
+                console.error("Confluence loader is not configured.");
+            } else {
+                error.value = "confluence";
+                console.error(err);
+            }
+        } finally {
+            isLoadingConfluence.value = false;
+        }
+    };
+
     const uploadDocuments = async (files: File[]) => {
         try {
             const uploads = files.map(uploadDocument);
@@ -79,5 +99,5 @@ export const useDocumentsStore = defineStore('chat', () => {
         uploadedDocuments.value = uploadedDocuments.value.filter(o => o.id !== documentId);
     };
 
-    return {removeUploadedDocument, uploadDocuments, loadDocuments, deleteDocument, allDocuments, uploadedDocuments, error};
+    return {removeUploadedDocument, uploadDocuments, loadDocuments, deleteDocument, loadConfluence, allDocuments, uploadedDocuments, error};
 });

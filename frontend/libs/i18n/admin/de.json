@@ -8,11 +8,22 @@
     "uploadDocumentCompleted": "Hochgeladen",
     "uploadProcessing": "Wird verarbeitet...",
     "uploadingDocument": "Wird hochgeladen...",
+    "fileUpload": "Datei-Upload",
+    "confluenceUpload": "Confluence",
+    "confluenceLoadTitle": "Confluence-Seiten laden",
+    "confluenceLoadDescription": "Klicken Sie auf den Button unten, um Seiten aus Confluence zu laden",
+    "loadConfluence": "Laden starten",
     "fileTypeNotAllowedTitle": "Dateityp nicht erlaubt",
     "fileTypeNotAllowedDescription": "Nur PDF-, DOCX-, PPTX- und XML-Dateien sind erlaubt",
     "select": "Auswählen",
     "chat": "Chat starten",
     "uploadDocumentFailed": "Upload fehlgeschlagen",
-    "error": {}
+    "errorOccurred": "Ein Fehler ist aufgetreten",
+    "deleteError": "Löschen des Dokuments fehlgeschlagen",
+    "uploadError": "Hochladen des Dokuments fehlgeschlagen",
+    "loadError": "Laden der Dokumente fehlgeschlagen",
+    "confluenceError": "Laden aus Confluence fehlgeschlagen",
+    "confluenceNotConfigured": "Confluence ist nicht konfiguriert",
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten"
   }
 }

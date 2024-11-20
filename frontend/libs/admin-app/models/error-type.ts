@@ -1,1 +1,1 @@
-export type ErrorType = 'delete' | 'upload' | 'load';
+export type ErrorType = 'delete' | 'upload' | 'load' | 'confluence' | 'confluence_not_configured';

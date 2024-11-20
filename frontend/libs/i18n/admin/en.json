@@ -10,9 +10,20 @@
     "uploadingDocument": "Uploading...",
     "fileTypeNotAllowedTitle": "File type not allowed",
     "fileTypeNotAllowedDescription": "Only PDF, DOCX, PPTX, and XML files are allowed",
+    "fileUpload": "File Upload",
+    "confluenceUpload": "Confluence",
+    "confluenceLoadTitle": "Load Confluence Pages",
+    "confluenceLoadDescription": "Click the button below to load pages from Confluence",
+    "loadConfluence": "Load Confluence",
     "select": "Select",
     "chat": "Start chat",
     "uploadDocumentFailed": "Upload failed",
-    "error": {}
+    "errorOccurred": "An error occurred",
+    "deleteError": "Failed to delete the document",
+    "uploadError": "Failed to upload the document",
+    "loadError": "Failed to load documents",
+    "confluenceError": "Failed to load from Confluence",
+    "confluenceNotConfigured": "Confluence is not configured",
+    "unknownError": "An unknown error occurred"
   }
 }

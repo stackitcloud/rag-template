@@ -35,6 +35,14 @@ export class DocumentAPI {
         }
     }
 
+    static async loadConfluence(): Promise<void> {
+        try {
+            await axios.post<void>('/load_confluence');
+        } catch(error) {
+            this.handleError(error);
+        }
+    }
+
     static async deleteDocument(documentId: string): Promise<void> {
         try {
             await axios.delete<void>(`/delete_document/${documentId}`);

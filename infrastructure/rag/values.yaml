@@ -8,7 +8,6 @@ features:
   frontend:
     enabled: true
 
-
 backend:
   name: backend
   replicaCount: 1

@@ -12,12 +12,13 @@ This README only explains the most important settings.
 With the exception of the `backend` all components can be disabled and exchanged with components of your choice.
 This can be done by overwriting the following values in your `values.yaml`
 ```yaml
-langfuse:
-  enabled: true
-qdrant:
-  enabled: true
-frontend:
-  enabled: true
+features:
+  langfuse:
+    enabled: true
+  qdrant:
+    enabled: true
+  frontend:
+    enabled: true
 ```
 
 It is required to use an `imagePullSecret` for pulling the images belonging to the rag-template.
@@ -57,7 +58,19 @@ Default values for the deployment are provided in the `rag/langfuse_values.yaml`
 
 ## Qdrant
 
-Default values for the deployment are provided in the `rag/qdrant_values.yaml` file.
+The deployment of the Qdrant can be disabled by setting the following value in the helm-chart:
+```yaml
+features:
+  qdrant:
+    enabled: false
+```
+For more information on the values for the Qdrant helm chart please consult the [README of the Qdrant helm chart](https://github.com/qdrant/qdrant-helm/blob/qdrant-1.12.3/charts/qdrant/README.md).
+
+> ⓘ INFO: The qdrant is a subchart of this helm-chart with the name `qdrant`. Therefore all configuration values for qdrant are required to be under the key `qdrant`, e.g. for changing the `replicaCount` you have to add the following value:
+```yaml
+qdrant:
+  replicaCount: 3
+```
 
 ## Frontend
 TODO: Adjust once the frontend actually works.

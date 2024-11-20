@@ -329,6 +329,21 @@ value_override = [
     "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_NAME=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
 ]
 
+def has_confluence_config():
+    required_keys = ["CONFLUENCE_TOKEN", "CONFLUENCE_URL", "CONFLUENCE_SPACE_KEY"]
+    for key in required_keys:
+        if key not in os.environ:
+            return False
+    return True
+
+if has_confluence_config():
+    confluence_settings = [
+        "adminBackend.secrets.confluenceLoader.token=%s" % os.environ["CONFLUENCE_TOKEN"],
+        "adminBackend.envs.confluenceLoader.CONFLUENCE_URL=%s" % os.environ["CONFLUENCE_URL"],
+        "adminBackend.envs.confluenceLoader.CONFLUENCE_SPACE_KEY=%s" % os.environ["CONFLUENCE_SPACE_KEY"],
+    ]
+    value_override.extend(confluence_settings)
+
 yaml = helm(
     "./rag-infrastructure/rag",
     name="rag",

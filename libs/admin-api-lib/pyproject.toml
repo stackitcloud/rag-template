@@ -53,8 +53,8 @@ max-line-length = 120
 [tool.poetry]
 name = "admin_api_lib"
 version = "0.0.1"
-description = "The admin backend is responsible for the document management. This includes deletion, upload and getting particular documents or document lists."
-authors = ["STACKIT GmbH & Co. KG"]
+description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
+authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 
 [tool.poetry.group.dev.dependencies]

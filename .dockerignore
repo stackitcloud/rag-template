@@ -1,0 +1,20 @@
+*/.gitignore
+# Ignore node_modules directory
+frontend/node_modules/
+
+frontend/.nx/cache/
+
+# Ignore package-lock.json or yarn.lock file
+frontend/package-lock.json
+frontend/yarn.lock
+
+# Ignore any build artifacts or compiled files
+frontend/dist/
+frontend/build/
+frontend/*.log
+
+# Ignore python envs and compiled python files
+*/venv
+*/.venv
+*/.env
+*/*.pyc

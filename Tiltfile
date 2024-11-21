@@ -300,8 +300,6 @@ docker_build(
 value_override = [
     # secrets env
     "backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    "backend.secrets.stackitMyapiLlm.authClientId=%s" % os.environ["STACKIT_AUTH_CLIENT_ID"],
-    "backend.secrets.stackitMyapiLlm.authClientSecret=%s" % os.environ["STACKIT_AUTH_CLIENT_SECRET"],
     "backend.secrets.openai.apiKey=%s" % os.environ["OPENAI_API_KEY"],
     "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],

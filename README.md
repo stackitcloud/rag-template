@@ -71,7 +71,6 @@ This results in a basic auth with username=`foo` and password=`bar`.
 
 > ⓘ INFO: The sit-internal instance of AlephAlpha has proven to be not the most reliable.
 > This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to on of the following values:
-> - `myapi`: Uses the sit-internal AlephAlpha instance.
 > - `alephalpha`: Uses the public AlephAlpha instance.
 > - `ollama`: Uses ollama as an LLM provider.
 >

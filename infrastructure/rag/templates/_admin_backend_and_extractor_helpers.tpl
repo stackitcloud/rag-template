@@ -11,10 +11,6 @@
 {{- printf "%s-langfuse-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.stackitMyapiLlmName" -}}
-{{- printf "%s-stackit-myapi-llm-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "secret.usecaseName" -}}
 {{- printf "%s-usecase-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -62,10 +58,6 @@
 
 {{- define "configmap.langfuseName" -}}
 {{- printf "%s-langfuse-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "configmap.stackitMyapiLlmName" -}}
-{{- printf "%s-stackit-myapi-llm.configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "configmap.pdfextractorName" -}}

@@ -98,21 +98,17 @@ global:
     langfuse:
       public_key: ...
       secret_key: ...
-    stackit_myapi_llm:
-      auth_client_id: ...
-      auth_client_secret: ...
   config:
     envs:
       rag_class_types:
-        RAG_CLASS_TYPE_LLM_TYPE: "myapi"
-        RAG_CLASS_TYPE_EMBEDDER_TYPE: "myapi"
+        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+        RAG_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
 
 ```
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
 
 > ⓘ INFO: The sit-internal instance of AlephAlpha has proven to be not the most reliable.
 > This deployment comes with multiple options. You can change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in `./rag/values.yaml` to one of the following values:
-> - `myapi`: Uses the sit-internal AlephAlpha instance.
 > - `alephalpha`: Uses the public AlephAlpha instance.
 > - `ollama`: Uses ollama as an LLM provider.
 >

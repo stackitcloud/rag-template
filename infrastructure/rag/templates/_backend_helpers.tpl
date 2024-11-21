@@ -11,10 +11,6 @@
 {{- printf "%s-langfuse-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.stackitMyApiLlmName" -}}
-{{- printf "%s-stackit-myapi-llm-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "secret.openaiName" -}}
 {{- printf "%s-openai-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -78,10 +74,6 @@
 
 {{- define "configmap.rerankerName" -}}
 {{- printf "%s-reranker-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "configmap.stackitMyApiLlmName" -}}
-{{- printf "%s-stackit-myapi-llm.configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "configmap.usecaseName" -}}

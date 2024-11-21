@@ -91,8 +91,6 @@ spec:
           - configMapRef:
               name: {{ template "configmap.ollamaName" . }}
           - configMapRef:
-              name: {{ template "configmap.stackitMyapiLlmName" . }}
-          - configMapRef:
               name: {{ template "configmap.usecaseName" . }}
           - configMapRef:
               name: {{ template "configmap.s3Name" . }}
@@ -108,8 +106,6 @@ spec:
               name: {{ template "secret.alephalphaName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
-          - secretRef:
-              name: {{ template "secret.stackitMyapiLlmName" . }}
           - secretRef:
               name: {{ template "secret.usecaseName" . }}
           - secretRef:

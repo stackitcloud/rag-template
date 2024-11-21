@@ -82,9 +82,6 @@ backend:
     langfuse:
       publicKey: "pk-lf"
       secretKey: "sk-lf"
-    stackitMyapiLlm:
-      authClientId: auth-client-id
-      authClientSecret: auth-client-secret
     stackitEmbedder:
       apiKey: ""
     openai:
@@ -110,9 +107,6 @@ backend:
       RETRIEVER_TABLE_K_DOCUMENTS: 10
       RETRIEVER_IMAGE_THRESHOLD: 0.7
       RETRIEVER_IMAGE_K_DOCUMENTS: 10
-    stackitMyapiLlm:
-      STACKIT_TOKEN_LIFETIME_MARGIN: 30
-      STACKIT_AUTH_SERVER_URL: https://dev.api.schwarz/oauth/accesstoken/v2
     alephAlpha:
       ALEPH_ALPHA_MODEL: llama-3-70b-instruct
       ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1

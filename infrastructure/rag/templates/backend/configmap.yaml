@@ -74,15 +74,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "configmap.stackitMyApiLlmName" . }}
-data:
-  {{- range $key, $value := .Values.backend.envs.stackitMyapiLlm }}
-  {{ $key }}: {{ $value | quote }}
-  {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: {{ template "configmap.publicName" . }}
 data:
   {{- range $key, $value := .Values.backend.envs.public }}

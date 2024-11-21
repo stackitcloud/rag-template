@@ -21,7 +21,8 @@ COPY rag-backend/pyproject.toml rag-backend/poetry.lock ./
 RUN mkdir log && chmod 700 log
 RUN touch /app/rag-backend/log/logfile.log && chmod 600 /app/rag-backend/log/logfile.log
 
-RUN if [ "$dev" = "1" ]; then \
+RUN poetry config virtualenvs.create false &&\
+    if [ "$dev" = "1" ]; then \
     poetry install --no-interaction --no-ansi --no-root --with dev; \
     else \
     poetry install --no-interaction --no-ansi --no-root; \
@@ -33,7 +34,7 @@ ARG dev=0
 RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv
-COPY --from=build ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
+COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/

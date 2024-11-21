@@ -19,24 +19,25 @@
             "extensions":[
 				"ms-python.python",
 				"njpwerner.autodocstring",
-                "donjayamanne.python-environment-manager",
+				"donjayamanne.python-environment-manager",
 				"k--kato.intellij-idea-keybindings",
-                "vscode-icons-team.vscode-icons",
-                "ms-python.black-formatter",
-                "EditorConfig.EditorConfig",
-                "ms-python.flake8",
-                "eamodio.gitlens",
-                "ms-python.isort",
-                "ms-python.vscode-pylance",
-                "ms-python.python",
-                "hbenl.vscode-test-explorer",
-                "Gruntfuggly.todo-tree",
-                "mikestead.dotenv",
-                "aaron-bond.better-comments",
-                "ms-azuretools.vscode-docker",
-                "cweijan.vscode-postgresql-client2",
-                "DavidKol.fastcompare"
-				]
+				"vscode-icons-team.vscode-icons",
+				"ms-python.black-formatter",
+				"EditorConfig.EditorConfig",
+				"ms-python.flake8",
+				"eamodio.gitlens",
+				"ms-python.isort",
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"hbenl.vscode-test-explorer",
+				"Gruntfuggly.todo-tree",
+				"mikestead.dotenv",
+				"aaron-bond.better-comments",
+				"ms-azuretools.vscode-docker",
+				"cweijan.vscode-postgresql-client2",
+				"DavidKol.fastcompare",
+				"fabiospampinato.vscode-diff"
+			]
             }
         },
 	"runArgs": [

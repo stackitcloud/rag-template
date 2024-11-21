@@ -1,4 +1,4 @@
-from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
+from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Configuration, List, Selector, Singleton  # noqa: WOT001
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.llms import Ollama, VLLMOpenAI
@@ -8,7 +8,6 @@ from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
 from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
 from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
 from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
@@ -17,18 +16,15 @@ from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
-from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-
 
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
 from admin_api_lib.extractor_api_client.openapi_client.api_client import ApiClient
 from admin_api_lib.impl.mapper.confluence_settings_mapper import ConfluenceSettingsMapper
 from admin_api_lib.extractor_api_client.openapi_client.configuration import Configuration as ExtractorConfiguration
 from admin_api_lib.rag_backend_client.openapi_client.configuration import Configuration as RagConfiguration
-from admin_api_lib.impl import admin_api
 from admin_api_lib.impl.chunker.text_chunker import TextChunker
 from admin_api_lib.impl.api_endpoints.default_confluence_loader import DefaultConfluenceLoader
 from admin_api_lib.impl.file_services.s3_service import S3Service
@@ -58,8 +54,6 @@ class DependencyContainer(DeclarativeContainer):
     Dependency injection container for managing application dependencies.
     """
 
-    wiring_config = WiringConfiguration(modules=[admin_api])
-
     class_selector_config = Configuration()
 
     # Settings
@@ -68,7 +62,6 @@ class DependencyContainer(DeclarativeContainer):
     aleph_alpha_settings = AlephAlphaSettings()
     ollama_settings = OllamaSettings()
     langfuse_settings = LangfuseSettings()
-    stackit_myapi_llm_settings = StackitMyAPILLMSettings()
     stackit_vllm_settings = StackitVllmSettings()
     document_extractor_settings = DocumentExtractorSettings()
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
@@ -83,7 +76,6 @@ class DependencyContainer(DeclarativeContainer):
 
     llm_secret_provider = Selector(
         class_selector_config.llm_type,
-        myapi=Singleton(DynamicSecretProvider, stackit_myapi_llm_settings),
         alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
         ollama=Singleton(NoSecretProvider),
         stackit=Singleton(StaticSecretProviderStackit, stackit_vllm_settings),
@@ -109,7 +101,6 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        myapi=Singleton(llm_provider, aleph_alpha_settings),
         alephalpha=Singleton(llm_provider, aleph_alpha_settings),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
         stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
@@ -118,7 +109,6 @@ class DependencyContainer(DeclarativeContainer):
     # Add secret provider to model
     large_language_model = Selector(
         class_selector_config.llm_type,
-        myapi=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
         alephalpha=Singleton(SecuredLLM, llm=aleph_alpha_settings, secret_provider=llm_secret_provider),
         ollama=large_language_model,
         stackit=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),

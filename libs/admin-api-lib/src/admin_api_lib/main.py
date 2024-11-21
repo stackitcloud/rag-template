@@ -13,6 +13,7 @@
 import logging.config
 import yaml
 
+from admin_api_lib.impl import admin_api
 from fastapi import FastAPI
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from dependency_injector.containers import Container
@@ -36,6 +37,7 @@ container = DependencyContainer()
 container.class_selector_config.from_dict(RAGClassTypeSettings().model_dump())
 
 app.container = container
+container.wire(modules=[admin_api])
 app.include_router(router)
 
 

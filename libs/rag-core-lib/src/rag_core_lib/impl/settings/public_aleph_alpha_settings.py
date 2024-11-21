@@ -1,11 +1,11 @@
-"""Contains settings regarding the stackit myapi llm."""
+"""Contains settings regarding the alephalpha llm."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
 class PublicAlephAlphaSettings(BaseSettings):
-    """Contains settings regarding the stackit myapi llm."""
+    """Contains settings regarding alephalpha llm."""
 
     class Config:
         """Config class for reading Fields from env."""

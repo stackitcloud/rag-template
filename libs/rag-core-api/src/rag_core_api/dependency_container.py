@@ -1,5 +1,5 @@
 import qdrant_client
-from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
+from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Configuration, Selector, Singleton, List  # noqa: WOT001
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings import OllamaEmbeddings
@@ -14,7 +14,6 @@ from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
-from rag_core_lib.impl.secret_provider.dynamic_secret_provider import DynamicSecretProvider
 from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
 from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
 from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
@@ -23,12 +22,10 @@ from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
-from rag_core_lib.impl.settings.stackit_myapi_llm_settings import StackitMyAPILLMSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
-from rag_core_api.impl import rag_api
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
 from rag_core_api.impl.graph.chat_graph import DefaultChatGraph
 from rag_core_api.impl.api_endpoints.default_information_pieces_remover import DefaultInformationPiecesRemover
@@ -59,8 +56,6 @@ class DependencyContainer(DeclarativeContainer):
     Dependency injection container for managing application dependencies.
     """
 
-    wiring_config = WiringConfiguration(modules=[rag_api])
-
     class_selector_config = Configuration()
     chat_history_config = Configuration()
 
@@ -72,7 +67,6 @@ class DependencyContainer(DeclarativeContainer):
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
     error_messages = ErrorMessages()
-    stackit_myapi_llm_settings = StackitMyAPILLMSettings()
     public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
     ragas_settings = RagasSettings()
@@ -89,7 +83,6 @@ class DependencyContainer(DeclarativeContainer):
 
     llm_secret_provider = Selector(
         class_selector_config.llm_type,
-        myapi=Singleton(DynamicSecretProvider, stackit_myapi_llm_settings),
         alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
         ollama=Singleton(NoSecretProvider),
         stackit=Singleton(StaticSecretProviderStackit, stackit_vllm_settings),
@@ -97,9 +90,6 @@ class DependencyContainer(DeclarativeContainer):
 
     embedder = Selector(
         class_selector_config.embedder_type,
-        myapi=Singleton(
-            AlephAlphaEmbedder, aleph_alpha_settings, Singleton(DynamicSecretProvider, stackit_myapi_llm_settings)
-        ),
         alephalpha=Singleton(
             AlephAlphaEmbedder, aleph_alpha_settings, Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings)
         ),
@@ -173,9 +163,6 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        myapi=Singleton(
-            SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
-        ),
         alephalpha=Singleton(
             SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
         ),

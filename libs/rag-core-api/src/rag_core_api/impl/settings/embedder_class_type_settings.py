@@ -21,5 +21,5 @@ class EmbedderClassTypeSettings(BaseSettings):
         case_sensitive = False
 
     embedder_type: EmbedderType = Field(
-        default=EmbedderType.MYAPI,
+        default=EmbedderType.STACKIT,
     )

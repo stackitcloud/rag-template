@@ -1,4 +1,3 @@
-import json
 import logging
 import tempfile
 import traceback
@@ -18,17 +17,12 @@ from admin_api_lib.impl.mapper.informationpiece2document import InformationPiece
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
 from admin_api_lib.models.status import Status
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi
-from admin_api_lib.rag_backend_client.openapi_client.models.content_type import ContentType
-from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import InformationPiece
-from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import KeyValuePair
 from fastapi import HTTPException, Request, UploadFile, status
 
 logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentUploader(DocumentUploader):
-    DOCUMENT_METADATA_TYPE_KEY = "type"
-
     def __init__(
         self,
         document_extractor: ExtractorApi,
@@ -108,7 +102,7 @@ class DefaultDocumentUploader(DocumentUploader):
         self._key_value_store.upsert(filename, Status.PROCESSING)
 
         information_pieces = self._document_extractor.extract_from_file_post(ExtractionRequest(path_on_s3=filename))
-        documents = [self._information_mapper.information_piece2document(x) for x in information_pieces]
+        documents = [self._information_mapper.extractor_information_piece2document(x) for x in information_pieces]
         host_base_url = str(request.base_url)
         document_url = f"{host_base_url.rstrip('/')}/document_reference/{urllib.parse.quote_plus(filename)}"
 
@@ -125,20 +119,11 @@ class DefaultDocumentUploader(DocumentUploader):
                 }
             )
 
-        documents = await self._information_enhancer.ainvoke(documents)
+        enhanced_documents = await self._information_enhancer.ainvoke(chunked_documents)
+        rag_information_pieces = [
+            self._information_mapper.document2rag_information_piece(doc) for doc in enhanced_documents
+        ]
 
-        rag_api_documents = []
-        for document in chunked_documents:
-            metadata = [KeyValuePair(key=str(key), value=json.dumps(value)) for key, value in document.metadata.items()]
-            content_type = ContentType(document.metadata[self.DOCUMENT_METADATA_TYPE_KEY].upper())
-            rag_api_documents.append(
-                InformationPiece(
-                    type=content_type,
-                    metadata=metadata,
-                    page_content=document.page_content,
-                )
-            )
-
-        self._rag_api.upload_information_piece(rag_api_documents)
+        self._rag_api.upload_information_piece(rag_information_pieces)
         self._key_value_store.upsert(filename, Status.READY)
         logger.info("File uploaded successfully: %s", filename)

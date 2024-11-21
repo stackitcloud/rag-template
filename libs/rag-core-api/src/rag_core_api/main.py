@@ -19,6 +19,7 @@ from dependency_injector.containers import Container
 
 from rag_core_api.apis.rag_api import router
 from rag_core_api.dependency_container import DependencyContainer
+from rag_core_api.impl import rag_api
 
 with open("/config/logging.yaml", "r") as stream:
     config = yaml.safe_load(stream)
@@ -34,6 +35,7 @@ app = FastAPI(
 app.include_router(router)
 
 container = DependencyContainer()
+container.wire(modules=[rag_api])
 app.container = container
 
 

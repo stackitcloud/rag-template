@@ -1,4 +1,3 @@
-import json
 import logging
 
 from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
@@ -12,17 +11,12 @@ from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyV
 from admin_api_lib.impl.settings.confluence_settings import ConfluenceSettings
 from admin_api_lib.impl.mapper.informationpiece2document import InformationPiece2Document
 from admin_api_lib.models.status import Status
-from admin_api_lib.rag_backend_client.openapi_client.models.content_type import ContentType
-from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import InformationPiece
-from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import KeyValuePair
-
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
 
 class DefaultConfluenceLoader(ConfluenceLoader):
-    DOCUMENT_METADATA_TYPE_KEY = "type"
     CONFLUENCE_SPACE = "confluence_space"
 
     def __init__(
@@ -64,28 +58,18 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         try:
             self._key_value_store.upsert(self._settings.url, Status.UPLOADING)
             information_pieces = self._extractor_api.extract_from_confluence_post(params)
-            documents = [self._information_mapper.information_piece2document(x) for x in information_pieces]
+            documents = [self._information_mapper.extractor_information_piece2document(x) for x in information_pieces]
             chunked_documents = self._chunker.chunk(documents)
-            rag_api_documents = []
-            for document in chunked_documents:
-                metadata = [
-                    KeyValuePair(key=str(key), value=json.dumps(value)) for key, value in document.metadata.items()
-                ]
-                content_type = ContentType(document.metadata[self.DOCUMENT_METADATA_TYPE_KEY].upper())
-                rag_api_documents.append(
-                    InformationPiece(
-                        type=content_type,
-                        metadata=metadata,
-                        page_content=document.page_content,
-                    )
-                )
+            rag_information_pieces = [
+                self._information_mapper.document2rag_information_piece(doc) for doc in chunked_documents
+            ]
         except Exception as e:
             self._key_value_store.upsert(self._settings.url, Status.ERROR)
             logger.error("Error while loading from Confluence: %s", str(e))
             raise HTTPException(500, f"Error loading from Confluence: {str(e)}") from e
 
         await self._delete_previous_information_pieces()
-        self._upload_information_pieces(rag_api_documents)
+        self._upload_information_pieces(rag_information_pieces)
 
     async def _delete_previous_information_pieces(self):
         try:

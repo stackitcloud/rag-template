@@ -1,4 +1,3 @@
-from abc import ABC
 from typing import Any, Optional
 
 from langchain_core.documents import Document
@@ -12,7 +11,7 @@ RunnableInput = AnswerGraphState
 RunnableOutput = str
 
 
-class AnswerGenerationChain(AsyncChain[RunnableInput, RunnableOutput], ABC):
+class AnswerGenerationChain(AsyncChain[RunnableInput, RunnableOutput]):
     """
     Base class for LLM answer generation chain.
     """

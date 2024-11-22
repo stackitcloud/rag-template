@@ -1,4 +1,3 @@
-from abc import ABC
 from typing import Any, Optional
 
 from langchain_core.runnables import Runnable, RunnableConfig
@@ -13,7 +12,7 @@ RunnableInput = AnswerGraphState
 RunnableOutput = str
 
 
-class RephrasingChain(AsyncChain[RunnableInput, RunnableOutput], ABC):
+class RephrasingChain(AsyncChain[RunnableInput, RunnableOutput]):
     """
     Base class for rephrasing of the input question.
     """

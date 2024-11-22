@@ -101,18 +101,17 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        alephalpha=Singleton(llm_provider, aleph_alpha_settings),
+        alephalpha=Singleton(
+            SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
+        ),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
-        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
+        stackit=Singleton(
+            SecuredLLM,
+            llm=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
+            secret_provider=llm_secret_provider,
+        ),
     )
 
-    # Add secret provider to model
-    large_language_model = Selector(
-        class_selector_config.llm_type,
-        alephalpha=Singleton(SecuredLLM, llm=aleph_alpha_settings, secret_provider=llm_secret_provider),
-        ollama=large_language_model,
-        stackit=Singleton(SecuredLLM, llm=large_language_model, secret_provider=llm_secret_provider),
-    )
     summary_text_splitter = Singleton(RecursiveCharacterTextSplitter)(
         chunk_size=summarizer_settings.maximum_input_size, chunk_overlap=chunker_settings.overlap
     )

@@ -2,15 +2,11 @@
 name = "rag-usecase-example"
 version = "0.1.0"
 description = ""
-authors = ["STACKIT GmbH & Co. KG"]
-readme = "README.md"
+authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
 rag-core-api = { path = "../rag-core-library/rag-core-api", develop = true}
-rag-core-lib = { path = "../rag-core-library/rag-core-lib", develop = true}
-pyyaml = "^6.0.2"
-langgraph = "^0.2.21"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"

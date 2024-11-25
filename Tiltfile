@@ -300,7 +300,6 @@ docker_build(
 value_override = [
     # secrets env
     "backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    "backend.secrets.openai.apiKey=%s" % os.environ["OPENAI_API_KEY"],
     "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
     "backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
@@ -308,6 +307,7 @@ value_override = [
     "backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     "backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     "backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
+    "backend.secrets.ragas.openaiApikey=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
     "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
     "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
     # variables
@@ -348,8 +348,6 @@ yaml = helm(
     namespace="rag",
     values=[
         "./rag-infrastructure/rag/values.yaml",
-        "./rag-infrastructure/rag/minio-values.yaml",
-        "./rag-infrastructure/rag/langfuse-values.yaml",
     ],
     set=value_override,
 )

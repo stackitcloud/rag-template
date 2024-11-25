@@ -11,10 +11,6 @@
 {{- printf "%s-langfuse-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.openaiName" -}}
-{{- printf "%s-openai-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "secret.usecaseName" -}}
 {{- printf "%s-usecase-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -26,6 +22,11 @@
 {{- define "secret.stackitVllmName" -}}
 {{- printf "%s-stackit-vllm-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{- define "secret.ragasName" -}}
+{{- printf "%s-stackit-ragas-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 
 # configmaps
 {{- define "configmap.publicName" -}}

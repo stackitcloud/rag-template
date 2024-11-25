@@ -119,13 +119,13 @@ spec:
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:
-              name: {{ template "secret.openaiName" . }}
-          - secretRef:
               name: {{ template "secret.stackitVllmName" . }}
           - secretRef:
               name: {{ template "secret.usecaseName" . }}
           - secretRef:
               name: {{ template "secret.stackitEmbedderName" . }}
+          - secretRef:
+              name: {{ template "secret.ragasName" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.backend.pythonPathEnv.PYTHONPATH }}

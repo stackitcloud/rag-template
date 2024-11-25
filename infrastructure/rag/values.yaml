@@ -84,10 +84,10 @@ backend:
       secretKey: "sk-lf"
     stackitEmbedder:
       apiKey: ""
-    openai:
-      apiKey: "sk-123456"
     stackitVllm:
       apiKey: "sk-123"
+    ragas:
+      openaiApikey: ""
     usecase:
 
   envs:
@@ -131,11 +131,10 @@ backend:
       RAG_CLASS_TYPE_LLM_TYPE: "stackit"
     ragas:
       RAGAS_IS_DEBUG: false
-      RAGAS_MODEL: "gpt-3.5-turbo-0125"
+      RAGAS_MODEL: "gpt-4o-mini"
+      RAGAS_USE_OPENAI: true
       RAGAS_TIMEOUT: 60
-      RAGAS_ADAPT_PROMPTS_TO_LANG: false
       RAGAS_PROMPT_LANGUAGE: "german"
-      RAGAS_BASE_URL: "https://api.openai.com/v1"
       RAGAS_EVALUATION_DATASET_NAME: "eval-data"
       RAGAS_MAX_CONCURRENCY: "5"
     embedderClassTypes:
@@ -395,3 +394,40 @@ shared:
     s3:
       S3_ENDPOINT: http://rag-minio:9000
       S3_BUCKET: documents
+
+
+langfuse:
+  postgresql:
+    deploy: true
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+  langfuse:
+    nextauth:
+      url: http://localhost:3000
+      secret: changeme
+    salt: changeme
+    additionalEnv:
+      HOSTNAME: 0.0.0.0
+      LANGFUSE_INIT_ORG_ID:
+      LANGFUSE_INIT_PROJECT_ID:
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY:
+      LANGFUSE_INIT_PROJECT_SECRET_KEY:
+      LANGFUSE_INIT_USER_EMAIL:
+      LANGFUSE_INIT_USER_NAME:
+      LANGFUSE_INIT_USER_PASSWORD:
+
+minio:
+  auth:
+    ## @param auth.rootUser MinIO&reg; root username
+    ##
+    rootUser: admin
+    ## @param auth.rootPassword Password for MinIO&reg; root user
+    ##
+    rootPassword: "adminpassword"
+  ## @param defaultBuckets Comma, semi-colon or space separated list of buckets to create at initialization (only in standalone mode)
+  ## e.g:
+  ## defaultBuckets: "my-bucket, my-second-bucket"
+  ##
+  defaultBuckets: "documents"

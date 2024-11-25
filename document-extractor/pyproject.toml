@@ -46,7 +46,7 @@ max-line-length = 120
 name = "pdfextractor_server"
 version = "0.0.0"
 description = "Extracts the content of pdf  documents."
-authors = ["STACKIT GmbH & Co. KG"]
+authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

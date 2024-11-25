@@ -1,7 +1,7 @@
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Singleton, List  # noqa: WOT001
 
-from extractor_api_lib.document_parser.table_coverters.dataframe2markdown import DataFrame2Markdown
+from extractor_api_lib.document_parser.table_converters.dataframe2markdown import DataFrame2Markdown
 from extractor_api_lib.document_parser.xml_extractor import XMLExtractor
 from extractor_api_lib.document_parser.ms_docs_extractor import MSDocsExtractor
 from extractor_api_lib.document_parser.general_extractor import GeneralExtractor

@@ -35,7 +35,7 @@ from rag_core_api.impl.embeddings.langchain_community_embedder import LangchainC
 from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
 from rag_core_api.impl.mapper.information_piece_mapper import InformationPieceMapper
 from rag_core_api.impl.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
-from rag_core_api.impl.prompt_templates.answer_rephrasing_prompt import ANSWER_REPHRASING_PROMPT
+from rag_core_api.impl.prompt_templates.question_rephrasing_prompt import QUESTION_REPHRASING_PROMPT
 from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
 from rag_core_api.impl.retriever.composite_retriever import CompositeRetriever
 from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
@@ -175,7 +175,7 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     prompt = ANSWER_GENERATION_PROMPT
-    rephrasing_prompt = ANSWER_REPHRASING_PROMPT
+    rephrasing_prompt = QUESTION_REPHRASING_PROMPT
 
     langfuse = Singleton(
         Langfuse,

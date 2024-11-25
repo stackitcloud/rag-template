@@ -15,7 +15,7 @@ from pdf2image import convert_from_path
 import pandas as pd
 
 
-from extractor_api_lib.document_parser.table_coverters.dataframe_converter import DataframeConverter
+from extractor_api_lib.document_parser.table_converters.dataframe_converter import DataframeConverter
 from extractor_api_lib.document_parser.information_extractor import (
     InformationExtractor,
 )

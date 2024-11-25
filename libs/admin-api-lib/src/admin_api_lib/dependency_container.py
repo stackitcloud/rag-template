@@ -122,12 +122,13 @@ class DependencyContainer(DeclarativeContainer):
         secret_key=langfuse_settings.secret_key,
         host=langfuse_settings.host,
     )
+    summarizer_prompt = SUMMARIZE_PROMPT
 
     langfuse_manager = Singleton(
         LangfuseManager,
         langfuse=langfuse,
         managed_prompts={
-            LangchainSummarizer.__name__: SUMMARIZE_PROMPT,
+            LangchainSummarizer.__name__: summarizer_prompt,
         },
         llm=large_language_model,
     )

@@ -8,7 +8,7 @@ from unstructured.partition.docx import partition_docx
 from unstructured.documents.elements import Element
 
 from extractor_api_lib.document_parser.information_piece import InformationPiece
-from extractor_api_lib.document_parser.table_coverters.dataframe_converter import DataframeConverter
+from extractor_api_lib.document_parser.table_converters.dataframe_converter import DataframeConverter
 from extractor_api_lib.document_parser.information_extractor import InformationExtractor
 from extractor_api_lib.document_parser.file_type import FileType
 from extractor_api_lib.document_parser.content_type import ContentType

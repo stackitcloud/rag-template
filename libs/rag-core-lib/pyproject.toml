@@ -7,8 +7,6 @@ name = "rag-core-lib"
 version = "0.0.1"
 description = "The perfect rag template"
 authors = ["STACKIT GmbH & Co. KG"]
-readme = "README.md"
-license = ""
 packages = [{ include = "rag_core_lib", from = "src" }]
 
 [tool.poetry.dependencies]

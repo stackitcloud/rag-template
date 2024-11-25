@@ -54,7 +54,6 @@ name = "extractor_api_lib"
 version = "0.0.0"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
-readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"

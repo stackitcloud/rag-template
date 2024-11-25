@@ -13,11 +13,9 @@ from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 import ragas
 from datasets import Dataset
 from langchain_core.runnables import RunnableConfig
-from langchain_openai import ChatOpenAI
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.client import DatasetClient
-from ragas import adapt
 from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
     answer_correctness,
@@ -28,7 +26,6 @@ from ragas.metrics import (
     context_recall,
     faithfulness,
 )
-from ragas.metrics.critique import harmfulness
 from ragas.run_config import RunConfig
 from tqdm import tqdm
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
@@ -56,8 +53,8 @@ class LangfuseRagasEvaluator(Evaluator):
         context_precision,
         context_recall,
         answer_correctness,
-        context_entity_recall,  # adapt for different languages not implemented
-        answer_similarity,  # adapt for different languages not implemented
+        context_entity_recall,
+        answer_similarity,
     ]
 
     MAX_RETRIES = 3
@@ -70,20 +67,17 @@ class LangfuseRagasEvaluator(Evaluator):
         embedder: Embedder,
         semaphore: AsyncThreadsafeSemaphore,
         chat_history_config: ChatHistorySettings,
+        chat_llm,
     ) -> None:
         self._chat_history_config = chat_history_config
         self._chat_endpoint = chat_endpoint
         self._settings = settings
         self._embedder = embedder
         self._semaphore = semaphore
-        self._metrics = [faithfulness, answer_relevancy, context_precision, harmfulness]
-        self._openai_llm = ChatOpenAI(model=settings.model, timeout=settings.timeout, openai_api_base=settings.base_url)
+        self._metrics = [faithfulness, answer_relevancy, context_precision]
         self._langfuse = Langfuse()
 
-        self._openai_llm_wrapped = LangchainLLMWrapper(self._openai_llm, RunConfig())
-        if settings.adapt_prompts_to_language:
-            adapt(self.METRICS[:-2], language=settings.prompt_language, llm=self._openai_llm)
-
+        self._llm_wrapped = LangchainLLMWrapper(chat_llm, RunConfig())
         # ensure prompt is initialized on langfuse
         langfuse_manager.init_prompts()
 
@@ -154,7 +148,7 @@ class LangfuseRagasEvaluator(Evaluator):
             result = ragas.evaluate(
                 eval_data,
                 metrics=self.METRICS,
-                llm=self._openai_llm_wrapped,
+                llm=self._llm_wrapped,
                 embeddings=self._embedder,
             )
             for metric, score in result.scores[0].items():

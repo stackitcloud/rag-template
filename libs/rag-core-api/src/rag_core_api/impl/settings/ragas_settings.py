@@ -14,10 +14,10 @@ class RagasSettings(BaseSettings):
         case_sensitive = False
 
     is_debug: bool = Field(default=False)
+    use_openai: bool = Field(default=True)
     model: str = Field(default="gpt-4o-mini")
+    openai_api_key: str = Field(default="")
     timeout: int = Field(default=60)
-    adapt_prompts_to_language: bool = Field(default=False)
-    base_url: str = Field(default="https://api.openai.com/v1/chat/completions")
     prompt_language: str = Field(default="german")
     evaluation_dataset_name: str = Field(default="eval-data")  # TODO: add config param in deployment
     dataset_filename: str = Field(default="test_data.json")

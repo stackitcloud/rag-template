@@ -6,6 +6,8 @@ from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama, VLLMOpenAI
 from langchain_qdrant import Qdrant
 from langfuse import Langfuse
+from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 from rag_core_api.impl.api_endpoints.default_chat import DefaultChat
 from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
@@ -223,6 +225,36 @@ class DependencyContainer(DeclarativeContainer):
 
     chat_endpoint = Singleton(DefaultChat, traced_chat_graph)
 
+    ragas_llm = (
+        Singleton(
+            ChatOpenAI,
+            model=ragas_settings.model,
+            timeout=ragas_settings.timeout,
+            api_key=ragas_settings.openai_api_key,
+        )
+        if ragas_settings.use_openai
+        else Selector(
+            class_selector_config.llm_type,
+            stackit=Singleton(
+                ChatOpenAI,
+                model=ragas_settings.model if ragas_settings.model else stackit_vllm_settings.model,
+                timeout=ragas_settings.timeout,
+                openai_api_base=stackit_vllm_settings.base_url,
+                api_key=stackit_vllm_settings.api_key,
+            ),
+            ollama=Singleton(
+                ChatOllama,
+                model=ragas_settings.model if ragas_settings.model else ollama_settings.model,
+                base_url=ollama_settings.base_url,
+            ),
+            alephalpha=Singleton(
+                lambda: exec(  # noqa: S102
+                    'raise NotImplementedError("Alephalpha is currently not supported for evaluation")'
+                )
+            ),
+        )
+    )
+
     evaluator = Singleton(
         LangfuseRagasEvaluator,
         chat_endpoint=chat_endpoint,
@@ -231,4 +263,5 @@ class DependencyContainer(DeclarativeContainer):
         embedder=embedder,
         semaphore=Singleton(AsyncThreadsafeSemaphore, ragas_settings.max_concurrency),
         chat_history_config=chat_history_config,
+        chat_llm=ragas_llm,
     )

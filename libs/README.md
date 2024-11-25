@@ -54,6 +54,10 @@ This endpoint is used for chatting.
 Will start the evaluation of the RAG using the provided question-answer pairs.
 The file containing the dataset can be set by changing the `RAGAS_DATASET_FILENAME` environment variable, the default is `test_data.json`.
 This path can be either an absolute path, or a path relative to the current working directory.
+By default `OpenAI` is used by the evaluation. If you want to use the same LLM-class for the evaluation as is used for the chat you have to set the environment variable `RAGA_USE_OPENAI` to `false` and adjust the `RAGAS_MODEL` environment variable to the model-name of your choice.
+
+> 📝 NOTE: The `alephalpha` LLM-class is currently not supported for evaluation.
+> 📝 NOTE: Due to quality problems with OpenSource LLMs it is recommended to use OpenAI for the evaluation.
 
 #### `/information_pieces/remove`
 Endpoint to remove documents from the vector database.
@@ -83,7 +87,7 @@ Uploaded documents are required to contain the following metadata:
 | traced_chat_graph | [`rag_core_lib.chains.async_chain.AsyncChain[Any, Any]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) | Wraps around the *chat_graph* and add langfuse tracing. |
 | evaluator | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | The evaulator used in the evaluate endpoint. |
 | chat_endpoint | [ `rag_core_api.api_endpoints.chat.Chat`](./rag-core-api/src/rag_core_api/api_endpoints/chat.py) | [`rag_core_api.impl.api_endpoints.default_chat.DefaultChat`](./rag-core-api/src/rag_core_api/impl/api_endpoints/default_chat.py) | Implementation of the chat endpoint. Default implementation just calls the *traced_chat_graph* |
-
+| ragas_llm | `langchain_core.language_models.chat_models.BaseChatModel` | `langchain_openai.ChatOpenAI` or `langchain_ollama.ChatOllama` | The LLM used for the ragas evaluation. |
 
 ## 2. Admin API Lib
 

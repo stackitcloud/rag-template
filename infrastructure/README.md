@@ -12,12 +12,13 @@ The documentation is structured as follows:
   - [1.5 Backend](#15-backend)
   - [1.6 Use Case Environment Variables](#16-use-case-environment-variables)
 - [2. Requirements and Setup Instructions](#2-requirements-and-setup-instructions)
-    - [2.1 Local setup instructions](#21-local-setup-instructions)
-    - [2.2 Production setup instructions](#22-production-setup-instructions)
+  - [2.1 Local setup instructions](#21-local-setup-instructions)
+  - [2.2 Production setup instructions](#22-production-setup-instructions)
 
 ## 1. Components and Configuration Values to Adjust
 
 This Repository contains the helm chart for the following RAG components:
+
 - [Langfuse](https://langfuse.com/) (dependency)
 - [Qdrant](https://qdrant.tech/) (dependency)
 - [KeyDB](https://docs.keydb.dev/) (dependency)
@@ -26,8 +27,9 @@ This Repository contains the helm chart for the following RAG components:
 
 > 📝 NOTE: Only the settings you are most likely to adjust are listed here. For all available settings please have a look at the [values.yaml](rag/values.yaml).
 
-With the exception of the `backend` all components can be disabled and exchanged with components of your choice.
+Except all `backend` services all components can be disabled and exchanged with components of your choice.
 This can be done by overwriting the following values in your `values.yaml`
+
 ```yaml
 features:
   langfuse:
@@ -44,13 +46,16 @@ features:
 
 It is required to use an `imagePullSecret` for pulling the images belonging to the rag-template.
 You can either provide your own already existing secret by using the example below:
+
 ```yaml
 global:
   imagePullSecret:
     create: false
     name: cr-credentials
 ```
+
 Or you can create a secret with your own values like this:
+
 ```yaml
 global:
   imagePullSecret:
@@ -65,6 +70,7 @@ global:
 ### 1.1 Langfuse
 
 You can deploy Langfuse with initial values for the public and secret API keys. The respective values are shown below:
+
 ```yaml
 langfuse:
   langfuse:
@@ -78,15 +84,16 @@ langfuse:
       LANGFUSE_INIT_USER_PASSWORD:
 ```
 
-Besides, you can deploy Langfuse in a two step approach. First, you deploy Langfuse without the API keys and then you can create the API keys via the Web UI. Therefore, after deployment, you have to sign up in the Web UI and create a project in the local Langfuse instance, create API keys via the settings; see below.
+Besides, you can deploy Langfuse in a two-step approach. First, you deploy Langfuse without the API keys, and then you can create the API keys via the Web UI. Therefore, after deployment, you have to sign up in the Web UI and create a project in the local Langfuse instance, create API keys via the settings; see below.
 
 ![langfuse-api-key](./figures/langfuse-api-access.png)
 
 Default values for the deployment are provided in the `rag/values.yaml` file under the `langfuse` key.
 
 > 📝 NOTE: Langfuse utilizes a PostgreSQL database under the hood.
->In production it is recommended to use the [STACKIT Postgresflex](https://www.stackit.de/en/product/stackit-postgresql-flex/) instead of the Postgres deployment bundled with Langfuse.
+>In production, it is recommended to use the [STACKIT Postgresflex](https://www.stackit.de/en/product/stackit-postgresql-flex/) instead of the Postgres deployment bundled with Langfuse.
 >You have to change the following values to use [STACKIT Postgresflex](https://www.stackit.de/en/product/stackit-postgresql-flex/):
+>
 >```yaml
 >langfuse:
 >  deploy: false
@@ -96,19 +103,23 @@ Default values for the deployment are provided in the `rag/values.yaml` file und
 >    password: ...
 >    database: ...
 >```
+>
 >All values containing `...` are placeholders and have to be replaced with real values.
 
 ### 1.2 Qdrant
 
 The deployment of the Qdrant can be disabled by setting the following value in the helm-chart:
+
 ```yaml
 features:
   qdrant:
     enabled: false
 ```
+
 For more information on the values for the Qdrant helm chart please consult the [README of the Qdrant helm chart](https://github.com/qdrant/qdrant-helm/blob/qdrant-1.12.3/charts/qdrant/README.md).
 
 > ⓘ INFO: Qdrant is a subchart of this helm chart with the name `qdrant`. Therefore, all configuration values for Qdrant are required to be under the key `qdrant`, e.g. for changing the `replicaCount` you have to add the following value:
+
 ```yaml
 qdrant:
   replicaCount: 3
@@ -119,6 +130,7 @@ qdrant:
 The usage of the KeyDB is **only recommended for development** purposes. KeyDB is used as alternative to Redis to store the state of each uploaded document. The Admin Backend uses the key-value-pairs of the KeyDB to keep track of the current state of the RAG sources. Note, sources include documents as well as non-document sources like confluence.
 
 In **production**, the usage of a fully-managed Redis instance (e.g. provided by STACKIT) is recommended. The following parameters need to be adjusted in the `values.yaml` file:
+
 ```yaml
 adminBackend:
   keyValueStore:
@@ -129,7 +141,9 @@ features:
 ```
 
 ### 1.4 Frontend
+
 The following values should be adjusted for the deployment:
+
 ```yaml
 frontend:
   envs:
@@ -147,9 +161,11 @@ frontend:
       VITE_AUTH_PASSWORD: ... # You should add the password for the basic auth of the backend here
 
 ```
+
 ### 1.5 Backend
 
 The following values should be adjusted for the deployment:
+
 ```yaml
 backend:
   secrets:
@@ -233,12 +249,14 @@ global:
         RAG_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
 
 ```
+
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
 
 > ⓘ INFO: The sit-internal instance of AlephAlpha has proven to be not the most reliable.
 > This deployment comes with multiple options. You can change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in `./rag/values.yaml` to one of the following values:
+>
 > - `alephalpha`: Uses the public AlephAlpha instance.
-> - `ollama`: Uses ollama as an LLM provider.
+> - `ollama`: Uses Ollama as an LLM provider.
 >
 > The same options are also available for the `backend.envs.ragClassTypes.RAG_CLASS_TYPE_EMBEDDER_TYPE`.
 > Both *AlephAlpha* options share the same settings.
@@ -246,6 +264,7 @@ global:
 ### 1.6 Use Case Environment Variables
 
 To add use case specific environment variables, the `usecase` secret and configmap can be used. Adding new environment variables to the `usecase` secret and configmap can be done by adding the following values to the `values.yaml` file:
+
 ```yaml
 shared:
   envs:
@@ -255,12 +274,12 @@ shared:
     usecase:
       USECASE_SECRET_ENV_VAR: ...
 ```
+
 ## 2. Requirements and Setup Instructions
 
 The following section describes the requirements for the infrastructure setup and provides instructions for the local and production setup.
 
 > 📝 NOTE: *Windows users*: make sure you use WSL for infrastructure setup & orchestration.
-
 
 ### 2.1 Local setup instructions
 
@@ -297,7 +316,6 @@ docker run --rm registry.localhost:5000/busybox:latest /bin/sh -c "echo '<<< sta
 docker image rm registry.localhost:5000/busybox:latest
 ```
 
-
 It is time to check if the cluster works with the local repo :sunglasses: :
 
 ```shell
@@ -314,7 +332,6 @@ Under linux, `*.localhost` should be resolved :fire:, otherwise you have to adju
 ```
 
 More information about adjusting the hosts file can be found in the section 'Access via ingress'.
-
 
 #### 2.1.2 Tilt Deployment
 

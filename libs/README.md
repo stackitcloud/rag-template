@@ -2,20 +2,21 @@
 
 This repository contains the core of the STACKIT RAG template.
 It consists of the following python packages:
+
 - [`1. Rag Core API`](#1-rag-core-api)
-    - [1.1 Requirements](#11-requirements)
-    - [1.2 Endpoints](#12-endpoints)
-    - [1.3 Replaceable parts](#13-replaceable-parts)
+  - [1.1 Requirements](#11-requirements)
+  - [1.2 Endpoints](#12-endpoints)
+  - [1.3 Replaceable parts](#13-replaceable-parts)
 - [`2. Admin API lib`](#2-admin-api-lib)
-    - [2.1 Requirements](#21-requirements)
-    - [2.2 Endpoints](#22-endpoints)
-    - [2.3 Replaceable parts](#23-replaceable-parts)
+  - [2.1 Requirements](#21-requirements)
+  - [2.2 Endpoints](#22-endpoints)
+  - [2.3 Replaceable parts](#23-replaceable-parts)
 - [`3. Extractor API lib`](#3-extractor-api-lib)
-    - [3.1 Requirements](#31-requirements)
-    - [3.2 Endpoints](#32-endpoints)
-    - [3.3 Replaceable parts](#33-replaceable-parts)
-- [`4. RAG Core lib`](#3-rag-core-lib)
-    - [4.1 Requirements](#31-requirements)
+  - [3.1 Requirements](#31-requirements)
+  - [3.2 Endpoints](#32-endpoints)
+  - [3.3 Replaceable parts](#33-replaceable-parts)
+- [`4. RAG Core lib`](#4-rag-core-lib)
+  - [4.1 Requirements](#41-requirements)
 
 With the exception of the `RAG Core lib` all of these packages contain an API definition and are easy to adjust for your specific use case.
 Each of the packages defines the replaceable parts([1.3 Replaceable Parts](#13-replaceable-parts), [2.3 Replaceable Parts](#23-replaceable-parts), [3.3 Replaceable Parts](#33-replaceable-parts)), expected types and offer a brief description.
@@ -26,21 +27,24 @@ This repository also contains a `Dockerfile` that is used to ensure proper linti
 
 For an example on how to use the packages, please consult the [use case example repository](TODO: add github link)
 
-## 1. Rag Core API
+## 1. RAG Core API
 
 The rag-core-api contains a default implementation of a RAG.
 For a default use case, no adjustments should be required.
 
 The following endpoints are provided by the *backend*:
+
 - `/chat/{session_id}`: The endpoint for chatting.
 - `/evaluate`: Will start the evaluation of the RAG using the provided question-answer pairs.
 - `/information_pieces/remove`: Endpoint to remove documents from the vector database.
-- `/information_pieces/upload`: Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity, a LangChain Documents like format is used.
+- `/information_pieces/upload`: Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity, a *LangChain* Documents like format is used.
 
 ### 1.1 Requirements
+
 All required python libraries can be found in the [pyproject.toml](./rag-core-api/pyproject.toml) file.
 In addition to python libraries, the following system packages are required:
-```
+
+```shell
 build-essential
 make
 ```
@@ -48,23 +52,27 @@ make
 ### 1.2 Endpoints
 
 #### `/chat/{session_id}`
+
 This endpoint is used for chatting.
 
 ### `/evaluate`
+
 Will start the evaluation of the RAG using the provided question-answer pairs.
 The file containing the dataset can be set by changing the `RAGAS_DATASET_FILENAME` environment variable, the default is `test_data.json`.
 This path can be either an absolute path, or a path relative to the current working directory.
 By default `OpenAI` is used by the evaluation. If you want to use the same LLM-class for the evaluation as is used for the chat you have to set the environment variable `RAGA_USE_OPENAI` to `false` and adjust the `RAGAS_MODEL` environment variable to the model-name of your choice.
 
 > 📝 NOTE: The `alephalpha` LLM-class is currently not supported for evaluation.
-> 📝 NOTE: Due to quality problems with OpenSource LLMs it is recommended to use OpenAI for the evaluation.
+> 📝 NOTE: Due to quality problems with open-source LLMs, it is recommended to use OpenAI for the evaluation.
 
 #### `/information_pieces/remove`
+
 Endpoint to remove documents from the vector database.
 
 #### `/information_pieces/upload`
 Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity, a LangChain Documents like format is used.
 Uploaded documents are required to contain the following metadata:
+
 - `document_url` that points to a download link to the source document.
 - All documents of the type `IMAGE` require the content of the image encoded in base64 in the `base64_image` key.
 
@@ -95,6 +103,7 @@ The Admin API Library contains all required components for file management capab
 
 
 The following endpoints are provided by the *admin-api-lib*:
+
 - `/delete_document/{identification}`: Deletes the file from storage (if applicable) and vector database. The `identification` can be retrieved from the `/all_documents_status` endpoint.
 - `/document_reference/{identification}`: Returns the document.
 - `/all_documents_status`: Return the `identification` and status of all available sources.
@@ -102,8 +111,10 @@ The following endpoints are provided by the *admin-api-lib*:
 - `/load_confluence`: Endpoint to load a confluence space
 
 ### 2.1 Requirements
+
 All required python libraries can be found in the [pyproject.toml](./admin-api-lib/pyproject.toml) file.
 In addition to python libraries, the following system packages are required:
+
 ```
 build-essential
 make
@@ -136,7 +147,6 @@ The extracted information will be summarized using a LLM. The summary, as well a
 Loads all the content of a confluence space using the [document-extractor](#3-extractor-api-lib).
 The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-core-api](#1-rag-core-api).
 
-
 ### 2.3 Replaceable parts
 
 | Name | Type | Default | Notes |
@@ -160,18 +170,22 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | document_uploader | [`admin_api_lib.api_endpoints.document_uploader.DocumentUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_document_uploader.DefaultDocumentUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_uploader.py) | Handles upload and extraction of files. |
 
 ## 3. Extractor API Lib
+
 The Extractor Library contains components that provide document parsing capabilities for various file formats. It also includes a default `dependency_container`, that is pre-configured and is a good starting point for most use-cases.
 This API should not be exposed by ingress and only used for internally.
 
 
 The following endpoints are provided by the *extractor-api-lib*:
+
 - `/extract_from_file`: This endpoint extracts the information from files.
 - `/extract_from_confluence`: This endpoint extracts the information from a confluence space.
 
 ### 3.1 Requirements
+
 All required python libraries can be found in the [pyproject.toml](./extractor-api-lib/pyproject.toml) file.
 In addition to python libraries, the following system packages are required:
-```
+
+```shell
 build-essential
 make
 ffmpeg
@@ -187,16 +201,18 @@ tesseract-ocr-eng
 This endpoint will extract the information from PDF,PTTX,WORD,XML files.
 It will load the files from the connected storage.
 The following types of information will be extracted:
+
 - `TEXT`: plain text
 - `TABLE`: data in tabular form found in the document
 
 #### `/extract_from_confluence`
+
 The extract from confluence endpoint will extract the information from a confluence space.
 The following types of information will be extracted:
+
 - `TEXT`: plain text
 
 ### 3.3 Replaceable parts
-
 
 | Name | Type | Default | Notes |
 |----------|---------|--------------|--------------|
@@ -214,6 +230,7 @@ The following types of information will be extracted:
 
 The rag-core-lib contains components of the `rag-core-api` that are also useful for other services and therefore are packaged in a way that makes it easy to use.
 Examples of included components:
+
 - tracing for `LangChain` chains using `Langfuse`
 - settings for multiple LLMs and Langfuse
 - factory for LLMs
@@ -223,7 +240,8 @@ Examples of included components:
 ### 4.1 Requirements
 All required python libraries can be found in the [pyproject.toml](./extractor-api-lib/pyproject.toml) file.
 In addition to python libraries the following system packages are required:
-```
+
+```shell
 build-essential
 make
 ```

@@ -7,6 +7,8 @@ features:
     enabled: true
   frontend:
     enabled: true
+  keydb:
+    enabled: true
 
 backend:
   name: backend
@@ -88,7 +90,6 @@ backend:
       apiKey: "sk-123"
     ragas:
       openaiApikey: ""
-    usecase:
 
   envs:
     stackitVllm:
@@ -134,7 +135,6 @@ backend:
       RAGAS_MODEL: "gpt-4o-mini"
       RAGAS_USE_OPENAI: true
       RAGAS_TIMEOUT: 60
-      RAGAS_PROMPT_LANGUAGE: "german"
       RAGAS_EVALUATION_DATASET_NAME: "eval-data"
       RAGAS_MAX_CONCURRENCY: "5"
     embedderClassTypes:
@@ -153,9 +153,6 @@ backend:
     reranker:
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
-    usecase:
-      USECASE_KEYVALUE_PORT: 6379
-      USECASE_KEYVALUE_HOST: "rag-keydb"
     chatHistory:
       CHAT_HISTORY_LIMIT: 4
       CHAT_HISTORY_REVERSE: true
@@ -164,7 +161,6 @@ frontend:
   name: frontend
   replicaCount: 1
   image:
-    # TODO: Change to jfrog/azure or something else
     repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
     name: frontend
     pullPolicy: Always
@@ -199,8 +195,6 @@ frontend:
       VITE_CHAT_URL: "http://rag.localhost"
       VITE_ADMIN_URL: "http://admin.rag.localhost"
       VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
-
-
 
 adminBackend:
   replicaCount: 1
@@ -281,6 +275,10 @@ adminBackend:
     confluenceLoader:
       CONFLUENCE_URL: ""
       CONFLUENCE_SPACE_KEY: ""
+    keyValueStore:
+      USECASE_KEYVALUE_PORT: 6379
+      USECASE_KEYVALUE_HOST: "rag-keydb"
+
   secrets:
     confluenceLoader:
       token: ""
@@ -326,7 +324,6 @@ extractor:
   - "--reload-dir"
   - "/app/rag-core-library/extractor-api-lib"
 
-
   service:
     type: ClusterIP
     port: 8080
@@ -360,7 +357,7 @@ adminFrontend:
       port: 8080
 
 shared:
-# These values are used accross all templates
+  # These values are used accross all templates
   ssl: true
 
   debug:
@@ -370,6 +367,11 @@ shared:
   imagePullSecret:
     create: false
     name: cr-credentials
+    auths:
+      username: github-username # replace with your github username
+      pat: github-pat # replace with your github personal access token
+      email: email-address@domain.de # replace with your email address
+      registry: ghcr.io
 
   config:
     dns:
@@ -386,6 +388,8 @@ shared:
     s3:
       accessKey: "admin"
       secretKey: "password"
+    usecase:
+
 
   envs:
     pdfExtractor:
@@ -394,9 +398,14 @@ shared:
     s3:
       S3_ENDPOINT: http://rag-minio:9000
       S3_BUCKET: documents
+    usecase:
 
 
 langfuse:
+  image:
+    repository: ghcr.io/langfuse/langfuse
+    pullPolicy: Always
+    tag: "2.75.2"
   postgresql:
     deploy: true
     auth:
@@ -417,6 +426,7 @@ langfuse:
       LANGFUSE_INIT_USER_EMAIL:
       LANGFUSE_INIT_USER_NAME:
       LANGFUSE_INIT_USER_PASSWORD:
+
 
 minio:
   auth:

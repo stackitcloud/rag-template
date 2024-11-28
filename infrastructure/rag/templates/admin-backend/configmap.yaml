@@ -33,3 +33,12 @@ data:
   {{- range $key, $value := .Values.adminBackend.envs.confluenceLoader }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.keyValueStoreName" . }}
+data:
+  {{- range $key, $value := .Values.adminBackend.envs.keyValueStore }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

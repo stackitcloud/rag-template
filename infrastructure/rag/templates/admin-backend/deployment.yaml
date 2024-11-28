@@ -102,6 +102,8 @@ spec:
               name: {{ template "configmap.pdfextractorName" . }}
           - configMapRef:
               name: {{ template "configmap.confluenceLoaderName" . }}
+          - configMapRef:
+              name: {{ template "configmap.keyValueStoreName" . }}
           - secretRef:
               name: {{ template "secret.alephalphaName" . }}
           - secretRef:

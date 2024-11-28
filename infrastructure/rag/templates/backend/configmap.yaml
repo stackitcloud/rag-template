@@ -80,22 +80,12 @@ data:
   {{ $key }}: {{ $value | quote }}
   {{- end }}
 ---
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "configmap.ollamaName" . }}
 data:
   {{- range $key, $value := .Values.backend.envs.ollama }}
-  {{ $key }}: {{ $value | quote }}
-  {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ template "configmap.usecaseName" . }}
-data:
-  {{- range $key, $value := .Values.backend.envs.usecase }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
 ---

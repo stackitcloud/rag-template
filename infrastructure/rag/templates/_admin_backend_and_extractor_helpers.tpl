@@ -28,6 +28,10 @@
 {{- printf "%s-s3-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "configmap.keyValueStoreName" -}}
+{{- printf "%s-key-value-store-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "configmap.summarizerName" -}}
 {{- printf "%s-summarizer-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

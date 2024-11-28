@@ -11,10 +11,6 @@
 {{- printf "%s-langfuse-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.usecaseName" -}}
-{{- printf "%s-usecase-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "secret.stackitEmbedderName" -}}
 {{- printf "%s-stackit-embedder-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -75,10 +71,6 @@
 
 {{- define "configmap.rerankerName" -}}
 {{- printf "%s-reranker-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "configmap.usecaseName" -}}
-{{- printf "%s-usecase-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "configmap.stackitVllmName" -}}

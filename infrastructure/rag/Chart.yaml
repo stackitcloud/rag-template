@@ -23,6 +23,7 @@ dependencies:
 - name: keydb
   repository: https://enapter.github.io/charts/
   version: "0.48.0"
+  condition: features.keydb.enabled
 - name: ollama
   alias: ollama
   version: 0.29.1

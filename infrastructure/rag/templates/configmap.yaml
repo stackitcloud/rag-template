@@ -15,3 +15,12 @@ data:
   {{- range $key, $value := .Values.shared.envs.pdfextractor }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.usecaseName" . }}
+data:
+  {{- range $key, $value := .Values.shared.envs.usecase }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

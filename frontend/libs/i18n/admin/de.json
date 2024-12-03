@@ -24,6 +24,7 @@
     "loadError": "Laden der Dokumente fehlgeschlagen",
     "confluenceError": "Laden aus Confluence fehlgeschlagen",
     "confluenceNotConfigured": "Confluence ist nicht konfiguriert",
+    "confluenceLocked": "Confluence Loader ist beschäftigt. Versuchen Sie es später erneut",
     "unknownError": "Ein unbekannter Fehler ist aufgetreten"
   }
 }

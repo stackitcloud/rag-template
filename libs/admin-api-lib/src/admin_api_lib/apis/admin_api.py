@@ -71,6 +71,13 @@ async def get_all_documents_status() -> list[DocumentStatus]:
     "/load_confluence",
     responses={
         200: {"description": "Loading from confluence is successful"},
+        423: {
+            "description": (
+                "if the confluence loader is already processing a request,"
+                "no further requests are possible. The user needs to wait,"
+                "till the preliminary request finished processing."
+            )
+        },
         500: {"description": "Internal Server Error"},
         501: {"description": "The confluence loader is not set up"},
     },

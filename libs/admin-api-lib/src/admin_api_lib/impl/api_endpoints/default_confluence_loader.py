@@ -1,4 +1,7 @@
+from asyncio import run
 import logging
+from threading import Thread
+from fastapi import status
 
 from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
@@ -40,6 +43,7 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         self._chunker = chunker
         self._document_deleter = document_deleter
         self._settings_mapper = settings_mapper
+        self._background_thread = None
 
     async def aload_from_confluence(self) -> None:
         """
@@ -53,10 +57,19 @@ class DefaultConfluenceLoader(ConfluenceLoader):
             and self._settings.token
             and self._settings.token.strip()
         ):
-            raise HTTPException(501, "The confluence loader is not configured!")
+            raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "The confluence loader is not configured!")
+
+        if self._background_thread is not None and self._background_thread.is_alive():
+            raise HTTPException(
+                status.HTTP_423_LOCKED, "Confluence loader is locked... Please wait for the current load to finish."
+            )
+        self._background_thread = Thread(target=lambda: run(self._aload_from_confluence()))
+        self._background_thread.start()
+
+    async def _aload_from_confluence(self) -> None:
         params = self._settings_mapper.map_settings_to_params(self._settings)
         try:
-            self._key_value_store.upsert(self._settings.url, Status.UPLOADING)
+            self._key_value_store.upsert(self._settings.url, Status.PROCESSING)
             information_pieces = self._extractor_api.extract_from_confluence_post(params)
             documents = [self._information_mapper.extractor_information_piece2document(x) for x in information_pieces]
             chunked_documents = self._chunker.chunk(documents)
@@ -66,9 +79,12 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         except Exception as e:
             self._key_value_store.upsert(self._settings.url, Status.ERROR)
             logger.error("Error while loading from Confluence: %s", str(e))
-            raise HTTPException(500, f"Error loading from Confluence: {str(e)}") from e
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error loading from Confluence: {str(e)}"
+            ) from e
 
         await self._delete_previous_information_pieces()
+        self._key_value_store.upsert(self._settings.url, Status.UPLOADING)
         self._upload_information_pieces(rag_information_pieces)
 
     async def _delete_previous_information_pieces(self):

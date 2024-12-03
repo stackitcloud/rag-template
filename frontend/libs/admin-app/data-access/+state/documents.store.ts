@@ -1,9 +1,9 @@
-import {DocumentModel} from "../../models/document.model.ts";
-import {UploadedDocument, mapToUploadDocument} from "../../models/uploaded-document.model";
-import {defineStore} from 'pinia';
-import {ref} from 'vue';
-import {DocumentAPI} from "../document.api";
-import {ErrorType} from "../../models/error-type";
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { DocumentModel } from "../../models/document.model.ts";
+import { ErrorType } from "../../models/error-type";
+import { UploadedDocument, mapToUploadDocument } from "../../models/uploaded-document.model";
+import { DocumentAPI } from "../document.api";
 
 export const useDocumentsStore = defineStore('chat', () => {
     const uploadedDocuments = ref<UploadedDocument[]>([]);
@@ -53,22 +53,25 @@ export const useDocumentsStore = defineStore('chat', () => {
     };
 
     const loadConfluence = async () => {
-        isLoadingConfluence.value = true;
-        error.value = null;
-        try {
-            await DocumentAPI.loadConfluence();
-            await loadDocuments(); // Refresh the document list after uploading
-        } catch(err) {
-            if (err.response && err.response.status === 501) {
-                error.value = "confluence_not_configured";
-                console.error("Confluence loader is not configured.");
-            } else {
-                error.value = "confluence";
-                console.error(err);
-            }
-        } finally {
-            isLoadingConfluence.value = false;
+      isLoadingConfluence.value = true;
+      error.value = null;
+      try {
+        await DocumentAPI.loadConfluence();
+        await loadDocuments(); // Refresh the document list after uploading
+      } catch(err) {
+        if (err.response && err.response.status === 501) {
+          error.value = "confluence_not_configured";
+          console.error("Confluence loader is not configured.");
+        } else if (err.response && err.response.status === 423) {
+          error.value = "confluence_locked";
+          console.error("Confluence loader returned a warning.");
+        } else {
+          error.value = "confluence";
+          console.error(err);
         }
+      } finally {
+        isLoadingConfluence.value = false;
+      }
     };
 
     const uploadDocuments = async (files: File[]) => {

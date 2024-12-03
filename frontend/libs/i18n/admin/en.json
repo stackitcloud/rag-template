@@ -24,6 +24,7 @@
     "loadError": "Failed to load documents",
     "confluenceError": "Failed to load from Confluence",
     "confluenceNotConfigured": "Confluence is not configured",
+    "confluenceLocked": "Confluence Loader is busy. Please try again later",
     "unknownError": "An unknown error occurred"
   }
 }

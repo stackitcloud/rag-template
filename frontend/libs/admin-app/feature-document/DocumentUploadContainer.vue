@@ -1,10 +1,10 @@
 <script lang="ts" setup>
+import { CloudArrowUpIcon, GlobeAltIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { computed, ref } from "vue";
+import { useI18n } from 'vue-i18n';
+import { useDocumentsStore } from '../data-access/+state/documents.store';
+import { UploadedDocument } from '../models/uploaded-document.model';
 import UploadedDocumentItem from '../ui/UploadedDocumentItem.vue';
-import {useI18n} from 'vue-i18n'
-import {computed, ref} from "vue";
-import {CloudArrowUpIcon, InformationCircleIcon, GlobeAltIcon, XMarkIcon} from '@heroicons/vue/24/outline';
-import {useDocumentsStore} from '../data-access/+state/documents.store';
-import {UploadedDocument} from '../models/uploaded-document.model';
 
 const store = useDocumentsStore();
 const {t} = useI18n();
@@ -74,6 +74,8 @@ const getErrorMessage = (errorType: string) => {
             return t('documents.confluenceError');
         case 'confluence_not_configured':
             return t('documents.confluenceNotConfigured');
+        case 'confluence_locked':
+            return t('documents.confluenceLocked');
         default:
             return t('documents.unknownError');
     }
@@ -84,7 +86,7 @@ const getErrorMessage = (errorType: string) => {
     <div class="flex justify-center items-center min-w-full min-h-full">
         <div class="flex flex-col w-full max-w-3xl">
             <!-- Error message -->
-            <div v-if="error" role="alert" 
+            <div v-if="error" role="alert"
                 class="alert alert-error mb-4 slide-in-down flex justify-between items-center">
                 <div class="flex items-center">
                     <InformationCircleIcon class="w-6 h-6 mr-2" />

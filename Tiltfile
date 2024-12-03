@@ -318,13 +318,20 @@ value_override = [
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
     # langfuse
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_ORG_ID=%s" % os.environ["LANGFUSE_INIT_ORG_ID"],
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_ID=%s" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_PUBLIC_KEY=%s" % os.environ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"],
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_PROJECT_SECRET_KEY=%s" % os.environ["LANGFUSE_INIT_PROJECT_SECRET_KEY"],
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_EMAIL=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_PASSWORD=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
-    "langfuse.langfuse.additionalEnv.LANGFUSE_INIT_USER_NAME=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
+    "langfuse.langfuse.additionalEnv[0].name=LANGFUSE_INIT_ORG_ID",
+    "langfuse.langfuse.additionalEnv[0].value=\"%s\"" % os.environ["LANGFUSE_INIT_ORG_ID"],
+    "langfuse.langfuse.additionalEnv[1].name=LANGFUSE_INIT_PROJECT_ID",
+    "langfuse.langfuse.additionalEnv[1].value=\"%s\"" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
+    "langfuse.langfuse.additionalEnv[2].name=LANGFUSE_INIT_PROJECT_PUBLIC_KEY",
+    "langfuse.langfuse.additionalEnv[2].value=%s" % os.environ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"],
+    "langfuse.langfuse.additionalEnv[3].name=LANGFUSE_INIT_PROJECT_SECRET_KEY",
+    "langfuse.langfuse.additionalEnv[3].value=%s" % os.environ["LANGFUSE_INIT_PROJECT_SECRET_KEY"],
+    "langfuse.langfuse.additionalEnv[4].name=LANGFUSE_INIT_USER_EMAIL",
+    "langfuse.langfuse.additionalEnv[4].value=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
+    "langfuse.langfuse.additionalEnv[5].name=LANGFUSE_INIT_USER_PASSWORD",
+    "langfuse.langfuse.additionalEnv[5].value=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
+    "langfuse.langfuse.additionalEnv[6].name=LANGFUSE_INIT_USER_NAME",
+    "langfuse.langfuse.additionalEnv[6].value=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
 ]
 
 def has_confluence_config():

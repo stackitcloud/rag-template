@@ -51,6 +51,8 @@ spec:
           - secretRef:
               name: "vite-auth"
           {{- end }}
+      {{- if .Values.shared.imagePullSecret -}}
       imagePullSecrets:
       - name: {{ .Values.shared.imagePullSecret.name }}
+      {{- end }}
 {{- end }}

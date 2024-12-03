@@ -44,11 +44,10 @@ features:
     enabled: true
 ```
 
-It is required to use an `imagePullSecret` for pulling the images belonging to the rag-template.
-You can either provide your own already existing secret by using the example below:
+It is optional to provide an `imagePullSecret`. If you need one for pulling the images belonging to the rag-template you can either provide your own already existing secret by using the example below:
 
 ```yaml
-global:
+shared:
   imagePullSecret:
     create: false
     name: cr-credentials
@@ -57,7 +56,7 @@ global:
 Or you can create a secret with your own values like this:
 
 ```yaml
-global:
+shared:
   imagePullSecret:
     create: true
     name: cr-credentials
@@ -66,6 +65,8 @@ global:
       pat: ...
       email: ...
 ```
+
+For local development, the `imagePullSecret` is not necessary.
 
 ### 1.1 Langfuse
 

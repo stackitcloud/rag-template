@@ -357,7 +357,7 @@ adminFrontend:
       port: 8080
 
 shared:
-  # These values are used accross all templates
+  # These values are used across all templates
   ssl: true
 
   debug:
@@ -365,13 +365,13 @@ shared:
       enabled: false
 
   imagePullSecret:
-    create: false
-    name: cr-credentials
-    auths:
-      username: github-username # replace with your github username
-      pat: github-pat # replace with your github personal access token
-      email: email-address@domain.de # replace with your email address
-      registry: ghcr.io
+    # create: false
+    # name: cr-credentials
+    # auths:
+    #   username: github-username # replace with your github username
+    #   pat: github-pat # replace with your github personal access token
+    #   email: email-address@domain.de # replace with your email address
+    #   registry: ghcr.io
 
   config:
     dns:
@@ -405,7 +405,7 @@ langfuse:
   image:
     repository: ghcr.io/langfuse/langfuse
     pullPolicy: Always
-    tag: "2.75.2"
+    tag: "2.93.0"
   postgresql:
     deploy: true
     auth:
@@ -418,15 +418,33 @@ langfuse:
       secret: changeme
     salt: changeme
     additionalEnv:
-      HOSTNAME: 0.0.0.0
-      LANGFUSE_INIT_ORG_ID:
-      LANGFUSE_INIT_PROJECT_ID:
-      LANGFUSE_INIT_PROJECT_PUBLIC_KEY:
-      LANGFUSE_INIT_PROJECT_SECRET_KEY:
-      LANGFUSE_INIT_USER_EMAIL:
-      LANGFUSE_INIT_USER_NAME:
-      LANGFUSE_INIT_USER_PASSWORD:
-
+    - name: LANGFUSE_INIT_ORG_ID
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_ID
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
+      value: ""
+    - name: LANGFUSE_INIT_USER_EMAIL
+      value: ""
+    - name: LANGFUSE_INIT_USER_NAME
+      value: ""
+    - name: LANGFUSE_INIT_USER_PASSWORD
+      value: ""
+    extraInitContainers:
+    - name: wait-for-postgres
+      image: busybox
+      command:
+      - sh
+      - -c
+      - |
+        until nc -z rag-postgresql 5432; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 2
+        done
+      # Define a reasonable timeout in case PostgreSQL fails to come up
+      timeoutSeconds: 300
 
 minio:
   auth:

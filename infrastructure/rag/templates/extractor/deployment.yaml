@@ -25,8 +25,10 @@ spec:
           emptyDir: {}
         - name: nltk-data-dir
           emptyDir: {}
+      {{- if .Values.shared.imagePullSecret -}}
       imagePullSecrets:
-        - name: {{ .Values.shared.imagePullSecret.name }}
+      - name: {{ .Values.shared.imagePullSecret.name }}
+      {{- end }}
       initContainers:
       - name: init-permissions
         image: busybox

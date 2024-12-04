@@ -1,7 +1,7 @@
 # RAG Template
 
 This is a very basic example of how to use the RAG-API libraries.
-It also gives an example of how to replace modules. TODO: add replacement example
+It also gives an example of how to replace modules with your own implementations, see [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py).
 
 ## Table of Contents
 
@@ -76,6 +76,7 @@ After uploading a file in the document-management WebUI you can start asking que
 
 For a complete documentation of the available REST-APIs, please consult [the README of the rag-core-library](./rag-core-library/README.md).
 
+If you want to replace some dependencies with you own dependencies, see the rag-backend folder, especially the [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py).
 
 ### 1.4 Local setup instructions
 

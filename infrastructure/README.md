@@ -14,6 +14,7 @@ The documentation is structured as follows:
 - [2. Requirements and Setup Instructions](#2-requirements-and-setup-instructions)
   - [2.1 Local setup instructions](#21-local-setup-instructions)
   - [2.2 Production setup instructions](#22-production-setup-instructions)
+- [3. Contributing](#3-contributing)
 
 ## 1. Components and Configuration Values to Adjust
 
@@ -374,3 +375,7 @@ On *Windows* you can adjust the hosts file as described [here](https://docs.digi
 
 The *helm* chart provided in this repository requires a *NGINX Ingress Controller*, (e.g. [Bitnami package for NGINX Ingress Controller](https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller)).
 If you want to use SSL-Encryption, a Cert-Manager is also required. An installation tutorial for the *STACKIT Cert-Manager Webhook* can be found in the [Github Repository](https://github.com/stackitcloud/stackit-cert-manager-webhook).
+
+## 3. Contributing
+
+Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information on how to contribute to the RAG Infrastructure.

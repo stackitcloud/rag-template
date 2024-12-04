@@ -1,7 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-from admin_api_lib.impl.chunker.chunker import Chunker
+from admin_api_lib.chunker.chunker import Chunker
 
 
 class TextChunker(Chunker):

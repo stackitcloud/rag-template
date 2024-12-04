@@ -6,7 +6,7 @@ from fastapi import status
 from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
-from admin_api_lib.impl.chunker.chunker import Chunker
+from admin_api_lib.chunker.chunker import Chunker
 from admin_api_lib.impl.mapper.confluence_settings_mapper import ConfluenceSettingsMapper
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi

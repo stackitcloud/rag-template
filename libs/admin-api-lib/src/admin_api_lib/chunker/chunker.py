@@ -11,11 +11,15 @@ class Chunker(ABC):
     @abstractmethod
     def chunk(self, documents: Document) -> list[Document]:
         """
-        Abstract method to chunk the given documents into smaller parts.
+        Chunk the given documents into smaller parts.
 
-        Args:
-            documents (Document): The documents to be chunked.
+        Parameters
+        ----------
+        documents : Document
+            The documents to be chunked.
 
-        Returns:
-            List[Document]: A list of smaller parts obtained by chunking the documents.
+        Returns
+        -------
+        list of Document
+            A list of smaller parts obtained by chunking the documents.
         """

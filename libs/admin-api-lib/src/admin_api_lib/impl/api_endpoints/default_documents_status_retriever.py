@@ -8,9 +8,29 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentsStatusRetriever(DocumentsStatusRetriever):
+    """DefaultDocumentsStatusRetriever is responsible for retrieving the status of all documents
+    from a key-value store."""
+
     def __init__(self, key_value_store: FileStatusKeyValueStore):
+        """
+        Initialize the DefaultDocumentsStatusRetriever.
+
+        Parameters
+        ----------
+        key_value_store : FileStatusKeyValueStore
+            The key-value store for storing filename and the corresponding status.
+        """
         self._key_value_store = key_value_store
 
     async def aget_all_documents_status(self) -> list[DocumentStatus]:
+        """
+        Asynchronously retrieves the status of all documents.
+
+        Returns
+        -------
+        list of DocumentStatus
+            A list containing the status of all documents, where each document's
+            status is represented by a DocumentStatus object.
+        """
         all_documents = self._key_value_store.get_all()
         return [DocumentStatus(name=x[0], status=x[1]) for x in all_documents]

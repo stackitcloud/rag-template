@@ -20,6 +20,15 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultConfluenceLoader(ConfluenceLoader):
+    """
+    DefaultConfluenceLoader is responsible for loading content from Confluence asynchronously.
+
+    Attributes
+    ----------
+    CONFLUENCE_SPACE : str
+        The Confluence space key.
+    """
+
     CONFLUENCE_SPACE = "confluence_space"
 
     def __init__(
@@ -34,6 +43,30 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         document_deleter: DocumentDeleter,
         settings_mapper: ConfluenceSettingsMapper,
     ):
+        """
+        Initialize the DefaultConfluenceLoader with the provided dependencies.
+
+        Parameters
+        ----------
+        extractor_api : ExtractorApi
+            The API for extracting information.
+        settings : ConfluenceSettings
+            The settings for Confluence.
+        information_mapper : InformationPiece2Document
+            The mapper for information pieces to langchain documents.
+        rag_api : RagApi
+            The API client for interacting with the RAG backend system.
+        key_value_store : FileStatusKeyValueStore
+            The key-value store to store file names and the corresponding file statuses.
+        information_enhancer : InformationEnhancer
+            The enhancer for information pieces.
+        chunker : Chunker
+            The chunker for breaking down documents into chunks.
+        document_deleter : DocumentDeleter
+            The deleter for documents from S3 Storage and Vector Database.
+        settings_mapper : ConfluenceSettingsMapper
+            The mapper to map the Confluence settings to confluence parameters.
+        """
         self._extractor_api = extractor_api
         self._rag_api = rag_api
         self._settings = settings
@@ -48,6 +81,11 @@ class DefaultConfluenceLoader(ConfluenceLoader):
     async def aload_from_confluence(self) -> None:
         """
         Asynchronously loads content from Confluence using the configured settings.
+
+        Raises
+        ------
+        HTTPException
+            If the Confluence loader is not configured or if a load is already in progress.
         """
         if not (
             self._settings.url

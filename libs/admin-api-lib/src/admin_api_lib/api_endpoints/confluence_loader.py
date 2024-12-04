@@ -1,3 +1,4 @@
+"""Module for ConfluenceLoader abstract base class."""
 from abc import ABC, abstractmethod
 
 

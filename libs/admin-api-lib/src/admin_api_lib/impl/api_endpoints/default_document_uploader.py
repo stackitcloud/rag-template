@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentUploader(DocumentUploader):
+    """DefaultDocumentUploader is responsible for handling the upload, processing, and storage of documents."""
+
     def __init__(
         self,
         document_extractor: ExtractorApi,
@@ -34,6 +36,28 @@ class DefaultDocumentUploader(DocumentUploader):
         key_value_store: FileStatusKeyValueStore,
         document_deleter: DocumentDeleter,
     ):
+        """
+        Initialize the DefaultDocumentUploader.
+
+        Parameters
+        ----------
+        document_extractor : ExtractorApi
+            The API for extracting documents.
+        file_service : FileService
+            The service for handling file operations on the S3 storage
+        rag_api : RagApi
+            The API for RAG backend.
+        information_enhancer : InformationEnhancer
+            The service for enhancing information.
+        information_mapper : InformationPiece2Document
+            The mapper for converting information pieces to langchain documents.
+        chunker : Chunker
+            The service for chunking documents into chunks.
+        key_value_store : FileStatusKeyValueStore
+            The key-value store for storing filename and the corresponding status.
+        document_deleter : DocumentDeleter
+            The service for deleting documents.
+        """
         self._document_extractor = document_extractor
         self._file_service = file_service
         self._rag_api = rag_api
@@ -49,6 +73,22 @@ class DefaultDocumentUploader(DocumentUploader):
         body: UploadFile,
         request: Request,
     ) -> None:
+        """
+        Handles the uploading of documents via a POST request.
+
+        This asynchronous method reads the content of the uploaded file and starts a background
+        thread to save the document in S3 storage and the vector database. It updates the status
+        of the document in the key-value store and handles any exceptions that may occur during
+        the process.
+
+        Args:
+            body (UploadFile): The uploaded file.
+            request (Request): The request object.
+
+        Raises:
+            HTTPException: If there is a ValueError, raises a 400 Bad Request error.
+            HTTPException: If there is any other exception, raises a 500 Internal Server Error.
+        """
         self._background_threads = [t for t in self._background_threads if t.is_alive()]
         content = await body.read()
         try:

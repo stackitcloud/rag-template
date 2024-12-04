@@ -10,19 +10,37 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentReferenceRetriever(DocumentReferenceRetriever):
+    """A class to retrieve document references using a file service."""
+
     def __init__(self, file_service: FileService):
+        """
+        Initialize the DefaultDocumentReferenceRetriever.
+
+        Parameters
+        ----------
+        file_service : FileService
+            An instance of FileService used to handle file operations.
+        """
         self._file_service = file_service
 
     async def adocument_reference_id_get(self, identification: str) -> Response:
         """
-        Retrieves the document with the given name.
+        Retrieves the document with the given identification asynchronously.
 
-        Args:
-            document_name (str): The name of the document.
-            file_service (FileService): The file service.
+        Parameters
+        ----------
+        identification : str
+            The identification string of the document.
 
-        Returns:
-            bytes: The document in binary form.
+        Returns
+        -------
+        Response
+            The document in binary form wrapped in a FastAPI Response object.
+
+        Raises
+        ------
+        HTTPException
+            If the document with the given identification is not found or any other value error occurs.
         """
         try:
             logger.debug("START retrieving document with id: %s", identification)

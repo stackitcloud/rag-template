@@ -13,12 +13,48 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentDeleter(DocumentDeleter):
+    """
+    A class used to delete documents from file storage and vector database.
+    """
+
     def __init__(self, file_service: FileService, rag_api: RagApi, key_value_store: FileStatusKeyValueStore):
+        """
+        Initialize the DefaultDocumentDeleter.
+
+        Parameters
+        ----------
+        file_service : FileService
+            The service responsible for file operations with s3 storage.
+        rag_api : RagApi
+            The API client for interacting with the RAG backend system.
+        key_value_store : FileStatusKeyValueStore
+            The key-value store to store file names and the corresponding file statuses.
+        """
         self._file_service = file_service
         self._rag_api = rag_api
         self._key_value_store = key_value_store
 
     async def adelete_document(self, identification: str) -> None:
+        """
+        Asynchronously delete a document identified by the given identification string.
+
+        This method attempts to delete the document from both the S3 storage and the vector database.
+        If any errors occur during the deletion process, an HTTPException is raised with the error messages.
+        If the source document is from a service like Confluence, no document on the S3 storage exists, and nothing
+        can be deleted from the S3 storage. However, this does not prevent the deletion of the document from the
+        vector database. If the document does not exist on the S3 storage, the deletion process will continue.
+
+        Parameters
+        ----------
+        identification : str
+            The unique identifier of the document to be deleted.
+
+        Raises
+        ------
+        HTTPException
+            If any errors occur during the deletion process, an HTTPException is raised with a 404 status code
+            and the error messages.
+        """
         error_messages = ""
         # Delete the document from file service and vector database
         logger.debug("Deleting existing document: %s", identification)

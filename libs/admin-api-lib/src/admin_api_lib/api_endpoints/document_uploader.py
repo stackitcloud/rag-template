@@ -8,5 +8,17 @@ class DocumentUploader(ABC):
 
     @abstractmethod
     async def aupload_documents_post(self, body: UploadFile, request: Request) -> None:
-        """Upload PDF documents."""
-        pass
+        """
+        Upload documents asynchronously, currently supported formats are: PDF, DOCX, XML, PPTX.
+
+        Parameters
+        ----------
+        body : UploadFile
+            The uploaded file.
+        request : Request
+            The request object.
+
+        Returns
+        -------
+        None
+        """

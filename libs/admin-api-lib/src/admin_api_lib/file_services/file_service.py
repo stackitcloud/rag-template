@@ -50,10 +50,10 @@ class FileService(ABC):
 
         Parameters
         ----------
-        source : Path
-            The path to the local file to upload.
-        target : str
-            The target path in the S3 bucket where the file will be stored.
+        file_path : str
+            The path to the local file to be uploaded.
+        file_name : str
+            The target path in the file storage where the file will be stored.
         """
 
     @abc.abstractmethod

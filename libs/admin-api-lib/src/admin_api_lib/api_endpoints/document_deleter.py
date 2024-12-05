@@ -6,5 +6,15 @@ class DocumentDeleter(ABC):
 
     @abstractmethod
     async def adelete_document(self, identification: str) -> None:
-        """Delete a document by its identification."""
-        pass
+        """
+        Delete a document by its identification asynchronously.
+
+        Parameters
+        ----------
+        identification : str
+            The unique identifier of the document to be deleted.
+
+        Returns
+        -------
+        None
+        """

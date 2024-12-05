@@ -91,9 +91,11 @@ class ChatResponse(BaseModel):
             {
                 "answer": obj.get("answer"),
                 "finish_reason": obj.get("finish_reason"),
-                "citations": [InformationPiece.from_dict(_item) for _item in obj["citations"]]
-                if obj.get("citations") is not None
-                else None,
+                "citations": (
+                    [InformationPiece.from_dict(_item) for _item in obj["citations"]]
+                    if obj.get("citations") is not None
+                    else None
+                ),
             }
         )
         return _obj

@@ -87,9 +87,11 @@ class ChatHistory(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "messages": [ChatHistoryMessage.from_dict(_item) for _item in obj["messages"]]
-                if obj.get("messages") is not None
-                else None
+                "messages": (
+                    [ChatHistoryMessage.from_dict(_item) for _item in obj["messages"]]
+                    if obj.get("messages") is not None
+                    else None
+                )
             }
         )
         return _obj

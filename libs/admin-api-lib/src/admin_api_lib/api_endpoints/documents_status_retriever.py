@@ -8,5 +8,11 @@ class DocumentsStatusRetriever(ABC):
 
     @abstractmethod
     async def aget_all_documents_status(self) -> list[DocumentStatus]:
-        """Get all documents and their statuses."""
-        pass
+        """
+        Get all documents and their statuses asynchronously.
+
+        Returns
+        -------
+        list of DocumentStatus
+            A list containing document names and their statuses.
+        """

@@ -1,3 +1,5 @@
+"""Module containing the MSDocsExtractor class."""
+
 import logging
 from pathlib import Path
 from typing import Optional, Any
@@ -22,7 +24,8 @@ class MSDocsExtractor(InformationExtractor):
     """Extractor for Microsoft Documents (DOCX and PPTX) using unstructured library."""
 
     def __init__(self, file_service: FileService, dataframe_converter: DataframeConverter):
-        """Constructor for MSDocsExtractor.
+        """
+        Initialize the MSDocsExtractor.
 
         Parameters
         ----------
@@ -36,9 +39,41 @@ class MSDocsExtractor(InformationExtractor):
 
     @property
     def compatible_file_types(self) -> list[FileType]:
+        """
+        List of compatible file types for the document parser.
+
+        Returns
+        -------
+        list[FileType]
+            A list containing the compatible file types, specifically DOCX and PPTX.
+        """
         return [FileType.DOCX, FileType.PPTX]
 
     def extract_content(self, file_path: Path) -> list[InformationPiece]:
+        """
+        Extract content from a given file based on its extension.
+
+        Parameters
+        ----------
+        file_path : Path
+            The path to the file from which content is to be extracted.
+
+        Returns
+        -------
+        list[InformationPiece]
+            A list of InformationPiece objects extracted from the file.
+
+        Raises
+        ------
+        ValueError
+            If the file type is unsupported.
+
+        Notes
+        -----
+        Supported file types are:
+        - .docx
+        - .pptx
+        """
         extension = file_path.suffix.lower()
         match extension:
             case ".docx":

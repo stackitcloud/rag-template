@@ -1,3 +1,5 @@
+"""Module for converting a pandas DataFrame to a Markdown string representation."""
+
 import pandas as pd
 
 from extractor_api_lib.document_parser.table_converters.dataframe_converter import (
@@ -6,10 +8,34 @@ from extractor_api_lib.document_parser.table_converters.dataframe_converter impo
 
 
 class DataFrame2Markdown(DataframeConverter):
+    """A class to convert pandas DataFrames to Markdown string representations and vice versa.
+
+    Attributes
+    ROW_OFFSET : int
+        The number of rows to skip when converting from markdown to DataFrame.
+    COL_OFFSET : int
+        The number of columns to skip when converting from markdown to DataFrame.
+    """
+
     ROW_OFFSET = 2
     COL_OFFSET = 1
 
     def convert(self, df: pd.DataFrame) -> str:
+        """
+        Convert a pandas DataFrame to a Markdown string representation.
+
+            The Markdown string representation of the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The DataFrame to be converted.
+
+        Returns
+        -------
+        str
+            The Markdown string representation of the DataFrame.
+        """
         table_df = self._drop_empty_rows(df)
         if df.empty:
             return ""
@@ -22,6 +48,21 @@ class DataFrame2Markdown(DataframeConverter):
         return "|".join(text_cells)
 
     def convert2df(self, text: str) -> pd.DataFrame:
+        """
+        Convert the given markdown table text to a pandas DataFrame.
+
+        Parameters
+        ----------
+        text : str
+            The markdown table text to be converted into a DataFrame. Each row should be separated
+            by a newline character, and columns should be separated by the '|' character.
+
+        Returns
+        -------
+        pd.DataFrame
+            The resulting DataFrame after conversion, with each cell containing the corresponding
+            text from the markdown table.
+        """
         data = [
             row.strip("|").split("|")[DataFrame2Markdown.COL_OFFSET :]
             for row in text.split("\n")[DataFrame2Markdown.ROW_OFFSET :]

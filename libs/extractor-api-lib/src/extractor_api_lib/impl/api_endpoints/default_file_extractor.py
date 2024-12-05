@@ -1,3 +1,5 @@
+"""Module for the DefaultFileExtractor class."""
+
 from pathlib import Path
 import tempfile
 
@@ -18,6 +20,18 @@ class DefaultFileExtractor(FileExtractor):
         file_service: FileService,
         mapper: Internal2ExternalInformationPiece,
     ):
+        """
+        Initialize the DefaultFileExtractor.
+
+        Parameters
+        ----------
+        information_extractor : InformationExtractor
+            An instance of InformationExtractor to extract information from files.
+        file_service : FileService
+            An instance of FileService to handle file operations.
+        mapper : Internal2ExternalInformationPiece
+            An instance of Internal2ExternalInformationPiece to map internal information to external format.
+        """
         self.information_extractor = information_extractor
         self.file_service = file_service
         self.mapper = mapper
@@ -26,7 +40,19 @@ class DefaultFileExtractor(FileExtractor):
         self,
         extraction_request: ExtractionRequest,
     ) -> list[InformationPiece]:
-        """Extract information of a document, given by the extraction_request."""
+        """
+        Extract information from a document specified in the extraction request.
+
+        Parameters
+        ----------
+        extraction_request : ExtractionRequest
+            The request containing details about the document to be extracted, including its path on S3.
+
+        Returns
+        -------
+        list[InformationPiece]
+            A list of extracted information pieces from the document, where each piece contains non-null page content.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file_path = Path(temp_dir) / extraction_request.path_on_s3
 

@@ -1,4 +1,4 @@
-"""Abstract class for dealing with I/O."""
+"""Module for Abstract class for dealing with I/O."""
 
 import abc
 from abc import ABC
@@ -50,10 +50,10 @@ class FileService(ABC):
 
         Parameters
         ----------
-        source : Path
+        file_path : str
             The path to the local file to upload.
-        target : str
-            The target path in the S3 bucket where the file will be stored.
+        file_name : str
+            The key in the S3 bucket.
         """
 
     @abc.abstractmethod
@@ -68,7 +68,7 @@ class FileService(ABC):
 
     @abc.abstractmethod
     def delete_file(self, file_name: str) -> None:
-        """Deletes a file from the file storage.
+        """Delete a file from the file storage.
 
         Parameters
         ----------

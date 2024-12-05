@@ -1,3 +1,5 @@
+"""Module for dependency injection container for managing application dependencies."""
+
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Singleton, List  # noqa: WOT001
 
@@ -18,9 +20,7 @@ from extractor_api_lib.settings.s3_settings import S3Settings
 
 
 class DependencyContainer(DeclarativeContainer):
-    """
-    Dependency injection container for managing application dependencies.
-    """
+    """Dependency injection container for managing application dependencies."""
 
     # Settings
     settings_s3 = Singleton(S3Settings)

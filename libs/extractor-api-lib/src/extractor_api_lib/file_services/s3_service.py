@@ -1,4 +1,4 @@
-"""Class to handle I/O with S3 storage."""
+"""Module for the class to handle I/O with S3 storage."""
 
 import logging
 from pathlib import Path
@@ -80,16 +80,15 @@ class S3Service(FileService):
         self._s3_client.download_fileobj(self._s3_settings.bucket, source, target_file)
 
     def upload_file(self, file_path: str, file_name: str) -> None:
-        """Upload a local file to the S3 bucket.
+        """Upload a local file to the Fileservice.
 
         Parameters
         ----------
-        source : Path
+        file_path : str
             The path to the local file to upload.
-        target : str
-            The target path in the S3 bucket where the file will be stored.
+        file_name : str
+            The key in the S3 bucket.
         """
-
         self._s3_client.upload_file(
             Filename=file_path,
             Bucket=self._s3_settings.bucket,
@@ -113,7 +112,7 @@ class S3Service(FileService):
         return file_names
 
     def delete_file(self, file_name: str) -> None:
-        """Deletes a file from the S3 bucket.
+        """Delete a file from the S3 bucket.
 
         Parameters
         ----------

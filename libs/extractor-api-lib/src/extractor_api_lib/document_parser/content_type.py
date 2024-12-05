@@ -1,4 +1,4 @@
-"""Enum describing the type of information extracted from a document."""
+"""Module containing the ContentType enum."""
 
 from enum import StrEnum, unique
 

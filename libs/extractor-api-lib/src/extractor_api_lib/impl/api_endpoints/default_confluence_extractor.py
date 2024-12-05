@@ -1,3 +1,5 @@
+"""Module for the DefaultConfluenceExtractor class."""
+
 from extractor_api_lib.api_endpoints.confluence_extractor import ConfluenceExtractor
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
@@ -14,9 +16,31 @@ class DefaultConfluenceExtractor(ConfluenceExtractor):
         self,
         mapper: ConfluenceLangchainDocument2InformationPiece,
     ):
+        """
+        Initialize the DefaultConfluenceExtractor.
+
+        Parameters
+        ----------
+        mapper : ConfluenceLangchainDocument2InformationPiece
+            An instance of ConfluenceLangchainDocument2InformationPiece used for mapping langchain documents
+            to information pieces.
+        """
         self.mapper = mapper
 
     async def aextract_from_confluence(self, confluence_parameters: ConfluenceParameters) -> list[InformationPiece]:
+        """
+        Asynchronously extracts information pieces from Confluence.
+
+        Parameters
+        ----------
+        confluence_parameters : ConfluenceParameters
+            The parameters required to connect to and extract data from Confluence.
+
+        Returns
+        -------
+        list[InformationPiece]
+            A list of information pieces extracted from Confluence.
+        """
         self.mapper.confluence_parameters = confluence_parameters
         confluence_loader_parameters = confluence_parameters.model_dump()
         document_loader = ConfluenceLoader(**confluence_loader_parameters)

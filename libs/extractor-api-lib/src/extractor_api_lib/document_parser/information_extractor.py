@@ -1,4 +1,4 @@
-"""Base class for Information extractors."""
+"""Module for the Base class for Information extractors."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -12,7 +12,7 @@ class InformationExtractor(ABC):
     """Base class for Information extractors."""
 
     def __init__(self, file_service: FileService):
-        """Base Constructor for InformationExtractor.
+        """Initialize the InformationExtractor.
 
         Parameters
         ----------
@@ -24,7 +24,14 @@ class InformationExtractor(ABC):
     @property
     @abstractmethod
     def compatible_file_types(self) -> list[FileType]:
-        ...
+        """
+        Abstract property that should be implemented to return a list of compatible file types.
+
+        Returns
+        -------
+        list[FileType]
+            A list of file types that are compatible with the document parser.
+        """
 
     @abstractmethod
     def extract_content(self, file_path: Path) -> list[InformationPiece]:

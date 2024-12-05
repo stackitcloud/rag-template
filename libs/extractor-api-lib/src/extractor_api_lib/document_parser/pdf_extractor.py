@@ -1,4 +1,4 @@
-"""Extractor for pdf documents."""
+"""Module containing the PDFExtractor class."""
 
 import logging
 from pathlib import Path
@@ -31,7 +31,18 @@ logger = logging.getLogger(__name__)
 
 
 class PDFExtractor(InformationExtractor):
-    """Extractor for pdf documents."""
+    """PDFExtractor is a class responsible for extracting information from PDF files.
+
+    It converts PDF pages to images, identifies table/figure coordinates, and extracts
+    text content using OCR.
+
+    Attributes
+    ----------
+    TITLE_PATTERN : re.Pattern
+        Regular expression pattern to identify titles in the text.
+    TITLE_PATTERN_MULTILINE : re.Pattern
+        Regular expression pattern to identify titles in the text with multiline support.
+    """
 
     TITLE_PATTERN = re.compile(r"(^|\n)(\d+\.[\.\d]*[\t ][a-zA-Z0-9 äöüÄÖÜß\-]+)")
     TITLE_PATTERN_MULTILINE = re.compile(r"(^|\n)(\d+\.[\.\d]*[\t ][a-zA-Z0-9 äöüÄÖÜß\-]+)", re.MULTILINE)
@@ -42,7 +53,7 @@ class PDFExtractor(InformationExtractor):
         pdf_extractor_settings: PDFExtractorSettings,
         dataframe_converter: DataframeConverter,
     ):
-        """Constructor for PDFExtractor.
+        """Initialize the PDFExtractor.
 
         Parameters
         ----------
@@ -60,6 +71,14 @@ class PDFExtractor(InformationExtractor):
 
     @property
     def compatible_file_types(self) -> list[FileType]:
+        """
+        Returns a list of compatible file types for the PDF extractor.
+
+        Returns
+        -------
+        list[FileType]
+            A list containing the FileType.PDF indicating that this extractor is compatible with PDF files.
+        """
         return [FileType.PDF]
 
     @staticmethod

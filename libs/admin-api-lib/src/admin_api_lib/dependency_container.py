@@ -50,9 +50,7 @@ from admin_api_lib.impl.api_endpoints.default_document_uploader import DefaultDo
 
 
 class DependencyContainer(DeclarativeContainer):
-    """
-    Dependency injection container for managing application dependencies.
-    """
+    """Dependency injection container for managing application dependencies."""
 
     class_selector_config = Configuration()
 

@@ -1,4 +1,7 @@
+"""Module for the Extractor API."""
+
 # coding: utf-8
+# noqa: D105
 
 from typing import List  # noqa: F401
 import importlib
@@ -38,6 +41,19 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 async def extract_from_confluence_post(
     confluence_parameters: ConfluenceParameters = Body(None, description=""),
 ) -> List[InformationPiece]:
+    """
+    Extract information from a Confluence space.
+
+    Parameters
+    ----------
+    confluence_parameters : ConfluenceParameters
+        The parameters required to access and extract information from the Confluence space.
+
+    Returns
+    -------
+    List[InformationPiece]
+        A list of extracted information pieces from the Confluence space.
+    """
     return await BaseExtractorApi.subclasses[0]().extract_from_confluence_post(confluence_parameters)
 
 
@@ -54,4 +70,17 @@ async def extract_from_confluence_post(
 async def extract_from_file_post(
     extraction_request: ExtractionRequest = Body(None, description=""),
 ) -> List[InformationPiece]:
+    """
+    Extract information from a file based on the provided extraction request.
+
+    Parameters
+    ----------
+    extraction_request : ExtractionRequest
+        The request object containing details about the extraction process.
+
+    Returns
+    -------
+    List[InformationPiece]
+        A list of extracted information pieces.
+    """
     return await BaseExtractorApi.subclasses[0]().extract_from_file_post(extraction_request)

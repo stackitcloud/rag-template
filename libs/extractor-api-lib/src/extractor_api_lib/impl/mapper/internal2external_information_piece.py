@@ -1,3 +1,5 @@
+"""Module for mapping internal information piece to external information piece."""
+
 from extractor_api_lib.document_parser.information_piece import InformationPiece as InternalInformationPiece
 from extractor_api_lib.models.key_value_pair import KeyValuePair as MetaInformationPiece
 from extractor_api_lib.models.information_piece import InformationPiece as ExternalInformationPiece
@@ -6,6 +8,15 @@ from extractor_api_lib.document_parser.content_type import ContentType as Intern
 
 
 class Internal2ExternalInformationPiece:
+    """
+    A class to map internal information pieces to external information pieces.
+
+    Attributes
+    ----------
+    TYPE_LOOKUP_TABLE : dict
+        A dictionary mapping internal content types to external content types.
+    """
+
     TYPE_LOOKUP_TABLE = {
         InternalContentType.IMAGE: ExternalContentType.IMAGE,
         InternalContentType.TEXT: ExternalContentType.TEXT,
@@ -13,6 +24,18 @@ class Internal2ExternalInformationPiece:
     }
 
     def map_internal_to_external(self, internal: InternalInformationPiece) -> ExternalInformationPiece:
+        """Map an InternalInformationPiece object to an ExternalInformationPiece object.
+
+        Parameters
+        ----------
+        internal : InternalInformationPiece
+            The internal information piece to be mapped.
+
+        Returns
+        -------
+        ExternalInformationPiece
+            The mapped external information piece.
+        """
         information_type = self._map_information_type(internal.type)
         meta = self._map_meta(internal.metadata)
         return ExternalInformationPiece(page_content=internal.page_content, type=information_type, metadata=meta)

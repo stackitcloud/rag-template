@@ -1,3 +1,5 @@
+"""Module for the FileExtractor abstract base class."""
+
 from abc import ABC, abstractmethod
 
 from extractor_api_lib.models.extraction_request import ExtractionRequest
@@ -9,5 +11,16 @@ class FileExtractor(ABC):
 
     @abstractmethod
     async def aextract_information(self, extraction_request: ExtractionRequest) -> list[InformationPiece]:
-        """Extract information of a document, given by the extraction_request."""
-        pass
+        """
+        Extract information of a document, given by the extraction_request.
+
+        Parameters
+        ----------
+        extraction_request : ExtractionRequest
+            The request containing the details of the document to be processed for information extraction.
+
+        Returns
+        -------
+        list[InformationPiece]
+            A list of extracted information pieces from the document.
+        """

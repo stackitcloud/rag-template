@@ -1,4 +1,4 @@
-"""Contains settings regarding the S3 storage."""
+"""Module for the settings of the S3 storage."""
 
 from pydantic_settings import BaseSettings
 from pydantic import Field

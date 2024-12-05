@@ -1,3 +1,5 @@
+"""Module containing the XMLExtractor class."""
+
 import logging
 from pathlib import Path
 from typing import Optional, Any
@@ -20,7 +22,7 @@ class XMLExtractor(InformationExtractor):
     """Extractor for XML documents using unstructured library."""
 
     def __init__(self, file_service: FileService):
-        """Constructor for XMLExtractor.
+        """Initialize the XMLExtractor.
 
         Parameters
         ----------
@@ -31,9 +33,30 @@ class XMLExtractor(InformationExtractor):
 
     @property
     def compatible_file_types(self) -> list[FileType]:
+        """
+        List of compatible file types for the XML extractor.
+
+        Returns
+        -------
+        list[FileType]
+            A list containing the compatible file types, which in this case is XML.
+        """
         return [FileType.XML]
 
     def extract_content(self, file_path: Path) -> list[InformationPiece]:
+        """
+        Extract content from an XML file and processes the elements.
+
+        Parameters
+        ----------
+        file_path : Path
+            The path to the XML file to be processed.
+
+        Returns
+        -------
+        list[InformationPiece]
+            A list of processed information pieces extracted from the XML file.
+        """
         elements = partition_xml(filename=file_path.as_posix(), xml_keep_tags=False)
         return self._process_elements(elements, file_path.name)
 

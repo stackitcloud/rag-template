@@ -1,5 +1,5 @@
 [tool.flake8]
-exclude= [".eggs", "./src/extractor_api_lib/models/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+exclude = [".eggs", "./src/extractor_api_lib/models/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
 statistics = true
 show-source = false
 max-complexity = 10

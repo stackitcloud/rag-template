@@ -1,4 +1,4 @@
-"""Dataclass holding the information found in a document."""
+"""Module containing the InformationPiece dataclass."""
 
 import dataclasses
 

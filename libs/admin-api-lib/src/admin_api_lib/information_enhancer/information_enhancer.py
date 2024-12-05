@@ -17,12 +17,14 @@ class InformationEnhancer(AsyncChain[RetrieverInput, RetrieverOutput], ABC):
     async def ainvoke(self, information: RetrieverInput, config: Optional[RunnableConfig] = None) -> RetrieverOutput:
         """
         Asynchronously invokes the information enhancer with the given input and configuration.
+
         Parameters
         ----------
         information : RetrieverInput
             The input information to be processed by the information enhancer.
         config : Optional[RunnableConfig]
             The configuration settings for the information enhancer, by default None.
+
         Returns
         -------
         RetrieverOutput

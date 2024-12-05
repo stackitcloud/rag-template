@@ -8,8 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentsStatusRetriever(DocumentsStatusRetriever):
-    """DefaultDocumentsStatusRetriever is responsible for retrieving the status of all documents
-    from a key-value store."""
+    """The DefaultDocumentsStatusRetriever retrieves the status of all documents from a key-value store."""
 
     def __init__(self, key_value_store: FileStatusKeyValueStore):
         """

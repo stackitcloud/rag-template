@@ -1,3 +1,5 @@
+"""Module for enhancing the summary of pages by grouping information by page and summarizing each page."""
+
 from asyncio import gather
 from hashlib import sha256
 from typing import Optional
@@ -11,6 +13,17 @@ from admin_api_lib.impl.information_enhancer.summary_enhancer import SummaryEnha
 
 
 class PageSummaryEnhancer(SummaryEnhancer):
+    """
+    Enhances the summary of pages by grouping information by page and summarizing each page.
+
+    Attributes
+    ----------
+    BASE64_IMAGE_KEY : str
+        Key used to identify base64 encoded images in metadata.
+    DEFAULT_PAGE_NR : int
+        Default page number used when no page metadata is available.
+    """
+
     BASE64_IMAGE_KEY = "base64_image"
     DEFAULT_PAGE_NR = 1
 

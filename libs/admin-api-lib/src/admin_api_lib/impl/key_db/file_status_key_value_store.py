@@ -11,6 +11,14 @@ class FileStatusKeyValueStore:
     INNER_STATUS_KEY = "status"
 
     def __init__(self, settings: KeyValueSettings):
+        """
+        Initialize the FileStatusKeyValueStore with the given settings.
+
+        Parameters
+        ----------
+        settings : KeyValueSettings
+            The settings object containing the host and port information for the Redis connection.
+        """
         self._redis = Redis(host=settings.host, port=settings.port, decode_responses=True)
 
     @staticmethod
@@ -31,10 +39,38 @@ class FileStatusKeyValueStore:
         )
 
     def upsert(self, file_name: str, file_status: Status) -> None:
+        """
+        Upserts the status of a file in the key-value store.
+
+        This method first removes any existing entry for the given file name and then adds the new status.
+
+        Parameters
+        ----------
+        file_name : str
+            The name of the file whose status is to be upserted.
+        file_status : Status
+            The status to be associated with the file.
+
+        Returns
+        -------
+        None
+        """
         self.remove(file_name)
         self._redis.sadd(self.STORAGE_KEY, FileStatusKeyValueStore._to_str(file_name, file_status))
 
     def remove(self, file_name: str) -> None:
+        """
+        Remove the specified file name from the key-value store.
+
+        Parameters
+        ----------
+        file_name : str
+            The name of the file to be removed from the key-value store.
+
+        Returns
+        -------
+        None
+        """
         all_documents = self.get_all()
         correct_file_name = [x for x in all_documents if x[0] == file_name]
         for file_name_related in correct_file_name:
@@ -43,5 +79,13 @@ class FileStatusKeyValueStore:
             )
 
     def get_all(self) -> list[tuple[str, Status]]:
+        """
+        Retrieve all file status information from the Redis store.
+
+        Returns
+        -------
+        list of tuple
+            A list of tuples where each tuple contains a string and a Status object.
+        """
         all_file_informations = list(self._redis.smembers(self.STORAGE_KEY))
         return [FileStatusKeyValueStore._from_str(x) for x in all_file_informations]

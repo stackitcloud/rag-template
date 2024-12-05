@@ -5,17 +5,7 @@ from admin_api_lib.chunker.chunker import Chunker
 
 
 class TextChunker(Chunker):
-    """
-    A class that chunks text documents into smaller chunks.
-
-    Args:
-        max_size (int): The maximum size of each chunk.
-        overlap (int): The overlap between consecutive chunks.
-
-    Attributes:
-        _splitter (RecursiveCharacterTextSplitter): The splitter used for chunking.
-
-    """
+    """A class that chunks text documents into smaller chunks."""
 
     def __init__(self, splitter: RecursiveCharacterTextSplitter):
         # NOTE:  `CharacterTextSplitter` does not take chunk_size into consideration
@@ -27,11 +17,15 @@ class TextChunker(Chunker):
         """
         Chunk the given documents into smaller chunks.
 
-        Args:
-            documents list[Document]: The documents to be chunked.
+        Parameters
+        ----------
+        documents : list[Document]
+            The documents to be chunked.
 
-        Returns:
-            list[Document]: The list of chunked documents.
+        Returns
+        -------
+        list[Document]
+            The list of chunked documents.
 
         """
         return self._splitter.split_documents(documents)

@@ -1,3 +1,5 @@
+"""Module for managing Langfuse prompts and Langfuse Language Models (LLMs)."""
+
 import logging
 from typing import Optional
 
@@ -13,6 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 class LangfuseManager:
+    """Manage prompts using Langfuse and a Large Language Model (LLM).
+
+    Attributes
+    ----------
+    API_KEY_FILTER : str
+        A filter string used to exclude the API key from configurations.
+    """
+
     API_KEY_FILTER: str = "api_key"
 
     def __init__(
@@ -21,20 +31,56 @@ class LangfuseManager:
         managed_prompts: dict[str, str],
         llm: LLM,
     ):
+        """
+        Initialize the LangfuseManager.
+
+        Parameters
+        ----------
+        langfuse : Langfuse
+            An instance of the Langfuse class.
+        managed_prompts : dict of str
+            A dictionary where keys and values are strings representing managed prompts.
+        llm : LLM
+            An instance of the LLM class.
+        """
         self._langfuse = langfuse
         self._llm = llm
         self._managed_prompts = managed_prompts
 
     def init_prompts(self) -> None:
+        """
+        Initialize the prompts managed by the LangfuseManager.
+
+        This method iterates over the keys of the managed prompts and retrieves
+        each prompt using the `get_langfuse_prompt` method.
+
+        Returns
+        -------
+        None
+        """
         for key in list(self._managed_prompts.keys()):
             self.get_langfuse_prompt(key)
 
     def get_langfuse_prompt(self, base_prompt_name: str) -> Optional[TextPromptClient]:
         """
-        Retrieves the prompt from Langfuse Prompt Management.
+        Retrieve the prompt from Langfuse Prompt Management.
 
-        Returns:
-            The langfuse prompt template.
+        Parameters
+        ----------
+        base_prompt_name : str
+            The name of the base prompt to retrieve.
+
+        Returns
+        -------
+        Optional[TextPromptClient]
+            The Langfuse prompt template if found, otherwise None.
+
+        Raises
+        ------
+        NotFoundError
+            If the prompt is not found in Langfuse, a new prompt is created.
+        Exception
+            If an error occurs while retrieving the prompt template from Langfuse.
         """
         try:
             langfuse_prompt = self._langfuse.get_prompt(base_prompt_name)
@@ -61,10 +107,18 @@ class LangfuseManager:
 
     def get_base_llm(self, name: str) -> LLM:
         """
-        Get the base Langfuse Language Model (LLM).
+        Get the Langfuse prompt, the configuration as well as Large Language Model (LLM).
 
-        Returns:
-            LLM: The base Langfuse Language Model.
+        Parameters
+        ----------
+        name : str
+            The name of the Langfuse prompt to retrieve the configuration for.
+
+        Returns
+        -------
+        LLM
+            The base Large Language Model. If the Langfuse prompt is not found,
+            returns the LLM with a fallback configuration.
         """
         langfuse_prompt = self.get_langfuse_prompt(name)
         if not langfuse_prompt:
@@ -75,10 +129,21 @@ class LangfuseManager:
 
     def get_base_prompt(self, name: str) -> PromptTemplate:
         """
-        Retrieves the base prompt from Langfuse Prompt Management.
+        Retrieve the base prompt from Langfuse Prompt Management.
 
-        Returns:
-            PromptTemplate: The base prompt template.
+        Parameters
+        ----------
+        name : str
+            The name of the prompt to retrieve.
+
+        Returns
+        -------
+        PromptTemplate
+            The base prompt template.
+
+        Notes
+        -----
+        If the prompt cannot be retrieved from Langfuse, a fallback value is used.
         """
         langfuse_prompt = self.get_langfuse_prompt(name)
         if not langfuse_prompt:

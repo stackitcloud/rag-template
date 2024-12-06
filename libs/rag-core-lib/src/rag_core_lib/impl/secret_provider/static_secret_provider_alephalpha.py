@@ -8,7 +8,7 @@ class StaticSecretProviderAlephAlpha(SecretProvider):
     """Simple API token provider."""
 
     def __init__(self, settings: AlephAlphaSettings):
-        """Simple API token provider.
+        """Initialize the StaticSecretProviderAlephAlpha.
 
         Parameters
         ----------
@@ -19,7 +19,23 @@ class StaticSecretProviderAlephAlpha(SecretProvider):
 
     @property
     def provided_key(self) -> str:
+        """
+        Property that provides a hard coded key for Aleph Alpha API.
+
+        Returns
+        -------
+        str
+            The provided key for Aleph Alpha API.
+        """
         return "aleph_alpha_api_key"
 
     def provide_token(self) -> dict:
+        """
+        Provide a token as a dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the provided key and the API key.
+        """
         return {self.provided_key: self._api_key}

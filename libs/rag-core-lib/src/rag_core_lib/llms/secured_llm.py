@@ -1,3 +1,5 @@
+"""Module for the secured LLM."""
+
 from typing import (
     Any,
     Optional,
@@ -11,6 +13,17 @@ from rag_core_lib.secret_provider.secret_provider import SecretProvider
 
 
 class SecuredLLM(LLM):
+    """
+    A secured wrapper for a Language Model (LLM) that integrates with a secret provider.
+
+    Attributes
+    ----------
+    llm : Any
+        The underlying language model instance.
+    secret_provider : SecretProvider
+        The provider responsible for supplying necessary secrets for the LLM.
+    """
+
     llm: Any
     secret_provider: SecretProvider
 

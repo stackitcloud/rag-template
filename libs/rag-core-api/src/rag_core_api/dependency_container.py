@@ -3,7 +3,8 @@ from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Configuration, Selector, Singleton, List  # noqa: WOT001
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings import OllamaEmbeddings
-from langchain_community.llms import Ollama, VLLMOpenAI
+from langchain_community.llms.ollama import Ollama
+from langchain_community.llms.vllm import VLLMOpenAI
 from langchain_qdrant import Qdrant
 from langfuse import Langfuse
 from langchain_ollama import ChatOllama

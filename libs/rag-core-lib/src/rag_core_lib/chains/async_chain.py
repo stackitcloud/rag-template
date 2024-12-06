@@ -1,3 +1,5 @@
+"""Module for the base class of asynchronous chains."""
+
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
@@ -26,11 +28,12 @@ class AsyncChain(Runnable[Input, Output], ABC):
         Output
             The result of the chain invocation.
         """
-        ...
 
     def invoke(self, chain_input: Input, config: Optional[RunnableConfig] = None, **kwargs: Any) -> Output:
-        """Synchronously invoke the chain with the given input and configuration.
-            Typing indicates this will be the return, but because no implementation is planned,
+        """
+        Invoke the chain with the given input and configuration.
+
+            Typing indicates `Output` will be the return, but because no implementation is planned,
             this will never be returned. This method is not implemented and will raise a not implemented error.
 
         Notes
@@ -40,7 +43,7 @@ class AsyncChain(Runnable[Input, Output], ABC):
         Parameters
         ----------
         chain_input : Input
-            The input data required to synchronously invoke the chain.
+            The input data required to invoke the chain.
         config : Optional[RunnableConfig], optional
             The configuration settings for the chain invocation, by default None.
 

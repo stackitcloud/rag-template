@@ -9,8 +9,22 @@ class SecretProvider(ABC):
     @property
     @abstractmethod
     def provided_key(self) -> str:
-        ...
+        """
+        Abstract property that should be implemented to provide a secret key.
+
+        Returns
+        -------
+        str
+            The secret key provided by the implementing class.
+        """
 
     @abstractmethod
     def provide_token(self) -> dict:
-        """Provides an API token."""
+        """
+        Abstract method that should be implemented to provide an API token.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the API token.
+        """

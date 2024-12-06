@@ -1,3 +1,5 @@
+"""Module for the LangfuseTraceChain class."""
+
 from typing import Optional
 from langfuse.callback import CallbackHandler
 from langchain_core.runnables import RunnableConfig, Runnable
@@ -7,9 +9,30 @@ from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 
 
 class LangfuseTracedGraph(TracedGraph):
+    """A class to trace the execution of a Runnable using Langfuse.
+
+    This class wraps an inner Runnable and adds tracing capabilities using the Langfuse tracer.
+    It allows for the configuration of the tracer through the provided settings.
+
+    Attributes
+    ----------
+    CONFIG_CALLBACK_KEY : str
+        The key used to store callbacks in the configuration.
+    """
+
     CONFIG_CALLBACK_KEY = "callbacks"
 
     def __init__(self, inner_chain: Runnable, settings: LangfuseSettings):
+        """
+        Initialize the LangfuseTracedChain with the given inner chain and settings.
+
+        Parameters
+        ----------
+        inner_chain : Runnable
+            The inner chain to be wrapped by this tracer.
+        settings : LangfuseSettings
+            The settings to configure the Langfuse tracer.
+        """
         super().__init__(inner_chain)
         self._settings = settings
 

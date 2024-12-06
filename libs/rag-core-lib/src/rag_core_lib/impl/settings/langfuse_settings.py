@@ -1,11 +1,22 @@
-"""Contains settings regarding langfuse."""
+"""Contains settings regarding Langfuse."""
 
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
 
 class LangfuseSettings(BaseSettings):
-    """Contains settings regarding langfuse."""
+    """
+    Contains settings regarding Langfuse.
+
+    Attributes
+    ----------
+    secret_key : str
+        The secret key for Langfuse.
+    public_key : str
+        The public key for Langfuse.
+    host : str
+        The host for Langfuse.
+    """
 
     class Config:
         """Config class for reading Fields from env."""

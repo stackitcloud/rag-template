@@ -1,4 +1,4 @@
-"""Contains the settings for the class types, if multiple classes can be selected"""
+"""Module that contains the settings for the class types, if multiple classes can be selected."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -11,7 +11,12 @@ class RAGClassTypeSettings(BaseSettings):
     Settings class for RAG class types.
 
     This class defines the configuration settings for RAG class types.
-    It inherits from the BaseSettings class
+    It inherits from the BaseSettings class.
+
+    Attributes
+    ----------
+    llm_type : LLMType
+        The type of language model to use.
     """
 
     class Config:

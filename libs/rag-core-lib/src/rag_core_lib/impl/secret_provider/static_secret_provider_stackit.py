@@ -8,7 +8,7 @@ class StaticSecretProviderStackit(SecretProvider):
     """Simple API token provider."""
 
     def __init__(self, settings: StackitVllmSettings):
-        """Simple API token provider.
+        """Initialize the StaticSecretProviderStackit.
 
         Parameters
         ----------
@@ -19,7 +19,23 @@ class StaticSecretProviderStackit(SecretProvider):
 
     @property
     def provided_key(self) -> str:
+        """
+        Property that provides a hardcoded OpenAI API key.
+
+        Returns
+        -------
+        str
+            The hard coded OpenAI API key.
+        """
         return "openai_api_key"
 
     def provide_token(self) -> dict:
+        """
+        Provide a token as a dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the provided key and the associated API key.
+        """
         return {self.provided_key: self._api_key}

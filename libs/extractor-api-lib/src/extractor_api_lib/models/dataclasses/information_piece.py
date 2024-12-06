@@ -2,7 +2,7 @@
 
 import dataclasses
 
-from extractor_api_lib.document_parser.content_type import ContentType
+from extractor_api_lib.impl.types.content_type import ContentType
 
 
 @dataclasses.dataclass

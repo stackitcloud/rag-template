@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from extractor_api_lib.document_parser.table_converters.dataframe_converter import (
+from extractor_api_lib.table_converter.dataframe_converter import (
     DataframeConverter,
 )
 

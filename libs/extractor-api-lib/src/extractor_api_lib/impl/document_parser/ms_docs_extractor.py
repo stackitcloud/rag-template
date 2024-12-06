@@ -9,13 +9,13 @@ from unstructured.partition.pptx import partition_pptx
 from unstructured.partition.docx import partition_docx
 from unstructured.documents.elements import Element
 
-from extractor_api_lib.document_parser.information_piece import InformationPiece
-from extractor_api_lib.document_parser.table_converters.dataframe_converter import DataframeConverter
+from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
+from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
 from extractor_api_lib.document_parser.information_extractor import InformationExtractor
-from extractor_api_lib.document_parser.file_type import FileType
-from extractor_api_lib.document_parser.content_type import ContentType
+from extractor_api_lib.impl.types.file_type import FileType
+from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.utils.utils import hash_datetime
+from extractor_api_lib.impl.utils.utils import hash_datetime
 
 logger = logging.getLogger(__name__)
 

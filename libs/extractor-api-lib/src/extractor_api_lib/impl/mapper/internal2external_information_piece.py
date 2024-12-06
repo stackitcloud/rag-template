@@ -1,10 +1,10 @@
 """Module for mapping internal information piece to external information piece."""
 
-from extractor_api_lib.document_parser.information_piece import InformationPiece as InternalInformationPiece
+from extractor_api_lib.models.dataclasses.information_piece import InformationPiece as InternalInformationPiece
 from extractor_api_lib.models.key_value_pair import KeyValuePair as MetaInformationPiece
 from extractor_api_lib.models.information_piece import InformationPiece as ExternalInformationPiece
 from extractor_api_lib.models.content_type import ContentType as ExternalContentType
-from extractor_api_lib.document_parser.content_type import ContentType as InternalContentType
+from extractor_api_lib.impl.types.content_type import ContentType as InternalContentType
 
 
 class Internal2ExternalInformationPiece:

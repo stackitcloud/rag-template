@@ -1,3 +1,5 @@
+"""Module for the DocumentUploader abstract base class."""
+
 from abc import ABC, abstractmethod
 
 from fastapi import Request, UploadFile

@@ -1,3 +1,5 @@
+"""Module for the DependencyContainer class."""
+
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Configuration, List, Selector, Singleton  # noqa: WOT001
 from langchain.text_splitter import RecursiveCharacterTextSplitter

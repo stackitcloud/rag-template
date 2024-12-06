@@ -7,8 +7,9 @@ from pydantic_settings import BaseSettings
 class DocumentExtractorSettings(BaseSettings):
     """Contains settings regarding the document extractor microservice.
 
-    Attributes:
-        host (str): The url to the api.
+    Attributes
+    ----------
+    host (str): The url to the api.
     """
 
     class Config:

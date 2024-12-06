@@ -1,3 +1,5 @@
+"""Module for the DocumentReferenceRetriever abstract base class."""
+
 from abc import ABC, abstractmethod
 
 from fastapi import Response

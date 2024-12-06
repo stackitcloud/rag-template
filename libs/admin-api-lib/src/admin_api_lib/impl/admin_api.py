@@ -1,3 +1,5 @@
+"""Module containing the implementation of the Admin API."""
+
 import logging
 
 from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
@@ -15,9 +17,19 @@ logger = logging.getLogger(__name__)
 
 
 class AdminApi(BaseAdminApi):
-    DOCUMENT_METADATA_TYPE_KEY = "type"
+    """The Class for the Admin API.
+
+    AdminApi class provides various asynchronous methods to interact with documents, including deleting,
+    retrieving status, loading from Confluence, retrieving by reference ID, and uploading documents.
+    """
 
     def __init__(self):
+        """
+        Initialize the AdminAPI class.
+
+        This constructor calls the parent class's initializer and sets up
+        an empty list to hold background threads.
+        """
         super().__init__()
         self._background_threads = []
 
@@ -27,6 +39,21 @@ class AdminApi(BaseAdminApi):
         identification: str,
         document_deleter: DocumentDeleter = Depends(Provide[DependencyContainer.document_deleter]),
     ) -> None:
+        """
+        Delete a document asynchronously.
+
+        Parameters
+        ----------
+        identification : str
+            The unique identifier of the document to be deleted.
+        document_deleter : DocumentDeleter
+            The document deleter instance, injected by dependency injection
+            (default is Depends(Provide[DependencyContainer.document_deleter])).
+
+        Returns
+        -------
+        None
+        """
         await document_deleter.adelete_document(identification)
 
     @inject
@@ -36,6 +63,20 @@ class AdminApi(BaseAdminApi):
             Provide[DependencyContainer.documents_status_retriever]
         ),
     ) -> list[DocumentStatus]:
+        """
+        Asynchronously retrieve the status of all documents.
+
+        Parameters
+        ----------
+        document_status_retriever : DocumentsStatusRetriever
+            An instance of DocumentsStatusRetriever
+            (default is Depends(Provide[DependencyContainer.documents_status_retriever])).
+
+        Returns
+        -------
+        list[DocumentStatus]
+            A list containing the status of all documents.
+        """
         return await document_status_retriever.aget_all_documents_status()
 
     @inject
@@ -43,6 +84,19 @@ class AdminApi(BaseAdminApi):
         self,
         confluence_loader: ConfluenceLoader = Depends(Provide[DependencyContainer.confluence_loader]),
     ) -> None:
+        """
+        Asynchronously loads a Confluence space using the provided ConfluenceLoader.
+
+        Parameters
+        ----------
+        confluence_loader : ConfluenceLoader
+            The ConfluenceLoader instance to use for loading the post. This is injected by dependency injection
+            (default is Depends(Provide[DependencyContainer.confluence_loader])).
+
+        Returns
+        -------
+        None
+        """
         await confluence_loader.aload_from_confluence()
 
     @inject
@@ -54,18 +108,21 @@ class AdminApi(BaseAdminApi):
         ),
     ) -> Response:
         """
-        Retrieves the document with the given identification.
+        Retrieve the document with the given identification.
 
-        Args:
-            identification (str): The identification of the document.
-            document_reference_retriever (DocumentReferenceRetriever, optional):
-                The service to retrieve the document reference.
-                Defaults to Depends(Provide[DependencyContainer.document_reference_retriever]).
+        Parameters
+        ----------
+        identification : str
+            The identification of the document.
+        document_reference_retriever : DocumentReferenceRetriever, optional
+            The service to retrieve the document reference.
+            Defaults to Depends(Provide[DependencyContainer.document_reference_retriever]).
 
-        Returns:
-            Response: The document in binary form.
+        Returns
+        -------
+        Response
+            The document in binary form.
         """
-
         return await document_reference_retriever.adocument_reference_id_get(identification)
 
     @inject
@@ -75,4 +132,20 @@ class AdminApi(BaseAdminApi):
         request: Request,
         document_uploader: DocumentUploader = Depends(Provide[DependencyContainer.document_uploader]),
     ) -> None:
+        """
+        Handle the POST request to upload documents.
+
+        Parameters
+        ----------
+        body : UploadFile
+            The file to be uploaded.
+        request : Request
+            The request object containing metadata about the request.
+        document_uploader : DocumentUploader, optional
+            The document uploader dependency, by default provided by DependencyContainer.
+
+        Returns
+        -------
+        None
+        """
         await document_uploader.aupload_documents_post(body, request)

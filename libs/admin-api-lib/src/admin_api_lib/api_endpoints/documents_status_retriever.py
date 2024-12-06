@@ -1,3 +1,5 @@
+"""Module abstract base class for the DocumentsStatusRetriever."""
+
 from abc import ABC, abstractmethod
 
 from admin_api_lib.models.document_status import DocumentStatus
@@ -13,6 +15,6 @@ class DocumentsStatusRetriever(ABC):
 
         Returns
         -------
-        list of DocumentStatus
+        list[DocumentStatus]
             A list containing document names and their statuses.
         """

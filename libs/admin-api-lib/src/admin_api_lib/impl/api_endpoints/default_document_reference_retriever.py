@@ -1,3 +1,5 @@
+"""Module for the DefaultDocumentReferenceRetriever class."""
+
 import io
 import logging
 import traceback
@@ -25,7 +27,7 @@ class DefaultDocumentReferenceRetriever(DocumentReferenceRetriever):
 
     async def adocument_reference_id_get(self, identification: str) -> Response:
         """
-        Retrieves the document with the given identification asynchronously.
+        Retrieve the document with the given identification asynchronously.
 
         Parameters
         ----------

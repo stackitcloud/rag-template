@@ -1,3 +1,5 @@
+"""Module for the Admin API."""
+
 # coding: utf-8
 
 import importlib
@@ -34,6 +36,18 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 async def delete_document(
     identification: str = Path(..., description=""),
 ) -> None:
+    """
+    Asynchronously deletes a document based on the provided identification.
+
+    Parameters
+    ----------
+    identification : str
+        The unique identifier of the document to be deleted.
+
+    Returns
+    -------
+    None
+    """
     return await BaseAdminApi.subclasses[0]().delete_document(identification)
 
 
@@ -51,6 +65,19 @@ async def delete_document(
 async def document_reference_id_get(
     identification: str = Path(..., description="Identifier of the pdf document."),
 ) -> Response:
+    """
+    Asynchronously retrieve a document reference by its identification.
+
+    Parameters
+    ----------
+    identification : str
+        The unique identifier for the document reference.
+
+    Returns
+    -------
+    Response
+        The response object containing the document reference details.
+    """
     return await BaseAdminApi.subclasses[0]().document_reference_id_get(identification)
 
 
@@ -64,6 +91,14 @@ async def document_reference_id_get(
     response_model_by_alias=True,
 )
 async def get_all_documents_status() -> list[DocumentStatus]:
+    """
+    Asynchronously retrieves the status of all documents.
+
+    Returns
+    -------
+    list[DocumentStatus]
+        A list containing the status of all documents.
+    """
     return await BaseAdminApi.subclasses[0]().get_all_documents_status()
 
 
@@ -85,6 +120,13 @@ async def get_all_documents_status() -> list[DocumentStatus]:
     response_model_by_alias=True,
 )
 async def load_confluence_post() -> None:
+    """
+    Asynchronously loads a Confluence space.
+
+    Returns
+    -------
+    None
+    """
     return await BaseAdminApi.subclasses[0]().load_confluence_post()
 
 
@@ -102,5 +144,18 @@ async def upload_documents_post(
     body: UploadFile,
     request: Request,
 ) -> None:
-    """Uploads user selected pdf documents."""
+    """
+    Asynchronously uploads user-selected source documents.
+
+    Parameters
+    ----------
+    body : UploadFile
+        The file object containing the source documents to be uploaded.
+    request : Request
+        The request object containing metadata about the upload request.
+
+    Returns
+    -------
+    None
+    """
     return await BaseAdminApi.subclasses[0]().upload_documents_post(body, request)

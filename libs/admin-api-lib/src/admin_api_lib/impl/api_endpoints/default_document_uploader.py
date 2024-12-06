@@ -1,3 +1,5 @@
+"""Module for the DefaultDocumentUploader class."""
+
 import logging
 import tempfile
 import traceback
@@ -74,20 +76,26 @@ class DefaultDocumentUploader(DocumentUploader):
         request: Request,
     ) -> None:
         """
-        Handles the uploading of documents via a POST request.
+        Handle the uploading of documents via a POST request.
 
         This asynchronous method reads the content of the uploaded file and starts a background
         thread to save the document in S3 storage and the vector database. It updates the status
         of the document in the key-value store and handles any exceptions that may occur during
         the process.
 
-        Args:
-            body (UploadFile): The uploaded file.
-            request (Request): The request object.
+        Parameters
+        ----------
+        body : UploadFile
+            The uploaded file.
+        request : Request
+            The request object.
 
-        Raises:
-            HTTPException: If there is a ValueError, raises a 400 Bad Request error.
-            HTTPException: If there is any other exception, raises a 500 Internal Server Error.
+        Raises
+        ------
+        HTTPException
+            If there is a ValueError, raises a 400 Bad Request error.
+        HTTPException
+            If there is any other exception, raises a 500 Internal Server Error.
         """
         self._background_threads = [t for t in self._background_threads if t.is_alive()]
         content = await body.read()

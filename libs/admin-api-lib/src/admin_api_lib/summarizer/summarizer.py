@@ -1,3 +1,5 @@
+"""Module for the summarizer baseclass."""
+
 from abc import ABC, abstractmethod
 from typing import Optional
 

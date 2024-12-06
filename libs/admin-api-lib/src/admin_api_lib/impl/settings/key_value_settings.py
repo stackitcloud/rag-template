@@ -5,7 +5,16 @@ from pydantic_settings import BaseSettings
 
 
 class KeyValueSettings(BaseSettings):
-    """Contains settings regarding the key value store."""
+    """
+    Contains settings regarding the key value store.
+
+    Attributes
+    ----------
+    host : str
+        The hostname of the key value store.
+    port : int
+        The port number of the key value store.
+    """
 
     class Config:
         """Config class for reading Fields from env."""

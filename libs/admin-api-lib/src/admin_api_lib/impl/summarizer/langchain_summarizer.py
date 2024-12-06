@@ -1,3 +1,5 @@
+"""Module for the LangchainSummarizer class."""
+
 import logging
 import traceback
 from typing import Optional
@@ -18,6 +20,13 @@ logger = logging.getLogger(__name__)
 
 
 class LangchainSummarizer(Summarizer):
+    """Is responsible for summarizing input data.
+
+    LangchainSummarizer is responsible for summarizing input data using the LangfuseManager,
+    RecursiveCharacterTextSplitter, and AsyncThreadsafeSemaphore. It handles chunking of the input
+    document and retries the summarization process if an error occurs.
+    """
+
     def __init__(
         self,
         langfuse_manager: LangfuseManager,
@@ -29,6 +38,31 @@ class LangchainSummarizer(Summarizer):
         self._semaphore = semaphore
 
     async def ainvoke(self, query: SummarizerInput, config: Optional[RunnableConfig] = None) -> SummarizerOutput:
+        """
+        Asynchronously invokes the summarization process on the given query.
+
+        Parameters
+        ----------
+        query : SummarizerInput
+            The input data to be summarized.
+        config : Optional[RunnableConfig], optional
+            Configuration options for the summarization process, by default None.
+
+        Returns
+        -------
+        SummarizerOutput
+            The summarized output.
+
+        Raises
+        ------
+        Exception
+            If the summary creation fails after the allowed number of tries.
+
+        Notes
+        -----
+        This method handles chunking of the input document and retries the summarization
+        process if an error occurs, up to the number of tries specified in the config.
+        """
         assert query, "Query is empty: %s" % query  # noqa S101
         config = ensure_config(config)
         tries_remaining = config.get("configurable", {}).get("tries_remaining", 3)

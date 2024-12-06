@@ -1,3 +1,5 @@
+"""Module containing the TextChunker class."""
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 

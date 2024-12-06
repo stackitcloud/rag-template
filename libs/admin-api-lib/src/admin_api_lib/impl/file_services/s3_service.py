@@ -81,7 +81,8 @@ class S3Service(FileService):
         self._s3_client.download_fileobj(self._s3_settings.bucket, source, target_file)
 
     def upload_file(self, file_path: str, file_name: str) -> None:
-        """Upload a local file to the S3 bucket.
+        """
+        Upload a local file to the S3 bucket.
 
         Parameters
         ----------
@@ -90,7 +91,6 @@ class S3Service(FileService):
         target : str
             The target path in the S3 bucket where the file will be stored.
         """
-
         self._s3_client.upload_file(
             Filename=file_path,
             Bucket=self._s3_settings.bucket,
@@ -114,7 +114,7 @@ class S3Service(FileService):
         return file_names
 
     def delete_file(self, file_name: str) -> None:
-        """Deletes a file from the S3 bucket.
+        """Delete a file from the S3 bucket.
 
         Parameters
         ----------

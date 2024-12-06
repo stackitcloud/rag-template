@@ -1,3 +1,5 @@
+"""Module for the DefaultDocumentDeleter class."""
+
 import json
 import logging
 
@@ -13,9 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultDocumentDeleter(DocumentDeleter):
-    """
-    A class used to delete documents from file storage and vector database.
-    """
+    """A class used to delete documents from file storage and vector database."""
 
     def __init__(self, file_service: FileService, rag_api: RagApi, key_value_store: FileStatusKeyValueStore):
         """

@@ -1,3 +1,5 @@
+"""Module for mapping between InformationPiece and LangchainDocument."""
+
 from langchain_core.documents import Document as LangchainDocument
 from rag_core_lib.impl.data_types.content_type import ContentType as RagInformationType
 from admin_api_lib.extractor_api_client.openapi_client.models.content_type import ContentType as ExtractorInformaType
@@ -13,6 +15,19 @@ import json
 
 
 class InformationPiece2Document:
+    """The InformationPiece2Document class.
+
+    A utility class for converting between ExtractorInformationPiece and LangchainDocument,
+    and between LangchainDocument and RagInformationPiece.
+
+    Attributes
+    ----------
+    LOOKUP_TABLE : dict
+        A dictionary mapping ExtractorInformaType to RagInformationType.
+    METADATA_TYPE_KEY : str
+        The key used to store the type of information piece in metadata.
+    """
+
     LOOKUP_TABLE = {
         ExtractorInformaType.IMAGE: RagInformationType.IMAGE,
         ExtractorInformaType.TABLE: RagInformationType.TABLE,
@@ -22,7 +37,24 @@ class InformationPiece2Document:
 
     @staticmethod
     def extractor_information_piece2document(info: ExtractorInformationPiece) -> LangchainDocument:
-        """Convert from InformationPiece to LangchainDocument"""
+        """
+        Convert an ExtractorInformationPiece instance to a LangchainDocument instance.
+
+        Parameters
+        ----------
+        info : ExtractorInformationPiece
+            The information piece to be converted, containing metadata page content, type.
+
+        Returns
+        -------
+        LangchainDocument
+            The converted LangchainDocument with the page content, metadata and type.
+
+        Notes
+        -----
+        The metadata of the resulting LangchainDocument includes all key-value pairs from the
+        input metadata, with an additional entry for the type of the information piece.
+        """
         metadata = {x.key: x.value for x in info.metadata}
         metadata[InformationPiece2Document.METADATA_TYPE_KEY] = InformationPiece2Document.infotype2infotype(
             info.type
@@ -32,7 +64,19 @@ class InformationPiece2Document:
 
     @staticmethod
     def document2rag_information_piece(document: LangchainDocument) -> RagInformationPiece:
-        """Convert from LangchainDocument to InformationPiece"""
+        """
+        Convert a LangchainDocument to a RagInformationPiece.
+
+        Parameters
+        ----------
+        document : LangchainDocument
+            The document to be converted, containing metadata, page content and type.
+
+        Returns
+        -------
+        RagInformationPiece
+            The converted information piece with type, metadata, and page content.
+        """
         metadata = [RagKeyValue(key=str(key), value=json.dumps(value)) for key, value in document.metadata.items()]
         content_type = RagInformationType(document.metadata[InformationPiece2Document.METADATA_TYPE_KEY].upper())
         return RagInformationPiece(
@@ -43,5 +87,17 @@ class InformationPiece2Document:
 
     @staticmethod
     def infotype2infotype(info_type: ExtractorInformaType) -> RagInformationType:
-        """Convert from external to internal information type"""
+        """
+        Convert from ExtractorInformaType to RagInformationType.
+
+        Parameters
+        ----------
+        info_type : ExtractorInformaType
+            The external information type to be converted.
+
+        Returns
+        -------
+        RagInformationType
+            The corresponding internal information type.
+        """
         return InformationPiece2Document.LOOKUP_TABLE[info_type]

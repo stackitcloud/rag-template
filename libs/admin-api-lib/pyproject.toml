@@ -1,5 +1,5 @@
 [tool.flake8]
-exclude= [".eggs", "./rag-core-library/*", "./src/admin_api_lib/models/*", "./src/admin_api_lib/rag_backend_client/*", "./src/admin_api_lib/extractor_api_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+exclude= [".eggs", "./rag-core-library/*", "./src/admin_api_lib/models/*", "./src/admin_api_lib/rag_backend_client/*", "./src/admin_api_lib/extractor_api_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
 statistics = true
 show-source = false
 max-complexity = 8

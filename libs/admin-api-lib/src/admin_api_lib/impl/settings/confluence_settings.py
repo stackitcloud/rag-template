@@ -7,13 +7,14 @@ from pydantic_settings import BaseSettings
 class ConfluenceSettings(BaseSettings):
     """Contains settings regarding the chunker.
 
-    Attributes:
-        url (Optional[str]): The Confluence URL.
-        token (Optional[str]): The authentication token.
-        space_key (Optional[str]): The Confluence space key.
-        include_attachments (bool): Whether to include attachments.
-        keep_markdown_format (bool): Whether to keep markdown formatting.
-        keep_newlines (bool): Whether to keep newlines.
+    Attributes
+    ----------
+    url (Optional[str]): The Confluence URL.
+    token (Optional[str]): The authentication token.
+    space_key (Optional[str]): The Confluence space key.
+    include_attachments (bool): Whether to include attachments.
+    keep_markdown_format (bool): Whether to keep markdown formatting.
+    keep_newlines (bool): Whether to keep newlines.
     """
 
     class Config:

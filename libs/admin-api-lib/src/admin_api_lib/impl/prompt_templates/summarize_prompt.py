@@ -1,3 +1,5 @@
+"""Module for the summarize prompt template."""
+
 SUMMARIZE_PROMPT = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 Fasse den folgenden Text zusammen. Die Ausgabe soll auf Deutsch sein. Gebe nur die deutsche Zusammenfassung aus, keinen zusätzlichen Text. Halte dich möglichst kurz mit deiner Antwort.<|eot_id|><|start_header_id|>user<|end_header_id|>

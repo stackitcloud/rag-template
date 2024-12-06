@@ -7,8 +7,9 @@ from pydantic_settings import BaseSettings
 class RAGAPISettings(BaseSettings):
     """Contains settings regarding the rag api microservice.
 
-    Attributes:
-        host (str): The url to the api.
+    Attributes
+    ----------
+    host (str): The url to the api.
     """
 
     class Config:

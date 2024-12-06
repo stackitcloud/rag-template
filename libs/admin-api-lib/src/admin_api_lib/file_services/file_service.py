@@ -68,7 +68,7 @@ class FileService(ABC):
 
     @abc.abstractmethod
     def delete_file(self, file_name: str) -> None:
-        """Deletes a file from the file storage.
+        """Delete a file from the file storage.
 
         Parameters
         ----------

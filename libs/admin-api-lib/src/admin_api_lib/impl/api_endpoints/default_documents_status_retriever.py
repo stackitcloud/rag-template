@@ -1,3 +1,5 @@
+"""Module for the DefaultDocumentsStatusRetriever class."""
+
 import logging
 
 from admin_api_lib.api_endpoints.documents_status_retriever import DocumentsStatusRetriever
@@ -27,7 +29,7 @@ class DefaultDocumentsStatusRetriever(DocumentsStatusRetriever):
 
         Returns
         -------
-        list of DocumentStatus
+        list[DocumentStatus]
             A list containing the status of all documents, where each document's
             status is represented by a DocumentStatus object.
         """

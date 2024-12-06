@@ -1,3 +1,5 @@
+"""Module for the InformationEnhancer abstract base class."""
+
 from abc import ABC, abstractmethod
 from typing import Optional
 

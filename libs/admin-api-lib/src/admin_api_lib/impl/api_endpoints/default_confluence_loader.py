@@ -1,3 +1,5 @@
+"""Module for the DefaultConfluenceLoader class."""
+
 from asyncio import run
 import logging
 from threading import Thread

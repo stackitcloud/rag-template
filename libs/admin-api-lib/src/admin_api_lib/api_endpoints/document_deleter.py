@@ -1,3 +1,5 @@
+"""Module for the document deletion endpoint."""
+
 from abc import ABC, abstractmethod
 
 

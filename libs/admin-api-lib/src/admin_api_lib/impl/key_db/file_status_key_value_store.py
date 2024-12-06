@@ -1,3 +1,5 @@
+"""Module containing the FileStatusKeyValueStore class."""
+
 import json
 from redis import Redis
 
@@ -6,6 +8,23 @@ from admin_api_lib.models.status import Status
 
 
 class FileStatusKeyValueStore:
+    """
+    A key-value store for managing file statuses using Redis.
+
+    This class provides methods to upsert, remove, and retrieve file status information
+    from a Redis store. Each file status is stored as a JSON string containing the file name
+    and its associated status.
+
+    Attributes
+    ----------
+    STORAGE_KEY : str
+        The key under which all file statuses are stored in Redis.
+    INNER_FILENAME_KEY : str
+        The key used for the file name in the JSON string.
+    INNER_STATUS_KEY : str
+        The key used for the file status in the JSON string.
+    """
+
     STORAGE_KEY = "files"
     INNER_FILENAME_KEY = "filename"
     INNER_STATUS_KEY = "status"
@@ -84,7 +103,7 @@ class FileStatusKeyValueStore:
 
         Returns
         -------
-        list of tuple
+        list[tuple[str, Status]]
             A list of tuples where each tuple contains a string and a Status object.
         """
         all_file_informations = list(self._redis.smembers(self.STORAGE_KEY))

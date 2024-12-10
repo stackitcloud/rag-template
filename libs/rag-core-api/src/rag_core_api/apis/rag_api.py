@@ -1,4 +1,7 @@
+"""Module containing the RAG API endpoints."""
+
 # coding: utf-8
+# flake8: noqa: D105
 
 from contextlib import suppress
 import importlib
@@ -39,7 +42,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     importlib.import_module(name)
 
 
-async def disconnected(request: Request) -> None:
+async def _disconnected(request: Request) -> None:
     while True:
         try:
             if await request.is_disconnected():
@@ -63,7 +66,34 @@ async def chat(
     session_id: str = Path(..., description=""),
     chat_request: ChatRequest = Body(None, description="Chat with RAG."),
 ) -> ChatResponse | None:
-    disconnect_task = create_task(disconnected(request))
+    """
+    Asynchronously handles the chat endpoint for the RAG API.
+
+    Parameters
+    ----------
+    request : Request
+        The request object.
+    session_id : str
+        The session ID for the chat.
+    chat_request : ChatRequest, optional
+        The chat request payload
+
+    Returns
+    -------
+    ChatResponse or None
+        The chat response if the chat task completes successfully, otherwise None.
+
+    Raises
+    ------
+    CancelledError
+        If the task is cancelled.
+
+    Notes
+    -----
+    This function creates two asynchronous tasks: one for handling disconnection and one for processing the chat
+    request. It waits for either task to complete first and cancels the remaining tasks.
+    """
+    disconnect_task = create_task(_disconnected(request))
     chat_task = create_task(BaseRagApi.subclasses[0]().chat(session_id, chat_request))
     done, pending = await wait(
         [disconnect_task, chat_task],
@@ -91,6 +121,13 @@ async def chat(
     response_model_by_alias=True,
 )
 async def evaluate() -> None:
+    """
+    Asynchronously evaluate the RAG.
+
+    Returns
+    -------
+    None
+    """
     return await BaseRagApi.subclasses[0]().evaluate()
 
 
@@ -109,6 +146,20 @@ async def evaluate() -> None:
 async def remove_information_piece(
     delete_request: DeleteRequest = Body(None, description=""),
 ) -> None:
+    """
+    Asynchronously removes information pieces.
+
+    This endpoint removes information pieces based on the provided delete request.
+
+    Parameters
+    ----------
+    delete_request : DeleteRequest
+        The request body containing the details for the information piece to be removed.
+
+    Returns
+    -------
+    None
+    """
     return await BaseRagApi.subclasses[0]().remove_information_piece(delete_request)
 
 
@@ -126,4 +177,18 @@ async def remove_information_piece(
 async def upload_information_piece(
     information_piece: List[InformationPiece] = Body(None, description=""),
 ) -> None:
+    """
+    Asynchronously uploads information pieces for vectordatabase.
+
+    This endpoint allows for the upload of information pieces to the vector database.
+
+    Parameters
+    ----------
+    information_piece : List[InformationPiece]
+        A list of information pieces to be uploaded (default None).
+
+    Returns
+    -------
+    None
+    """
     return await BaseRagApi.subclasses[0]().upload_information_piece(information_piece)

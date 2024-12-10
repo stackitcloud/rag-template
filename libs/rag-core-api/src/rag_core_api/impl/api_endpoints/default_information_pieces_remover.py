@@ -1,3 +1,5 @@
+"""Module for DefaultInformationPiecesRemover class."""
+
 import logging
 import json
 
@@ -13,10 +15,37 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultInformationPiecesRemover(InformationPieceRemover):
+    """DefaultInformationPiecesRemover is responsible for removing information pieces from a vector database."""
+
     def __init__(self, vector_database: VectorDatabase):
+        """
+        Initializes the DefaultInformationPiecesRemover with a vector database.
+
+        Parameters
+        ----------
+        vector_database : VectorDatabase
+            An instance of the VectorDatabase class used for managing vector data.
+        """
         self._vector_database = vector_database
 
     def remove_information_piece(self, delete_request: DeleteRequest) -> None:
+        """
+        Remove information pieces based on the given delete request.
+
+        Parameters
+        ----------
+        delete_request : DeleteRequest
+            The request object containing the details of the information pieces to be deleted.
+
+        Raises
+        ------
+        HTTPException
+            If there is an error while parsing metadata or deleting from the vector database.
+
+        Returns
+        -------
+        None
+        """
         logger.info("Deleting the information pieces from vector database")
         try:
             metadata = {}

@@ -1,3 +1,5 @@
+"""Module containing the DefaultInformationPiecesUploader class."""
+
 from fastapi import HTTPException, status
 
 from rag_core_api.impl.mapper.information_piece_mapper import InformationPieceMapper
@@ -8,10 +10,38 @@ from rag_core_api.vector_databases.vector_database import VectorDatabase
 
 
 class DefaultInformationPiecesUploader(InformationPiecesUploader):
+    """DefaultInformationPiecesUploader is responsible for uploading information pieces to a vector database."""
+
     def __init__(self, vector_database: VectorDatabase):
+        """
+        Initializes the DefaultInformationPiecesUploader with a vector database.
+
+        Parameters
+        ----------
+        vector_database : VectorDatabase
+            An instance of the VectorDatabase class used to store and manage vectors.
+        """
         self._vector_database = vector_database
 
-    def upload_information_piece(self, information_piece: list[InformationPiece]):
+    def upload_information_piece(self, information_piece: list[InformationPiece]) -> None:
+        """
+        Upload a list of information pieces.
+
+        Parameters
+        ----------
+        information_piece : list[InformationPiece]
+            A list of InformationPiece objects to be uploaded.
+
+        Raises
+        ------
+        HTTPException
+            If there is a ValueError, raises an HTTP 422 Unprocessable Entity error.
+            If there is any other exception, raises an HTTP 500 Internal Server Error.
+
+        Returns
+        -------
+        None
+        """
         langchain_documents = [
             InformationPieceMapper.information_piece2langchain_document(document) for document in information_piece
         ]

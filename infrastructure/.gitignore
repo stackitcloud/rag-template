@@ -1,3 +1,6 @@
+**/cr-secret.yaml   
+**/star-values.yaml
+
 */terraform.tfstate
 */Chart.lock
 *.tgz

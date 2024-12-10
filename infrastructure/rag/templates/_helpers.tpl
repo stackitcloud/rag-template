@@ -1,8 +1,8 @@
 {{- define "rag.dockerconfigjson" -}}
-{{- $username := .Values.global.imagePullSecret.auths.username -}}
-{{- $password := .Values.global.imagePullSecret.auths.pat -}}
+{{- $username := .Values.shared.imagePullSecret.auths.username -}}
+{{- $password := .Values.shared.imagePullSecret.auths.pat -}}
 {{- $auth := printf "%s:%s" $username $password | b64enc -}}
-{{- $dockerconfigjson := dict "auths" (dict .Values.global.imagePullSecret.auths.registry (dict "username" $username "password" $password "email" .Values.global.imagePullSecret.auths.email "auth" $auth)) | toJson -}}
+{{- $dockerconfigjson := dict "auths" (dict .Values.shared.imagePullSecret.auths.registry (dict "username" $username "password" $password "email" .Values.shared.imagePullSecret.auths.email "auth" $auth)) | toJson -}}
 {{- print $dockerconfigjson | b64enc -}}
 {{- end -}}
 

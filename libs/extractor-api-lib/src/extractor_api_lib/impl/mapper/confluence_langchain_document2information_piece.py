@@ -101,6 +101,8 @@ class ConfluenceLangchainDocument2InformationPiece:
             page_title = page_title_matches[0] if page_title_matches else "Unknown Title"
 
             metadata.append(MetaInformationPiece(key=self.USER_CASE_PAGE_KEY, value=page_title))
-            metadata.append(MetaInformationPiece(key=self.DOCUMENT_KEY, value=self._confluence_parameters.url))
+            metadata.append(
+                MetaInformationPiece(key=self.DOCUMENT_KEY, value=self._confluence_parameters.document_name)
+            )
             metadata.append(MetaInformationPiece(key=self.USE_CASE_RELATED_KEY, value=[]))
         return metadata

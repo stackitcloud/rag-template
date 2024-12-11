@@ -94,11 +94,9 @@ class InformationPiece(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "metadata": (
-                    [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")]
-                    if obj.get("metadata") is not None
-                    else None
-                ),
+                "metadata": [KeyValuePair.from_dict(_item) for _item in obj.get("metadata")]
+                if obj.get("metadata") is not None
+                else None,
                 "page_content": obj.get("page_content"),
                 "type": obj.get("type"),
             }

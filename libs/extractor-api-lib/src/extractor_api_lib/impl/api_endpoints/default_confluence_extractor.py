@@ -43,6 +43,8 @@ class DefaultConfluenceExtractor(ConfluenceExtractor):
         """
         self.mapper.confluence_parameters = confluence_parameters
         confluence_loader_parameters = confluence_parameters.model_dump()
+        # Drop the document_name parameter as it is not used by the ConfluenceLoader
+        confluence_loader_parameters.pop("document_name", None)
         document_loader = ConfluenceLoader(**confluence_loader_parameters)
         documents = document_loader.load()
         return [self.mapper.map_document2informationpiece(x) for x in documents]

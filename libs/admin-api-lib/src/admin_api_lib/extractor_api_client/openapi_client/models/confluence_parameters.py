@@ -40,6 +40,9 @@ class ConfluenceParameters(BaseModel):
         default=True,
         description="whether to retain newline characters in the output for better readability. Default is `true`.",
     )
+    document_name: StrictStr = Field(
+        description="The name that will be used to store the confluence db in the key value db and the vectordatabase (metadata.document)."
+    )
     __properties: ClassVar[List[str]] = [
         "url",
         "token",
@@ -47,6 +50,7 @@ class ConfluenceParameters(BaseModel):
         "include_attachments",
         "keep_markdown_format",
         "keep_newlines",
+        "document_name",
     ]
 
     model_config = ConfigDict(
@@ -102,13 +106,14 @@ class ConfluenceParameters(BaseModel):
                 "url": obj.get("url"),
                 "token": obj.get("token"),
                 "space_key": obj.get("space_key"),
-                "include_attachments": (
-                    obj.get("include_attachments") if obj.get("include_attachments") is not None else False
-                ),
-                "keep_markdown_format": (
-                    obj.get("keep_markdown_format") if obj.get("keep_markdown_format") is not None else True
-                ),
+                "include_attachments": obj.get("include_attachments")
+                if obj.get("include_attachments") is not None
+                else False,
+                "keep_markdown_format": obj.get("keep_markdown_format")
+                if obj.get("keep_markdown_format") is not None
+                else True,
                 "keep_newlines": obj.get("keep_newlines") if obj.get("keep_newlines") is not None else True,
+                "document_name": obj.get("document_name"),
             }
         )
         return _obj

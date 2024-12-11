@@ -1,11 +1,11 @@
-"""Contains settings regarding the chunker."""
+"""Contains settings regarding the confluence."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
 class ConfluenceSettings(BaseSettings):
-    """Contains settings regarding the chunker.
+    """Contains settings regarding confluence.
 
     Attributes
     ----------
@@ -15,6 +15,8 @@ class ConfluenceSettings(BaseSettings):
     include_attachments (bool): Whether to include attachments.
     keep_markdown_format (bool): Whether to keep markdown formatting.
     keep_newlines (bool): Whether to keep newlines.
+    document_name (Optional[str]): The name of the document. Should be a name like "stackit-confluence".
+        This name will be shown in the admin-frontend and will be used to identify the document in the RAG backend.
     """
 
     class Config:
@@ -29,3 +31,4 @@ class ConfluenceSettings(BaseSettings):
     include_attachments: bool = Field(default=False)
     keep_markdown_format: bool = Field(default=True)
     keep_newlines: bool = Field(default=True)
+    document_name: str | None = Field(default=None)

@@ -29,4 +29,5 @@ class ConfluenceSettingsMapper:
             include_attachments=settings.include_attachments,
             keep_markdown_format=settings.keep_markdown_format,
             keep_newlines=settings.keep_newlines,
+            document_name=settings.document_name,
         )

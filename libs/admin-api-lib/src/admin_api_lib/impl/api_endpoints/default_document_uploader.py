@@ -7,6 +7,7 @@ import urllib
 from asyncio import run
 from pathlib import Path
 from threading import Thread
+from fastapi import HTTPException, Request, UploadFile, status
 
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.api_endpoints.document_uploader import DocumentUploader
@@ -19,7 +20,7 @@ from admin_api_lib.impl.mapper.informationpiece2document import InformationPiece
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
 from admin_api_lib.models.status import Status
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi
-from fastapi import HTTPException, Request, UploadFile, status
+from admin_api_lib.utils.utils import sanitize_document_name
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,7 @@ class DefaultDocumentUploader(DocumentUploader):
         """
         self._background_threads = [t for t in self._background_threads if t.is_alive()]
         content = await body.read()
+        body.filename = sanitize_document_name(body.filename)
         try:
             self._key_value_store.upsert(body.filename, Status.UPLOADING)
             thread = Thread(target=lambda: run(self._asave_new_document(content, body.filename, request)))

@@ -1,5 +1,5 @@
-**/cr-secret.yaml   
-**/star-values.yaml
+**/cr-secret.yaml
+**/customer-values.yaml
 
 */terraform.tfstate
 */Chart.lock

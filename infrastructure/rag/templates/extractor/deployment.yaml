@@ -37,10 +37,18 @@ spec:
           - -c
           - |
             touch /app/document-extractor/log/logfile.log && \
-            chmod 600 /app/document-extractor/log/logfile.log
+            chmod 600 /app/document-extractor/log/logfile.log;
+            wget -q -O /tmp/punkt.zip https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt_tab.zip && \
+            unzip /tmp/punkt.zip -d /home/nonroot/nltk_data/tokenizers && \
+            wget -q -O /tmp/averaged_perceptron_tagger_eng.zip https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/taggers/averaged_perceptron_tagger_eng.zip && \
+            unzip /tmp/averaged_perceptron_tagger_eng.zip -d /home/nonroot/nltk_data/taggers;
         volumeMounts:
         - name: log-dir
           mountPath: /app/document-extractor/log
+        - name: nltk-data-dir
+          mountPath: /home/nonroot/nltk_data
+        - name: tmp-dir
+          mountPath: /tmp
       containers:
       - name: {{ .Values.extractor.name }}
         securityContext:
@@ -95,3 +103,5 @@ spec:
         env:
           - name: PYTHONPATH
             value: {{ .Values.extractor.pythonPathEnv.PYTHONPATH }}
+          - name: NLTK_DATA
+            value: /home/nonroot/nltk_data

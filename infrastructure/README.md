@@ -375,6 +375,11 @@ On *Windows* you can adjust the hosts file as described [here](https://docs.digi
 
 The *helm* chart provided in this repository requires a *NGINX Ingress Controller*, (e.g. [Bitnami package for NGINX Ingress Controller](https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller)).
 If you want to use SSL-Encryption, a Cert-Manager is also required. An installation tutorial for the *STACKIT Cert-Manager Webhook* can be found in the [Github Repository](https://github.com/stackitcloud/stackit-cert-manager-webhook).
+For deployment of the *NGINX Ingress Controller* and a cert-manager, the following helm chart can be used:
+
+[base-setup](server-setup/base-setup/Chart.yaml)
+
+The email [here](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
 
 ## 3. Contributing
 

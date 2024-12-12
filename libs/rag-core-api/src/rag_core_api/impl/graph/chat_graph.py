@@ -1,3 +1,5 @@
+"""Module for the string enum class GraphNodeNames and the DefaultChatGraph class."""
+
 import io
 import logging
 from enum import StrEnum
@@ -30,6 +32,21 @@ logger = logging.getLogger(__name__)
 
 
 class GraphNodeNames(StrEnum):
+    """
+    GraphNodeNames is an enumeration of different types of graph nodes used in the chat graph.
+
+    Attributes
+    ----------
+    REPHRASE : str
+        Represents a node that rephrases the question.
+    RETRIEVE : str
+        Represents a node that retrieves the relevant langchain documents from the vectordatabase.
+    GENERATE : str
+        Represents a node that generates the response.
+    ERROR_NODE : str
+        Represents a node that handles errors.
+    """
+
     REPHRASE = "rephrase"
     RETRIEVE = "retrieve"
     GENERATE = "generate"
@@ -37,6 +54,12 @@ class GraphNodeNames(StrEnum):
 
 
 class DefaultChatGraph(GraphBase):
+    """The DefaultChatGraph handles chat requests.
+
+    It utilizes various chains and retrievers to process and generate responses based on the input message and chat
+    history.
+    """
+
     def __init__(
         self,
         answer_generation_chain: AnswerGenerationChain,
@@ -46,6 +69,24 @@ class DefaultChatGraph(GraphBase):
         error_messages: ErrorMessages,
         chat_history_settings: ChatHistorySettings,
     ):
+        """
+        Initialize the DefaultChatGraph.
+
+        Parameters
+        ----------
+        answer_generation_chain : AnswerGenerationChain
+            The chain responsible for generating answers.
+        rephrasing_chain : RephrasingChain
+            The chain responsible for rephrasing questions.
+        composed_retriever : Retriever
+            The retriever used to fetch relevant information.
+        mapper : InformationPieceMapper
+            The mapper used to map information pieces.
+        error_messages : ErrorMessages
+            The error messages to be used in case of failures.
+        chat_history_settings : ChatHistorySettings
+            The settings for managing chat history.
+        """
         self._state_graph = StateGraph(AnswerGraphState)
         self._answer_generation_chain = answer_generation_chain
         self._composite_retriever = composed_retriever
@@ -60,6 +101,28 @@ class DefaultChatGraph(GraphBase):
     async def ainvoke(
         self, graph_input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any
     ) -> ChatResponse:
+        """
+        Asynchronously invokes the chat graph with the provided input and configuration.
+
+        Parameters
+        ----------
+        graph_input : ChatRequest
+            The input data for the chat graph, including the message and history.
+        config : Optional[RunnableConfig]
+            Configuration options for the invocation (default None).
+        **kwargs : Any
+            Additional keyword arguments.
+
+        Returns
+        -------
+        ChatResponse
+            The response from the chat graph.
+
+        Notes
+        -----
+        - The method processes the chat history based on the settings defined in `_chat_history_settings`.
+        - The history is formatted and included in the `AnswerGraphState`.
+        """
         history_of_interest = []
         if graph_input.history and graph_input.history.messages:
             history_of_interest = graph_input.history.messages[-self._chat_history_settings.limit :]
@@ -89,7 +152,20 @@ class DefaultChatGraph(GraphBase):
         return response_state["response"]
 
     def draw_graph(self, relative_dir_path: Optional[str] = None) -> None:
-        """Draw the graph and save as png."""
+        """
+        Draw the graph and save it as a PNG file.
+
+        Parameters
+        ----------
+        relative_dir_path : Optional[str]
+            The relative directory path where the PNG file will be saved.
+            If not provided, the current working directory will be used.
+            (default None)
+
+        Returns
+        -------
+        None
+        """
         img = Image.open(
             io.BytesIO(
                 self._graph.get_graph().draw_mermaid_png(

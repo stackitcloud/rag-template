@@ -1,3 +1,5 @@
+"""Module for the AnswerGraphState class."""
+
 import operator
 from typing import Annotated
 from typing_extensions import TypedDict
@@ -10,7 +12,28 @@ from rag_core_api.models.information_piece import InformationPiece
 class AnswerGraphState(TypedDict):
     """
     Represents the state of the answer graph.
-
+    Attributes
+    ----------
+    question : str
+        The original question asked.
+    rephrased_question : str
+        The rephrased version of the original question.
+    history : str
+        The history of interactions or context leading up to the current state.
+    information_pieces : list[InformationPiece]
+        A list of information pieces relevant to the question.
+    langchain_documents : list[Document]
+        A list of documents processed by LangChain.
+    answer_text : str | None
+        The text of the answer, if available (default None).
+    response : ChatResponse | None
+        The chat response object, if available (default None).
+    additional_info : dict | None
+        Any additional information (default None).
+    error_messages : list[str]
+        A list of error messages encountered.
+    finish_reasons : list[str]
+        A list of reasons why the process finished.
     """
 
     question: str
@@ -38,6 +61,39 @@ class AnswerGraphState(TypedDict):
         response=None,
         additional_info=None,
     ) -> "AnswerGraphState":
+        """
+        Create an instance of AnswerGraphState.
+
+        Parameters
+        ----------
+        cls : type
+            The class type.
+        question : str
+            The question being asked.
+        history : list
+            The history of previous interactions.
+        error_messages : list
+            List of error messages encountered.
+        finish_reasons : list
+            List of reasons for finishing the process.
+        information_pieces : list
+            Pieces of information relevant to the question.
+        langchain_documents : list
+            Documents used by the LangChain model.
+        rephrased_question : str
+            The rephrased version of the question (default None).
+        answer_text : str
+            The text of the answer (default None).
+        response : dict
+            The response data (default None).
+        additional_info : dict
+            Any additional information (default None).
+
+        Returns
+        -------
+        AnswerGraphState
+            An instance of AnswerGraphState.
+        """
         return AnswerGraphState(
             question=question,
             history=history,

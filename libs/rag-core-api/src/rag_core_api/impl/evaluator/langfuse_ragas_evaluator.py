@@ -1,3 +1,5 @@
+"""Module for the LangfuseRagasEvaluator class."""
+
 from asyncio import gather
 import json
 import logging
@@ -41,6 +43,25 @@ logger = logging.getLogger(__name__)
 
 
 class LangfuseRagasEvaluator(Evaluator):
+    """LangfuseRagasEvaluator is responsible for evaluating questions in a dataset using various metrics.
+
+    Attributes
+    BASE_PROMPT_NAME : str
+        The name of the base prompt used for answer generation.
+    DATASET_INPUT_KEY : str
+        The key for the input question in the dataset.
+    DATASET_EXPECTED_OUTPUT_KEY : str
+        The key for the expected output in the dataset.
+    DATASET_ID_KEY : str
+        The key for the dataset item ID.
+    DEFAULT_SCORE_VALUE : float
+        The default score value used when a metric evaluation fails.
+    METRICS : list
+        A list of metrics used for evaluation.
+    MAX_RETRIES : int
+        The maximum number of retries for linking items to generations.
+    """
+
     BASE_PROMPT_NAME: str = "base-answer-generation"
     DATASET_INPUT_KEY: str = "question"
     DATASET_EXPECTED_OUTPUT_KEY: str = "ground_truth"
@@ -69,6 +90,30 @@ class LangfuseRagasEvaluator(Evaluator):
         chat_history_config: ChatHistorySettings,
         chat_llm,
     ) -> None:
+        """
+        Initialize the LangfuseRagasEvaluator.
+
+        Parameters
+        ----------
+        chat_endpoint : Chat
+            The chat endpoint to be used.
+        langfuse_manager : LangfuseManager
+            The manager for Langfuse operations.
+        settings : RagasSettings
+            The settings for Ragas.
+        embedder : Embedder
+            The embedder to be used for embeddings.
+        semaphore : AsyncThreadsafeSemaphore
+            The semaphore for managing asynchronous threads.
+        chat_history_config : ChatHistorySettings
+            The configuration settings for chat history.
+        chat_llm :
+            The LLM for chat.
+
+        Returns
+        -------
+        None
+        """
         self._chat_history_config = chat_history_config
         self._chat_endpoint = chat_endpoint
         self._settings = settings
@@ -82,6 +127,16 @@ class LangfuseRagasEvaluator(Evaluator):
         langfuse_manager.init_prompts()
 
     async def aevaluate(self) -> None:
+        """
+        Asynchronously evaluates the questions in the evaluation dataset.
+
+        This method retrieves the evaluation dataset and generates answers for the evaluation questions.
+        If an error occurs during the evaluation process, it logs the error message.
+
+        Returns
+        -------
+        None
+        """
         try:
             evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
             await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)

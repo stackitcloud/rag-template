@@ -1,57 +1,81 @@
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer
-from dependency_injector.providers import Configuration, Selector, Singleton, List  # noqa: WOT001
+from dependency_injector.providers import (  # noqa: WOT001
+    Configuration,
+    List,
+    Selector,
+    Singleton,
+)
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms.ollama import Ollama
 from langchain_community.llms.vllm import VLLMOpenAI
-from langchain_qdrant import Qdrant
-from langfuse import Langfuse
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
+from langchain_qdrant import Qdrant
+from langfuse import Langfuse
 
+from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
+    AnswerGenerationChain,
+)
+from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
 from rag_core_api.impl.api_endpoints.default_chat import DefaultChat
+from rag_core_api.impl.api_endpoints.default_information_pieces_remover import (
+    DefaultInformationPiecesRemover,
+)
+from rag_core_api.impl.api_endpoints.default_information_pieces_uploader import (
+    DefaultInformationPiecesUploader,
+)
+from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
+from rag_core_api.impl.embeddings.langchain_community_embedder import (
+    LangchainCommunityEmbedder,
+)
+from rag_core_api.impl.embeddings.stackit_embedder import StackitEmbedder
+from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
+from rag_core_api.impl.graph.chat_graph import DefaultChatGraph
+from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
+from rag_core_api.impl.retriever.composite_retriever import CompositeRetriever
+from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
 from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
+from rag_core_api.impl.settings.embedder_class_type_settings import (
+    EmbedderClassTypeSettings,
+)
+from rag_core_api.impl.settings.error_messages import ErrorMessages
+from rag_core_api.impl.settings.ragas_settings import RagasSettings
+from rag_core_api.impl.settings.reranker_settings import RerankerSettings
+from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
+from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
+from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
+from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
+from rag_core_api.mapper.information_piece_mapper import InformationPieceMapper
+from rag_core_api.prompt_templates.answer_generation_prompt import (
+    ANSWER_GENERATION_PROMPT,
+)
+from rag_core_api.prompt_templates.question_rephrasing_prompt import (
+    QUESTION_REPHRASING_PROMPT,
+)
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
 from rag_core_lib.impl.llms.llm_type import LLMType
 from rag_core_lib.impl.llms.secured_llm import SecuredLLM
 from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
-from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import StaticSecretProviderAlephAlpha
-from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import StaticSecretProviderStackit
+from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import (
+    StaticSecretProviderAlephAlpha,
+)
+from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import (
+    StaticSecretProviderStackit,
+)
 from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
-from rag_core_lib.impl.settings.public_aleph_alpha_settings import PublicAlephAlphaSettings
+from rag_core_lib.impl.settings.public_aleph_alpha_settings import (
+    PublicAlephAlphaSettings,
+)
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-
-from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
-from rag_core_api.impl.graph.chat_graph import DefaultChatGraph
-from rag_core_api.impl.api_endpoints.default_information_pieces_remover import DefaultInformationPiecesRemover
-from rag_core_api.impl.api_endpoints.default_information_pieces_uploader import DefaultInformationPiecesUploader
-from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
-from rag_core_api.impl.embeddings.langchain_community_embedder import LangchainCommunityEmbedder
-from rag_core_api.impl.evaluator.langfuse_ragas_evaluator import LangfuseRagasEvaluator
-from rag_core_api.impl.mapper.information_piece_mapper import InformationPieceMapper
-from rag_core_api.impl.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
-from rag_core_api.impl.prompt_templates.question_rephrasing_prompt import QUESTION_REPHRASING_PROMPT
-from rag_core_api.impl.reranking.flashrank_reranker import FlashrankReranker
-from rag_core_api.impl.retriever.composite_retriever import CompositeRetriever
-from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
-from rag_core_api.impl.settings.embedder_class_type_settings import EmbedderClassTypeSettings
-from rag_core_api.impl.settings.error_messages import ErrorMessages
-from rag_core_api.impl.settings.ragas_settings import RagasSettings
-from rag_core_api.impl.settings.reranker_settings import RerankerSettings
-from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
-from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
-from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
-from rag_core_api.impl.embeddings.stackit_embedder import StackitEmbedder
-from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
-from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
 
 
 class DependencyContainer(DeclarativeContainer):

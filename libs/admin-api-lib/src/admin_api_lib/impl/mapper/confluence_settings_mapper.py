@@ -1,7 +1,9 @@
 """Module for the ConfluenceSettingsMapper class."""
 
+from admin_api_lib.extractor_api_client.openapi_client.models.confluence_parameters import (
+    ConfluenceParameters,
+)
 from admin_api_lib.impl.settings.confluence_settings import ConfluenceSettings
-from admin_api_lib.extractor_api_client.openapi_client.models.confluence_parameters import ConfluenceParameters
 
 
 class ConfluenceSettingsMapper:

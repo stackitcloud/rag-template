@@ -11,11 +11,10 @@
     Do not edit the class manually.
 """  # noqa: E501
 import logging.config
+
 import yaml
-
-from fastapi import FastAPI
 from dependency_injector.containers import Container
-
+from fastapi import FastAPI
 
 from rag_core_api.apis.rag_api import router
 from rag_core_api.dependency_container import DependencyContainer

@@ -3,22 +3,17 @@
 # coding: utf-8
 # noqa: D105
 
-from typing import List  # noqa: F401
 import importlib
 import pkgutil
+from typing import List  # noqa: F401
 
-from extractor_api_lib.apis.extractor_api_base import BaseExtractorApi
+from fastapi import APIRouter, Body  # noqa: F401
+
 import extractor_api_lib.impl
-
-from fastapi import (  # noqa: F401
-    APIRouter,
-    Body,
-)
-
+from extractor_api_lib.apis.extractor_api_base import BaseExtractorApi
 from extractor_api_lib.models.confluence_parameters import ConfluenceParameters
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.models.information_piece import InformationPiece
-
 
 router = APIRouter()
 

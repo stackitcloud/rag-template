@@ -2,10 +2,10 @@
 
 from langchain_community.embeddings import AlephAlphaAsymmetricSemanticEmbedding
 from langchain_core.embeddings import Embeddings
-from rag_core_lib.secret_provider.secret_provider import SecretProvider
-from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 
 from rag_core_api.embeddings.embedder import Embedder
+from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
+from rag_core_lib.secret_provider.secret_provider import SecretProvider
 
 
 class AlephAlphaEmbedder(Embedder, Embeddings):

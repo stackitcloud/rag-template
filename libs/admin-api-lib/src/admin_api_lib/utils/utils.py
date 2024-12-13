@@ -2,7 +2,6 @@
 
 import unicodedata
 
-
 TRANSLITERATION_MAP = {
     "ä": "ae",
     "ö": "oe",

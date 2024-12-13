@@ -15,18 +15,21 @@ from langgraph.graph import END, START, StateGraph
 from PIL import Image
 
 from rag_core_api.graph.graph_base import GraphBase
-from rag_core_api.impl.retriever.no_or_empty_collection_error import NoOrEmptyCollectionError
-from rag_core_api.impl.mapper.information_piece_mapper import InformationPieceMapper
+from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
+    AnswerGenerationChain,
+)
+from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
+from rag_core_api.impl.retriever.no_or_empty_collection_error import (
+    NoOrEmptyCollectionError,
+)
 from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
+from rag_core_api.impl.settings.error_messages import ErrorMessages
+from rag_core_api.mapper.information_piece_mapper import InformationPieceMapper
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
-from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
-from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
-from rag_core_api.impl.settings.error_messages import ErrorMessages
-from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
-from rag_core_api.retriever.retriever import Retriever
 from rag_core_api.models.content_type import ContentType
-
+from rag_core_api.retriever.retriever import Retriever
 
 logger = logging.getLogger(__name__)
 

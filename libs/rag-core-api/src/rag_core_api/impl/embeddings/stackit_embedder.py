@@ -1,7 +1,7 @@
 """Module that contains the StackitEmbedder class."""
 
-from openai import OpenAI
 from langchain_core.embeddings import Embeddings
+from openai import OpenAI
 
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings

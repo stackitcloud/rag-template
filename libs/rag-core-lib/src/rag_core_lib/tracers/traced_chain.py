@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 from langchain_core.runnables import Runnable, RunnableConfig, ensure_config
+
 from rag_core_lib.chains.async_chain import AsyncChain
 
 RunnableInput = Any

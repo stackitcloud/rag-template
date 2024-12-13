@@ -3,13 +3,20 @@
 import json
 import logging
 
+from fastapi import HTTPException
+
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.file_services.file_service import FileService
-from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_api_lib.impl.key_db.file_status_key_value_store import (
+    FileStatusKeyValueStore,
+)
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi
-from admin_api_lib.rag_backend_client.openapi_client.models.delete_request import DeleteRequest
-from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import KeyValuePair
-from fastapi import HTTPException
+from admin_api_lib.rag_backend_client.openapi_client.models.delete_request import (
+    DeleteRequest,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import (
+    KeyValuePair,
+)
 
 logger = logging.getLogger(__name__)
 

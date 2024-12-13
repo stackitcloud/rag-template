@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from langchain_core.documents import Document
-
-from typing import Optional
 from langchain_core.runnables import Runnable, RunnableConfig
 
 RetrieverInput = str

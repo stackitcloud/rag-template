@@ -5,8 +5,9 @@
 
 from typing import ClassVar, Tuple  # noqa: F401
 
-from admin_api_lib.models.document_status import DocumentStatus
 from fastapi import Request, Response, UploadFile
+
+from admin_api_lib.models.document_status import DocumentStatus
 
 
 class BaseAdminApi:

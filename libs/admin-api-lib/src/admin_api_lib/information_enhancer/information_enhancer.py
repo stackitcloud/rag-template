@@ -3,8 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from langchain_core.runnables import RunnableConfig
 from langchain_core.documents import Document
+from langchain_core.runnables import RunnableConfig
 
 from rag_core_lib.chains.async_chain import AsyncChain
 

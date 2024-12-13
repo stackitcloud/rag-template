@@ -3,10 +3,7 @@
 from asyncio import gather
 from typing import Optional
 
-from langchain_core.runnables import (
-    RunnableConfig,
-    ensure_config,
-)
+from langchain_core.runnables import RunnableConfig, ensure_config
 
 from admin_api_lib.information_enhancer.information_enhancer import (
     InformationEnhancer,

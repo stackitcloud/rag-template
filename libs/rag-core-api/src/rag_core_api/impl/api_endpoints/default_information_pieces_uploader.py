@@ -2,10 +2,11 @@
 
 from fastapi import HTTPException, status
 
-from rag_core_api.impl.mapper.information_piece_mapper import InformationPieceMapper
+from rag_core_api.api_endpoints.information_piece_uploader import (
+    InformationPiecesUploader,
+)
+from rag_core_api.mapper.information_piece_mapper import InformationPieceMapper
 from rag_core_api.models.information_piece import InformationPiece
-
-from rag_core_api.api_endpoints.information_piece_uploader import InformationPiecesUploader
 from rag_core_api.vector_databases.vector_database import VectorDatabase
 
 

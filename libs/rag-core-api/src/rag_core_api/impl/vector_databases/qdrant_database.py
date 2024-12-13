@@ -1,7 +1,7 @@
-from langchain_qdrant import Qdrant
 from langchain_core.documents import Document
+from langchain_qdrant import Qdrant
 from qdrant_client.http import models
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import FieldCondition, Filter, MatchValue
 
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings

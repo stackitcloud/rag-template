@@ -1,21 +1,20 @@
 """Module for the LangfuseRagasEvaluator class."""
 
-from asyncio import gather
 import json
 import logging
 import math
 import os
-from uuid import uuid4
-from json import JSONDecodeError
+from asyncio import gather
 from datetime import datetime
+from json import JSONDecodeError
 from time import sleep
+from uuid import uuid4
 
-from langfuse.api.core.api_error import ApiError
-from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 import ragas
 from datasets import Dataset
 from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
+from langfuse.api.core.api_error import ApiError
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.client import DatasetClient
 from ragas.llms import LangchainLLMWrapper
@@ -30,14 +29,15 @@ from ragas.metrics import (
 )
 from ragas.run_config import RunConfig
 from tqdm import tqdm
-from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 from rag_core_api.api_endpoints.chat import Chat
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.evaluator.evaluator import Evaluator
+from rag_core_api.impl.settings.chat_history_settings import ChatHistorySettings
 from rag_core_api.impl.settings.ragas_settings import RagasSettings
 from rag_core_api.models.chat_request import ChatRequest
+from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
+from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 logger = logging.getLogger(__name__)
 

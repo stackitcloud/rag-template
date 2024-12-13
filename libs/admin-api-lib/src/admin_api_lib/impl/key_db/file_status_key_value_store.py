@@ -1,6 +1,7 @@
 """Module containing the FileStatusKeyValueStore class."""
 
 import json
+
 from redis import Redis
 
 from admin_api_lib.impl.settings.key_value_settings import KeyValueSettings

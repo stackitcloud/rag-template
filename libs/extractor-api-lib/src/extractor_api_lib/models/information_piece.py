@@ -13,13 +13,14 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
+from typing import Any, ClassVar, Dict, List
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+
 from extractor_api_lib.models.content_type import ContentType
 from extractor_api_lib.models.key_value_pair import KeyValuePair
 

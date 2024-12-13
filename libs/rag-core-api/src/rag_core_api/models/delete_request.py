@@ -13,13 +13,14 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
+from typing import Any, ClassVar, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List, Optional
+
 from rag_core_api.models.key_value_pair import KeyValuePair
 
 try:

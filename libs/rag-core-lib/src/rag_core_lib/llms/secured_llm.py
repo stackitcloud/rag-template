@@ -1,13 +1,9 @@
 """Module for the secured LLM."""
 
-from typing import (
-    Any,
-    Optional,
-)
+from typing import Any, Optional
 
-from langchain_core.language_models.llms import LLM
 from langchain_core.callbacks import CallbackManagerForLLMRun
-
+from langchain_core.language_models.llms import LLM
 
 from rag_core_lib.secret_provider.secret_provider import SecretProvider
 

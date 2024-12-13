@@ -4,12 +4,12 @@ from asyncio import gather
 from hashlib import sha256
 from typing import Optional
 
+from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
 from tqdm import tqdm
-from langchain_core.documents import Document
-from rag_core_lib.impl.data_types.content_type import ContentType
 
 from admin_api_lib.impl.information_enhancer.summary_enhancer import SummaryEnhancer
+from rag_core_lib.impl.data_types.content_type import ContentType
 
 
 class PageSummaryEnhancer(SummaryEnhancer):

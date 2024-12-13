@@ -2,10 +2,10 @@
 
 from langchain_core.documents import Document as LangchainDocument
 
-from extractor_api_lib.models.key_value_pair import KeyValuePair as MetaInformationPiece
 from extractor_api_lib.models.confluence_parameters import ConfluenceParameters
-from extractor_api_lib.models.information_piece import InformationPiece
 from extractor_api_lib.models.content_type import ContentType
+from extractor_api_lib.models.information_piece import InformationPiece
+from extractor_api_lib.models.key_value_pair import KeyValuePair as MetaInformationPiece
 
 
 class ConfluenceLangchainDocument2InformationPiece:

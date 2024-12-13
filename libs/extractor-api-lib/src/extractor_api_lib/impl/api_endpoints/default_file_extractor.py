@@ -1,12 +1,14 @@
 """Module for the DefaultFileExtractor class."""
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 from extractor_api_lib.api_endpoints.file_extractor import FileExtractor
 from extractor_api_lib.document_parser.information_extractor import InformationExtractor
 from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.impl.mapper.internal2external_information_piece import Internal2ExternalInformationPiece
+from extractor_api_lib.impl.mapper.internal2external_information_piece import (
+    Internal2ExternalInformationPiece,
+)
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.models.information_piece import InformationPiece
 

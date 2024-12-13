@@ -3,9 +3,9 @@ from typing import Any, Optional
 from langchain_core.documents import Document
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
 
+from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 from rag_core_lib.chains.async_chain import AsyncChain
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 
 RunnableInput = AnswerGraphState
 RunnableOutput = str

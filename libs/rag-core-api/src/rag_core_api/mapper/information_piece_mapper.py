@@ -1,11 +1,11 @@
 import json
 
 from langchain_core.documents import Document as LangchainDocument
-from rag_core_lib.impl.data_types.content_type import ContentType as InternalContentType
 
-from rag_core_api.models.information_piece import InformationPiece
 from rag_core_api.models.content_type import ContentType as ExternalContentType
+from rag_core_api.models.information_piece import InformationPiece
 from rag_core_api.models.key_value_pair import KeyValuePair
+from rag_core_lib.impl.data_types.content_type import ContentType as InternalContentType
 
 
 class InformationPieceMapper:

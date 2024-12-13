@@ -1,7 +1,8 @@
 """Module for the SearchRequest data type."""
 
-from pydantic import BaseModel, StrictStr
 from typing import Optional
+
+from pydantic import BaseModel, StrictStr
 
 
 class SearchRequest(BaseModel):

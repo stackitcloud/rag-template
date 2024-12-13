@@ -2,8 +2,9 @@
 
 import operator
 from typing import Annotated
-from typing_extensions import TypedDict
+
 from langchain_core.documents import Document
+from typing_extensions import TypedDict
 
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.information_piece import InformationPiece

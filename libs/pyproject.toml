@@ -38,6 +38,7 @@ exclude = """
 profile = "black"
 skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
 skip_gitignore = true
+known_local_folder = ["rag_core_lib"]
 
 [tool.pylint]
 max-line-length = 120

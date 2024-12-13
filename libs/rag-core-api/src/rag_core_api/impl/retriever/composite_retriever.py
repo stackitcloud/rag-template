@@ -1,16 +1,14 @@
 import logging
-from typing import Any, Optional
 from copy import deepcopy
+from typing import Any, Optional
 
 from langchain_core.documents import Document
-from langchain_core.runnables import (
-    RunnableConfig,
-)
-from rag_core_api.reranking.reranker import Reranker
-from rag_core_lib.impl.data_types.content_type import ContentType
+from langchain_core.runnables import RunnableConfig
 
-from rag_core_api.retriever.retriever import Retriever
 from rag_core_api.impl.retriever.retriever_quark import RetrieverQuark
+from rag_core_api.reranking.reranker import Reranker
+from rag_core_api.retriever.retriever import Retriever
+from rag_core_lib.impl.data_types.content_type import ContentType
 
 logger = logging.getLogger(__name__)
 

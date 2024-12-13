@@ -1,15 +1,13 @@
 """Module for DefaultInformationPiecesRemover class."""
 
-import logging
 import json
+import logging
 
 from fastapi import HTTPException, status
 
-from rag_core_api.models.delete_request import DeleteRequest
-
 from rag_core_api.api_endpoints.information_piece_remover import InformationPieceRemover
+from rag_core_api.models.delete_request import DeleteRequest
 from rag_core_api.vector_databases.vector_database import VectorDatabase
-
 
 logger = logging.getLogger(__name__)
 

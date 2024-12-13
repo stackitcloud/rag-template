@@ -13,16 +13,21 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
-from admin_api_lib.extractor_api_client.openapi_client.models.content_type import ContentType
-from admin_api_lib.extractor_api_client.openapi_client.models.key_value_pair import KeyValuePair
-from typing import Optional, Set
 from typing_extensions import Self
+
+from admin_api_lib.extractor_api_client.openapi_client.models.content_type import (
+    ContentType,
+)
+from admin_api_lib.extractor_api_client.openapi_client.models.key_value_pair import (
+    KeyValuePair,
+)
 
 
 class InformationPiece(BaseModel):

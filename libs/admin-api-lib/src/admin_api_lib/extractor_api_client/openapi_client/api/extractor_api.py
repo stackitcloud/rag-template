@@ -12,17 +12,25 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
-from typing import List
-from admin_api_lib.extractor_api_client.openapi_client.models.confluence_parameters import ConfluenceParameters
-from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import ExtractionRequest
-from admin_api_lib.extractor_api_client.openapi_client.models.information_piece import InformationPiece
-
-from admin_api_lib.extractor_api_client.openapi_client.api_client import ApiClient, RequestSerialized
+from admin_api_lib.extractor_api_client.openapi_client.api_client import (
+    ApiClient,
+    RequestSerialized,
+)
 from admin_api_lib.extractor_api_client.openapi_client.api_response import ApiResponse
+from admin_api_lib.extractor_api_client.openapi_client.models.confluence_parameters import (
+    ConfluenceParameters,
+)
+from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import (
+    ExtractionRequest,
+)
+from admin_api_lib.extractor_api_client.openapi_client.models.information_piece import (
+    InformationPiece,
+)
 from admin_api_lib.extractor_api_client.openapi_client.rest import RESTResponseType
 
 

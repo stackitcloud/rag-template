@@ -3,14 +3,13 @@
 # coding: utf-8
 # flake8: noqa: D105
 
-from contextlib import suppress
 import importlib
 import logging
 import pkgutil
 from asyncio import FIRST_COMPLETED, CancelledError, create_task, sleep, wait
+from contextlib import suppress
 from typing import Any, Awaitable, List  # noqa: F401
 
-import rag_core_api.impl
 from fastapi import (  # noqa: F401
     APIRouter,
     BackgroundTasks,
@@ -27,6 +26,8 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
+
+import rag_core_api.impl
 from rag_core_api.apis.rag_api_base import BaseRagApi
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse

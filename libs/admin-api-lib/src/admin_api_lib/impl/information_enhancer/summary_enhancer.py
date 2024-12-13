@@ -4,11 +4,7 @@ from abc import abstractmethod
 from typing import Optional
 
 from langchain_core.documents import Document
-from langchain_core.runnables import (
-    RunnableConfig,
-    ensure_config,
-)
-from rag_core_lib.impl.data_types.content_type import ContentType
+from langchain_core.runnables import RunnableConfig, ensure_config
 
 from admin_api_lib.information_enhancer.information_enhancer import (
     InformationEnhancer,
@@ -16,6 +12,7 @@ from admin_api_lib.information_enhancer.information_enhancer import (
     RetrieverOutput,
 )
 from admin_api_lib.summarizer.summarizer import Summarizer
+from rag_core_lib.impl.data_types.content_type import ContentType
 
 
 class SummaryEnhancer(InformationEnhancer):

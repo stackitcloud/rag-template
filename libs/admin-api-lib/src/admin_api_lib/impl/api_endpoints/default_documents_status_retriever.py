@@ -2,8 +2,12 @@
 
 import logging
 
-from admin_api_lib.api_endpoints.documents_status_retriever import DocumentsStatusRetriever
-from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_api_lib.api_endpoints.documents_status_retriever import (
+    DocumentsStatusRetriever,
+)
+from admin_api_lib.impl.key_db.file_status_key_value_store import (
+    FileStatusKeyValueStore,
+)
 from admin_api_lib.models.document_status import DocumentStatus
 
 logger = logging.getLogger(__name__)

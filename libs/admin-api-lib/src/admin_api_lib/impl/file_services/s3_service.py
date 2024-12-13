@@ -1,11 +1,12 @@
 """Class to handle I/O with S3 storage."""
 
 import logging
-from pathlib import Path
 import traceback
+from pathlib import Path
 from typing import BinaryIO
 
 import boto3
+
 from admin_api_lib.file_services.file_service import FileService
 from admin_api_lib.impl.settings.s3_settings import S3Settings
 

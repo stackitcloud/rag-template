@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from langchain_core.documents import Document
 from langchain_community.vectorstores import VectorStore
+from langchain_core.documents import Document
 
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings

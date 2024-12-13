@@ -13,7 +13,7 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./src/admin_api_lib/impl/prompt_templates/summarize_prompt.py: E501,
+  ./src/admin_api_lib/prompt_templates/summarize_prompt.py: E501,
   ./src/admin_api_lib/apis/admin_api.py: B008,WOT001,
   ./src/admin_api_lib/impl/admin_api.py: B008,
   ./src/admin_api_lib/dependency_container.py: CCE002,CCE001,
@@ -46,6 +46,7 @@ exclude = """
 profile = "black"
 skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
 skip_gitignore = true
+known_local_folder = ["admin_api_lib", "rag_core_lib"]
 
 [tool.pylint]
 max-line-length = 120

@@ -4,17 +4,17 @@ import logging
 import traceback
 from typing import Optional
 
-from langchain_core.runnables import (
-    RunnableConfig,
-    Runnable,
-    ensure_config,
-)
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from langchain_core.runnables import Runnable, RunnableConfig, ensure_config
+
+from admin_api_lib.summarizer.summarizer import (
+    Summarizer,
+    SummarizerInput,
+    SummarizerOutput,
+)
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-
-from admin_api_lib.summarizer.summarizer import SummarizerInput, SummarizerOutput, Summarizer
 
 logger = logging.getLogger(__name__)
 

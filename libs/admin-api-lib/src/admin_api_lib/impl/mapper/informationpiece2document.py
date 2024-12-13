@@ -1,17 +1,22 @@
 """Module for mapping between InformationPiece and LangchainDocument."""
 
+import json
+
 from langchain_core.documents import Document as LangchainDocument
-from rag_core_lib.impl.data_types.content_type import ContentType as RagInformationType
-from admin_api_lib.extractor_api_client.openapi_client.models.content_type import ContentType as ExtractorInformaType
+
+from admin_api_lib.extractor_api_client.openapi_client.models.content_type import (
+    ContentType as ExtractorInformaType,
+)
 from admin_api_lib.extractor_api_client.openapi_client.models.information_piece import (
     InformationPiece as ExtractorInformationPiece,
 )
-from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import KeyValuePair as RagKeyValue
 from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import (
     InformationPiece as RagInformationPiece,
 )
-
-import json
+from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import (
+    KeyValuePair as RagKeyValue,
+)
+from rag_core_lib.impl.data_types.content_type import ContentType as RagInformationType
 
 
 class InformationPiece2Document:

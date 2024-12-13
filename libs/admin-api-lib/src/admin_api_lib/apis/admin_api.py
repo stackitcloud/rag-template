@@ -5,17 +5,11 @@
 import importlib
 import pkgutil
 
+from fastapi import APIRouter, Path, Request, Response, UploadFile  # noqa: F401
+
 import admin_api_lib.impl
 from admin_api_lib.apis.admin_api_base import BaseAdminApi
 from admin_api_lib.models.document_status import DocumentStatus
-from fastapi import (  # noqa: F401
-    APIRouter,
-    Path,
-    Request,
-    Response,
-    UploadFile,
-)
-
 
 router = APIRouter()
 

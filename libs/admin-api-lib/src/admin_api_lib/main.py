@@ -3,17 +3,15 @@
 # coding: utf-8
 
 import logging.config
+
 import yaml
-
-from admin_api_lib.impl import admin_api
-from fastapi import FastAPI
-from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from dependency_injector.containers import Container
-
+from fastapi import FastAPI
 
 from admin_api_lib.apis.admin_api import router
 from admin_api_lib.dependency_container import DependencyContainer
-
+from admin_api_lib.impl import admin_api
+from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 
 with open("/config/logging.yaml", "r") as stream:
     config = yaml.safe_load(stream)

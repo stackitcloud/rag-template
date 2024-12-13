@@ -1,19 +1,19 @@
 """Module containing the XMLExtractor class."""
 
 import logging
-from pathlib import Path
-from typing import Optional, Any
 import re
+from pathlib import Path
+from typing import Any, Optional
 
-from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
-from unstructured.partition.xml import partition_xml
 from unstructured.documents.elements import Element
+from unstructured.partition.xml import partition_xml
 
 from extractor_api_lib.document_parser.information_extractor import InformationExtractor
-from extractor_api_lib.impl.types.file_type import FileType
-from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.file_services.file_service import FileService
+from extractor_api_lib.impl.types.content_type import ContentType
+from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
+from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
 
 logger = logging.getLogger(__name__)
 

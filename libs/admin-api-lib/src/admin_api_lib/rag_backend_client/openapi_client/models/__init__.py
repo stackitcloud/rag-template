@@ -14,12 +14,28 @@
 
 
 # import models into model package
-from admin_api_lib.rag_backend_client.openapi_client.models.chat_history import ChatHistory
-from admin_api_lib.rag_backend_client.openapi_client.models.chat_history_message import ChatHistoryMessage
-from admin_api_lib.rag_backend_client.openapi_client.models.chat_request import ChatRequest
-from admin_api_lib.rag_backend_client.openapi_client.models.chat_response import ChatResponse
+from admin_api_lib.rag_backend_client.openapi_client.models.chat_history import (
+    ChatHistory,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.chat_history_message import (
+    ChatHistoryMessage,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.chat_request import (
+    ChatRequest,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.chat_response import (
+    ChatResponse,
+)
 from admin_api_lib.rag_backend_client.openapi_client.models.chat_role import ChatRole
-from admin_api_lib.rag_backend_client.openapi_client.models.content_type import ContentType
-from admin_api_lib.rag_backend_client.openapi_client.models.delete_request import DeleteRequest
-from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import InformationPiece
-from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import KeyValuePair
+from admin_api_lib.rag_backend_client.openapi_client.models.content_type import (
+    ContentType,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.delete_request import (
+    DeleteRequest,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import (
+    InformationPiece,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.key_value_pair import (
+    KeyValuePair,
+)

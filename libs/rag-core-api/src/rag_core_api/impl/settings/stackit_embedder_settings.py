@@ -1,7 +1,7 @@
 """Contains settings regarding the stackit embedder."""
 
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class StackitEmbedderSettings(BaseSettings):

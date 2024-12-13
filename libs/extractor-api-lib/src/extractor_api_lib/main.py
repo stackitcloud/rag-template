@@ -3,14 +3,13 @@
 # coding: utf-8
 
 import logging.config
-import yaml
 
+import yaml
 from fastapi import FastAPI
 
-from extractor_api_lib.dependency_container import DependencyContainer
 from extractor_api_lib.apis.extractor_api import router
+from extractor_api_lib.dependency_container import DependencyContainer
 from extractor_api_lib.impl import extractor_api_impl
-
 
 with open("/config/logging.yaml", "r") as stream:
     config = yaml.safe_load(stream)

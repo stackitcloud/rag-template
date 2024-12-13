@@ -1,21 +1,22 @@
 """Module containing the MSDocsExtractor class."""
 
 import logging
-from pathlib import Path
-from typing import Optional, Any
-import pandas as pd
 from io import StringIO
-from unstructured.partition.pptx import partition_pptx
-from unstructured.partition.docx import partition_docx
-from unstructured.documents.elements import Element
+from pathlib import Path
+from typing import Any, Optional
 
+import pandas as pd
+from unstructured.documents.elements import Element
+from unstructured.partition.docx import partition_docx
+from unstructured.partition.pptx import partition_pptx
+
+from extractor_api_lib.document_parser.information_extractor import InformationExtractor
+from extractor_api_lib.file_services.file_service import FileService
+from extractor_api_lib.impl.types.content_type import ContentType
+from extractor_api_lib.impl.types.file_type import FileType
+from extractor_api_lib.impl.utils.utils import hash_datetime
 from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
 from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
-from extractor_api_lib.document_parser.information_extractor import InformationExtractor
-from extractor_api_lib.impl.types.file_type import FileType
-from extractor_api_lib.impl.types.content_type import ContentType
-from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.impl.utils.utils import hash_datetime
 
 logger = logging.getLogger(__name__)
 

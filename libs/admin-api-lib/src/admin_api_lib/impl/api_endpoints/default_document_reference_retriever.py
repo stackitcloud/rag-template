@@ -4,9 +4,12 @@ import io
 import logging
 import traceback
 
-from admin_api_lib.api_endpoints.document_reference_retriever import DocumentReferenceRetriever
-from admin_api_lib.file_services.file_service import FileService
 from fastapi import HTTPException, Response, status
+
+from admin_api_lib.api_endpoints.document_reference_retriever import (
+    DocumentReferenceRetriever,
+)
+from admin_api_lib.file_services.file_service import FileService
 
 logger = logging.getLogger(__name__)
 

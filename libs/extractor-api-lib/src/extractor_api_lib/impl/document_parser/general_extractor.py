@@ -1,10 +1,11 @@
 """Module for the GeneralExtractor class."""
 
 from pathlib import Path
+
+from extractor_api_lib.document_parser.information_extractor import InformationExtractor
+from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
-from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.document_parser.information_extractor import InformationExtractor
 
 
 class GeneralExtractor(InformationExtractor):

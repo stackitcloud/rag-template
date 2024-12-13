@@ -19,7 +19,10 @@ import ssl
 
 import urllib3
 
-from admin_api_lib.extractor_api_client.openapi_client.exceptions import ApiException, ApiValueError
+from admin_api_lib.extractor_api_client.openapi_client.exceptions import (
+    ApiException,
+    ApiValueError,
+)
 
 SUPPORTED_SOCKS_PROXIES = {"socks5", "socks5h", "socks4", "socks4a"}
 RESTResponseType = urllib3.HTTPResponse

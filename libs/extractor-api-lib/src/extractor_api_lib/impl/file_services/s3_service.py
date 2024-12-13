@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 import boto3
+
 from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.impl.settings.s3_settings import S3Settings
 

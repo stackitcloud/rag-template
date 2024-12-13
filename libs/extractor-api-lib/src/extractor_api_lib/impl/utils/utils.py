@@ -1,7 +1,7 @@
 """Module containing utility functions for the extractor API library."""
 
-from hashlib import sha256
 import datetime
+from hashlib import sha256
 
 
 def hash_datetime() -> str:

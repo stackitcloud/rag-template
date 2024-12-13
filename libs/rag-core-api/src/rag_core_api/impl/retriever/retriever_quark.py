@@ -2,17 +2,14 @@ import logging
 from typing import Optional
 
 from langchain_core.documents import Document
-from langchain_core.runnables import (
-    RunnableConfig,
-    ensure_config,
-)
-from rag_core_lib.impl.data_types.content_type import ContentType
+from langchain_core.runnables import RunnableConfig, ensure_config
 
-from rag_core_api.retriever.retriever import Retriever
 from rag_core_api.impl.retriever.no_or_empty_collection_error import (
     NoOrEmptyCollectionError,
 )
+from rag_core_api.retriever.retriever import Retriever
 from rag_core_api.vector_databases.vector_database import VectorDatabase
+from rag_core_lib.impl.data_types.content_type import ContentType
 
 logger = logging.getLogger(__name__)
 

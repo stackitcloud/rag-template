@@ -1,11 +1,12 @@
 """Module for the LangfuseTraceChain class."""
 
 from typing import Optional
-from langfuse.callback import CallbackHandler
-from langchain_core.runnables import RunnableConfig, Runnable
 
-from rag_core_lib.tracers.traced_chain import TracedGraph
+from langchain_core.runnables import Runnable, RunnableConfig
+from langfuse.callback import CallbackHandler
+
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
+from rag_core_lib.tracers.traced_chain import TracedGraph
 
 
 class LangfuseTracedGraph(TracedGraph):

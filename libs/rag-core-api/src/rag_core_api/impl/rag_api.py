@@ -1,23 +1,24 @@
 """Module for the implementation of the RagApi class."""
 
-from asyncio import run
 import logging
+from asyncio import run
 from threading import Thread
 
-from fastapi import Depends
 from dependency_injector.wiring import Provide, inject
+from fastapi import Depends
 
 from rag_core_api.api_endpoints.chat import Chat
+from rag_core_api.api_endpoints.information_piece_remover import InformationPieceRemover
+from rag_core_api.api_endpoints.information_piece_uploader import (
+    InformationPiecesUploader,
+)
+from rag_core_api.apis.rag_api_base import BaseRagApi
+from rag_core_api.dependency_container import DependencyContainer
+from rag_core_api.evaluator.evaluator import Evaluator
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.delete_request import DeleteRequest
 from rag_core_api.models.information_piece import InformationPiece
-from rag_core_api.api_endpoints.information_piece_remover import InformationPieceRemover
-from rag_core_api.api_endpoints.information_piece_uploader import InformationPiecesUploader
-from rag_core_api.dependency_container import DependencyContainer
-from rag_core_api.apis.rag_api_base import BaseRagApi
-from rag_core_api.evaluator.evaluator import Evaluator
-
 
 logger = logging.getLogger(__name__)
 

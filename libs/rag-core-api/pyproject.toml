@@ -72,10 +72,10 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./src/rag_core_api/impl/prompt_templates/answer_generation_prompt.py: E501,
+  ./src/rag_core_api/prompt_templates/answer_generation_prompt.py: E501,
   ./src/rag_core_api/apis/rag_api.py: B008,WOT001,
   ./src/rag_core_api/impl/rag_api.py: B008,
-  ./src/rag_core_api/impl/prompt_templates/*: E501,
+  ./src/rag_core_api/prompt_templates/*: E501,
   ./src/rag_core_api/dependency_container.py: CCE002,CCE001,
   ./src/rag_core_api/apis/rag_api_base.py: WOT001,
   ./tests/*: S101,
@@ -106,6 +106,7 @@ exclude = """
 profile = "black"
 skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
 skip_gitignore = true
+known_local_folder = ["rag_core_api", "rag_core_lib"]
 
 [tool.pylint]
 max-line-length = 120
@@ -113,3 +114,4 @@ max-line-length = 120
 [tool.pytest.ini_options]
 log_cli = 1
 log_cli_level = "DEBUG"
+

@@ -7,7 +7,6 @@ from langchain_core.runnables import RunnableConfig
 
 from rag_core_lib.chains.async_chain import AsyncChain
 
-
 SummarizerInput = str
 SummarizerOutput = str
 

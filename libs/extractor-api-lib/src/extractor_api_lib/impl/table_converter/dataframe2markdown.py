@@ -2,9 +2,7 @@
 
 import pandas as pd
 
-from extractor_api_lib.table_converter.dataframe_converter import (
-    DataframeConverter,
-)
+from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
 
 
 class DataFrame2Markdown(DataframeConverter):

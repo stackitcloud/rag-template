@@ -3,13 +3,11 @@
 import logging
 from typing import Optional
 
-from langfuse import Langfuse
-from langfuse.model import TextPromptClient
-from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
-
 from langchain.prompts import PromptTemplate
 from langchain_core.language_models.llms import LLM
-
+from langfuse import Langfuse
+from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
+from langfuse.model import TextPromptClient
 
 logger = logging.getLogger(__name__)
 

@@ -13,13 +13,14 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
+from typing import Any, ClassVar, Dict, List
 
 from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
+
 from rag_core_api.models.chat_history_message import ChatHistoryMessage
 
 try:

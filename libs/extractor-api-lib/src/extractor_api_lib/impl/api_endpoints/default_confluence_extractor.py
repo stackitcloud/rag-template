@@ -1,12 +1,13 @@
 """Module for the DefaultConfluenceExtractor class."""
 
+from langchain_community.document_loaders import ConfluenceLoader
+
 from extractor_api_lib.api_endpoints.confluence_extractor import ConfluenceExtractor
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
 )
 from extractor_api_lib.models.confluence_parameters import ConfluenceParameters
 from extractor_api_lib.models.information_piece import InformationPiece
-from langchain_community.document_loaders import ConfluenceLoader
 
 
 class DefaultConfluenceExtractor(ConfluenceExtractor):

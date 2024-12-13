@@ -7,16 +7,25 @@ import urllib
 from asyncio import run
 from pathlib import Path
 from threading import Thread
+
 from fastapi import HTTPException, Request, UploadFile, status
 
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.api_endpoints.document_uploader import DocumentUploader
-from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
-from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import ExtractionRequest
-from admin_api_lib.file_services.file_service import FileService
 from admin_api_lib.chunker.chunker import Chunker
-from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
-from admin_api_lib.impl.mapper.informationpiece2document import InformationPiece2Document
+from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import (
+    ExtractorApi,
+)
+from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import (
+    ExtractionRequest,
+)
+from admin_api_lib.file_services.file_service import FileService
+from admin_api_lib.impl.key_db.file_status_key_value_store import (
+    FileStatusKeyValueStore,
+)
+from admin_api_lib.impl.mapper.informationpiece2document import (
+    InformationPiece2Document,
+)
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
 from admin_api_lib.models.status import Status
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi

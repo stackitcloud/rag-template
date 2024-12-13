@@ -12,20 +12,28 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictStr
-from typing import List
-from typing_extensions import Annotated
-from admin_api_lib.rag_backend_client.openapi_client.models.chat_request import ChatRequest
-from admin_api_lib.rag_backend_client.openapi_client.models.chat_response import ChatResponse
-from admin_api_lib.rag_backend_client.openapi_client.models.delete_request import DeleteRequest
-from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import InformationPiece
-
-from admin_api_lib.rag_backend_client.openapi_client.api_client import ApiClient, RequestSerialized
+from admin_api_lib.rag_backend_client.openapi_client.api_client import (
+    ApiClient,
+    RequestSerialized,
+)
 from admin_api_lib.rag_backend_client.openapi_client.api_response import ApiResponse
+from admin_api_lib.rag_backend_client.openapi_client.models.chat_request import (
+    ChatRequest,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.chat_response import (
+    ChatResponse,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.delete_request import (
+    DeleteRequest,
+)
+from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import (
+    InformationPiece,
+)
 from admin_api_lib.rag_backend_client.openapi_client.rest import RESTResponseType
 
 

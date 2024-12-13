@@ -2,16 +2,21 @@
 
 import logging
 
+from dependency_injector.wiring import Provide, inject
+from fastapi import Depends, Request, Response, UploadFile
+
 from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
-from admin_api_lib.api_endpoints.document_reference_retriever import DocumentReferenceRetriever
+from admin_api_lib.api_endpoints.document_reference_retriever import (
+    DocumentReferenceRetriever,
+)
 from admin_api_lib.api_endpoints.document_uploader import DocumentUploader
-from admin_api_lib.api_endpoints.documents_status_retriever import DocumentsStatusRetriever
+from admin_api_lib.api_endpoints.documents_status_retriever import (
+    DocumentsStatusRetriever,
+)
 from admin_api_lib.apis.admin_api_base import BaseAdminApi
 from admin_api_lib.dependency_container import DependencyContainer
 from admin_api_lib.models.document_status import DocumentStatus
-from dependency_injector.wiring import Provide, inject
-from fastapi import Depends, Request, Response, UploadFile
 
 logger = logging.getLogger(__name__)
 

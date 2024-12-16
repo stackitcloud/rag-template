@@ -1,3 +1,5 @@
+"""Module for the VectorDatabase abstract class."""
+
 from abc import ABC, abstractmethod
 
 from langchain_community.vectorstores import VectorStore
@@ -8,6 +10,8 @@ from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 
 
 class VectorDatabase(ABC):
+    """Abstract base class for a vector database."""
+
     def __init__(
         self,
         settings: VectorDatabaseSettings,
@@ -17,9 +21,14 @@ class VectorDatabase(ABC):
         """
         Initialize the vector database.
 
-        Args:
-            settings: The settings for the vector database.
-            embedder: The embedder used to convert chunks into vector representations.
+        Parameters
+        ----------
+        settings : VectorDatabaseSettings
+            The settings for the vector database.
+        embedder : Embedder
+            The embedder used to convert chunks into vector representations.
+        vectorstore : Qdrant
+            The Qdrant vector store instance.
         """
         self._settings = settings
         self._embedder = embedder
@@ -30,57 +39,89 @@ class VectorDatabase(ABC):
     def collection_available(self) -> bool:
         """Check if the collection is available in the vector database.
 
-        Returns:
-            bool: True if the collection is available, False otherwise.
+        Returns
+        -------
+        bool
+            True if the collection is available, False otherwise.
 
-        Raises:
-            NotImplementedError: _description_
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented.
         """
         raise NotImplementedError()
 
     @abstractmethod
     async def asearch(self, query: str, search_kwargs: dict, filter_kwargs: dict) -> list[Document]:
-        """Search in a vectordatabase for points fitting the query and the search_kwargs.
+        """Search in a vector database for points fitting the query and the search_kwargs.
 
-        Args:
-            query (str): Query string
-            search_kwargs (dict): Search arguments
+        Parameters
+        ----------
+        query : str
+            The search query string.
+        search_kwargs : dict
+            Additional keyword arguments for the search.
+        filter_kwargs : dict, optional
+            Optional filter keyword arguments to refine the search.
 
-        Return:
-            List of langchain documents
+        Returns
+        -------
+        list[Document]
+            List of langchain documents.
 
-        Raises:
-            NotImplementedError: _description_
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def upload(self, documents: list[Document]):
-        """Uploads the documents to the vector database.
+        """Upload the documents to the vector database.
 
-        Args:
-            documents (list[Document]): List of documents which will be uploaded
+        Parameters
+        ----------
+        documents : list[Document]
+            List of documents which will be uploaded.
 
-        Raises:
-            NotImplementedError: _description_
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def delete(self, delete_request: dict) -> None:
-        """Deletes the documents from the vector database.
+        """
+        Delete the documents from the vector database.
 
-        Args:
-            delete_request (dict): Contains the information required for deleting the documents.
+        Parameters
+        ----------
+        delete_request : dict
+            Contains the information required for deleting the documents.
 
-        Raises:
-            NotImplementedError: This method is meant to be overridden by subclasses.
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def get_collections(self) -> list[str]:
         """
-        Get all collection names from the vector database
+        Get all collection names from the vector database.
+
+        Returns
+        -------
+        list[str]
+            List of all collection names.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented.
         """
         raise NotImplementedError()

@@ -28,7 +28,7 @@ class DefaultChat(Chat):
         chat_request: ChatRequest,
     ) -> ChatResponse:
         """
-        Method to handle asynchronous chat requests.
+        Asynchronously handles chat requests.
 
         Parameters
         ----------

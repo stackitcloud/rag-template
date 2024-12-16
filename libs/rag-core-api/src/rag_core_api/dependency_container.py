@@ -1,3 +1,5 @@
+"""Module containing the dependency injection container for managing application dependencies."""
+
 import qdrant_client
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import (  # noqa: WOT001
@@ -79,9 +81,7 @@ from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSe
 
 
 class DependencyContainer(DeclarativeContainer):
-    """
-    Dependency injection container for managing application dependencies.
-    """
+    """Dependency injection container for managing application dependencies."""
 
     class_selector_config = Configuration()
     chat_history_config = Configuration()

@@ -9,8 +9,7 @@ class LangchainCommunityEmbedder(Embedder, Embeddings):
     """A class that represents any Langchain provided Embedder."""
 
     def __init__(self, embedder: Embeddings):
-        """
-        Initializes the LangchainCommunityEmbedder with the given embedder.
+        """Initialize the LangchainCommunityEmbedder with the given embedder.
 
         Parameters
         ----------
@@ -20,8 +19,7 @@ class LangchainCommunityEmbedder(Embedder, Embeddings):
         self._embedder = embedder
 
     def get_embedder(self) -> "LangchainCommunityEmbedder":
-        """
-        Returns the embedder instance.
+        """Return the embedder instance.
 
         Returns
         -------
@@ -31,12 +29,11 @@ class LangchainCommunityEmbedder(Embedder, Embeddings):
         return self
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        """
-        Embed a list of documents into numerical vectors.
+        """Embed a list of documents into numerical vectors.
 
         Parameters
         ----------
-        texts : list of str
+        texts : list[str]
             A list of documents to be embedded.
 
         Returns

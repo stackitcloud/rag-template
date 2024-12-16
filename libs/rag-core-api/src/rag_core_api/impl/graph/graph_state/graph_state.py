@@ -11,8 +11,8 @@ from rag_core_api.models.information_piece import InformationPiece
 
 
 class AnswerGraphState(TypedDict):
-    """
-    Represents the state of the answer graph.
+    """Represent the state of the answer graph.
+
     Attributes
     ----------
     question : str

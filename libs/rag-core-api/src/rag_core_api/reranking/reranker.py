@@ -13,7 +13,8 @@ RerankerOutput = list[Document]
 class Reranker(Runnable[RerankerInput, RerankerOutput], ABC):
     """Reranker is an abstract base class that defines the interface for reranking operations.
 
-    This class inherits from Runnable and ABC, and requires the implementation of an asynchronous reranking method."""
+    This class inherits from Runnable and ABC, and requires the implementation of an asynchronous reranking method.
+    """
 
     @abstractmethod
     async def ainvoke(self, rerank_input: RerankerInput, config: Optional[RunnableConfig] = None) -> RerankerOutput:

@@ -20,8 +20,7 @@ class AlephAlphaEmbedder(Embedder, Embeddings):
         secret_provider: SecretProvider,
         size: int = 128,
     ):
-        """
-        Initializes the AlephAlphaEmbedder with the given settings, secret provider, and size.
+        """Initialize the AlephAlphaEmbedder with the given settings, secret provider, and size.
 
         Parameters
         ----------
@@ -38,7 +37,7 @@ class AlephAlphaEmbedder(Embedder, Embeddings):
 
     def get_embedder(self) -> "AlephAlphaEmbedder":
         """
-        Returns the embedder instance.
+        Return the embedder instance.
 
         Returns
         -------

@@ -1,4 +1,4 @@
-"""Contains the settings for the class types, if multiple classes can be selected"""
+"""Module that contains the settings for the class types, if multiple classes can be selected."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -10,8 +10,10 @@ class EmbedderClassTypeSettings(BaseSettings):
     """
     Settings class for embedder class types.
 
-    This class defines the configuration settings for embedder class types.
-    It inherits from the BaseSettings class
+    Attributes
+    ----------
+    embedder_type : EmbedderType
+        The type of embedder to be used (defaults EmbedderType.STACKIT).
     """
 
     class Config:

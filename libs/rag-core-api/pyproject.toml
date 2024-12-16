@@ -72,7 +72,7 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./src/rag_core_api/prompt_templates/answer_generation_prompt.py: E501,
+  ./src/rag_core_api/prompt_templates/*: E501,D100,
   ./src/rag_core_api/apis/rag_api.py: B008,WOT001,
   ./src/rag_core_api/impl/rag_api.py: B008,
   ./src/rag_core_api/prompt_templates/*: E501,

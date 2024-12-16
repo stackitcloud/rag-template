@@ -1,11 +1,24 @@
-"""Contains settings regarding the error messages."""
+"""Module that contains settings regarding the error messages."""
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
 class ErrorMessages(BaseSettings):
-    """Contains settings regarding the error messages."""
+    """
+    Contains settings regarding the error messages.
+
+    Attributes
+    ----------
+    no_documents_message : str
+        Default message when no documents are available.
+    no_or_empty_collection : str
+        Default message when no or empty collection of documents is provided.
+    harmful_question : str
+        Default message for harmful or inappropriate questions.
+    no_answer_found : str
+        Default message when no answer is found with the given context.
+    """
 
     class Config:
         """Config class for reading Fields from env."""

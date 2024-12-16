@@ -14,8 +14,7 @@ class DefaultInformationPiecesUploader(InformationPiecesUploader):
     """DefaultInformationPiecesUploader is responsible for uploading information pieces to a vector database."""
 
     def __init__(self, vector_database: VectorDatabase):
-        """
-        Initializes the DefaultInformationPiecesUploader with a vector database.
+        """Initialize the DefaultInformationPiecesUploader with a vector database.
 
         Parameters
         ----------

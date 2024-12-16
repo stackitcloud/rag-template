@@ -16,8 +16,7 @@ class DefaultInformationPiecesRemover(InformationPieceRemover):
     """DefaultInformationPiecesRemover is responsible for removing information pieces from a vector database."""
 
     def __init__(self, vector_database: VectorDatabase):
-        """
-        Initializes the DefaultInformationPiecesRemover with a vector database.
+        """Initialize the DefaultInformationPiecesRemover with a vector database.
 
         Parameters
         ----------

@@ -1,3 +1,5 @@
+"""Module for mapping between LangchainDocument and InformationPiece."""
+
 import json
 
 from langchain_core.documents import Document as LangchainDocument
@@ -9,6 +11,20 @@ from rag_core_lib.impl.data_types.content_type import ContentType as InternalCon
 
 
 class InformationPieceMapper:
+    """
+    A mapper class for converting between LangchainDocument and InformationPiece.
+
+    This class provides static methods to handle bidirectional conversion between
+    LangchainDocument and InformationPiece objects, as well as content type conversions.
+
+    Attributes
+    ----------
+    DOCUMENT_URL_KEY : str
+        Key for document URL in metadata
+    IMAGE_CONTENT_KEY : str
+        Key for base64 image content in metadata
+    """
+
     DOCUMENT_URL_KEY = "document_url"
     IMAGE_CONTENT_KEY = "base64_image"
 
@@ -16,6 +32,25 @@ class InformationPieceMapper:
     def information_piece2langchain_document(
         information_piece: InformationPiece,
     ) -> LangchainDocument:
+        """
+        Convert an InformationPiece instance to a LangchainDocument instance.
+
+        Parameters
+        ----------
+        information_piece : InformationPiece
+            The information piece to be converted.
+
+        Returns
+        -------
+        LangchainDocument
+            The converted LangchainDocument instance.
+
+        Raises
+        ------
+        ValueError
+            If the required key `DOCUMENT_URL_KEY` is not found in the metadata.
+            If the required key for content-type `IMAGE` is not found in the metadata when the type is `IMAGE`.
+        """
         metadata = {x.key: json.loads(x.value) for x in information_piece.metadata}
         if InformationPieceMapper.DOCUMENT_URL_KEY not in metadata.keys():
             raise ValueError('Required key "%s" not found in metadata.' % InformationPieceMapper.DOCUMENT_URL_KEY)
@@ -34,6 +69,20 @@ class InformationPieceMapper:
     def langchain_document2information_piece(
         langchain_document: LangchainDocument,
     ) -> InformationPiece:
+        """
+        Convert a LangchainDocument to an InformationPiece.
+
+        Parameters
+        ----------
+        langchain_document : LangchainDocument
+            The LangchainDocument instance to be converted.
+
+        Returns
+        -------
+        InformationPiece
+            The converted InformationPiece instance, with metadata converted to key-value pairs
+            and type set to the value from metadata or ExternalContentType.TEXT.value (default).
+        """
         metadata = InformationPieceMapper._dict2key_value_pair(langchain_document.metadata)
         return InformationPiece(
             page_content=langchain_document.page_content,
@@ -45,6 +94,24 @@ class InformationPieceMapper:
     def internal_content2external_content(
         internal_content_type: str,
     ) -> ExternalContentType:
+        """
+        Convert an internal content type to an external content type.
+
+        Parameters
+        ----------
+        internal_content_type : str
+            The internal content type to be converted.
+
+        Returns
+        -------
+        ExternalContentType
+            The corresponding external content type.
+
+        Raises
+        ------
+        KeyError
+            If the internal content type is not found in the lookup table.
+        """
         lookup_table = {
             InternalContentType.IMAGE.value: ExternalContentType.IMAGE,
             InternalContentType.TABLE.value: ExternalContentType.TABLE,
@@ -57,6 +124,24 @@ class InformationPieceMapper:
     def external_content2internal_content(
         external_content_type: str,
     ) -> InternalContentType:
+        """
+        Convert external content type to internal content type.
+
+        Parameters
+        ----------
+        external_content_type : str
+            The external content type as a string.
+
+        Returns
+        -------
+        InternalContentType
+            The corresponding internal content type.
+
+        Raises
+        ------
+        KeyError
+            If the external content type is not found in the lookup table.
+        """
         lookup_table = {
             ExternalContentType.IMAGE.value: InternalContentType.IMAGE,
             ExternalContentType.TABLE.value: InternalContentType.TABLE,
@@ -69,7 +154,7 @@ class InformationPieceMapper:
     def _dict2key_value_pair(metadata: dict[str, any]) -> list[KeyValuePair]:
         mapped_values = []
         for key, value in metadata.items():
-            mapped_item: KeyValuePair = ...
+            mapped_item: KeyValuePair | None = None
 
             match value:
                 case dict():

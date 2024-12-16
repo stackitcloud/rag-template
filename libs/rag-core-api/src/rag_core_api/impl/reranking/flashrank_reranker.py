@@ -10,10 +10,11 @@ from rag_core_api.reranking.reranker import Reranker, RerankerInput, RerankerOut
 
 
 class FlashrankReranker(Reranker):
-    """FlashrankReranker reranks documents
+    """FlashrankReranker reranks documents.
 
     It is a class that provides functionality to rerank documents
-    based on a given question using the FlashrankRerank algorithm."""
+    based on a given question using the FlashrankRerank algorithm.
+    """
 
     def __init__(self, reranker: FlashrankRerank, **kwargs):
         """

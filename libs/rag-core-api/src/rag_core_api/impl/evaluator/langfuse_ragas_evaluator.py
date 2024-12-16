@@ -46,6 +46,7 @@ class LangfuseRagasEvaluator(Evaluator):
     """LangfuseRagasEvaluator is responsible for evaluating questions in a dataset using various metrics.
 
     Attributes
+    ----------
     BASE_PROMPT_NAME : str
         The name of the base prompt used for answer generation.
     DATASET_INPUT_KEY : str
@@ -226,19 +227,6 @@ class LangfuseRagasEvaluator(Evaluator):
             self._link_item2generation(item, generation, experiment_name, retries)
 
     def _get_dataset(self, dataset_name: str) -> DatasetClient:
-        """
-        Retrieves a dataset with the given name from LangFuse. If Dataset is empty or does not exist,
-        a new dataset is created.
-
-        Args:
-            dataset_name (str): The name of the dataset to retrieve.
-
-        Returns:
-            dataset: The retrieved dataset.
-
-        Raises:
-            NotFoundError: If the dataset does not exist or is empty.
-        """
         dataset = None
         try:
             dataset = self._langfuse.get_dataset(dataset_name)

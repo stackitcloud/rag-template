@@ -8,9 +8,7 @@ from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedder
 
 
 class StackitEmbedder(Embedder, Embeddings):
-    """
-    A class that represents any Langchain provided Embedder.
-    """
+    """A class that represents any Langchain provided Embedder."""
 
     def __init__(self, stackit_embedder_settings: StackitEmbedderSettings):
         """
@@ -28,8 +26,7 @@ class StackitEmbedder(Embedder, Embeddings):
         self._settings = stackit_embedder_settings
 
     def get_embedder(self) -> "StackitEmbedder":
-        """
-        Returns the embedder instance.
+        """Return the embedder instance.
 
         Returns
         -------

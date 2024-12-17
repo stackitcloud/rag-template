@@ -299,14 +299,11 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
     "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
     "backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
     "backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
-    "backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
-    "backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
     "backend.secrets.ragas.openaiApikey=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
     "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
     "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
@@ -348,6 +345,24 @@ if has_confluence_config():
         "adminBackend.envs.confluenceLoader.CONFLUENCE_SPACE_KEY=%s" % os.environ["CONFLUENCE_SPACE_KEY"],
     ]
     value_override.extend(confluence_settings)
+
+if os.environ.get("STACKIT_VLLM_API_KEY", False):
+    stackit_vllm_settings = [
+        "backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
+    ]
+    value_override.extend(stackit_vllm_settings)
+
+if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
+    stackit_embedder_settings = [
+        "backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
+    ]
+    value_override.extend(stackit_embedder_settings)
+
+if os.environ.get("ALEPH_ALPHA_ALEPH_ALPHA_API_KEY", False):
+    aleph_alpha_settings = [
+        "backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
+    ]
+    value_override.extend(aleph_alpha_settings)
 
 yaml = helm(
     "./rag-infrastructure/rag",

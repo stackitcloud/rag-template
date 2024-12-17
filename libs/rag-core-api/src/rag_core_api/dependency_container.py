@@ -43,6 +43,7 @@ from rag_core_api.impl.settings.embedder_class_type_settings import (
     EmbedderClassTypeSettings,
 )
 from rag_core_api.impl.settings.error_messages import ErrorMessages
+from rag_core_api.impl.settings.ollama_embedder_settings import OllamaEmbedderSettings
 from rag_core_api.impl.settings.ragas_settings import RagasSettings
 from rag_core_api.impl.settings.reranker_settings import RerankerSettings
 from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
@@ -91,6 +92,7 @@ class DependencyContainer(DeclarativeContainer):
     retriever_settings = RetrieverSettings()
     aleph_alpha_settings = AlephAlphaSettings()
     ollama_settings = OllamaSettings()
+    ollama_embedder_settings = OllamaEmbedderSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
     error_messages = ErrorMessages()
@@ -121,7 +123,7 @@ class DependencyContainer(DeclarativeContainer):
             AlephAlphaEmbedder, aleph_alpha_settings, Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings)
         ),
         ollama=Singleton(
-            LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_settings.model_dump())
+            LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
         ),
         stackit=Singleton(StackitEmbedder, stackit_embedder_settings),
     )

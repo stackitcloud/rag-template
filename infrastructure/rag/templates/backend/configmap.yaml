@@ -124,3 +124,12 @@ data:
   {{- range $key, $value := .Values.backend.envs.chatHistory }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.ollamaEmbedderName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.ollamaEmbedder }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

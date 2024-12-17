@@ -115,6 +115,8 @@ spec:
           - configMapRef:
               name: {{ template "configmap.stackitEmbedderName" . }}
           - configMapRef:
+              name: {{ template "configmap.ollamaEmbedderName" . }}
+          - configMapRef:
               name: {{ template "configmap.chatHistoryName" . }}
           - secretRef:
               name: {{ template "secret.alephalphaName" . }}

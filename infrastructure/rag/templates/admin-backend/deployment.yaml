@@ -93,6 +93,8 @@ spec:
           - configMapRef:
               name: {{ template "configmap.ollamaName" . }}
           - configMapRef:
+              name: {{ template "configmap.ollamaEmbedderName" . }}
+          - configMapRef:
               name: {{ template "configmap.usecaseName" . }}
           - configMapRef:
               name: {{ template "configmap.s3Name" . }}

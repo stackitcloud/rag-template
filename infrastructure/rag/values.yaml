@@ -145,11 +145,14 @@ backend:
     public:
       PUBLIC_HOST: "https://api.aleph-alpha.com"
     ollama:
-      OLLAMA_MODEL: "llama3:instruct"
+      OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
       OLLAMA_BASE_URL: "http://rag-ollama:11434"
       OLLAMA_TOP_K: 0
       OLLAMA_TOP_P: 0
       OLLAMA_TEMPERATURE: 0
+    ollamaEmbedder:
+      OLLAMA_EMBEDDER_MODEL: "bge-m3"
+      OLLAMA_EMBEDDER_BASE_URL: "http://rag-ollama:11434"
     reranker:
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
@@ -460,3 +463,15 @@ minio:
   ## defaultBuckets: "my-bucket, my-second-bucket"
   ##
   defaultBuckets: "documents"
+
+ollama:
+  image:
+    tag: 0.5.1
+  ollama:
+    models:
+      pull:
+        - llama3.2:3b-instruct-fp16
+        - bge-m3
+      runs:
+        - llama3.2:3b-instruct-fp16
+        - bge-m3

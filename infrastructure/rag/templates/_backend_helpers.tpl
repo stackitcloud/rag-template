@@ -41,6 +41,10 @@
 {{- printf "%s-ollama-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "configmap.ollamaEmbedderName" -}}
+{{- printf "%s-ollama-embedder-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "configmap.ragClassTypesName" -}}
 {{- printf "%s-rag-class-types-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

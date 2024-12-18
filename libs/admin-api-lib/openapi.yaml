@@ -64,6 +64,8 @@ paths:
           description: ok
         "400":
           description: Bad request
+        "422":
+          description: If no text has been extracted from the file.
         "500":
           description: Internal server error
       tags:

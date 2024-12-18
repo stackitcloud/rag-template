@@ -11,6 +11,7 @@ import admin_api_lib.impl
 from admin_api_lib.apis.admin_api_base import BaseAdminApi
 from admin_api_lib.models.document_status import DocumentStatus
 
+
 router = APIRouter()
 
 ns_pkg = admin_api_lib.impl
@@ -129,6 +130,7 @@ async def load_confluence_post() -> None:
     responses={
         200: {"description": "ok"},
         400: {"description": "Bad request"},
+        422: {"description": "If no text has been extracted from the file."},
         500: {"description": "Internal server error"},
     },
     tags=["admin"],

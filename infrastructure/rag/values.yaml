@@ -78,8 +78,6 @@ backend:
       port: 8080
 
   secrets:
-    alephAlpha:
-      apiKey: "sk-123456"
     basicAuth: ""
     langfuse:
       publicKey: "pk-lf"
@@ -108,17 +106,6 @@ backend:
       RETRIEVER_TABLE_K_DOCUMENTS: 10
       RETRIEVER_IMAGE_THRESHOLD: 0.7
       RETRIEVER_IMAGE_K_DOCUMENTS: 10
-    alephAlpha:
-      ALEPH_ALPHA_MODEL: llama-3-70b-instruct
-      ALEPH_ALPHA_HOST: https://dev.api.schwarz/sit/uapc-public/luminous-api/v1
-      ALEPH_ALPHA_TOP_K: 0
-      ALEPH_ALPHA_TOP_P: 0
-      ALEPH_ALPHA_PRESENCE_PENALTY: 0
-      ALEPH_ALPHA_FREQUENCY_PENALTY: 0
-      ALEPH_ALPHA_MAXIMUM_TOKENS: 256
-      ALEPH_ALPHA_TEMPERATURE: 0
-      ALEPH_ALPHA_N: 1
-      ALEPH_ALPHA_BEST_OF: 2
     errorMessages:
       ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: "I'm sorry, my responses are limited. You must ask the right questions."
       ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: "No documents were provided for searching."
@@ -142,8 +129,6 @@ backend:
     stackitEmbedder:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
       STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
-    public:
-      PUBLIC_HOST: "https://api.aleph-alpha.com"
     ollama:
       OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
       OLLAMA_BASE_URL: "http://rag-ollama:11434"

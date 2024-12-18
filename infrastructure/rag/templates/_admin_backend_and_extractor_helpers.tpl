@@ -3,10 +3,6 @@
 {{- printf "%s-s3-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.alephalphaName" -}}
-{{- printf "%s-alephalpha-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "secret.langfuseName" -}}
 {{- printf "%s-langfuse-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -46,10 +42,6 @@
 
 {{- define "configmap.ragClassTypesName" -}}
 {{- printf "%s-rag-class-types-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "configmap.alephalphaName" -}}
-{{- printf "%s-alephalpha-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "configmap.ragapiName" -}}

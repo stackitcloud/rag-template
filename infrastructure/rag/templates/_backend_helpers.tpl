@@ -3,10 +3,6 @@
 {{- printf "%s-database-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.alephalphaName" -}}
-{{- printf "%s-alephalpha-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "secret.langfuseName" -}}
 {{- printf "%s-langfuse-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -55,10 +51,6 @@
 
 {{- define "configmap.retrieverName" -}}
 {{- printf "%s-retriever-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "configmap.alephalphaName" -}}
-{{- printf "%s-alephalpha-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "configmap.langfuseName" -}}

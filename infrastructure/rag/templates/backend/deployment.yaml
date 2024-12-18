@@ -99,8 +99,6 @@ spec:
           - configMapRef:
               name: {{ template "configmap.rerankerName" . }}
           - configMapRef:
-              name: {{ template "configmap.alephalphaName" . }}
-          - configMapRef:
               name: {{ template "configmap.langfuseName" . }}
           - configMapRef:
               name: {{ template "configmap.publicName" . }}
@@ -118,8 +116,6 @@ spec:
               name: {{ template "configmap.ollamaEmbedderName" . }}
           - configMapRef:
               name: {{ template "configmap.chatHistoryName" . }}
-          - secretRef:
-              name: {{ template "secret.alephalphaName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:

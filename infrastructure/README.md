@@ -181,9 +181,6 @@ backend:
     # LLM secrets. Only the secrets for the LLM you choose have to be provided
     # With the exception of the class `stackit` the embedder and llm share the secrets
     #
-    # alephalpha
-    alephAlpha:
-      apiKey: ...
     # stackit
     stackitEmbedder:
       apiKey: ...
@@ -238,8 +235,6 @@ backend:
 global:
   ssl: true
   secrets:
-    aleph_alpha:
-      aleph_alpha_aleph_alpha_api_key: ...
     basic_auth: ...
     langfuse:
       public_key: ...
@@ -254,14 +249,12 @@ global:
 
 > 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
 
-> ⓘ INFO: The sit-internal instance of AlephAlpha has proven to be not the most reliable.
-> This deployment comes with multiple options. You can change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in `./rag/values.yaml` to one of the following values:
+> ⓘ INFO: This deployment comes with multiple options. You can change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in `./rag/values.yaml` to one of the following values:
 >
-> - `alephalpha`: Uses the public AlephAlpha instance.
+> - `stackit`: Uses the STACKIT LLM as an LLM provider.
 > - `ollama`: Uses Ollama as an LLM provider.
 >
 > The same options are also available for the `backend.envs.ragClassTypes.RAG_CLASS_TYPE_EMBEDDER_TYPE`.
-> Both *AlephAlpha* options share the same settings.
 
 ### 1.6 Use Case Environment Variables
 

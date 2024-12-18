@@ -87,8 +87,6 @@ spec:
           - configMapRef:
               name: {{ template "configmap.summarizerName" . }}
           - configMapRef:
-              name: {{ template "configmap.alephalphaName" . }}
-          - configMapRef:
               name: {{ template "configmap.langfuseName" . }}
           - configMapRef:
               name: {{ template "configmap.ollamaName" . }}
@@ -108,8 +106,6 @@ spec:
               name: {{ template "configmap.confluenceLoaderName" . }}
           - configMapRef:
               name: {{ template "configmap.keyValueStoreName" . }}
-          - secretRef:
-              name: {{ template "secret.alephalphaName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:

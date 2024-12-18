@@ -19,7 +19,6 @@ pydantic = "^2.7.2"
 oauthlib = "^3.2.2"
 requests-oauthlib = "^2.0.0"
 langfuse = "^2.33.0"
-aleph-alpha-client = "^7.1.0"
 deprecated = "^1.2.14"
 openai = "^1.55.0"
 

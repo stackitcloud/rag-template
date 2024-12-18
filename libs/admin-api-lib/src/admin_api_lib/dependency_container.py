@@ -68,21 +68,8 @@ from admin_api_lib.rag_backend_client.openapi_client.configuration import (
 )
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
-from rag_core_lib.impl.llms.llm_type import LLMType
-from rag_core_lib.impl.llms.secured_llm import SecuredLLM
-from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
-from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import (
-    StaticSecretProviderAlephAlpha,
-)
-from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import (
-    StaticSecretProviderStackit,
-)
-from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
-from rag_core_lib.impl.settings.public_aleph_alpha_settings import (
-    PublicAlephAlphaSettings,
-)
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
@@ -97,27 +84,16 @@ class DependencyContainer(DeclarativeContainer):
     # Settings
     s3_settings = S3Settings()
     chunker_settings = ChunkerSettings()
-    aleph_alpha_settings = AlephAlphaSettings()
     ollama_settings = OllamaSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
     document_extractor_settings = DocumentExtractorSettings()
-    public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
     rag_api_settings = RAGAPISettings()
     key_value_store_settings = KeyValueSettings()
     summarizer_settings = SummarizerSettings()
     confluence_settings = ConfluenceSettings()
 
-    if rag_class_type_settings.llm_type == LLMType.ALEPHALPHA.value:
-        aleph_alpha_settings.host = public_aleph_alpha_settings.host
-
-    llm_secret_provider = Selector(
-        class_selector_config.llm_type,
-        alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
-        ollama=Singleton(NoSecretProvider),
-        stackit=Singleton(StaticSecretProviderStackit, stackit_vllm_settings),
-    )
     key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)
     file_service = Singleton(S3Service, s3_settings=s3_settings)
 
@@ -139,15 +115,8 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        alephalpha=Singleton(
-            SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
-        ),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
-        stackit=Singleton(
-            SecuredLLM,
-            llm=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
-            secret_provider=llm_secret_provider,
-        ),
+        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
     )
 
     summary_text_splitter = Singleton(RecursiveCharacterTextSplitter)(

@@ -7,6 +7,5 @@ from enum import StrEnum, unique
 class LLMType(StrEnum):
     """Enum class representing different types of Large Language Models (LLMs)."""
 
-    ALEPHALPHA = "alephalpha"
     OLLAMA = "ollama"
     STACKIT = "stackit"

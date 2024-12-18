@@ -2,32 +2,31 @@
 
 from typing import Callable, Type
 
-from langchain_community.llms.aleph_alpha import AlephAlpha
+from langchain_community.llms.vllm import VLLMOpenAI
 from langchain_core.language_models.llms import LLM
 from langchain_core.runnables import ConfigurableField
-
-from rag_core_lib.impl.settings.llm_settings import LLMSettings
+from pydantic_settings import BaseSettings
 
 
 def _generic_llm_factory(
     llm_class: Type[LLM],
     configurable_fields: dict[str, ConfigurableField],
-) -> Callable[[LLMSettings], LLM]:
-    def factory(settings: LLMSettings) -> LLM:
+) -> Callable[[BaseSettings], LLM]:
+    def factory(settings: BaseSettings) -> LLM:
         llm_instance = llm_class(**settings.model_dump())
         return llm_instance.configurable_fields(**configurable_fields)
 
     return factory
 
 
-def get_configurable_fields_from(settings: LLMSettings) -> dict[str, ConfigurableField]:
+def get_configurable_fields_from(settings: BaseSettings) -> dict[str, ConfigurableField]:
     """
-    Extract configurable fields from the given LLMSettings.
+    Extract configurable fields from the given settings.
 
     Parameters
     ----------
-    settings : LLMSettings
-        An instance of LLMSettings containing model fields with their respective settings.
+    settings : BaseSettings
+        An instance of BaseSettings containing model fields with their respective settings.
 
     Returns
     -------
@@ -47,16 +46,16 @@ def get_configurable_fields_from(settings: LLMSettings) -> dict[str, Configurabl
     return _fields
 
 
-def llm_provider(settings: LLMSettings, llm_cls: Type[LLM] = AlephAlpha) -> LLM:
+def llm_provider(settings: BaseSettings, llm_cls: Type[LLM] = VLLMOpenAI) -> LLM:
     """
     Create an instance of a LLM provider based on the given settings and class type.
 
     Parameters
     ----------
-    settings : LLMSettings
+    settings : BaseSettings
         Configuration settings for the LLM.
     llm_cls : Type[LLM], optional
-        The class type of the LLM to instantiate (default AlephAlpha).
+        The class type of the LLM to instantiate (default VLLMOpenAI).
 
     Returns
     -------

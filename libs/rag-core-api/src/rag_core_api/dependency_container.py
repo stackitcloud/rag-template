@@ -28,7 +28,6 @@ from rag_core_api.impl.api_endpoints.default_information_pieces_remover import (
 from rag_core_api.impl.api_endpoints.default_information_pieces_uploader import (
     DefaultInformationPiecesUploader,
 )
-from rag_core_api.impl.embeddings.alephalpha_embedder import AlephAlphaEmbedder
 from rag_core_api.impl.embeddings.langchain_community_embedder import (
     LangchainCommunityEmbedder,
 )
@@ -60,21 +59,8 @@ from rag_core_api.prompt_templates.question_rephrasing_prompt import (
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import llm_provider
-from rag_core_lib.impl.llms.llm_type import LLMType
-from rag_core_lib.impl.llms.secured_llm import SecuredLLM
-from rag_core_lib.impl.secret_provider.no_secret_provider import NoSecretProvider
-from rag_core_lib.impl.secret_provider.static_secret_provider_alephalpha import (
-    StaticSecretProviderAlephAlpha,
-)
-from rag_core_lib.impl.secret_provider.static_secret_provider_stackit import (
-    StaticSecretProviderStackit,
-)
-from rag_core_lib.impl.settings.aleph_alpha_settings import AlephAlphaSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
-from rag_core_lib.impl.settings.public_aleph_alpha_settings import (
-    PublicAlephAlphaSettings,
-)
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
@@ -90,13 +76,11 @@ class DependencyContainer(DeclarativeContainer):
     # Settings
     vector_database_settings = VectorDatabaseSettings()
     retriever_settings = RetrieverSettings()
-    aleph_alpha_settings = AlephAlphaSettings()
     ollama_settings = OllamaSettings()
     ollama_embedder_settings = OllamaEmbedderSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
     error_messages = ErrorMessages()
-    public_aleph_alpha_settings = PublicAlephAlphaSettings()
     rag_class_type_settings = RAGClassTypeSettings()
     ragas_settings = RagasSettings()
     reranker_settings = RerankerSettings()
@@ -107,21 +91,8 @@ class DependencyContainer(DeclarativeContainer):
 
     class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
 
-    if rag_class_type_settings.llm_type.value == LLMType.ALEPHALPHA.value:
-        aleph_alpha_settings.host = public_aleph_alpha_settings.host
-
-    llm_secret_provider = Selector(
-        class_selector_config.llm_type,
-        alephalpha=Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings),
-        ollama=Singleton(NoSecretProvider),
-        stackit=Singleton(StaticSecretProviderStackit, stackit_vllm_settings),
-    )
-
     embedder = Selector(
         class_selector_config.embedder_type,
-        alephalpha=Singleton(
-            AlephAlphaEmbedder, aleph_alpha_settings, Singleton(StaticSecretProviderAlephAlpha, aleph_alpha_settings)
-        ),
         ollama=Singleton(
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
         ),
@@ -192,15 +163,8 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        alephalpha=Singleton(
-            SecuredLLM, llm=Singleton(llm_provider, aleph_alpha_settings), secret_provider=llm_secret_provider
-        ),
         ollama=Singleton(llm_provider, ollama_settings, Ollama),
-        stackit=Singleton(
-            SecuredLLM,
-            llm=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
-            secret_provider=llm_secret_provider,
-        ),
+        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
     )
 
     prompt = ANSWER_GENERATION_PROMPT
@@ -273,11 +237,6 @@ class DependencyContainer(DeclarativeContainer):
                 ChatOllama,
                 model=ragas_settings.model if ragas_settings.model else ollama_settings.model,
                 base_url=ollama_settings.base_url,
-            ),
-            alephalpha=Singleton(
-                lambda: exec(  # noqa: S102
-                    'raise NotImplementedError("Alephalpha is currently not supported for evaluation")'
-                )
             ),
         )
     )

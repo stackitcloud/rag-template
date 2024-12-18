@@ -55,8 +55,8 @@ class LLMSettings(BaseSettings):
 
     # concerning authentication
     #   when utilizing the public API
-    model: str = Field(default="luminous-supreme-control-20240215")
-    host: str = Field(default="https://api.aleph-alpha.com")
+    model: str = Field()
+    host: str = Field()
 
     top_k: int = Field(default=0, title="LLM Top K")
     top_p: float = Field(default=0, title="LLM Top P")

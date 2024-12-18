@@ -358,11 +358,6 @@ if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
     ]
     value_override.extend(stackit_embedder_settings)
 
-if os.environ.get("ALEPH_ALPHA_ALEPH_ALPHA_API_KEY", False):
-    aleph_alpha_settings = [
-        "backend.secrets.alephAlpha.apiKey=%s" % os.environ["ALEPH_ALPHA_ALEPH_ALPHA_API_KEY"],
-    ]
-    value_override.extend(aleph_alpha_settings)
 
 yaml = helm(
     "./rag-infrastructure/rag",

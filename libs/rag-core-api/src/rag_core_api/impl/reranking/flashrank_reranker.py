@@ -55,7 +55,7 @@ class FlashrankReranker(Reranker):
         all_documents: list[Document],
         relevant_document: Document,
     ) -> Document:
-        # TODO: This is only needed because langchains wrapper around FlashRerank
+        # NOTE: This is only needed because langchains wrapper around FlashRerank
         # is destructive in terms of metadata. This could be fixed in their wrapper implementation.
         for doc in all_documents:
             if doc.page_content == relevant_document.page_content:

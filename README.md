@@ -372,8 +372,5 @@ The linting-settings can be changed in the `rag-backend/pyproject.toml` file und
 ## 4. Contribution Guidelines
 
 This use case example contains 2 git submodules, the `rag-infrastructure` and the `rag-core-library`.
-In order to contribute you can simply create a new branch, make changes and create a PR.
+In order to contribute please consult the [CONTRIBUTING.md](./CONTRIBUTING.md).
 
- > 📝 Before creating a pull request please run `black .`, as well as `flake8 .` in every package and ensure there are no complaints by these tools.
-
-### TODO: add contribution guideline

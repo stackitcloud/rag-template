@@ -95,7 +95,8 @@ backend:
       STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
     database:
       VECTOR_DB_COLLECTION_NAME: rag-db
-      VECTOR_DB_URL: http://rag-qdrant:6333
+      VECTOR_DB_LOCATION: http://rag-qdrant:6333
+      VECTOR_DB_VALIDATE_COLLECTION_CONFIG: false
     retriever:
       RETRIEVER_THRESHOLD: 0.3
       RETRIEVER_K_DOCUMENTS: 10
@@ -138,6 +139,8 @@ backend:
     ollamaEmbedder:
       OLLAMA_EMBEDDER_MODEL: "bge-m3"
       OLLAMA_EMBEDDER_BASE_URL: "http://rag-ollama:11434"
+    fakeEmbedder:
+      FAKE_EMBEDDER_SIZE: 386
     reranker:
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
@@ -460,3 +463,7 @@ ollama:
       runs:
         - llama3.2:3b-instruct-fp16
         - bge-m3
+
+qdrant:
+  image:
+    tag: v1.12.6

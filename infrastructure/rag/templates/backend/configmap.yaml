@@ -110,6 +110,15 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: {{ template "configmap.fakeEmbedderName" . }}
+data:
+  {{- range $key, $value := .Values.backend.envs.fakeEmbedder }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: {{ template "configmap.chatHistoryName" . }}
 data:
   {{- range $key, $value := .Values.backend.envs.chatHistory }}

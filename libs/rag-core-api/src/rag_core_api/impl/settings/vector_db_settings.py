@@ -1,6 +1,7 @@
 """Module that contains settings regarding the vector db."""
 
 from pydantic_settings import BaseSettings
+from pydantic import Field
 
 
 class VectorDatabaseSettings(BaseSettings):
@@ -21,5 +22,8 @@ class VectorDatabaseSettings(BaseSettings):
         env_prefix = "VECTOR_DB_"
         case_sensitive = False
 
-    collection_name: str
-    url: str
+    collection_name: str = Field()
+    location: str = Field()
+    validate_collection_config: bool = Field(
+        default=False
+    )  # if true and collection does not exist, an error will be raised

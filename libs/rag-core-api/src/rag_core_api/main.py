@@ -14,12 +14,13 @@ import logging.config
 import yaml
 from dependency_injector.containers import Container
 from fastapi import FastAPI
+from rag_core_lib.impl.settings.logging_settings import LoggingSettings
 
 from rag_core_api.apis.rag_api import router
 from rag_core_api.dependency_container import DependencyContainer
 from rag_core_api.impl import rag_api
 
-with open("/config/logging.yaml", "r") as stream:
+with open(LoggingSettings().directory, "r") as stream:
     config = yaml.safe_load(stream)
 
 logging.config.dictConfig(config)

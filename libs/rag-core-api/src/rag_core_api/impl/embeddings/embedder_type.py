@@ -9,3 +9,4 @@ class EmbedderType(StrEnum):
 
     OLLAMA = "ollama"
     STACKIT = "stackit"
+    FAKE = "fake"

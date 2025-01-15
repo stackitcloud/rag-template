@@ -1,13 +1,17 @@
 """Module containing the QdrantDatabase class."""
+import logging
 
 from langchain_core.documents import Document
-from langchain_qdrant import Qdrant
+from langchain_qdrant import QdrantVectorStore
 from qdrant_client.http import models
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.vector_databases.vector_database import VectorDatabase
+
+
+logger = logging.getLogger(__name__)
 
 
 class QdrantDatabase(VectorDatabase):
@@ -21,7 +25,7 @@ class QdrantDatabase(VectorDatabase):
         self,
         settings: VectorDatabaseSettings,
         embedder: Embedder,
-        vectorstore: Qdrant,
+        vectorstore: QdrantVectorStore,
     ):
         """
         Initialize the Qdrant database.
@@ -61,7 +65,19 @@ class QdrantDatabase(VectorDatabase):
 
     @staticmethod
     def _search_kwargs_builder(search_kwargs: dict, filter_kwargs: dict):
-        return search_kwargs | {"filter": filter_kwargs}
+        """Build search kwargs with proper Qdrant filter format."""
+        if not filter_kwargs:
+            return search_kwargs
+
+        # Convert dict filter to Qdrant filter format
+        qdrant_filter = models.Filter(
+            must=[
+                models.FieldCondition(key="metadata." + key, match=models.MatchValue(value=value))
+                for key, value in filter_kwargs.items()
+            ]
+        )
+
+        return {**search_kwargs, "filter": qdrant_filter}
 
     async def asearch(self, query: str, search_kwargs: dict, filter_kwargs: dict | None = None) -> list[Document]:
         """
@@ -81,19 +97,21 @@ class QdrantDatabase(VectorDatabase):
         list[Document]
             A list of documents that match the search query and filters, including related documents.
         """
-        retriever = self._vectorstore.as_retriever(
-            query=query,
-            search_kwargs=(
-                search_kwargs
-                if not filter_kwargs
-                else self._search_kwargs_builder(search_kwargs=search_kwargs, filter_kwargs=filter_kwargs)
-            ),
-        )
-        results = await retriever.ainvoke(query)
-        related_results = []
-        for res in results:
-            related_results += self._get_related(res.metadata["related"])
-        return results + related_results
+        try:
+            search_params = self._search_kwargs_builder(search_kwargs=search_kwargs, filter_kwargs=filter_kwargs)
+
+            retriever = self._vectorstore.as_retriever(query=query, search_kwargs=search_params)
+
+            results = await retriever.ainvoke(query)
+            related_results = []
+
+            for res in results:
+                related_results += self._get_related(res.metadata["related"])
+            return results + related_results
+
+        except Exception as e:
+            logger.error(f"Search failed: {str(e)}")
+            raise
 
     def get_specific_document(self, document_id: str) -> list[Document]:
         """
@@ -147,11 +165,11 @@ class QdrantDatabase(VectorDatabase):
         -------
         None
         """
-        Qdrant.from_documents(
+        self._vectorstore = self._vectorstore.from_documents(
             documents,
             self._embedder.get_embedder(),
             collection_name=self._settings.collection_name,
-            url=self._settings.url,
+            location=self._settings.location,
         )
 
     def delete(self, delete_request: dict) -> None:

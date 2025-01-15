@@ -27,6 +27,7 @@ openai = "^1.42.0"
 langgraph = "^0.2.23"
 pillow = "^11.0.0"
 langchain-ollama = "^0.2.0"
+pytest-asyncio = "^0.25.0"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"
@@ -78,7 +79,8 @@ per-file-ignores = """
   ./src/rag_core_api/prompt_templates/*: E501,
   ./src/rag_core_api/dependency_container.py: CCE002,CCE001,
   ./src/rag_core_api/apis/rag_api_base.py: WOT001,
-  ./tests/*: S101,
+  ./tests/rag_api_test.py: E402,S101,S105,I252,D409,
+  ./tests/*: S101,S105,I252,D409,
 """
 
 [tool.black]
@@ -114,4 +116,6 @@ max-line-length = 120
 [tool.pytest.ini_options]
 log_cli = 1
 log_cli_level = "DEBUG"
+pythonpath = "src"
+testpaths = "src/tests"
 

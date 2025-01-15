@@ -100,7 +100,7 @@ class CompositeRetriever(Retriever):
                 continue
             return_val.append(result)
 
-        if self._reranker:
+        if self._reranker and results:
             return_val = await self._reranker.ainvoke((return_val, retriever_input), config=config)
 
         return return_val

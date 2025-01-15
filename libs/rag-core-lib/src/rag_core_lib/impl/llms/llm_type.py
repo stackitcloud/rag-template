@@ -9,3 +9,4 @@ class LLMType(StrEnum):
 
     OLLAMA = "ollama"
     STACKIT = "stackit"
+    FAKE = "fake"

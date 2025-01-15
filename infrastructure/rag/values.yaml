@@ -112,6 +112,7 @@ backend:
       ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: "No documents were provided for searching."
       ERROR_MESSAGES_HARMFUL_QUESTION: "I'm sorry, but harmful requests cannot be processed."
       ERROR_MESSAGES_NO_ANSWER_FOUND: "I'm sorry, I couldn't find an answer with the context provided."
+      ERROR_MESSAGE_EMPTY_MESSAGE: "I'm sorry, but I can't answer an empty question."
     langfuse:
       LANGFUSE_DATASET_NAME: "rag_test_ds"
       LANGFUSE_DATASET_FILENAME: "/app/test_data.json"

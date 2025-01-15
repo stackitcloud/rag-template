@@ -18,6 +18,8 @@ class ErrorMessages(BaseSettings):
         Default message for harmful or inappropriate questions.
     no_answer_found : str
         Default message when no answer is found with the given context.
+    empty_message : str
+        Default message when an empty question is provided.
     """
 
     class Config:
@@ -40,3 +42,5 @@ class ErrorMessages(BaseSettings):
     no_answer_found: str = Field(
         default="Es tut mir leid, mit dem mir bereitgestellten Kontext konnte ich keine Antwort finden."
     )
+
+    empty_message: str = Field(default="Es tut mir leid, ich kann keine leere Frage beantworten.")

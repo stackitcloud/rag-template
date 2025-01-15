@@ -126,6 +126,13 @@ class DefaultChatGraph(GraphBase):
         - The method processes the chat history based on the settings defined in `_chat_history_settings`.
         - The history is formatted and included in the `AnswerGraphState`.
         """
+        if not graph_input.message.strip():
+            return ChatResponse(
+                answer=self._error_messages.empty_message,
+                citations=[],
+                finish_reason=self._error_messages.empty_message,
+            )
+
         history_of_interest = []
         if graph_input.history and graph_input.history.messages:
             history_of_interest = graph_input.history.messages[-self._chat_history_settings.limit :]

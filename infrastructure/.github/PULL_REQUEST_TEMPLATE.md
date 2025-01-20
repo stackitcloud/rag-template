@@ -12,4 +12,4 @@ Thank you for contributing to the RAG Infrastructure!
 
 Additional guidelines:
 
-If no one reviews your PR within a few days, please @-mention aklos.
+If no one reviews your PR within a few days, please @-mention a-klos.

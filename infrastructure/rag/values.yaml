@@ -18,7 +18,7 @@ backend:
     repository: ghcr.io/stackitcloud
     name: rag-backend
     pullPolicy: Always
-    tag: "dev-ba20c7b"
+    tag: "v1.0.0"
 
   command:
   - "poetry"
@@ -156,7 +156,7 @@ frontend:
     repository: ghcr.io/stackitcloud
     name: frontend
     pullPolicy: Always
-    tag: "dev-e12f8cc"
+    tag: "v1.0.0"
 
   service:
     type: ClusterIP
@@ -197,7 +197,7 @@ adminBackend:
     repository: ghcr.io/stackitcloud
     name: admin-backend
     pullPolicy: Always
-    tag: "443892"
+    tag: "v1.0.0"
 
   command:
   - "poetry"
@@ -283,7 +283,7 @@ extractor:
     repository: ghcr.io/stackitcloud
     name: document-extractor
     pullPolicy: Always
-    tag: "443892"
+    tag: "v1.0.0"
 
   command:
   - "poetry"
@@ -331,7 +331,7 @@ adminFrontend:
     repository: ghcr.io/stackitcloud
     name: admin-frontend
     pullPolicy: Always
-    tag: "443892"
+    tag: "v1.0.0"
 
   service:
     type: ClusterIP

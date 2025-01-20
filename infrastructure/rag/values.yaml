@@ -15,7 +15,7 @@ backend:
   replicaCount: 1
 
   image:
-    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    repository: ghcr.io/stackitcloud
     name: rag-backend
     pullPolicy: Always
     tag: "dev-ba20c7b"
@@ -153,7 +153,7 @@ frontend:
   name: frontend
   replicaCount: 1
   image:
-    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    repository: ghcr.io/stackitcloud
     name: frontend
     pullPolicy: Always
     tag: "dev-e12f8cc"
@@ -194,7 +194,7 @@ adminBackend:
   name: admin-backend
 
   image:
-    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    repository: ghcr.io/stackitcloud
     name: admin-backend
     pullPolicy: Always
     tag: "443892"
@@ -280,7 +280,7 @@ extractor:
   replicaCount: 1
   name: extractor
   image:
-    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    repository: ghcr.io/stackitcloud
     name: document-extractor
     pullPolicy: Always
     tag: "443892"
@@ -328,7 +328,7 @@ adminFrontend:
   name: admin-frontend
   replicaCount: 1
   image:
-    repository: schwarzit-xx-sit-rag-template-sit-stackit-docker-local.jfrog.io
+    repository: ghcr.io/stackitcloud
     name: admin-frontend
     pullPolicy: Always
     tag: "443892"

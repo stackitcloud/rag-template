@@ -30,24 +30,24 @@ This repository contains the following components:
 - [*document-extractor*](#113-document-extractor): Extracts content from documents and Confluence spaces.
 - *frontend*: Frontend for both, chat and admin APIs.
 - *rag-infrastructure*: Contains the helm-chart and other files related to infrastructure and deployment. Please consult [this README](./rag-infrastructure/README.md) for further information.
-- *rag-core-library*: Contains the API-libraries that are used to construct the backend-services in this repository. For further information, please consult [this README](./rag-core-library/README.md).
+- *rag-core-library*: Contains the API-libraries that are used to construct the backend-services in this repository. For further information, please consult [this README](https://github.com/stackitcloud/rag-core-library/README.md).
 
 #### 1.1.1 Rag backend
 The backend is the main component of the RAG. It handles all connections to the vector database, as well as chatting.
 
-All components are provided by the *rag-core-api*. For further information on endpoints and requirements, please consult [this README](./rag-core-library/README.md#1-rag-core-api).
+All components are provided by the *rag-core-api*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/README.md#1-rag-core-api).
 
 #### 1.1.2 Admin backend
 
 The Admin backend is a component that is used to manage user provided documents and confluence spaces. It communicates with the document-extractor to extract the content from the documents and confluence spaces. Besides, it communicates with the rag-backend to store the document chunks into the vector database. For storing the documents, it uses the S3 object storage. It also acts as interface to provide the current status of the documents and confluence spaces in the RAG.
 
-All components are provided by the *admin-api-lib*. For further information on endpoints and requirements, please consult [this README](./rag-core-library/README.md#2-admin-api-lib).
+All components are provided by the *admin-api-lib*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/README.md#2-admin-api-lib).
 
 #### 1.1.3 Document extractor
 
 The Document extractor is a component that is used to extract the content from the documents and confluence spaces.
 
-All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [this README](./rag-core-library/README.md#3-extractor-api-lib).
+All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/README.md#3-extractor-api-lib).
 
 ### 1.2 Requirements
 
@@ -74,7 +74,7 @@ This example of the rag-template includes a WebUI for document-management, as we
 After following the setup instruction for either the [local installation](#-local-setup-instructions) or the [installation on a server](#-Deployment-to-server) the WebUI is accessible via the configured ingress.
 After uploading a file in the document-management WebUI you can start asking question about your document in the chat WebUI.
 
-For a complete documentation of the available REST-APIs, please consult [the README of the rag-core-library](./rag-core-library/README.md).
+For a complete documentation of the available REST-APIs, please consult [the README of the rag-core-library](https://github.com/stackitcloud/rag-core-library/README.md).
 
 If you want to replace some dependencies with you own dependencies, see the rag-backend folder, especially the [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py).
 

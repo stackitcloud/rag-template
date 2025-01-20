@@ -25,7 +25,7 @@ Each of the packages defines the replaceable parts([1.3 Replaceable Parts](#13-r
 
 This repository also contains a `Dockerfile` that is used to ensure proper linting and testing of the packages.
 
-For an example on how to use the packages, please consult the [use case example repository](TODO: add github link)
+For an example on how to use the packages, please consult the [use case example repository](https://github.com/stackitcloud/rag-template)
 
 ## 1. RAG Core API
 

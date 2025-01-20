@@ -1,0 +1,60 @@
+name: Lint and test workflow
+
+on:
+    pull_request:
+      branches:
+      - main
+    workflow_dispatch:
+
+jobs:
+  SanitizeBranchName:
+    runs-on: ubuntu-latest
+    outputs:
+      sanitized_ref: ${{ steps.sanitize.outputs.sanitized_ref }}
+    steps:
+      - name: Sanitize Branch Name
+        id: sanitize
+        run: |
+          SANITIZED_REF=$(echo "${GITHUB_HEAD_REF}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-')
+          SANITIZED_REF=${SANITIZED_REF#-}
+          SANITIZED_REF=${SANITIZED_REF%-}
+          SANITIZED_REF=${SANITIZED_REF:0:63}
+          if [[ -z "$SANITIZED_REF" || "$SANITIZED_REF" =~ ^-+$ ]]; then
+            SANITIZED_REF="tmp-branch"
+          fi
+          echo "::set-output name=sanitized_ref::${SANITIZED_REF}"
+        shell: bash
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+
+  BuildAndLint:
+    name: Build and Lint
+    runs-on: ubuntu-latest
+    needs: [SanitizeBranchName]
+    strategy:
+        fail-fast: true
+        matrix:
+            service: [ "admin-backend", "document-extractor", "rag-backend"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: stackitcloud/rag-template
+          submodules: 'true'
+      - name: Set Docker Image Name
+        run: |
+          echo "IMAGE_NAME=${{ matrix.service }}:${{ needs.SanitizeBranchName.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build lint image
+        run: |
+          docker build -t $IMAGE_NAME --build-arg dev=1 --build-arg TAG=debug -f ${{ matrix.service }}/Dockerfile .
+
+      - name: Generate lint report
+        run: |
+          docker run --rm --entrypoint make "$IMAGE_NAME" lint
+
+      - name: Run tests
+        run: |
+          docker run --rm --entrypoint make "$IMAGE_NAME" test

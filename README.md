@@ -29,7 +29,7 @@ This repository contains the following components:
 - [*admin-backend*](#112-admin-backend): Manages user documents and confluence spaces, interacts with document-extractor and rag-backend.
 - [*document-extractor*](#113-document-extractor): Extracts content from documents and Confluence spaces.
 - *frontend*: Frontend for both, chat and admin APIs.
-- *rag-infrastructure*: Contains the helm-chart and other files related to infrastructure and deployment. Please consult [this README](./rag-infrastructure/README.md) for further information.
+- *rag-infrastructure*: Contains the helm-chart and other files related to infrastructure and deployment. Please consult [this README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md) for further information.
 - *rag-core-library*: Contains the API-libraries that are used to construct the backend-services in this repository. For further information, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md).
 
 #### 1.1.1 Rag backend
@@ -145,7 +145,7 @@ In the following, the *k3d* cluster setup and the setup inside the *k3d* will be
 
 #### 1.4.1 *k3d* cluster setup
 
-For a detailed explanation of the *k3d* setup, please consult the [rag-infrastructure README](./rag-infrastructure/README.md#211-k3d-cluster-setup).
+For a detailed explanation of the *k3d* setup, please consult the [rag-infrastructure README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#211-k3d-cluster-setup).
 
 #### 1.4.2 Tilt deployment
 
@@ -294,7 +294,7 @@ tilt down
 
 #### 1.4.3 Access via ingress
 
-A detailed explanation of, how to access a service via ingress, can be found in the [rag-infrastructure README](./rag-infrastructure/README.md#213-access-via-ingress).
+A detailed explanation of, how to access a service via ingress, can be found in the [rag-infrastructure README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#213-access-via-ingress).
 
 
 
@@ -358,11 +358,11 @@ resource "stackit_objectstorage_bucket" "docs" {
 
 For further information please consult the [STACKIT Terrraform Provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
 
-Further requirements for the server can be found [here](./rag-infrastructure/README.md#22-production-setup-instructions).
+Further requirements for the server can be found [here](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#22-production-setup-instructions).
 
 ### 2.2 Langfuse
 
-A detailed description regarding the configuration of Langfuse can be found [here](./rag-infrastructure/README.md#11-langfuse).
+A detailed description regarding the configuration of Langfuse can be found [here](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#11-langfuse).
 
 
 ## 3. Build and Test

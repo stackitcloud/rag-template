@@ -16,6 +16,6 @@ Additional Guidelines:
 
 - Ensure your code follows established coding conventions
 - Include relevant tests and documentation updates.
-- If no one reviews your PR within a few days, please @-mention aklos.
+- If no one reviews your PR within a few days, please @-mention a-klos.
 
 Thank you for your contribution!

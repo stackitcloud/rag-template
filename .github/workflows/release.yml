@@ -1,4 +1,4 @@
-name: semantic-release-pipeline
+name: Semantic release workflow
 on:
   push:
     branches:

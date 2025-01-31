@@ -1,0 +1,48 @@
+name: semantic-release
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  semantic-release:
+    name: semantic-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.1"
+
+      - name: create-archives
+        run: |
+          TEMP_DIR=$(mktemp -d)
+          tar --warning=no-file-changed \
+              --exclude=".git" \
+              --exclude="/.git" \
+              --exclude="node_modules" \
+              -czf "$TEMP_DIR/action-main-release-trials.tar.gz" .
+          zip -r "$TEMP_DIR/action-main-release-trials.zip" . \
+              -x ".git" "node_modules"
+          mv "$TEMP_DIR"/*.{tar.gz,zip} .
+          rm -rf "$TEMP_DIR"
+
+      - name: install-dependencies
+        run: npm ci
+
+      - name: verify-dependencies-integrity
+        run: npm audit signatures
+
+      - name: create-semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

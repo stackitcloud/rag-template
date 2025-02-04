@@ -23,7 +23,6 @@ jobs:
             SANITIZED_REF="tmp-branch"
           fi
           echo "::set-output name=sanitized_ref::${SANITIZED_REF}"
-          echo "Sanitized branch name: $SANITIZED_REF"
         shell: bash
         env:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
@@ -70,7 +69,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: stackitcloud/rag-template
-          submodules: false
+          submodules: true
 
       - name: Set Docker Image Name
         run: |

@@ -1,4 +1,4 @@
-name: Lint and test workflow
+name: lint-and-test
 
 on:
     pull_request:
@@ -7,12 +7,12 @@ on:
     workflow_dispatch:
 
 jobs:
-  SanitizeBranchName:
+  sanitize-branch-name:
     runs-on: ubuntu-latest
     outputs:
       sanitized_ref: ${{ steps.sanitize.outputs.sanitized_ref }}
     steps:
-      - name: Sanitize Branch Name
+      - name: sanitize-branch-name
         id: sanitize
         run: |
           SANITIZED_REF=$(echo "${GITHUB_HEAD_REF}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-')
@@ -27,10 +27,38 @@ jobs:
         env:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
 
-  BuildAndLint:
+  update-submodules:
+    name: update-submodules
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          submodules: false
+
+      - name: update-submodules
+        id: update-submodules
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule sync --recursive
+          git submodule update --init --remote --recursive
+
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Submodules have new commits. Committing and pushing..."
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore: update submodules to latest main"
+            git push
+          else
+            echo "No submodule changes."
+          fi
+
+  build-and-lint:
     name: Build and Lint
     runs-on: ubuntu-latest
-    needs: [SanitizeBranchName]
+    needs: [sanitize-branch-name, update-submodules]
     strategy:
         fail-fast: true
         matrix:
@@ -39,12 +67,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: stackitcloud/rag-template
-          submodules: 'true'
+          ref: ${{ github.event.pull_request.head.ref }}
+          submodules: true
+
       - name: Set Docker Image Name
         run: |
-          echo "IMAGE_NAME=${{ matrix.service }}:${{ needs.SanitizeBranchName.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${{ matrix.service }}:${{ needs.sanitize-branch-name.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
         shell: bash
 
       - name: Build lint image

@@ -23,6 +23,7 @@ jobs:
             SANITIZED_REF="tmp-branch"
           fi
           echo "::set-output name=sanitized_ref::${SANITIZED_REF}"
+          echo "Sanitized branch name: $SANITIZED_REF"
         shell: bash
         env:
           GITHUB_HEAD_REF: ${{ github.head_ref }}

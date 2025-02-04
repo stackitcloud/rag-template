@@ -74,7 +74,7 @@ jobs:
 
       - name: Set Docker Image Name
         run: |
-          echo "IMAGE_NAME=${{ matrix.service }}:${{ needs.SanitizeBranchName.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${{ matrix.service }}:${{ needs.sanitize-branch-name.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
         shell: bash
 
       - name: Build lint image

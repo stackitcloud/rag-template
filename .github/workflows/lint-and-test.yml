@@ -70,6 +70,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: stackitcloud/rag-template
           submodules: true
+      - name: Check submodules commit
+        run: |
+          echo "Checked out submodules commit(s):"
+          git submodule status --recursive
 
       - name: Set Docker Image Name
         run: |

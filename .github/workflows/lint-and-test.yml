@@ -54,7 +54,7 @@ jobs:
           else
             echo "No submodule changes."
           fi
-  # TODO: check if checkout make a checkout of the latest commit of the PR
+
   build-and-lint:
     name: Build and Lint
     runs-on: ubuntu-latest
@@ -69,10 +69,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           submodules: true
-      - name: Check submodules commit
-        run: |
-          echo "Checked out submodules commit(s):"
-          git submodule status --recursive
 
       - name: Set Docker Image Name
         run: |

@@ -1,7 +1,26 @@
 # RAG Template
 
-This is a very basic example of how to use the RAG-API libraries.
-It also gives an example of how to replace modules with your own implementations, see [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py).
+Welcome to the STACKIT RAG Template! This is a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py)).
+
+<!-- The RAG (Retrieve, Augment, Generate) template is here to simplify your journey into developing and deploying AI-driven applications in a kubernetes cluster. It provides a comprehensive guide, including local setup as well as production deployment instructions. Whether you're a developer, data scientist, or researcher, this template offers everything you need to build and deploy your own RAG solution.  -->
+
+
+## Features 🚀
+
+**Document Management**: Supports PDFs, DOCX, PPTX, XML, and Confluence documents.
+
+**AI Integration**: Multiple LLM and embedder providers for flexibility.
+
+**Tracing & Evaluation**: Tools for monitoring and assessing system performance.
+
+**Frontends**: User-friendly interfaces for easy interaction.
+
+**Security**: Basic authentication for secure access.
+
+**Deployment**: Options for both local and production
+environments.
+
+The template supports multiple LLM (Large Language Model) providers, such as STACKIT and Ollama, giving you flexibility in choosing the best fit for your project. It also integrates with Langfuse for enhanced monitoring and analytics, and uses S3 object storage for document management. 📁
 
 ## Table of Contents
 

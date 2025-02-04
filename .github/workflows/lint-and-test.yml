@@ -67,8 +67,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.ref }}
           submodules: true
       - name: Check submodules commit
         run: |

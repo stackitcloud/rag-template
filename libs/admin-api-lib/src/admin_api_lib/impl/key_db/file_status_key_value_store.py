@@ -26,7 +26,7 @@ class FileStatusKeyValueStore:
         The key used for the file status in the JSON string.
     """
 
-    STORAGE_KEY = "files"
+    STORAGE_KEY = "stackit-rag-template-files"
     INNER_FILENAME_KEY = "filename"
     INNER_STATUS_KEY = "status"
 
@@ -76,6 +76,7 @@ class FileStatusKeyValueStore:
         None
         """
         self.remove(file_name)
+
         self._redis.sadd(self.STORAGE_KEY, FileStatusKeyValueStore._to_str(file_name, file_status))
 
     def remove(self, file_name: str) -> None:

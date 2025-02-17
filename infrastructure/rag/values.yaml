@@ -116,7 +116,7 @@ backend:
     langfuse:
       LANGFUSE_DATASET_NAME: "rag_test_ds"
       LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
-      LANGFUSE_HOST: "http://rag-langfuse:3000" #NOTE: http protocol needs to be defined!
+      LANGFUSE_HOST: "http://rag-langfuse-web:3000" #NOTE: http protocol needs to be defined!
     ragClassTypes:
       RAG_CLASS_TYPE_LLM_TYPE: "stackit"
     ragas:
@@ -395,10 +395,14 @@ shared:
 
 
 langfuse:
+  minio:
+    deploy: false
+  valkey:
+    deploy: false #<--- keydb is used instead of valkey
   image:
     repository: ghcr.io/langfuse/langfuse
     pullPolicy: Always
-    tag: "2.93.0"
+    tag: "3.27.2"
   postgresql:
     deploy: true
     auth:
@@ -425,6 +429,33 @@ langfuse:
       value: ""
     - name: LANGFUSE_INIT_USER_PASSWORD
       value: ""
+    # REDIS
+    - name: "REDIS_CONNECTION_STRING"
+      value: "redis://rag-keydb:6379"
+    # CLICKHOUSE
+    - name: "CLICKHOUSE_MIGRATION_URL"
+      value: "clickhouse://rag-clickhouse:9000"
+    - name: "CLICKHOUSE_URL"
+      value: "http://rag-clickhouse:8123"
+    - name: "CLICKHOUSE_USER"
+      value: "default"
+    - name: "CLICKHOUSE_PASSWORD"
+      value: "changeme"
+    # S3 / MinIO
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENABLED"
+      value: "true"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_BUCKET"
+      value: "langfuse"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_REGION"
+      value: "auto"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID"
+      value: "admin"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY"
+      value: "adminpassword"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT"
+      value: "http://rag-minio:9000"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE"
+      value: "true"
     extraInitContainers:
     - name: wait-for-postgres
       image: busybox
@@ -451,7 +482,14 @@ minio:
   ## e.g:
   ## defaultBuckets: "my-bucket, my-second-bucket"
   ##
-  defaultBuckets: "documents"
+  defaultBuckets: "documents,langfuse"
+  networkPolicy:
+    enabled: false
+  mode: standalone
+
+
+
+
 
 ollama:
   image:

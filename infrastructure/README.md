@@ -292,7 +292,7 @@ In the following, the *k3d* cluster setup and the setup inside the *k3d* will be
 Assumption: You are in the root directory of this repository. A local registry is created at `registry.localhost:5000`.
 
 ```shell
-cd cluster-setup && bash setup-k3d-cluster.sh
+cd local-cluster-setup && bash setup-k3d-cluster.sh
 ```
 
 Note: only tested under Linux (Ubuntu 22.04 LTS)

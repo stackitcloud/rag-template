@@ -351,14 +351,10 @@ if has_confluence_config():
 
     if os.environ.get("CONFLUENCE_VERIFY_SSL"):
         verify_ssl = os.environ["CONFLUENCE_VERIFY_SSL"].replace(",", "\\,")
-        confluence_settings += [
-            "adminBackend.envs.confluenceLoader.CONFLUENCE_VERIFY_SSL=%s" % verify_ssl,
-        ]
+        confluence_settings.append("adminBackend.envs.confluenceLoader.CONFLUENCE_VERIFY_SSL=%s" % verify_ssl)
     if os.environ.get("CONFLUENCE_DOCUMENT_NAME"):
         document_names = os.environ["CONFLUENCE_DOCUMENT_NAME"].replace(",", "\\,")
-        confluence_settings += [
-            "adminBackend.envs.confluenceLoader.CONFLUENCE_DOCUMENT_NAME=%s" % document_names,
-        ]
+        confluence_settings.append("adminBackend.envs.confluenceLoader.CONFLUENCE_DOCUMENT_NAME=%s" % document_names)
     value_override.extend(confluence_settings)
 
 if os.environ.get("STACKIT_VLLM_API_KEY", False):

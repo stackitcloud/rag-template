@@ -49,9 +49,10 @@ export const useChatStore = defineStore('chat', () => {
 
     function parseDocumentsAsMarkdown(documents: InformationPiece[]): Promise<DocumentResponseModel[]> {
         return Promise.all(documents.map(async o => {
-            const chunk = await marked(o.page_content);
+            let a = JSON.parse(o);
+            const chunk = await marked(a.page_content);
             return {
-                ...o,
+                ...a,
                 page_content: chunk,
             } as DocumentResponseModel;
         }));
@@ -65,19 +66,30 @@ export const useChatStore = defineStore('chat', () => {
             const promptAsMd = await marked(prompt)
             addHistory(promptAsMd);
 
-            const response = await ChatAPI.callInference(requestMessages);
+            const stream = await ChatAPI.callInference(requestMessages);
 
-            const textAsMd = await marked(response.answer);
-            const documentsAsMd = await parseDocumentsAsMarkdown(response.citations);
-            const documents = mapToChatDocuments(chatDocuments.value.length, documentsAsMd, lastMessage().id);
+            
+            let fullchunk = {};
+            for await (const chunk of stream) {
+                console.log(chunk)
+                fullchunk = {
+                    ...JSON.parse(chunk),
+                    ...fullchunk
+                  };
+                console.log(fullchunk)
+                let abc=fullchunk;
+                let documentsAsMd = await parseDocumentsAsMarkdown( abc?.citations|| "...");
+                console.log("parse");
+                let documents = mapToChatDocuments(chatDocuments.value.length, documentsAsMd, lastMessage().id);
+                chatDocuments.value.push(...documents);
+                let textAsMd = await marked( fullchunk?.answer || "...");
+                updateLatestMessage({
+                    dateTime: new Date(),
+                    text: textAsMd,
+                    anchorIds: documents.map((o) => o.index)
+                });
 
-            updateLatestMessage({
-                dateTime: new Date(),
-                text: textAsMd,
-                anchorIds: documents.map((o) => o.index)
-            });
-
-            chatDocuments.value.push(...documents);
+              }
 
         } catch(error) {
             updateLatestMessage({

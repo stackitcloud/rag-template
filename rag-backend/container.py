@@ -19,4 +19,5 @@ from chat_endpoint import UseCaseChat
 
 @containers.copy(DependencyContainer)
 class UseCaseContainer(DependencyContainer):
-    chat_endpoint = Singleton(UseCaseChat, DependencyContainer.traced_chat_graph)
+    #chat_endpoint = Singleton(UseCaseChat, DependencyContainer.traced_chat_graph)
+    ...

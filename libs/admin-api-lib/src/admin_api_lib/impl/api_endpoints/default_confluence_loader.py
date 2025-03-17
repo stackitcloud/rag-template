@@ -3,8 +3,10 @@
 import logging
 from asyncio import run
 from threading import Thread
+import threading
 
 from fastapi import HTTPException, status
+from langchain_core.documents import Document
 
 from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
@@ -81,7 +83,6 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         self._extractor_api = extractor_api
         self._rag_api = rag_api
         self._settings = settings
-        self._sanitize_document_name()
         self._key_value_store = key_value_store
         self._information_mapper = information_mapper
         self._information_enhancer = information_enhancer
@@ -100,10 +101,16 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         HTTPException
             If the Confluence loader is not configured or if a load is already in progress.
         """
-        if not (self._settings.url.strip() and self._settings.space_key.strip() and self._settings.token.strip()):
-            raise HTTPException(
-                status.HTTP_501_NOT_IMPLEMENTED, "The confluence loader is not configured! Required fields are missing."
-            )
+        for index in range(len(self._settings.url)):
+            if not (
+                self._settings.url[index].strip()
+                and self._settings.space_key[index].strip()
+                and self._settings.token[index].strip()
+            ):
+                raise HTTPException(
+                    status.HTTP_501_NOT_IMPLEMENTED,
+                    "The confluence loader is not configured! Required fields are missing.",
+                )
 
         if self._background_thread is not None and self._background_thread.is_alive():
             raise HTTPException(
@@ -113,51 +120,76 @@ class DefaultConfluenceLoader(ConfluenceLoader):
         self._background_thread.start()
 
     async def _aload_from_confluence(self) -> None:
-        params = self._settings_mapper.map_settings_to_params(self._settings)
+        async def process_confluence(index):
+            logger.info("Loading from Confluence %s", self._settings.url[index])
+            self._sanitize_document_name(index=index)
+
+            params = self._settings_mapper.map_settings_to_params(self._settings, index)
+            try:
+                self._key_value_store.upsert(self._settings.document_name[index], Status.PROCESSING)
+                information_pieces = self._extractor_api.extract_from_confluence_post(params)
+                documents = [
+                    self._information_mapper.extractor_information_piece2document(x) for x in information_pieces
+                ]
+                documents = await self._aenhance_langchain_documents(documents)
+                chunked_documents = self._chunker.chunk(documents)
+                rag_information_pieces = [
+                    self._information_mapper.document2rag_information_piece(doc) for doc in chunked_documents
+                ]
+            except Exception as e:
+                self._key_value_store.upsert(self._settings.document_name[index], Status.ERROR)
+
+                logger.error("Error while loading from Confluence: %s", str(e))
+                raise HTTPException(
+                    status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error loading from Confluence: {str(e)}"
+                ) from e
+
+            await self._delete_previous_information_pieces(index=index)
+            self._key_value_store.upsert(self._settings.document_name[index], Status.UPLOADING)
+            self._upload_information_pieces(rag_information_pieces, index=index)
+
+        threads = []
+        for idx in range(len(self._settings.url)):
+            t = threading.Thread(target=lambda idx=idx: run(process_confluence(idx)))
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join()
+
+    async def _aenhance_langchain_documents(self, documents: list[Document]):
         try:
-            self._key_value_store.upsert(self._settings.document_name, Status.PROCESSING)
-            information_pieces = self._extractor_api.extract_from_confluence_post(params)
-            documents = [self._information_mapper.extractor_information_piece2document(x) for x in information_pieces]
-            chunked_documents = self._chunker.chunk(documents)
-            rag_information_pieces = [
-                self._information_mapper.document2rag_information_piece(doc) for doc in chunked_documents
-            ]
+            return await self._information_enhancer.ainvoke(documents)
         except Exception as e:
-            self._key_value_store.upsert(self._settings.document_name, Status.ERROR)
-            logger.error("Error while loading from Confluence: %s", str(e))
-            raise HTTPException(
-                status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error loading from Confluence: {str(e)}"
-            ) from e
+            logger.error("Exception occured while enhancing confluence langchain document %s" % e)
+            raise e
 
-        await self._delete_previous_information_pieces()
-        self._key_value_store.upsert(self._settings.document_name, Status.UPLOADING)
-        self._upload_information_pieces(rag_information_pieces)
-
-    async def _delete_previous_information_pieces(self):
+    async def _delete_previous_information_pieces(self, index=0):
         try:
-            await self._document_deleter.adelete_document(self._settings.document_name)
+            await self._document_deleter.adelete_document(self._settings.document_name[index])
         except HTTPException as e:
             logger.error(
                 (
                     "Error while trying to delete documents with id: %s before uploading %s."
                     "NOTE: Still continuing with upload."
                 ),
-                self._settings.document_name,
+                self._settings.document_name[index],
                 e,
             )
 
-    def _upload_information_pieces(self, rag_api_documents):
+    def _upload_information_pieces(self, rag_api_documents, index=0):
         try:
             self._rag_api.upload_information_piece(rag_api_documents)
-            self._key_value_store.upsert(self._settings.document_name, Status.READY)
+            self._key_value_store.upsert(self._settings.document_name[index], Status.READY)
             logger.info("Confluence loaded successfully")
         except Exception as e:
-            self._key_value_store.upsert(self._settings.document_name, Status.ERROR)
+            self._key_value_store.upsert(self._settings.document_name[index], Status.ERROR)
             logger.error("Error while uploading Confluence to the database: %s", str(e))
             raise HTTPException(500, f"Error loading from Confluence: {str(e)}") from e
 
-    def _sanitize_document_name(self) -> None:
-        document_name = self._settings.document_name if self._settings.document_name else self._settings.url
+    def _sanitize_document_name(self, index) -> None:
+        document_name = (
+            self._settings.document_name[index] if self._settings.document_name[index] else self._settings.url[index]
+        )
         document_name = document_name.replace("http://", "").replace("https://", "")
 
-        self._settings.document_name = sanitize_document_name(document_name)
+        self._settings.document_name[index] = sanitize_document_name(document_name)

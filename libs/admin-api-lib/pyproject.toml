@@ -1,3 +1,14 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "admin-api-lib"
+version = "1.0.1"
+description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
+authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+packages = [{ include = "admin_api_lib", from = "src" }]
+
 [tool.flake8]
 exclude= [".eggs", "./rag-core-library/*", "./src/admin_api_lib/models/*", "./src/admin_api_lib/rag_backend_client/*", "./src/admin_api_lib/extractor_api_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
 statistics = true
@@ -18,7 +29,10 @@ per-file-ignores = """
   ./src/admin_api_lib/impl/admin_api.py: B008,
   ./src/admin_api_lib/dependency_container.py: CCE002,CCE001,
   ./src/admin_api_lib/apis/admin_api_base.py: WOT001,
-  ./tests/*: S101,
+  ./tests/*: S101,S106,D100,D103,PT011
+  ./src/admin_api_lib/impl/settings/confluence_settings.py: C901,N805,
+  ./src/admin_api_lib/impl/utils/comma_separated_bool_list.py: R505,
+  ./src/admin_api_lib/impl/utils/comma_separated_str_list.py: R505,
 """
 
 [tool.black]
@@ -51,12 +65,6 @@ known_local_folder = ["admin_api_lib", "rag_core_lib"]
 [tool.pylint]
 max-line-length = 120
 
-[tool.poetry]
-name = "admin_api_lib"
-version = "0.0.1"
-description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
-
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.1"
 pytest = "^8.2.1"
@@ -85,11 +93,6 @@ black = "^23.9.1"
 # flake8-logging-format = "^2024.24.12"
 # flake8-docstrings = "^1.7.0"
 
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.poetry.dependencies]
 rag-core-lib = {path = "../rag-core-lib"}
 python = "^3.11"
@@ -103,3 +106,9 @@ tqdm = "^4.66.4"
 langfuse = "^2.39.1"
 redis = "^5.0.8"
 pyyaml = "^6.0.2"
+
+[tool.pytest.ini_options]
+log_cli = 1
+log_cli_level = "DEBUG"
+pythonpath = "src"
+testpaths = "src/tests"

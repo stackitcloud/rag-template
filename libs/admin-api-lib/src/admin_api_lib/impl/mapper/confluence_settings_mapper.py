@@ -10,7 +10,7 @@ class ConfluenceSettingsMapper:
     """Mapper class for converting ConfluenceSettings to ConfluenceParameters."""
 
     @staticmethod
-    def map_settings_to_params(settings: ConfluenceSettings) -> ConfluenceParameters:
+    def map_settings_to_params(settings: ConfluenceSettings, index) -> ConfluenceParameters:
         """
         Map ConfluenceSettings to ConfluenceParameters.
 
@@ -25,11 +25,12 @@ class ConfluenceSettingsMapper:
             The parameters object for API consumption.
         """
         return ConfluenceParameters(
-            url=settings.url,
-            token=settings.token,
-            space_key=settings.space_key,
-            include_attachments=settings.include_attachments,
-            keep_markdown_format=settings.keep_markdown_format,
-            keep_newlines=settings.keep_newlines,
-            document_name=settings.document_name,
+            url=settings.url[index],
+            token=settings.token[index],
+            space_key=settings.space_key[index],
+            include_attachments=settings.include_attachments[index],
+            keep_markdown_format=settings.keep_markdown_format[index],
+            keep_newlines=settings.keep_newlines[index],
+            document_name=settings.document_name[index],
+            confluence_kwargs=[{"key": "verify_ssl", "value": settings.verify_ssl[index]}],
         )

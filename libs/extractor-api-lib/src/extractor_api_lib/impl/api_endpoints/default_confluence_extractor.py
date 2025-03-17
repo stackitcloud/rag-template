@@ -13,6 +13,8 @@ from extractor_api_lib.models.information_piece import InformationPiece
 class DefaultConfluenceExtractor(ConfluenceExtractor):
     """Default implementation of the FileExtractor interface."""
 
+    MIN_PAGE_CONTENT_LENGTH = 10
+
     def __init__(
         self,
         mapper: ConfluenceLangchainDocument2InformationPiece,
@@ -43,7 +45,11 @@ class DefaultConfluenceExtractor(ConfluenceExtractor):
             A list of information pieces extracted from Confluence.
         """
         self.mapper.confluence_parameters = confluence_parameters
+        confluence_kwargs = {}
+        for ckwargs in confluence_parameters.confluence_kwargs:
+            confluence_kwargs[ckwargs.key] = ckwargs.value
         confluence_loader_parameters = confluence_parameters.model_dump()
+        confluence_loader_parameters["confluence_kwargs"] = confluence_kwargs
         # Drop the document_name parameter as it is not used by the ConfluenceLoader
         confluence_loader_parameters.pop("document_name", None)
         document_loader = ConfluenceLoader(**confluence_loader_parameters)

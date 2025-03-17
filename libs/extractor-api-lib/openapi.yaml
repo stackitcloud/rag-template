@@ -158,6 +158,12 @@ components:
             key value db and the vectordatabase (metadata.document).
           title: document_name
           type: string
+        confluence_kwargs:
+          description: Additional kwargs like verify_ssl
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: confluence_kwargs
+          type: array
       required:
       - document_name
       - space_key

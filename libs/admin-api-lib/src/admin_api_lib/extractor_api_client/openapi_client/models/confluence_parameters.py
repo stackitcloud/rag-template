@@ -20,6 +20,9 @@ import re  # noqa: F401
 from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from admin_api_lib.extractor_api_client.openapi_client.models.key_value_pair import KeyValuePair
+from typing import Optional, Set
 from typing_extensions import Self
 
 
@@ -43,6 +46,9 @@ class ConfluenceParameters(BaseModel):
     document_name: StrictStr = Field(
         description="The name that will be used to store the confluence db in the key value db and the vectordatabase (metadata.document)."
     )
+    confluence_kwargs: Optional[List[KeyValuePair]] = Field(
+        default=None, description="Additional kwargs like verify_ssl"
+    )
     __properties: ClassVar[List[str]] = [
         "url",
         "token",
@@ -51,6 +57,7 @@ class ConfluenceParameters(BaseModel):
         "keep_markdown_format",
         "keep_newlines",
         "document_name",
+        "confluence_kwargs",
     ]
 
     model_config = ConfigDict(
@@ -89,6 +96,13 @@ class ConfluenceParameters(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in confluence_kwargs (list)
+        _items = []
+        if self.confluence_kwargs:
+            for _item_confluence_kwargs in self.confluence_kwargs:
+                if _item_confluence_kwargs:
+                    _items.append(_item_confluence_kwargs.to_dict())
+            _dict["confluence_kwargs"] = _items
         return _dict
 
     @classmethod
@@ -113,6 +127,9 @@ class ConfluenceParameters(BaseModel):
                 else True,
                 "keep_newlines": obj.get("keep_newlines") if obj.get("keep_newlines") is not None else True,
                 "document_name": obj.get("document_name"),
+                "confluence_kwargs": [KeyValuePair.from_dict(_item) for _item in obj["confluence_kwargs"]]
+                if obj.get("confluence_kwargs") is not None
+                else None,
             }
         )
         return _obj

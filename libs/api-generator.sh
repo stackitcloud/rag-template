@@ -32,11 +32,13 @@ case $api_name in
         ;;
     "extractor-api-lib")
         docker run --user $(id -u):$(id -g) --rm -v $PWD:/local openapitools/openapi-generator-cli@sha256:b35aee2d0f6ffadadcdad9d8fc3c46e8d48360c20b5731a5f47c809d51f67a04 generate -i /local/extractor-api-lib/openapi.yaml -g python-fastapi -o /local/extractor-api-lib --additional-properties=packageName=extractor_api_lib,generateSourceCodeOnly=True
+        rm -r extractor-api-lib/src/openapi_server
         cd ./extractor-api-lib
         black .
         cd ..
-        docker run --user $(id -u):$(id -g) --rm -v $PWD:/local openapitools/openapi-generator-cli@sha256:b35aee2d0f6ffadadcdad9d8fc3c46e8d48360c20b5731a5f47c809d51f67a04 generate -i /local/extractor-api-lib/openapi.yaml -g python -o /local/admin-api-lib/src --additional-properties=generateSourceCodeOnly=True,packageName=admin_api_lib.extractor_api_client.openapi_client
+        docker run --user $(id -u):$(id -g) --rm -v $PWD:/local openapitools/openapi-generator-cli@sha256:b35aee2d0f6ffadadcdad9d8fc3c46e8d48360c20b5731a5f47c809d51f67a04 generate -i /local/extractor-api-lib/openapi.yaml -g python -o /local/admin-api-lib/src   --additional-properties=packageName=admin_api_lib.extractor_api_client.openapi_client,generateSourceCodeOnly=True,testOutput=false
         rm -r admin-api-lib/src/openapi_server
+        find ./admin-api-lib/src/admin_api_lib/extractor_api_client -type f -name '*.md' -delete
         cd ./admin-api-lib
         black .
         cd ..

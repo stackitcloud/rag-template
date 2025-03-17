@@ -76,7 +76,6 @@ class FileStatusKeyValueStore:
         None
         """
         self.remove(file_name)
-
         self._redis.sadd(self.STORAGE_KEY, FileStatusKeyValueStore._to_str(file_name, file_status))
 
     def remove(self, file_name: str) -> None:

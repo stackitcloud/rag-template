@@ -3,6 +3,7 @@
 from abc import abstractmethod
 from typing import Optional
 
+from admin_api_lib.impl.settings.chunker_settings import ChunkerSettings
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig, ensure_config
 
@@ -26,7 +27,7 @@ class SummaryEnhancer(InformationEnhancer):
 
     INFORMATION_METADATA_TYPE = "type"
 
-    def __init__(self, summarizer: Summarizer):
+    def __init__(self, summarizer: Summarizer, chunker_settings: ChunkerSettings = None):
         """
         Initialize the SummaryEnhancer with a given Summarizer instance.
 
@@ -37,6 +38,7 @@ class SummaryEnhancer(InformationEnhancer):
         """
         super().__init__()
         self._summarizer = summarizer
+        self._chunker_settings = chunker_settings
 
     @staticmethod
     def _is_relevant(information: Document) -> bool:

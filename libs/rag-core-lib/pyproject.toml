@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-lib"
-version = "0.0.1"
+version = "1.0.1"
 description = "The perfect rag template"
 authors = ["STACKIT GmbH & Co. KG"]
 packages = [{ include = "rag_core_lib", from = "src" }]
@@ -100,3 +100,5 @@ max-line-length = 120
 [tool.pytest.ini_options]
 log_cli = 1
 log_cli_level = "DEBUG"
+pythonpath = "src"
+testpaths = "src/tests"

@@ -29,9 +29,15 @@ class PageSummaryEnhancer(SummaryEnhancer):
 
     async def _acreate_summary(self, information: list[Document], config: Optional[RunnableConfig]) -> list[Document]:
         # group infos by page, defaulting to page 1 if no page metadata
+        if self._chunker_settings:
+            filtered_information = [
+                info for info in information if len(info.page_content) > self._chunker_settings.max_size
+            ]
+        else:
+            filtered_information = information
         grouped = [
-            [info for info in information if info.metadata.get("page", self.DEFAULT_PAGE_NR) == page]
-            for page in {info_piece.metadata.get("page", self.DEFAULT_PAGE_NR) for info_piece in information}
+            [info for info in filtered_information if info.metadata.get("page", self.DEFAULT_PAGE_NR) == page]
+            for page in {info_piece.metadata.get("page", self.DEFAULT_PAGE_NR) for info_piece in filtered_information}
         ]
 
         summary_tasks = [self._asummarize_page(info_group, config) for info_group in tqdm(grouped)]

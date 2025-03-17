@@ -148,7 +148,7 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     summary_enhancer = List(
-        Singleton(PageSummaryEnhancer, summarizer),
+        Singleton(PageSummaryEnhancer, summarizer, chunker_settings),
     )
     untraced_information_enhancer = Singleton(
         GeneralEnhancer,

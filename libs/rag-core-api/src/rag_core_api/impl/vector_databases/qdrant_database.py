@@ -2,7 +2,7 @@
 import logging
 
 from langchain_core.documents import Document
-from langchain_qdrant import QdrantVectorStore
+from langchain_qdrant import QdrantVectorStore, SparseEmbeddings
 from qdrant_client.http import models
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 
@@ -25,6 +25,7 @@ class QdrantDatabase(VectorDatabase):
         self,
         settings: VectorDatabaseSettings,
         embedder: Embedder,
+        sparse_embedder: SparseEmbeddings,
         vectorstore: QdrantVectorStore,
     ):
         """
@@ -43,6 +44,7 @@ class QdrantDatabase(VectorDatabase):
             settings=settings,
             embedder=embedder,
             vectorstore=vectorstore,
+            sparse_embedder=sparse_embedder,
         )
 
     @property
@@ -167,9 +169,11 @@ class QdrantDatabase(VectorDatabase):
         """
         self._vectorstore = self._vectorstore.from_documents(
             documents,
-            self._embedder.get_embedder(),
-            collection_name=self._settings.collection_name,
+            embedding=self._embedder.get_embedder(),
+            sparse_embedding=self._sparse_embedder,
             location=self._settings.location,
+            collection_name=self._settings.collection_name,
+            retrieval_mode=self._settings.retrieval_mode,
         )
 
     def delete(self, delete_request: dict) -> None:

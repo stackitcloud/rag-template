@@ -3,6 +3,8 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
+from langchain_qdrant import RetrievalMode
+
 
 class VectorDatabaseSettings(BaseSettings):
     """
@@ -27,3 +29,4 @@ class VectorDatabaseSettings(BaseSettings):
     validate_collection_config: bool = Field(
         default=False
     )  # if true and collection does not exist, an error will be raised
+    retrieval_mode: RetrievalMode = Field(default=RetrievalMode.HYBRID)

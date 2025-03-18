@@ -12,7 +12,7 @@ packages = [{ include = "rag_core_lib", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 langchain = "^0.3.7"
-langchain-community = "0.3.7"
+langchain-community = "0.3.19"
 flashrank = "^0.2.5"
 pydantic-settings = "^2.2.1"
 pydantic = "^2.7.2"

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 from langchain_community.vectorstores import VectorStore
 from langchain_core.documents import Document
+from langchain_qdrant import SparseEmbeddings
 
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
@@ -16,6 +17,7 @@ class VectorDatabase(ABC):
         self,
         settings: VectorDatabaseSettings,
         embedder: Embedder,
+        sparse_embedder: SparseEmbeddings,
         vectorstore: VectorStore,
     ):
         """
@@ -32,6 +34,7 @@ class VectorDatabase(ABC):
         """
         self._settings = settings
         self._embedder = embedder
+        self._sparse_embedder = sparse_embedder
         self._vectorstore = vectorstore
 
     @property

@@ -16,7 +16,7 @@ from langchain_community.llms.vllm import VLLMOpenAI
 from langchain_community.llms.fake import FakeListLLM
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
-from langchain_qdrant import QdrantVectorStore
+from langchain_qdrant import QdrantVectorStore, FastEmbedSparse
 from langfuse import Langfuse
 
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
@@ -50,6 +50,7 @@ from rag_core_api.impl.settings.ollama_embedder_settings import OllamaEmbedderSe
 from rag_core_api.impl.settings.ragas_settings import RagasSettings
 from rag_core_api.impl.settings.reranker_settings import RerankerSettings
 from rag_core_api.impl.settings.retriever_settings import RetrieverSettings
+from rag_core_api.impl.settings.sparse_embedder_settings import SparseEmbedderSettings
 from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.impl.vector_databases.qdrant_database import QdrantDatabase
@@ -95,6 +96,7 @@ class DependencyContainer(DeclarativeContainer):
     embedder_class_type_settings = EmbedderClassTypeSettings()
     stackit_embedder_settings = StackitEmbedderSettings()
     chat_history_settings = ChatHistorySettings()
+    sparse_embedder_settings = SparseEmbedderSettings()
     chat_history_config.from_dict(chat_history_settings.model_dump())
 
     class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
@@ -110,22 +112,28 @@ class DependencyContainer(DeclarativeContainer):
         ),
     )
 
+    sparse_embedder = Singleton(FastEmbedSparse, **sparse_embedder_settings.model_dump())
+
     vectordb_client = Singleton(
         qdrant_client.QdrantClient,
         location=vector_database_settings.location,
     )
+
     vectorstore = Singleton(
         QdrantVectorStore,
         client=vectordb_client,
         collection_name=vector_database_settings.collection_name,
         embedding=embedder,
+        sparse_embedding=sparse_embedder,
         validate_collection_config=False,
+        retrieval_mode=vector_database_settings.retrieval_mode,
     )
 
     vector_database = Singleton(
         QdrantDatabase,
         settings=vector_database_settings,
         embedder=embedder,
+        sparse_embedder=sparse_embedder,
         vectorstore=vectorstore,
     )
 

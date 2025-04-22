@@ -380,7 +380,7 @@ shared:
   secrets:
     s3:
       accessKey: "admin"
-      secretKey: "password"
+      secretKey: "adminpassword"
     usecase:
 
 

@@ -10,6 +10,6 @@ spec:
     {{- end }}
   secretName: tls-certificate
   issuerRef:
-    name: letsencrypt-cluster-issuer
-    kind: ClusterIssuer
+    name: {{ .Values.shared.config.tls.issuerName }}
+    kind: {{ .Values.shared.config.tls.issuerKind }}
 {{- end }}

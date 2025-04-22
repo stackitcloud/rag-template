@@ -376,6 +376,8 @@ shared:
       enabled: true
       host: rag.localhost
       secretName: tls-certificate
+      issuerName: letsencrypt-cluster-issuer
+      issuerKind: ClusterIssuer
 
   secrets:
     s3:

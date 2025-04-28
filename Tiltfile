@@ -138,7 +138,7 @@ local_resource(
 ########################################################################################################################
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
-registry = "ghcr.io/stackitcloud"
+registry = "ghcr.io/stackitcloud/rag-template"
 rag_api_image_name = "rag-backend"
 
 backend_context = "./rag-backend"
@@ -182,7 +182,7 @@ local_resource(
 ########################################################################################################################
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
-registry = "ghcr.io/stackitcloud"
+registry = "ghcr.io/stackitcloud/rag-template"
 admin_api_image_name = "admin-backend"
 
 admin_backend_context = "./admin-backend"
@@ -226,7 +226,7 @@ local_resource(
 ########################################################################################################################
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
-registry = "ghcr.io/stackitcloud"
+registry = "ghcr.io/stackitcloud/rag-template"
 document_extractor_image_name = "document-extractor"
 
 extractor_context = "./document-extractor"

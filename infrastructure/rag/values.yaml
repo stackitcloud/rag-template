@@ -15,7 +15,7 @@ backend:
   replicaCount: 1
 
   image:
-    repository: ghcr.io/stackitcloud/rag-template﻿
+    repository: ghcr.io/stackitcloud/rag-template
     name: rag-backend
     pullPolicy: Always
     tag: "v1.0.0"

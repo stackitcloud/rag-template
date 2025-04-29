@@ -2,6 +2,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Pytest (current file)",
+            "type": "python",
+            "request": "launch",
+            // run pytest as a module
+            "module": "pytest",
+            "args": [
+              "--maxfail=1",
+              "--disable-warnings",
+              "-q",
+              "${file}"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
             "name": "rag_backend",
             "type": "python",
             "request": "attach",
@@ -94,7 +109,5 @@
                 }
             ]
         }
-
-
     ]
 }

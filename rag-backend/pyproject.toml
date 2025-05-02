@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "rag-usecase-example"
-version = "0.1.0"
-description = ""
+name = "rag-backend"
+version = "1.0.0"
+description = "The RAG backend is responsible for handling the interaction with the RAG system."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 
 [tool.poetry.dependencies]
@@ -39,7 +39,6 @@ flake8-tidy-imports = "^4.10.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-
 [tool.flake8]
 exclude= [".eggs", "./rag-core-library/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
 statistics = true
@@ -57,7 +56,6 @@ ban-relative-imports = true
 per-file-ignores = """
   ./tests/*: S101,
 """
-
 
 [tool.black]
 line-length = 120
@@ -80,7 +78,6 @@ exclude = """
 )/
 """
 
-
 [tool.isort]
 profile = "black"
 skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
@@ -88,4 +85,3 @@ skip_gitignore = true
 
 [tool.pylint]
 max-line-length = 120
-

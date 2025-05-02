@@ -7,6 +7,10 @@ pyrightconfig.json
 notes*.md
 notes.md
 
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
+
 # Node Modules
 node_modules/
 

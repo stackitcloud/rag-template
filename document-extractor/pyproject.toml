@@ -50,7 +50,7 @@ authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.12"
+python = "^3.13"
 extractor-api-lib = {path = "../rag-core-library/extractor-api-lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]

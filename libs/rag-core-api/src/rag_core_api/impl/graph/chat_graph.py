@@ -8,6 +8,7 @@ from pathlib import Path
 from time import time
 from typing import Any, Optional
 
+import langdetect
 from fastapi import HTTPException, status
 from langchain_core.runnables import RunnableConfig
 from langchain_core.runnables.graph import MermaidDrawMethod
@@ -40,6 +41,8 @@ class GraphNodeNames(StrEnum):
 
     Attributes
     ----------
+    DETERMINE_LANGUAGE : str
+        Reperesents a node that determiens the language of the question.
     REPHRASE : str
         Represents a node that rephrases the question.
     RETRIEVE : str
@@ -50,6 +53,7 @@ class GraphNodeNames(StrEnum):
         Represents a node that handles errors.
     """
 
+    DETERMINE_LANGUAGE = "determine_language"
     REPHRASE = "rephrase"
     RETRIEVE = "retrieve"
     GENERATE = "generate"
@@ -194,6 +198,12 @@ class DefaultChatGraph(GraphBase):
     #########
     # nodes #
     #########
+    async def _determine_language_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
+        question = state["question"]
+        question_language = langdetect.detect(question)
+        logger.debug('Detected langauge for question "%s": %s', question, question_language)
+        return {"language": question_language}
+
     async def _rephrase_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         rephrased_question = await self._rephrasing_chain.ainvoke(chain_input=state, config=config)
         return {"rephrased_question": rephrased_question}
@@ -254,6 +264,7 @@ class DefaultChatGraph(GraphBase):
         return GraphNodeNames.ERROR_NODE
 
     def _add_nodes(self):
+        self._state_graph.add_node(GraphNodeNames.DETERMINE_LANGUAGE, self._determine_language_node)
         self._state_graph.add_node(GraphNodeNames.REPHRASE, self._rephrase_node_builder)
         self._state_graph.add_node(GraphNodeNames.RETRIEVE, self._retrieve_node)
         self._state_graph.add_node(GraphNodeNames.GENERATE, self._generate_node_builder)
@@ -261,7 +272,10 @@ class DefaultChatGraph(GraphBase):
 
     def _wire_graph(self):
         self._state_graph.add_edge(START, GraphNodeNames.REPHRASE)
-        self._state_graph.add_edge(GraphNodeNames.REPHRASE, GraphNodeNames.RETRIEVE)
+        self._state_graph.add_edge(START, GraphNodeNames.DETERMINE_LANGUAGE)
+        self._state_graph.add_edge(
+            [GraphNodeNames.REPHRASE, GraphNodeNames.DETERMINE_LANGUAGE], GraphNodeNames.RETRIEVE
+        )
         self._state_graph.add_conditional_edges(
             GraphNodeNames.RETRIEVE, self._docs_retrieved_edge, [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE]
         )

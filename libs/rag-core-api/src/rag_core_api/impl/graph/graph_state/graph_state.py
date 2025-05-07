@@ -17,6 +17,8 @@ class AnswerGraphState(TypedDict):
     ----------
     question : str
         The original question asked.
+    language : str
+        The language the question has been asked in.
     rephrased_question : str
         The rephrased version of the original question.
     history : str
@@ -38,6 +40,7 @@ class AnswerGraphState(TypedDict):
     """
 
     question: str
+    language: str
     rephrased_question: str
     history: str
     information_pieces: Annotated[list[InformationPiece], operator.add]
@@ -61,6 +64,7 @@ class AnswerGraphState(TypedDict):
         answer_text=None,
         response=None,
         additional_info=None,
+        language="en",
     ) -> "AnswerGraphState":
         """
         Create an instance of AnswerGraphState.
@@ -89,6 +93,8 @@ class AnswerGraphState(TypedDict):
             The response data (default None).
         additional_info : dict
             Any additional information (default None).
+        language : str
+            The language the question has been asked in (default en).
 
         Returns
         -------
@@ -106,4 +112,5 @@ class AnswerGraphState(TypedDict):
             additional_info=additional_info,
             error_messages=error_messages,
             finish_reasons=finish_reasons,
+            language=language,
         )

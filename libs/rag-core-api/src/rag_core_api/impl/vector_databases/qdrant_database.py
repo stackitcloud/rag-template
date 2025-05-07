@@ -1,4 +1,5 @@
 """Module containing the QdrantDatabase class."""
+
 import logging
 
 from langchain_core.documents import Document

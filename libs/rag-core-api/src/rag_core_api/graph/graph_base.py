@@ -59,12 +59,10 @@ class GraphBase(AsyncChain[Input, Output], ABC):
         """
 
     @abstractmethod
-    def _add_nodes(self) -> None:
-        ...
+    def _add_nodes(self) -> None: ...
 
     @abstractmethod
-    def _wire_graph(self) -> None:
-        ...
+    def _wire_graph(self) -> None: ...
 
     def _setup_graph(self):
         self._add_nodes()

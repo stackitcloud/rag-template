@@ -1,6 +1,5 @@
 """Module for the Evaluator class."""
 
-
 from abc import ABC, abstractmethod
 
 

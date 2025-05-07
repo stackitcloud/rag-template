@@ -69,5 +69,6 @@ class SummaryEnhancer(InformationEnhancer):
         return await self._acreate_summary(pieces_to_summarize, config)
 
     @abstractmethod
-    async def _acreate_summary(self, information: list[Document], config: Optional[RunnableConfig]) -> list[Document]:
-        ...
+    async def _acreate_summary(
+        self, information: list[Document], config: Optional[RunnableConfig]
+    ) -> list[Document]: ...

@@ -1,6 +1,5 @@
 """Utility module to handle comma separated string input that represents boolean values."""
 
-
 from typing import Any
 
 

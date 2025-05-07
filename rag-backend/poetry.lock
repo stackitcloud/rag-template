@@ -2047,6 +2047,21 @@ files = [
 langchain-core = ">=0.3.51,<1.0.0"
 
 [[package]]
+name = "langdetect"
+version = "1.0.9"
+description = "Language detection library ported from Google's language-detection."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "langdetect-1.0.9-py2-none-any.whl", hash = "sha256:7cbc0746252f19e76f77c0b1690aadf01963be835ef0cd4b56dddf2a8f1dfc2a"},
+    {file = "langdetect-1.0.9.tar.gz", hash = "sha256:cbc1fef89f8d062739774bd51eda3da3274006b3661d199c2655f6b3f6d605a0"},
+]
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "langfuse"
 version = "2.60.4"
 description = "A client library for accessing langfuse"
@@ -3833,6 +3848,7 @@ flashrank = "^0.2.10"
 langchain-community = "0.3.23"
 langchain-ollama = "^0.3.2"
 langchain-qdrant = "^0.2.0"
+langdetect = "^1.0.9"
 langgraph = "^0.4.2"
 openai = "^1.77.0"
 pillow = "^11.2.1"

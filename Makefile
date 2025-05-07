@@ -11,3 +11,9 @@ update-lock:
 	cd admin-backend;poetry lock --regenerate
 	cd rag-backend;poetry lock --regenerate
 	cd document-extractor;poetry lock --regenerate
+
+black:
+	cd rag-core-library;make black
+	cd admin-backend;black .
+	cd rag-backend;black .
+	cd document-extractor;black .

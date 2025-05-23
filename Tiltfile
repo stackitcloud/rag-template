@@ -132,7 +132,6 @@ local_resource(
     allow_parallel=True,
 )
 
-
 ########################################################################################################################
 ################################## build backend_rag image and do live update ##########################################
 ########################################################################################################################
@@ -355,6 +354,9 @@ if has_confluence_config():
     if os.environ.get("CONFLUENCE_DOCUMENT_NAME"):
         document_names = os.environ["CONFLUENCE_DOCUMENT_NAME"].replace(",", "\\,")
         confluence_settings.append("adminBackend.envs.confluenceLoader.CONFLUENCE_DOCUMENT_NAME=%s" % document_names)
+    if os.environ.get("CONFLUENCE_MAX_PAGES"):
+        max_pages = os.environ["CONFLUENCE_MAX_PAGES"].replace(",", "\\,")
+        confluence_settings.append("adminBackend.envs.confluenceLoader.CONFLUENCE_MAX_PAGES=%s" % max_pages)
     value_override.extend(confluence_settings)
 
 if os.environ.get("STACKIT_VLLM_API_KEY", False):
@@ -373,7 +375,7 @@ if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
 yaml = helm(
     "./rag-infrastructure/rag",
     name="rag",
-    namespace="rag",
+    namespace=namespace,
     values=[
         "./rag-infrastructure/rag/values.yaml",
     ],

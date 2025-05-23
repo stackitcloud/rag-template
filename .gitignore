@@ -6,6 +6,7 @@ helm-chart/charts/rag-0.0.1.tgz
 pyrightconfig.json
 notes*.md
 notes.md
+*todo*.md
 
 # macOS Finder metadata
 .DS_Store

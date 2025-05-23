@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { DocumentModel } from "../../models/document.model.ts";
 import { ErrorType } from "../../models/error-type";
 import { UploadedDocument, mapToUploadDocument } from "../../models/uploaded-document.model";
-import { DocumentAPI } from "../document.api";
+import { DocumentAPI, ConfluenceConfig } from "../document.api";
 
 export const useDocumentsStore = defineStore('chat', () => {
     const uploadedDocuments = ref<UploadedDocument[]>([]);
@@ -52,11 +52,12 @@ export const useDocumentsStore = defineStore('chat', () => {
         }
     };
 
-    const loadConfluence = async () => {
+    const loadConfluence = async (config: ConfluenceConfig) => {
       isLoadingConfluence.value = true;
       error.value = null;
       try {
-        await DocumentAPI.loadConfluence();
+        // provide confluence configuration from frontend
+        await DocumentAPI.loadConfluence(config);
         await loadDocuments(); // Refresh the document list after uploading
       } catch(err) {
         if (err.response && err.response.status === 501) {

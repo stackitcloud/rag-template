@@ -21,7 +21,7 @@ const confluenceName = ref('');
 const spaceKey = ref('');
 const confluenceToken = ref('');
 const confluenceUrl = ref('');
-const maxPages = ref<number>(1000);
+const maxPages = ref<number>();
 
 const error = computed(() => store.error);
 

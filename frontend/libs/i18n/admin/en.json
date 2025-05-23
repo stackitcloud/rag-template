@@ -12,7 +12,7 @@
     "fileTypeNotAllowedDescription": "Only PDF, DOCX, PPTX, and XML files are allowed",
     "fileUpload": "File Upload",
     "confluenceUpload": "Confluence",
-    "confluenceLoadTitle": "Load Confluence Pages",
+    "confluenceLoadTitle": "Load all confluence pages from space",
     "confluenceLoadDescription": "Click the button below to load pages from Confluence",
     "loadConfluence": "Load Confluence",
     "select": "Select",

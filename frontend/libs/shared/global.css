@@ -48,3 +48,9 @@ main {
 [data-theme="dark"] .chat-text {
   color: #f5f5f5;
 }
+
+.avatar img {
+  color: red;
+  background-color: white;
+  height: 42px;
+}

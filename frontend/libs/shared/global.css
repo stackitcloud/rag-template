@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 html,
 body,
 #app {
@@ -35,4 +34,17 @@ main {
 
 .base-200-highlight {
   background-color: var(--base-200-highlight);
+}
+
+/* Chat text styles */
+.chat-text {
+  color: var(--tw-prose-body);
+}
+
+[data-theme="light"] .chat-text {
+  color: #333333;
+}
+
+[data-theme="dark"] .chat-text {
+  color: #f5f5f5;
 }

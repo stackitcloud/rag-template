@@ -1,3 +1,5 @@
+// frontend/libs/shared/ui/NavigationContainer.vue
+
 <script lang="ts" setup>
 import { settings } from "../settings";
 import { useThemeStore } from "../store/theme.store";

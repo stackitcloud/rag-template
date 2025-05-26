@@ -15,13 +15,12 @@ export interface AppSettings {
 // Default settings that can be overridden
 export const settings: AppSettings = {
   bot: {
-    name: "Karl Kalle",
+    name: "Knowledge Agent",
   },
   ui: {
-    logoPath:
-      "https://www.what-the-hack.saarland/sites/default/files/Logo-SAAR-HACKATHON-x2.jpg",
+    logoPath: "/assets/navigation-logo.svg",
     theme: {
-      default: "dark",
+      default: "light",
       options: ["light", "dark"],
     },
   },

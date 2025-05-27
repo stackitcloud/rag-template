@@ -11,7 +11,7 @@ const themeStore = useThemeStore();
 </script>
 
 <template>
-  <div class="bg-primary flex p-4">
+  <div class="bg-[#0a1e2d] flex p-4">
     <div class="flex-1">
       <img :src="logoPath" class="w-32" />
     </div>

@@ -15,7 +15,7 @@ const toggleTheme = () => {
 <template>
   <button
     @click="toggleTheme"
-    class="btn btn-circle btn-ghost"
+    class="btn btn-circle btn-ghost text-white hover:bg-white/20"
     :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
   >
     <SunIcon v-if="!isDarkMode" class="h-5 w-5" />

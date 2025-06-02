@@ -3,13 +3,13 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.impl.types.file_type import FileType
-from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.file_services.file_service import FileService
 
 
-class InformationExtractor(ABC):
-    """Base class for Information extractors."""
+class InformationFileExtractor(ABC):
+    """Base class for Information file extractors."""
 
     def __init__(self, file_service: FileService):
         """Initialize the InformationExtractor.
@@ -34,7 +34,7 @@ class InformationExtractor(ABC):
         """
 
     @abstractmethod
-    def extract_content(self, file_path: Path) -> list[InformationPiece]:
+    async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """
         Extract content from given file.
 
@@ -42,6 +42,8 @@ class InformationExtractor(ABC):
         ----------
         file_path : Path
             Path to the file the information should be extracted from.
+        name : str
+            Name of the document.
 
         Returns
         -------

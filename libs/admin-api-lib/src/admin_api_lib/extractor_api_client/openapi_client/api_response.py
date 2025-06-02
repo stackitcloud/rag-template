@@ -1,10 +1,8 @@
 """API response object."""
 
 from __future__ import annotations
-
-from typing import Generic, Mapping, Optional, TypeVar
-
-from pydantic import BaseModel, Field, StrictBytes, StrictInt
+from typing import Optional, Generic, Mapping, TypeVar
+from pydantic import Field, StrictInt, StrictBytes, BaseModel
 
 T = TypeVar("T")
 

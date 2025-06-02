@@ -2,15 +2,18 @@
 
 import logging
 
+
+from pydantic import StrictStr
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, Request, Response, UploadFile
 
-from admin_api_lib.api_endpoints.confluence_loader import ConfluenceLoader
+from admin_api_lib.api_endpoints.file_uploader import FileUploader
+from admin_api_lib.api_endpoints.source_uploader import SourceUploader
+from admin_api_lib.models.key_value_pair import KeyValuePair
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.api_endpoints.document_reference_retriever import (
     DocumentReferenceRetriever,
 )
-from admin_api_lib.api_endpoints.document_uploader import DocumentUploader
 from admin_api_lib.api_endpoints.documents_status_retriever import (
     DocumentsStatusRetriever,
 )
@@ -85,24 +88,57 @@ class AdminApi(BaseAdminApi):
         return await document_status_retriever.aget_all_documents_status()
 
     @inject
-    async def load_confluence_post(
+    async def upload_source(
         self,
-        confluence_loader: ConfluenceLoader = Depends(Provide[DependencyContainer.confluence_loader]),
+        source_type: StrictStr,
+        name: StrictStr,
+        kwargs: list[KeyValuePair],
+        source_uploader: SourceUploader = Depends(Provide[DependencyContainer.source_uploader]),
     ) -> None:
         """
-        Asynchronously loads a Confluence space using the provided ConfluenceLoader.
+        Asynchronously uploads user-selected source documents.
 
         Parameters
         ----------
-        confluence_loader : ConfluenceLoader
-            The ConfluenceLoader instance to use for loading the post. This is injected by dependency injection
-            (default is Depends(Provide[DependencyContainer.confluence_loader])).
+        source_type : StrictStr
+            The type of the source document to be uploaded.
+        name : StrictStr
+            The name of the source document to be uploaded.
+        kwargs : list[KeyValuePair]
+           Additional parameters required for the extractor.
+        source_uploader : SourceUploader
+            An instance of SourceUploader to handle the upload process.
 
         Returns
         -------
         None
         """
-        await confluence_loader.aload_from_confluence()
+        await source_uploader.upload_source(source_type, name, kwargs)
+
+    @inject
+    async def upload_file(
+        self,
+        file: UploadFile,
+        request: Request,
+        file_uploader: FileUploader = Depends(Provide[DependencyContainer.file_uploader]),
+    ) -> None:
+        """
+        Asynchronously uploads a file to the server.
+
+        Parameters
+        ----------
+        file : UploadFile
+            The file object to be uploaded.
+        request : Request
+            The HTTP request object containing metadata about the upload request.
+        file_uploader : FileUploader, optional
+            An instance of FileUploader to handle the upload process.
+
+        Returns
+        -------
+        None
+        """
+        await file_uploader.upload_file(str(request.base_url), file)
 
     @inject
     async def document_reference_id_get(
@@ -129,28 +165,3 @@ class AdminApi(BaseAdminApi):
             The document in binary form.
         """
         return await document_reference_retriever.adocument_reference_id_get(identification)
-
-    @inject
-    async def upload_documents_post(
-        self,
-        body: UploadFile,
-        request: Request,
-        document_uploader: DocumentUploader = Depends(Provide[DependencyContainer.document_uploader]),
-    ) -> None:
-        """
-        Handle the POST request to upload documents.
-
-        Parameters
-        ----------
-        body : UploadFile
-            The file to be uploaded.
-        request : Request
-            The request object containing metadata about the request.
-        document_uploader : DocumentUploader, optional
-            The document uploader dependency, by default provided by DependencyContainer.
-
-        Returns
-        -------
-        None
-        """
-        await document_uploader.aupload_documents_post(body, request)

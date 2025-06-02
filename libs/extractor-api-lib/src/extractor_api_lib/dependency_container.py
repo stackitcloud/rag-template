@@ -3,16 +3,12 @@
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import List, Singleton  # noqa: WOT001
 
-from extractor_api_lib.impl.api_endpoints.default_confluence_extractor import (
-    DefaultConfluenceExtractor,
-)
-from extractor_api_lib.impl.api_endpoints.default_file_extractor import (
-    DefaultFileExtractor,
-)
-from extractor_api_lib.impl.document_parser.general_extractor import GeneralExtractor
-from extractor_api_lib.impl.document_parser.ms_docs_extractor import MSDocsExtractor
-from extractor_api_lib.impl.document_parser.pdf_extractor import PDFExtractor
-from extractor_api_lib.impl.document_parser.xml_extractor import XMLExtractor
+from extractor_api_lib.impl.api_endpoints.general_source_extractor import GeneralSourceExtractor
+from extractor_api_lib.impl.extractors.confluence_extractor import ConfluenceExtractor
+from extractor_api_lib.impl.extractors.file_extractors.ms_docs_extractor import MSDocsExtractor
+from extractor_api_lib.impl.extractors.file_extractors.pdf_extractor import PDFExtractor
+from extractor_api_lib.impl.extractors.file_extractors.xml_extractor import XMLExtractor
+from extractor_api_lib.impl.api_endpoints.general_file_extractor import GeneralFileExtractor
 from extractor_api_lib.impl.file_services.s3_service import S3Service
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
@@ -40,11 +36,13 @@ class DependencyContainer(DeclarativeContainer):
 
     intern2external = Singleton(Internal2ExternalInformationPiece)
     langchain_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
-    all_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor)
+    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor)
 
-    general_extractor = Singleton(GeneralExtractor, file_service, all_extractors)
+    general_file_extractor = Singleton(GeneralFileExtractor, file_service, file_extractors, intern2external)
+    confluence_extractor = Singleton(ConfluenceExtractor, mapper=langchain_document2information_piece)
 
-    file_extractor = Singleton(
-        DefaultFileExtractor, information_extractor=general_extractor, file_service=file_service, mapper=intern2external
+    source_extractor = Singleton(
+        GeneralSourceExtractor,
+        mapper=intern2external,
+        available_extractors=List(confluence_extractor),
     )
-    confluence_extractor = Singleton(DefaultConfluenceExtractor, mapper=langchain_document2information_piece)

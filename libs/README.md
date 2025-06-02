@@ -105,8 +105,8 @@ The following endpoints are provided by the *admin-api-lib*:
 - `/delete_document/{identification}`: Deletes the file from storage (if applicable) and vector database. The `identification` can be retrieved from the `/all_documents_status` endpoint.
 - `/document_reference/{identification}`: Returns the document.
 - `/all_documents_status`: Return the `identification` and status of all available sources.
-- `/upload_documents`: Endpoint to upload files.
-- `/load_confluence`: Endpoint to load a confluence space
+- `/upload_file`: Endpoint to upload files.
+- `/upload_source`: Endpoint to upload non-file sources.
 
 ### 2.1 Requirements
 
@@ -135,15 +135,16 @@ Will return the source document stored in the connected storage system.
 Will return a list of all sources for the chat and their current status.
 
 
-#### `/upload_documents`
+#### `/upload_file`
 
 Files can be uploaded here. This endpoint will process the document in a background and will extract information using the [document-extractor](#3-extractor-api-lib).
 The extracted information will be summarized using a LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-core-api](#1-rag-core-api).
 
-#### `/load_confluence`
+#### `/upload_source`
 
-Loads all the content of a confluence space using the [document-extractor](#3-extractor-api-lib).
-The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-core-api](#1-rag-core-api).
+Loads all the content from an arbitrary non-file source using the [document-extractor](#3-extractor-api-lib).
+The `type`of the source needs to correspond to an extractor in the [document-extractor](#3-extractor-api-lib).
+The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-core-api](#1-rag-core-api). An is configured. Defaults to 3600 seconds (1 hour). Can be adjusted by values in the helm chart.
 
 ### 2.3 Replaceable parts
 
@@ -162,9 +163,9 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | information_enhancer |  [`rag_core_lib.chains.async_chain.AsyncChain[Any, Any]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) |Wraps around the *untraced_information_enhancer* and adds langfuse tracing. |
 | document_deleter |[`admin_api_lib.api_endpoints.document_deleter.DocumentDeleter`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_deleter.py) | [`admin_api_lib.impl.api_endpoints.default_document_deleter.DefaultDocumentDeleter`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_deleter.py) |  Handles deletion of sources. |
 | documents_status_retriever |  [`admin_api_lib.api_endpoints.documents_status_retriever.DocumentsStatusRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/documents_status_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_documents_status_retriever.DefaultDocumentsStatusRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_documents_status_retriever.py) |Handles return of source status. |
-| confluence_loader | [`admin_api_lib.api_endpoints.confluence_loader.ConfluenceLoader`](./admin-api-lib/src/admin_api_lib/api_endpoints/confluence_loader.py) | [`admin_api_lib.impl.api_endpoints.default_confluence_loader.DefaultConfluenceLoader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_confluence_loader.py)| Handles data loading and extraction from confluence. |
+| source_uploader | [`admin_api_lib.api_endpoints.source_uploader.SourceUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/source_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_source_uploader.DefaultSourceUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_source_uploader.py)| Handles data loading and extraction from various non-file sources. |
 | document_reference_retriever | [`admin_api_lib.api_endpoints.document_reference_retriever.DocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_reference_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_document_reference_retriever.DefaultDocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_reference_retriever.py) | Handles return of files from connected storage. |
-| document_uploader | [`admin_api_lib.api_endpoints.document_uploader.DocumentUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_document_uploader.DefaultDocumentUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_uploader.py) | Handles upload and extraction of files. |
+| file_uploader | [`admin_api_lib.api_endpoints.file_uploader.FileUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/file_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_file_uploader.DefaultFileUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_file_uploader.py) | Handles upload and extraction of files. |
 
 ## 3. Extractor API Lib
 
@@ -175,7 +176,7 @@ This API should not be exposed by ingress and only used for internally.
 The following endpoints are provided by the *extractor-api-lib*:
 
 - `/extract_from_file`: This endpoint extracts the information from files.
-- `/extract_from_confluence`: This endpoint extracts the information from a confluence space.
+- `/extract_from_source`: This endpoint extracts the information from a non-file source.
 
 ### 3.1 Requirements
 
@@ -202,12 +203,14 @@ The following types of information will be extracted:
 - `TEXT`: plain text
 - `TABLE`: data in tabular form found in the document
 
-#### `/extract_from_confluence`
+#### `/extract_from_source`
 
-The extract from confluence endpoint will extract the information from a confluence space.
-The following types of information will be extracted:
+This endpoint will extract data for non-file source.
+The type of information that is extracted will vary depending on the source, the following types of information can be extracted:
 
 - `TEXT`: plain text
+- `TABLE`: data in tabular form found in the document
+- `IMAGE`: image found in the document
 
 ### 3.3 Replaceable parts
 
@@ -221,7 +224,8 @@ The following types of information will be extracted:
 | all_extractors | `dependency_injector.providers.List[extractor_api_lib.document_parser.information_extractor.InformationExtractor]` | `dependency_injector.providers.List(pdf_extractor, ms_docs_extractor, xml_extractor)` | List of all available extractors. If you add a new type of extractor you would have to add it to this list. |
 | general_extractor | [`extractor_api_lib.document_parser.information_extractor.InformationExtractor`](./extractor-api-lib/src/extractor_api_lib/document_parser/information_extractor.py) |[`extractor_api_lib.document_parser.general_extractor.GeneralExtractor`](./extractor-api-lib/src/extractor_api_lib/document_parser/general_extractor.py) | Combines multiple extractors and decides which one to use for the given file format. |
 | file_extractor | [`extractor_api_lib.api_endpoints.file_extractor.FileExtractor`](./extractor-api-lib/src/extractor_api_lib/api_endpoints/file_extractor.py) | [`extractor_api_lib.impl.api_endpoints.default_file_extractor.DefaultFileExtractor`](./extractor-api-lib/src/extractor_api_lib/impl/api_endpoints/default_file_extractor.py) | Implementation of the `/extract_from_file` endpoint. Uses *general_extractor*. |
-| confluence_extractor | [`extractor_api_lib.api_endpoints.confluence_extractor.ConfluenceExtractor`](./extractor-api-lib/src/extractor_api_lib/api_endpoints/confluence_extractor.py) | [`extractor_api_lib.impl.api_endpoints.default_confluence_extractor.DefaultConfluenceExtractor`](./extractor-api-lib/src/extractor_api_lib/impl/api_endpoints/default_confluence_extractor.py) | Implementation of the `/extract_from_confluence` endpoint. |
+| general_source_extractor | [`extractor_api_lib.api_endpoints.source_extractor.SourceExtractor`](./extractor-api-lib/src/extractor_api_lib/api_endpoints/source_extractor.py) | [`extractor_api_lib.impl.api_endpoints.general_source_extractor.GeneralSourceExtractor`](./extractor-api-lib/src/extractor_api_lib/impl/api_endpoints/general_source_extractor.py) | Implementation of the `/extract_from_source` endpoint.  Will decide the correct extractor for the source. |
+| confluence_extractor | [`extractor_api_lib.extractors.information_extractor.InformationExtractor`](./extractor-api-lib/src/extractor_api_lib/extractors/information_extractor.py) | [`extractor_api_lib.impl.extractors.confluence_extractor.ConfluenceExtractor`](./extractor-api-lib/src/extractor_api_lib/extractors/confluence_extractor.py) | Implementation of an esxtractor for the source `confluence`. |
 
 ## 4. RAG Core Lib
 

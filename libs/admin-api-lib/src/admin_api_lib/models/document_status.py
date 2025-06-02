@@ -13,14 +13,13 @@ Do not edit the class manually.
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar, Dict, List
+import json
+
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-
+from typing import Any, ClassVar, Dict, List
 from admin_api_lib.models.status import Status
 
 try:
@@ -30,7 +29,9 @@ except ImportError:
 
 
 class DocumentStatus(BaseModel):
-    """ """  # noqa: E501
+    """
+    DocumentStatus
+    """  # noqa: E501
 
     name: StrictStr
     status: Status

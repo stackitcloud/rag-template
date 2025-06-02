@@ -12,7 +12,6 @@ Do not edit the class manually.
 """  # noqa: E501
 
 from typing import Any, Optional
-
 from typing_extensions import Self
 
 
@@ -103,6 +102,7 @@ class ApiKeyError(OpenApiException, KeyError):
 
 
 class ApiException(OpenApiException):
+
     def __init__(
         self,
         status=None,

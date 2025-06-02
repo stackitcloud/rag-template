@@ -10,18 +10,19 @@ from unstructured.documents.elements import Element
 from unstructured.partition.docx import partition_docx
 from unstructured.partition.pptx import partition_pptx
 
-from extractor_api_lib.document_parser.information_extractor import InformationExtractor
+
 from extractor_api_lib.file_services.file_service import FileService
+from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
-from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
 
 logger = logging.getLogger(__name__)
 
 
-class MSDocsExtractor(InformationExtractor):
+class MSDocsExtractor(InformationFileExtractor):
     """Extractor for Microsoft Documents (DOCX and PPTX) using unstructured library."""
 
     def __init__(self, file_service: FileService, dataframe_converter: DataframeConverter):
@@ -50,7 +51,7 @@ class MSDocsExtractor(InformationExtractor):
         """
         return [FileType.DOCX, FileType.PPTX]
 
-    def extract_content(self, file_path: Path) -> list[InformationPiece]:
+    async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """
         Extract content from a given file based on its extension.
 
@@ -58,7 +59,8 @@ class MSDocsExtractor(InformationExtractor):
         ----------
         file_path : Path
             The path to the file from which content is to be extracted.
-
+        name : str
+            Name of the document.
         Returns
         -------
         list[InformationPiece]
@@ -92,8 +94,8 @@ class MSDocsExtractor(InformationExtractor):
 
         return self._process_elements(elements, file_path.name)
 
-    def _process_elements(self, elements: list[Element], document_name: str) -> list[InformationPiece]:
-        processed_elements: list[InformationPiece] = []
+    def _process_elements(self, elements: list[Element], document_name: str) -> list[InternalInformationPiece]:
+        processed_elements: list[InternalInformationPiece] = []
         page_content_lines: list[tuple[str, str]] = []
         current_page: int = 1
         old_page: int = 1
@@ -118,7 +120,7 @@ class MSDocsExtractor(InformationExtractor):
         self,
         el: Element,
         page_content_lines: list[tuple[str, str]],
-        processed_elements: list[InformationPiece],
+        processed_elements: list[InternalInformationPiece],
         document_name: str,
         current_page: int,
     ) -> None:
@@ -154,7 +156,7 @@ class MSDocsExtractor(InformationExtractor):
 
     def _create_text_piece(
         self, document_name: str, page: int, page_content_lines: list[tuple[str, str]]
-    ) -> InformationPiece:
+    ) -> InternalInformationPiece:
         content = "\n".join([content for _, content in page_content_lines])
         return self._create_information_piece(document_name, page, content, ContentType.TEXT)
 
@@ -165,7 +167,7 @@ class MSDocsExtractor(InformationExtractor):
         content: str,
         content_type: ContentType,
         additional_meta: Optional[dict[str, Any]] = None,
-    ) -> InformationPiece:
+    ) -> InternalInformationPiece:
         metadata = {
             "document": document_name,
             "page": page,
@@ -174,7 +176,7 @@ class MSDocsExtractor(InformationExtractor):
         }
         if additional_meta:
             metadata.update(additional_meta)
-        return InformationPiece(
+        return InternalInformationPiece(
             type=content_type,
             metadata=metadata,
             page_content=content,

@@ -14,23 +14,23 @@ from dependency_injector import providers
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 
-from .mock_environment_variables import mock_environment_variables
-from .mock_logging_directory import mock_logging_config
+from mock_environment_variables import mock_environment_variables
+from mock_logging_directory import mock_logging_config
 
 mock_environment_variables()
 mock_logging_config()
 
-from src.rag_core_api.main import app
-from src.rag_core_api.models.chat_request import ChatRequest
-from src.rag_core_api.models.chat_history import ChatHistory
-from src.rag_core_api.models.chat_history_message import ChatHistoryMessage
-from src.rag_core_api.models.chat_role import ChatRole
-from src.rag_core_api.models.information_piece import InformationPiece
-from src.rag_core_api.models.content_type import ContentType
-from src.rag_core_api.models.key_value_pair import KeyValuePair
-from src.rag_core_api.models.delete_request import DeleteRequest
-from src.rag_core_api.impl.settings.fake_embedder_settings import FakeEmbedderSettings
-from src.rag_core_api.impl.settings.error_messages import ErrorMessages
+from rag_core_api.main import app
+from rag_core_api.models.chat_request import ChatRequest
+from rag_core_api.models.chat_history import ChatHistory
+from rag_core_api.models.chat_history_message import ChatHistoryMessage
+from rag_core_api.models.chat_role import ChatRole
+from rag_core_api.models.information_piece import InformationPiece
+from rag_core_api.models.content_type import ContentType
+from rag_core_api.models.key_value_pair import KeyValuePair
+from rag_core_api.models.delete_request import DeleteRequest
+from rag_core_api.impl.settings.fake_embedder_settings import FakeEmbedderSettings
+from rag_core_api.impl.settings.error_messages import ErrorMessages
 
 
 @pytest_asyncio.fixture

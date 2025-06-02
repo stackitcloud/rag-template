@@ -118,8 +118,8 @@ known_local_folder = ["rag_core_api", "rag_core_lib"]
 max-line-length = 120
 
 [tool.pytest.ini_options]
-log_cli = 1
+log_cli = true
 log_cli_level = "DEBUG"
-pythonpath = "src"
-testpaths = "src/tests"
+pythonpath = ["src", "tests"]
+testpaths = "tests"
 

@@ -14,19 +14,20 @@ import pytesseract
 from pdf2image import convert_from_path
 from pdfplumber.page import Page
 
-from extractor_api_lib.document_parser.information_extractor import InformationExtractor
-from extractor_api_lib.file_services.file_service import FileService
+
 from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
-from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
+from extractor_api_lib.file_services.file_service import FileService
+from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
 
 logger = logging.getLogger(__name__)
 
 
-class PDFExtractor(InformationExtractor):
+class PDFExtractor(InformationFileExtractor):
     """PDFExtractor is a class responsible for extracting information from PDF files.
 
     It converts PDF pages to images, identifies table/figure coordinates, and extracts
@@ -35,7 +36,7 @@ class PDFExtractor(InformationExtractor):
     Attributes
     ----------
     TITLE_PATTERN : re.Pattern
-        Regular expression pattern to identify titles in the text.
+        Regular expression pattern to identify titles in the text.document
     TITLE_PATTERN_MULTILINE : re.Pattern
         Regular expression pattern to identify titles in the text with multiline support.
     """
@@ -86,7 +87,7 @@ class PDFExtractor(InformationExtractor):
         content_type: ContentType,
         information_id: str,
         additional_meta: Optional[dict] = None,
-    ) -> InformationPiece:
+    ) -> InternalInformationPiece:
         metadata = {
             "document": document_name,
             "page": page,
@@ -96,19 +97,21 @@ class PDFExtractor(InformationExtractor):
         }
         if additional_meta:
             metadata = metadata | additional_meta
-        return InformationPiece(
+        return InternalInformationPiece(
             type=content_type,
             metadata=metadata,
             page_content=content,
         )
 
-    def extract_content(self, file_path: Path) -> list[InformationPiece]:
+    async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """Extract content from given file.
 
         Parameters
         ----------
         file_path : Path
             Path to the file the information should be extracted from.
+        name : str
+            Name of the document.
 
         Returns
         -------
@@ -134,7 +137,7 @@ class PDFExtractor(InformationExtractor):
                         page=page,
                         temp_dir=temp_dir,
                         title=current_title,
-                        document_name=file_path.name,
+                        document_name=name,
                     )
                     pdf_elements += new_pdf_elements
 
@@ -147,7 +150,7 @@ class PDFExtractor(InformationExtractor):
         document_name: str,
         text_x_tolerance: int = 1,
         text_y_tolerance: int = 1,
-    ) -> list[InformationPiece]:
+    ) -> list[InternalInformationPiece]:
         return_value = []
         pdfplumber_tables = page.find_tables()
         table_strings = []

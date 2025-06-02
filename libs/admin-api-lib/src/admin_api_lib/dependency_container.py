@@ -1,5 +1,6 @@
 """Module for the DependencyContainer class."""
 
+from admin_api_lib.impl.api_endpoints.default_file_uploader import DefaultFileUploader
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import (  # noqa: WOT001
     Configuration,
@@ -18,18 +19,14 @@ from admin_api_lib.extractor_api_client.openapi_client.api_client import ApiClie
 from admin_api_lib.extractor_api_client.openapi_client.configuration import (
     Configuration as ExtractorConfiguration,
 )
-from admin_api_lib.impl.api_endpoints.default_confluence_loader import (
-    DefaultConfluenceLoader,
-)
+from admin_api_lib.impl.api_endpoints.default_source_uploader import DefaultSourceUploader
 from admin_api_lib.impl.api_endpoints.default_document_deleter import (
     DefaultDocumentDeleter,
 )
 from admin_api_lib.impl.api_endpoints.default_document_reference_retriever import (
     DefaultDocumentReferenceRetriever,
 )
-from admin_api_lib.impl.api_endpoints.default_document_uploader import (
-    DefaultDocumentUploader,
-)
+
 from admin_api_lib.impl.api_endpoints.default_documents_status_retriever import (
     DefaultDocumentsStatusRetriever,
 )
@@ -42,20 +39,17 @@ from admin_api_lib.impl.information_enhancer.page_summary_enhancer import (
 from admin_api_lib.impl.key_db.file_status_key_value_store import (
     FileStatusKeyValueStore,
 )
-from admin_api_lib.impl.mapper.confluence_settings_mapper import (
-    ConfluenceSettingsMapper,
-)
 from admin_api_lib.impl.mapper.informationpiece2document import (
     InformationPiece2Document,
 )
 from admin_api_lib.impl.settings.chunker_settings import ChunkerSettings
-from admin_api_lib.impl.settings.confluence_settings import ConfluenceSettings
 from admin_api_lib.impl.settings.document_extractor_settings import (
     DocumentExtractorSettings,
 )
 from admin_api_lib.impl.settings.key_value_settings import KeyValueSettings
 from admin_api_lib.impl.settings.rag_api_settings import RAGAPISettings
 from admin_api_lib.impl.settings.s3_settings import S3Settings
+from admin_api_lib.impl.settings.source_uploader_settings import SourceUploaderSettings
 from admin_api_lib.impl.settings.summarizer_settings import SummarizerSettings
 from admin_api_lib.impl.summarizer.langchain_summarizer import LangchainSummarizer
 from admin_api_lib.prompt_templates.summarize_prompt import SUMMARIZE_PROMPT
@@ -92,7 +86,7 @@ class DependencyContainer(DeclarativeContainer):
     rag_api_settings = RAGAPISettings()
     key_value_store_settings = KeyValueSettings()
     summarizer_settings = SummarizerSettings()
-    confluence_settings = ConfluenceSettings()
+    source_uploader_settings = SourceUploaderSettings()
 
     key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)
     file_service = Singleton(S3Service, s3_settings=s3_settings)
@@ -111,7 +105,6 @@ class DependencyContainer(DeclarativeContainer):
     rag_api = Singleton(RagApi, rag_api_client)
 
     information_mapper = Singleton(InformationPiece2Document)
-    confluence_settings_mapper = Singleton(ConfluenceSettingsMapper)
 
     large_language_model = Selector(
         class_selector_config.llm_type,
@@ -164,27 +157,29 @@ class DependencyContainer(DeclarativeContainer):
         DefaultDocumentDeleter, rag_api=rag_api, file_service=file_service, key_value_store=key_value_store
     )
     documents_status_retriever = Singleton(DefaultDocumentsStatusRetriever, key_value_store=key_value_store)
-    confluence_loader = Singleton(
-        DefaultConfluenceLoader,
+
+    document_reference_retriever = Singleton(DefaultDocumentReferenceRetriever, file_service=file_service)
+
+    source_uploader = Singleton(
+        DefaultSourceUploader,
         extractor_api=document_extractor,
         rag_api=rag_api,
-        key_value_store=key_value_store,
-        settings=confluence_settings,
         information_enhancer=information_enhancer,
         information_mapper=information_mapper,
         chunker=chunker,
+        key_value_store=key_value_store,
         document_deleter=document_deleter,
-        settings_mapper=confluence_settings_mapper,
+        settings=source_uploader_settings,
     )
-    document_reference_retriever = Singleton(DefaultDocumentReferenceRetriever, file_service=file_service)
-    document_uploader = Singleton(
-        DefaultDocumentUploader,
-        document_extractor=document_extractor,
-        file_service=file_service,
+
+    file_uploader = Singleton(
+        DefaultFileUploader,
+        extractor_api=document_extractor,
         rag_api=rag_api,
         information_enhancer=information_enhancer,
         information_mapper=information_mapper,
         chunker=chunker,
         key_value_store=key_value_store,
         document_deleter=document_deleter,
+        file_service=file_service,
     )

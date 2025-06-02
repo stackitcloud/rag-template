@@ -92,7 +92,7 @@ html5lib = "^1.1"
 langchain-community = "^0.3.23"
 atlassian-python-api = "^4.0.3"
 markdownify = "^1.1.0"
-langchain-core = "^0.3.58"
+langchain-core = "0.3.63"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

@@ -2,12 +2,8 @@
 
 from extractor_api_lib.impl.types.content_type import ContentType as InternalContentType
 from extractor_api_lib.models.content_type import ContentType as ExternalContentType
-from extractor_api_lib.models.dataclasses.information_piece import (
-    InformationPiece as InternalInformationPiece,
-)
-from extractor_api_lib.models.information_piece import (
-    InformationPiece as ExternalInformationPiece,
-)
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.information_piece import InformationPiece
 from extractor_api_lib.models.key_value_pair import KeyValuePair as MetaInformationPiece
 
 
@@ -27,7 +23,7 @@ class Internal2ExternalInformationPiece:
         InternalContentType.TABLE: ExternalContentType.TABLE,
     }
 
-    def map_internal_to_external(self, internal: InternalInformationPiece) -> ExternalInformationPiece:
+    def map_internal_to_external(self, internal: InternalInformationPiece) -> InformationPiece:
         """Map an InternalInformationPiece object to an ExternalInformationPiece object.
 
         Parameters
@@ -42,7 +38,7 @@ class Internal2ExternalInformationPiece:
         """
         information_type = self._map_information_type(internal.type)
         meta = self._map_meta(internal.metadata)
-        return ExternalInformationPiece(page_content=internal.page_content, type=information_type, metadata=meta)
+        return InformationPiece(page_content=internal.page_content, type=information_type, metadata=meta)
 
     def _map_information_type(self, internal: InternalContentType) -> ExternalContentType:
         return self.TYPE_LOOKUP_TABLE[internal]

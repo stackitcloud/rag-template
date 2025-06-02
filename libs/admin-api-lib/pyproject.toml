@@ -29,7 +29,7 @@ per-file-ignores = """
   ./src/admin_api_lib/impl/admin_api.py: B008,
   ./src/admin_api_lib/dependency_container.py: CCE002,CCE001,
   ./src/admin_api_lib/apis/admin_api_base.py: WOT001,
-  ./tests/*: S101,S106,D100,D103,PT011
+  ./tests/*: S101,S106,D100,D103,PT011,N802
   ./src/admin_api_lib/impl/settings/confluence_settings.py: C901,N805,
   ./src/admin_api_lib/impl/utils/comma_separated_bool_list.py: R505,
   ./src/admin_api_lib/impl/utils/comma_separated_str_list.py: R505,

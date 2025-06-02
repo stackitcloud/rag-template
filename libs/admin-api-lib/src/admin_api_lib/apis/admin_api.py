@@ -2,15 +2,37 @@
 
 # coding: utf-8
 
+from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
-
-from fastapi import APIRouter, Path, Request, Response, UploadFile  # noqa: F401
+from typing_extensions import Annotated
 
 import admin_api_lib.impl
+
+from fastapi import (  # noqa: F401
+    APIRouter,
+    Body,
+    Cookie,
+    Depends,
+    Form,
+    UploadFile,
+    Request,
+    Header,
+    HTTPException,
+    Path,
+    Query,
+    Response,
+    Security,
+    status,
+)
+from pydantic import Field, StrictStr
+
+
 from admin_api_lib.apis.admin_api_base import BaseAdminApi
 from admin_api_lib.models.document_status import DocumentStatus
-
+from admin_api_lib.models.http_validation_error import HTTPValidationError
+from admin_api_lib.models.key_value_pair import KeyValuePair
+from admin_api_lib.models.extra_models import TokenModel  # noqa: F401
 
 router = APIRouter()
 
@@ -24,12 +46,14 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     responses={
         200: {"description": "Deleted"},
         500: {"description": "Internal server error"},
+        422: {"model": HTTPValidationError, "description": "Validation Error"},
     },
     tags=["admin"],
+    summary="Delete Document",
     response_model_by_alias=True,
 )
 async def delete_document(
-    identification: str = Path(..., description=""),
+    identification: StrictStr = Path(..., description=""),
 ) -> None:
     """
     Asynchronously deletes a document based on the provided identification.
@@ -43,6 +67,8 @@ async def delete_document(
     -------
     None
     """
+    if not BaseAdminApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
     return await BaseAdminApi.subclasses[0]().delete_document(identification)
 
 
@@ -53,12 +79,16 @@ async def delete_document(
         400: {"model": str, "description": "Bad request"},
         404: {"model": str, "description": "Document not found."},
         500: {"model": str, "description": "Internal server error"},
+        422: {"model": HTTPValidationError, "description": "Validation Error"},
     },
     tags=["admin"],
+    summary="Document Reference Id Get",
     response_model_by_alias=True,
 )
-async def document_reference_id_get(
-    identification: str = Path(..., description="Identifier of the pdf document."),
+async def document_reference(
+    identification: Annotated[StrictStr, Field(description="Identifier of the document.")] = Path(
+        ..., description="Identifier of the document."
+    ),
 ) -> Response:
     """
     Asynchronously retrieve a document reference by its identification.
@@ -73,19 +103,22 @@ async def document_reference_id_get(
     Response
         The response object containing the document reference details.
     """
-    return await BaseAdminApi.subclasses[0]().document_reference_id_get(identification)
+    if not BaseAdminApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseAdminApi.subclasses[0]().document_reference(identification)
 
 
 @router.get(
     "/all_documents_status",
     responses={
-        200: {"model": list[DocumentStatus], "description": "list of document links"},
+        200: {"model": List[DocumentStatus], "description": "List of document links"},
         500: {"description": "Internal server error"},
     },
     tags=["admin"],
+    summary="Get All Documents Status",
     response_model_by_alias=True,
 )
-async def get_all_documents_status() -> list[DocumentStatus]:
+async def get_all_documents_status() -> List[DocumentStatus]:
     """
     Asynchronously retrieves the status of all documents.
 
@@ -94,64 +127,71 @@ async def get_all_documents_status() -> list[DocumentStatus]:
     list[DocumentStatus]
         A list containing the status of all documents.
     """
+    if not BaseAdminApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
     return await BaseAdminApi.subclasses[0]().get_all_documents_status()
 
 
 @router.post(
-    "/load_confluence",
-    responses={
-        200: {"description": "Loading from confluence is successful"},
-        423: {
-            "description": (
-                "if the confluence loader is already processing a request,"
-                "no further requests are possible. The user needs to wait,"
-                "till the preliminary request finished processing."
-            )
-        },
-        500: {"description": "Internal Server Error"},
-        501: {"description": "The confluence loader is not set up"},
-    },
-    tags=["admin"],
-    response_model_by_alias=True,
-)
-async def load_confluence_post() -> None:
-    """
-    Asynchronously loads a Confluence space.
-
-    Returns
-    -------
-    None
-    """
-    return await BaseAdminApi.subclasses[0]().load_confluence_post()
-
-
-@router.post(
-    "/upload_documents",
+    "/upload_file",
     responses={
         200: {"description": "ok"},
         400: {"description": "Bad request"},
-        422: {"description": "If no text has been extracted from the file."},
+        422: {"description": "Unprocessable Content"},
         500: {"description": "Internal server error"},
     },
     tags=["admin"],
+    summary="Upload File",
     response_model_by_alias=True,
 )
-async def upload_documents_post(
-    body: UploadFile,
+async def upload_file(
+    file: UploadFile,
     request: Request,
 ) -> None:
     """
-    Asynchronously uploads user-selected source documents.
+    Uploads user selected sources.
 
     Parameters
     ----------
-    body : UploadFile
-        The file object containing the source documents to be uploaded.
+    file : UploadFile
+        The file to be uploaded.
     request : Request
-        The request object containing metadata about the upload request.
-
-    Returns
-    -------
-    None
+        The HTTP request object containing metadata about the upload request.
     """
-    return await BaseAdminApi.subclasses[0]().upload_documents_post(body, request)
+    if not BaseAdminApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseAdminApi.subclasses[0]().upload_file(file, request)
+
+
+@router.post(
+    "/upload_source",
+    responses={
+        200: {"description": "ok"},
+        400: {"description": "Bad request"},
+        422: {"description": "Unprocessable Content"},
+        500: {"description": "Internal server error"},
+    },
+    tags=["admin"],
+    summary="Upload Source",
+    response_model_by_alias=True,
+)
+async def upload_source(
+    source_type: StrictStr = Query(None, description="The type of the source"),
+    name: StrictStr = Query(None, description="The name of the source", alias="name"),
+    key_value_pair: List[KeyValuePair] = Body(None, description="The key-value pairs for the source"),
+) -> None:
+    """
+    Uploads user selected sources.
+
+    Parameters
+    ----------
+    source_type : str
+        The type of the source. Is used by the extractor service to determine the correct extractor to use.
+    name : str
+        Display name of the source.
+    key_value_pair : List[KeyValuePair]
+        List of KeyValuePair with parameters used for the extraction.
+    """
+    if not BaseAdminApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseAdminApi.subclasses[0]().upload_source(source_type, name, key_value_pair)

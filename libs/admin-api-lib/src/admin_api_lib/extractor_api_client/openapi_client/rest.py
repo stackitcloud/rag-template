@@ -19,10 +19,7 @@ import ssl
 
 import urllib3
 
-from admin_api_lib.extractor_api_client.openapi_client.exceptions import (
-    ApiException,
-    ApiValueError,
-)
+from admin_api_lib.extractor_api_client.openapi_client.exceptions import ApiException, ApiValueError
 
 SUPPORTED_SOCKS_PROXIES = {"socks5", "socks5h", "socks4", "socks4a"}
 RESTResponseType = urllib3.HTTPResponse
@@ -39,6 +36,7 @@ def is_socks_proxy_url(url):
 
 
 class RESTResponse(io.IOBase):
+
     def __init__(self, resp) -> None:
         self.response = resp
         self.status = resp.status
@@ -60,6 +58,7 @@ class RESTResponse(io.IOBase):
 
 
 class RESTClientObject:
+
     def __init__(self, configuration) -> None:
         # urllib3.PoolManager will pass all kw parameters to connectionpool
         # https://github.com/shazow/urllib3/blob/f9409436f83aeb79fbaf090181cd81b784f1b8ce/urllib3/poolmanager.py#L75  # noqa: E501
@@ -144,6 +143,7 @@ class RESTClientObject:
         try:
             # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
             if method in ["POST", "PUT", "PATCH", "OPTIONS", "DELETE"]:
+
                 # no content type provided or payload is json
                 content_type = headers.get("Content-Type")
                 if not content_type or re.search("json", content_type, re.IGNORECASE):

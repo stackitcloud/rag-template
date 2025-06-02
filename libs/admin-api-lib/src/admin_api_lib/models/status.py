@@ -13,11 +13,11 @@ Do not edit the class manually.
 
 
 from __future__ import annotations
-
 import json
 import pprint
 import re  # noqa: F401
 from enum import Enum
+
 
 try:
     from typing import Self
@@ -26,7 +26,9 @@ except ImportError:
 
 
 class Status(str, Enum):
-    """ """
+    """
+    allowed enum values
+    """
 
     """
     allowed enum values

@@ -5,20 +5,21 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
+
 from unstructured.documents.elements import Element
 from unstructured.partition.xml import partition_xml
 
-from extractor_api_lib.document_parser.information_extractor import InformationExtractor
 from extractor_api_lib.file_services.file_service import FileService
+from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
-from extractor_api_lib.models.dataclasses.information_piece import InformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 
 logger = logging.getLogger(__name__)
 
 
-class XMLExtractor(InformationExtractor):
+class XMLExtractor(InformationFileExtractor):
     """Extractor for XML documents using unstructured library."""
 
     def __init__(self, file_service: FileService):
@@ -43,7 +44,7 @@ class XMLExtractor(InformationExtractor):
         """
         return [FileType.XML]
 
-    def extract_content(self, file_path: Path) -> list[InformationPiece]:
+    async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """
         Extract content from an XML file and processes the elements.
 
@@ -51,6 +52,8 @@ class XMLExtractor(InformationExtractor):
         ----------
         file_path : Path
             The path to the XML file to be processed.
+        name : str
+            Name of the document.
 
         Returns
         -------
@@ -60,8 +63,8 @@ class XMLExtractor(InformationExtractor):
         elements = partition_xml(filename=file_path.as_posix(), xml_keep_tags=False)
         return self._process_elements(elements, file_path.name)
 
-    def _process_elements(self, elements: list[Element], document_name: str) -> list[InformationPiece]:
-        processed_elements: list[InformationPiece] = []
+    def _process_elements(self, elements: list[Element], document_name: str) -> list[InternalInformationPiece]:
+        processed_elements: list[InternalInformationPiece] = []
         content_lines: list[tuple[str, str]] = []
 
         for el in elements:
@@ -86,7 +89,7 @@ class XMLExtractor(InformationExtractor):
         text = re.sub(r"\s+", " ", text)
         return text.strip()
 
-    def _create_text_piece(self, document_name: str, content_lines: list[tuple[str, str]]) -> InformationPiece:
+    def _create_text_piece(self, document_name: str, content_lines: list[tuple[str, str]]) -> InternalInformationPiece:
         content = "\n".join([content for _, content in content_lines])
         return self._create_information_piece(document_name, content, ContentType.TEXT)
 
@@ -96,7 +99,7 @@ class XMLExtractor(InformationExtractor):
         content: str,
         content_type: ContentType,
         additional_meta: Optional[dict[str, Any]] = None,
-    ) -> InformationPiece:
+    ) -> InternalInformationPiece:
         metadata = {
             "document": document_name,
             "id": hash_datetime(),
@@ -104,7 +107,7 @@ class XMLExtractor(InformationExtractor):
         }
         if additional_meta:
             metadata.update(additional_meta)
-        return InformationPiece(
+        return InternalInformationPiece(
             type=content_type,
             metadata=metadata,
             page_content=content,

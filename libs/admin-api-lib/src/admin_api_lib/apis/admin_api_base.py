@@ -3,11 +3,14 @@
 # coding: utf-8
 # flake8: noqa: D105
 
-from typing import ClassVar, Tuple  # noqa: F401
+from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+from typing_extensions import Annotated
 
+from pydantic import Field, StrictStr
 from fastapi import Request, Response, UploadFile
 
 from admin_api_lib.models.document_status import DocumentStatus
+from admin_api_lib.models.key_value_pair import KeyValuePair
 
 
 class BaseAdminApi:
@@ -28,7 +31,7 @@ class BaseAdminApi:
 
     async def delete_document(
         self,
-        identification: str,
+        identification: StrictStr,
     ) -> None:
         """
         Asynchronously deletes a document based on the provided identification.
@@ -43,9 +46,9 @@ class BaseAdminApi:
         None
         """
 
-    async def document_reference_id_get(
+    async def document_reference(
         self,
-        identification: str,
+        identification: Annotated[StrictStr, Field(description="Identifier of the document.")],
     ) -> Response:
         """
         Asynchronously retrieve a document reference by its identification.
@@ -73,28 +76,40 @@ class BaseAdminApi:
             A list containing the status of all documents.
         """
 
-    async def load_confluence_post(
+    async def upload_source(
         self,
+        source_type: StrictStr,
+        name: StrictStr,
+        key_value_pair: List[KeyValuePair],
     ) -> None:
         """
-        Asynchronously loads a Confluence space.
+        Asynchronously uploads user selected source.
+
+        Parameters
+        ----------
+        source_type : str
+            The type of the source. Is used by the extractor service to determine the correct extractor to use.
+        name : str
+            Display name of the source.
+        key_value_pair : list[KeyValuePair]
+            List of KeyValuePair with parameters used for the extraction.
 
         Returns
         -------
         None
         """
 
-    async def upload_documents_post(
+    async def upload_file(
         self,
-        body: UploadFile,
+        file: UploadFile,
         request: Request,
     ) -> None:
         """
-        Asynchronously uploads user-selected source documents.
+        Asynchronously uploads user-selected documents.
 
         Parameters
         ----------
-        body : UploadFile
+        file : UploadFile
             The file object containing the source documents to be uploaded.
         request : Request
             The request object containing metadata about the upload request.

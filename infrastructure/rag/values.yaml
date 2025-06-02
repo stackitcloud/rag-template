@@ -261,17 +261,9 @@ adminBackend:
     chunker:
       CHUNKER_MAX_SIZE: 1000
       CHUNKER_OVERLAP: 300
-    confluenceLoader:
-      CONFLUENCE_URL: ""
-      CONFLUENCE_SPACE_KEY: ""
-      CONFLUENCE_DOCUMENT_NAME: ""
     keyValueStore:
       USECASE_KEYVALUE_PORT: 6379
       USECASE_KEYVALUE_HOST: "rag-keydb"
-
-  secrets:
-    confluenceLoader:
-      token: ""
 
 extractor:
   replicaCount: 1

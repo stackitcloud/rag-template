@@ -1,6 +1,7 @@
 **/cr-secret.yaml
 **/customer-values.yaml
-
+auth
+*\-values.yaml
 */terraform.tfstate
 */Chart.lock
 *.tgz

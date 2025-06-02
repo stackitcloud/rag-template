@@ -103,8 +103,6 @@ spec:
           - configMapRef:
               name: {{ template "configmap.pdfextractorName" . }}
           - configMapRef:
-              name: {{ template "configmap.confluenceLoaderName" . }}
-          - configMapRef:
               name: {{ template "configmap.keyValueStoreName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
@@ -114,8 +112,6 @@ spec:
               name: {{ template "secret.s3Name" . }}
           - secretRef:
               name: {{ template "secret.stackitVllmName" . }}
-          - secretRef:
-              name: {{ template "secret.confluenceLoaderName" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.adminBackend.pythonPathEnv.PYTHONPATH }}

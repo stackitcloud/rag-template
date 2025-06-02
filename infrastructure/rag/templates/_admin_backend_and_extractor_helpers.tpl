@@ -15,10 +15,6 @@
 {{- printf "%s-stackit-vllm-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "secret.confluenceLoaderName" -}}
-{{- printf "%s-confluence-loader-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 # configmaps
 {{- define "configmap.s3Name" -}}
 {{- printf "%s-s3-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
@@ -70,10 +66,6 @@
 
 {{- define "configmap.stackitVllmName" -}}
 {{- printf "%s-stackit-vllm-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "configmap.confluenceLoaderName" -}}
-{{- printf "%s-confluence-loader-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 # image

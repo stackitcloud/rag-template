@@ -55,7 +55,7 @@ export class DocumentAPI {
             ];
             // include required query parameters
             await axios.post<void>('/upload_source', payload, {
-                params: { type: 'confluence', name: config.name }
+                params: { source_type: 'confluence', name: config.name }
             });
         } catch(error) {
             this.handleError(error);

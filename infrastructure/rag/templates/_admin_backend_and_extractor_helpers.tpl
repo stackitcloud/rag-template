@@ -68,6 +68,10 @@
 {{- printf "%s-stackit-vllm-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "configmap.sourceUploaderName" -}}
+{{- printf "%s-source-uploader-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 # image
 {{- define "adminBackend.fullImageName" -}}
 {{- printf "%s/%s:%s" .Values.adminBackend.image.repository .Values.adminBackend.image.name .Values.adminBackend.image.tag | trimSuffix ":" }}

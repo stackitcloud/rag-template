@@ -104,6 +104,8 @@ spec:
               name: {{ template "configmap.pdfextractorName" . }}
           - configMapRef:
               name: {{ template "configmap.keyValueStoreName" . }}
+          - configMapRef:
+              name: {{ template "configmap.sourceUploaderName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:

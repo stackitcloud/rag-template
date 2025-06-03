@@ -26,20 +26,22 @@ This Repository contains the helm chart for the following RAG components:
 - Frontend
 - Backend
 
-> 📝 NOTE: Only the settings you are most likely to adjust are listed here. For all available settings please have a look at the [values.yaml](rag/values.yaml).
+> 📝 NOTE: Only the settings you are most likely to adjust are listed here. For all available settings please take a look at the [values.yaml](rag/values.yaml).
 
 Except all `backend` services all components can be disabled and exchanged with components of your choice.
 This can be done by overwriting the following values in your `values.yaml`
 
 ```yaml
 features:
+  ollama:
+    enabled: false
+  minio:
+    enabled: false
   langfuse:
     enabled: true
   qdrant:
     enabled: true
   frontend:
-    enabled: true
-  minio:
     enabled: true
   keydb:
     enabled: true
@@ -74,16 +76,28 @@ For local development, the `imagePullSecret` is not necessary.
 You can deploy Langfuse with initial values for the public and secret API keys. The respective values are shown below:
 
 ```yaml
+# For production deployment with external PostgreSQL
 langfuse:
+  postgresql:
+    deploy: true # If you want to use an external PostgreSQL, set this to false
   langfuse:
     additionalEnv:
-      LANGFUSE_INIT_ORG_ID:
-      LANGFUSE_INIT_PROJECT_ID:
-      LANGFUSE_INIT_PROJECT_PUBLIC_KEY:
-      LANGFUSE_INIT_PROJECT_SECRET_KEY:
-      LANGFUSE_INIT_USER_EMAIL:
-      LANGFUSE_INIT_USER_NAME:
-      LANGFUSE_INIT_USER_PASSWORD:
+    - name: DATABASE_URL
+      value: "postgresql://username:password@postgres-host:5432/langfuse" # Your PostgreSQL connection string
+    - name: LANGFUSE_INIT_ORG_ID
+      value: ... # Optional: Pre-create organization
+    - name: LANGFUSE_INIT_PROJECT_ID
+      value: ... # Optional: Pre-create project
+    - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
+      value: ... # Optional: Set initial public key
+    - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
+      value: ... # Optional: Set initial secret key
+    - name: LANGFUSE_INIT_USER_EMAIL
+      value: ... # Optional: Create initial user
+    - name: LANGFUSE_INIT_USER_NAME
+      value: ... # Optional: Initial user name
+    - name: LANGFUSE_INIT_USER_PASSWORD
+      value: ... # Optional: Initial user password
 ```
 
 Besides, you can deploy Langfuse in a two-step approach. First, you deploy Langfuse without the API keys, and then you can create the API keys via the Web UI. Therefore, after deployment, you have to sign up in the Web UI and create a project in the local Langfuse instance, create API keys via the settings; see below.
@@ -134,12 +148,24 @@ The usage of the KeyDB is **only recommended for development** purposes. KeyDB i
 In **production**, the usage of a fully-managed Redis instance (e.g. provided by STACKIT) is recommended. The following parameters need to be adjusted in the `values.yaml` file:
 
 ```yaml
+# For production: Use external Redis instead of KeyDB
 adminBackend:
-  keyValueStore:
-    USECASE_KEYVALUE_HOST: ...
+  envs:
+    keyValueStore:
+      USECASE_KEYVALUE_HOST: ... # Your Redis host (e.g., redis.yourdomain.com)
+      USECASE_KEYVALUE_PORT: 6379
+
 features:
   keydb:
-    enabled: false
+    enabled: false # Disable KeyDB for production
+
+langfuse:
+  valkey:
+    deploy: false # Use Redis instead of KeyDB
+  langfuse:
+    additionalEnv:
+    - name: REDIS_CONNECTION_STRING
+      value: "redis:"
 ```
 
 ### 1.4 Frontend
@@ -150,18 +176,21 @@ The following values should be adjusted for the deployment:
 frontend:
   envs:
     vite:
-      VITE_API_URL: ... # You should add the public url to the backend here
-      VITE_CHAT_URL: ... # You should add the public url to the chat frontend here
+      # Required: Update these URLs for your deployment
+      VITE_API_URL: "https://rag.yourdomain.com/api" # Your backend API URL
+      VITE_CHAT_URL: "https://rag.yourdomain.com" # Your chat frontend URL
+      VITE_ADMIN_URL: "https://admin.rag.yourdomain.com" # Your admin frontend URL
+      VITE_ADMIN_API_URL: "https://admin.rag.yourdomain.com/api" # Your admin API URL
 
   ingress:
     host:
-      name: ... # You should add the DNS for the chat-frontend here
+      name: ... # Your domain name (e.g., rag.yourdomain.com)
 
   secrets:
     viteAuth:
-      VITE_AUTH_USERNAME: ... # You should add the username for the basic auth of the backend here
-      VITE_AUTH_PASSWORD: ... # You should add the password for the basic auth of the backend here
-
+      # Required: Credentials for backend authentication
+      VITE_AUTH_USERNAME: ... # Username for basic auth
+      VITE_AUTH_PASSWORD: ... # Password for basic auth
 ```
 
 ### 1.5 Backend
@@ -171,33 +200,34 @@ The following values should be adjusted for the deployment:
 ```yaml
 backend:
   secrets:
+    # Required: Basic authentication for the backend API
+    basicAuth: ... # Set your basic auth credentials
 
-    basicAuth: ...
+    # Required: Langfuse API keys for observability
     langfuse:
-      publicKey: ...
-      secretKey: ...
-    openai:
-      apiKey: ...
-    # LLM secrets. Only the secrets for the LLM you choose have to be provided
-    # With the exception of the class `stackit` the embedder and llm share the secrets
-    #
-    # stackit
+      publicKey: ... # Your Langfuse public key
+      secretKey: ... # Your Langfuse secret key
+
+    # Required: API keys for your chosen LLM provider
+    # STACKIT LLM provider
     stackitEmbedder:
-      apiKey: ...
+      apiKey: ... # Your STACKIT embedder API key
     stackitVllm:
-      apiKey: ...
-    # for ollama there is no apikey setting
+      apiKey: ... # Your STACKIT vLLM API key
+
+    # Optional: Only needed if using RAGAS evaluation with OpenAI
+    ragas:
+      openaiApikey: ... # Your OpenAI API key for RAGAS evaluation
 
   envs:
-    # Decide which LLM you would like to use for answering/embedding.
-    # These settings are independent of each other. You can use a different LLM for embedding and answering.
+    # Required: Choose your LLM and embedder providers
     ragClassTypes:
-      RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+      RAG_CLASS_TYPE_LLM_TYPE: "stackit" # Options: "stackit", "ollama"
     embedderClassTypes:
-      EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
-    # Settings for the retriever. These should be adjusted for your use-case.
-    # Finding the correct setting to not retrieve too many or not enough documents from the vector database is
-    # important for a good result.
+      EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit" # Options: "stackit", "ollama"
+
+    # Optional: Adjust retriever settings for your use-case
+    # These control how many documents are retrieved from the vector database
     retriever:
       RETRIEVER_THRESHOLD: 0.3
       RETRIEVER_K_DOCUMENTS: 10
@@ -208,6 +238,7 @@ backend:
       RETRIEVER_TABLE_K_DOCUMENTS: 10
       RETRIEVER_IMAGE_THRESHOLD: 0.7
       RETRIEVER_IMAGE_K_DOCUMENTS: 10
+    # Optional: Adjust Reranker settings for your use-case
     reranker:
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
@@ -229,32 +260,32 @@ backend:
       RAGAS_MAX_CONCURRENCY: "5"
 
   ingress:
-      host:
-      name: rag.localhost
+    host:
+      name: ... # Your domain name (e.g., rag.yourdomain.com)
 
-global:
-  ssl: true
-  secrets:
-    basic_auth: ...
-    langfuse:
-      public_key: ...
-      secret_key: ...
+# Required for production deployments
+shared:
   config:
-    envs:
-      rag_class_types:
-        RAG_CLASS_TYPE_LLM_TYPE: "stackit"
-        RAG_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
+    dns:
+    - ... # Your primary domain (e.g., rag.yourdomain.com)
+    - ... # Your admin domain (e.g., admin.rag.yourdomain.com)
+
+    tls:
+      enabled: true
+      host: ... # Your primary domain for TLS certificate
+      secretName: tls-certificate
+      issuerName: letsencrypt-cluster-issuer # Adjust if using different cert issuer
 
 ```
 
-> 📝 NOTE: All values containg `...` are placeholders and have to be replaced with real values.
+> 📝 NOTE: Values marked with `...` are placeholders that **must** be replaced with your actual values for deployment.
 
-> ⓘ INFO: This deployment comes with multiple options. You can change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in `./rag/values.yaml` to one of the following values:
+> ⓘ INFO: This deployment comes with multiple options. You can change the `backend.envs.ragClassTypes.RAG_CLASS_TYPE_LLM_TYPE` in `./rag/values.yaml` to one of the following values:
 >
 > - `stackit`: Uses the STACKIT LLM as an LLM provider.
 > - `ollama`: Uses Ollama as an LLM provider.
 >
-> The same options are also available for the `backend.envs.ragClassTypes.RAG_CLASS_TYPE_EMBEDDER_TYPE`.
+> The same options are also available for the `backend.envs.embedderClassTypes.EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE`.
 
 ### 1.6 Use Case Environment Variables
 

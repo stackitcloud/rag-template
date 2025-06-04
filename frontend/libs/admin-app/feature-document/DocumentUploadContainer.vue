@@ -151,10 +151,15 @@ const getErrorMessage = (errorType: string) => {
                     <p class="mb-1 font-bold">{{ t('documents.confluenceLoadTitle') }}</p>
                     <!-- configuration inputs -->
                     <div class="space-y-2 mb-4 w-full max-w-sm">
+                      <label for="confluenceUrl" class="sr-only">Confluence URL</label>
                       <input v-model="confluenceUrl" type="url" placeholder="URL" class="input input-bordered w-full" />
+                      <label for="confluenceName" class="sr-only"> Confluence Name</label>
                       <input v-model="confluenceName" type="text" placeholder="Name" class="input input-bordered w-full" />
+                      <label for="spaceKey" class="sr-only">Space key</label>
                       <input v-model="spaceKey" type="text" placeholder="Space key" class="input input-bordered w-full" />
+                      <label for="confluenceToken" class="sr-only">Token</label>
                       <input v-model="confluenceToken" type="password" placeholder="Token" class="input input-bordered w-full" />
+                      <label for="maxPages" class="sr-only">Max pages</label>
                       <input v-model.number="maxPages" type="number" placeholder="Max number of pages" class="input input-bordered w-full" />
                     </div>
                     <p class="text-xs opacity-50 mb-4">{{ t('documents.confluenceLoadDescription') }}</p>

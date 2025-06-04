@@ -16,6 +16,13 @@ export interface ConfluenceConfig {
   name: string;
 }
 
+// sitemap configuration interface
+export interface SitemapConfig {
+  webPath: string;
+  filterUrls: string;
+  name: string;
+}
+
 export class DocumentAPI {
     static async loadDocuments(): Promise<DocumentModel[]> {
         try {
@@ -56,6 +63,35 @@ export class DocumentAPI {
             // include required query parameters
             await axios.post<void>('/upload_source', payload, {
                 params: { source_type: 'confluence', name: config.name }
+            });
+        } catch(error) {
+            this.handleError(error);
+        }
+    }
+
+    static async loadSitemap(config: SitemapConfig): Promise<void> {
+        try {
+            // convert config to list of key/value items for backend
+            const payload = [
+                { key: 'web_path', value: config.webPath }
+            ];
+
+            // add filter_urls only if provided
+            if (config.filterUrls && config.filterUrls.trim()) {
+                // Convert multiline string to array and filter out empty lines
+                const filterUrlsArray = config.filterUrls
+                    .split('\n')
+                    .map(url => url.trim())
+                    .filter(url => url.length > 0);
+
+                if (filterUrlsArray.length > 0) {
+                    payload.push({ key: 'filter_urls', value: JSON.stringify(filterUrlsArray) });
+                }
+            }
+
+            // include required query parameters
+            await axios.post<void>('/upload_source', payload, {
+                params: { source_type: 'sitemap', name: config.name }
             });
         } catch(error) {
             this.handleError(error);

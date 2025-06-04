@@ -19,7 +19,7 @@ COPY admin-backend/pyproject.toml admin-backend/poetry.lock ./
 RUN mkdir log && chmod 700 log
 RUN touch /app/admin-backend/log/logfile.log && chmod 600 /app/admin-backend/log/logfile.log
 
-RUN poetry config virtualenvs.create false &&\
+RUN poetry config virtualenvs.create false && \
     if [ "$dev" = "1" ]; then \
         poetry install --no-interaction --no-ansi --no-root --with dev; \
     else \

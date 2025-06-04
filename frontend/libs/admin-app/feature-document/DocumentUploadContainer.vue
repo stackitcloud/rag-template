@@ -29,6 +29,14 @@ const sitemapWebPath = ref('');
 const sitemapFilterUrls = ref('');
 const sitemapHeaderTemplate = ref('');
 
+
+// confluence configuration refs
+const confluenceName = ref('');
+const spaceKey = ref('');
+const confluenceToken = ref('');
+const confluenceUrl = ref('');
+const maxPages = ref<number>();
+
 const error = computed(() => store.error);
 
 const uploadDocuments = (files: File[]) => {

@@ -27,6 +27,7 @@ const maxPages = ref<number>();
 const sitemapName = ref('');
 const sitemapWebPath = ref('');
 const sitemapFilterUrls = ref('');
+const sitemapHeaderTemplate = ref('');
 
 const error = computed(() => store.error);
 
@@ -83,7 +84,8 @@ const handleSitemapUpload = () => {
     store.loadSitemap({
         name: sitemapName.value,
         webPath: sitemapWebPath.value,
-        filterUrls: sitemapFilterUrls.value
+        filterUrls: sitemapFilterUrls.value,
+        headerTemplate: sitemapHeaderTemplate.value
     });
 }
 
@@ -207,6 +209,8 @@ const getErrorMessage = (errorType: string) => {
                       <input v-model="sitemapWebPath" type="url" placeholder="Sitemap URL (required)" class="input input-bordered w-full" required />
                       <label for="sitemapFilterUrls" class="sr-only">Filter URLs</label>
                       <textarea v-model="sitemapFilterUrls" placeholder="Filter URLs (optional) - one regex pattern per line" class="textarea textarea-bordered w-full" rows="3"></textarea>
+                      <label for="sitemapHeaderTemplate" class="sr-only">Headers JSON</label>
+                      <textarea v-model="sitemapHeaderTemplate" placeholder="Headers (optional) - JSON format: {&quot;Authorization&quot;: &quot;Bearer token&quot;}" class="textarea textarea-bordered w-full" rows="2"></textarea>
                     </div>
                     <p class="text-xs opacity-50 mb-4">{{ t('documents.sitemapLoadDescription') }}</p>
                     <button class="btn btn-sm btn-accent" @click="handleSitemapUpload">

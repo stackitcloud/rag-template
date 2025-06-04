@@ -20,6 +20,7 @@ export interface ConfluenceConfig {
 export interface SitemapConfig {
   webPath: string;
   filterUrls: string;
+  headerTemplate: string;
   name: string;
 }
 
@@ -86,6 +87,17 @@ export class DocumentAPI {
 
                 if (filterUrlsArray.length > 0) {
                     payload.push({ key: 'filter_urls', value: JSON.stringify(filterUrlsArray) });
+                }
+            }
+
+            // add header_template only if provided
+            if (config.headerTemplate && config.headerTemplate.trim()) {
+                try {
+                    // Validate JSON format
+                    JSON.parse(config.headerTemplate);
+                    payload.push({ key: 'header_template', value: config.headerTemplate });
+                } catch (jsonError) {
+                    throw new Error('Header template must be valid JSON format');
                 }
             }
 

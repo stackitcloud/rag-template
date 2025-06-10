@@ -61,7 +61,7 @@ class XMLExtractor(InformationFileExtractor):
             A list of processed information pieces extracted from the XML file.
         """
         elements = partition_xml(filename=file_path.as_posix(), xml_keep_tags=False)
-        return self._process_elements(elements, file_path.name)
+        return self._process_elements(elements, name)
 
     def _process_elements(self, elements: list[Element], document_name: str) -> list[InternalInformationPiece]:
         processed_elements: list[InternalInformationPiece] = []

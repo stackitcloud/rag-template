@@ -92,7 +92,7 @@ class MSDocsExtractor(InformationFileExtractor):
             infer_table_structure=True,
         )
 
-        return self._process_elements(elements, file_path.name)
+        return self._process_elements(elements, name)
 
     def _process_elements(self, elements: list[Element], document_name: str) -> list[InternalInformationPiece]:
         processed_elements: list[InternalInformationPiece] = []

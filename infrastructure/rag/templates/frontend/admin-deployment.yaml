@@ -47,10 +47,8 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.frontendName" . }}
-          {{- if .Values.shared.config.basicAuth.enabled }}
           - secretRef:
               name: "vite-auth"
-          {{- end }}
       {{- if .Values.shared.imagePullSecret }}
       imagePullSecrets:
       - name: {{ .Values.shared.imagePullSecret.name }}

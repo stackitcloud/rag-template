@@ -6,4 +6,5 @@ class ExtractorTypes(StrEnum):
 
     FILE = "file"
     CONFLUENCE = "confluence"
+    SITEMAP = "sitemap"
     NONE = "None"

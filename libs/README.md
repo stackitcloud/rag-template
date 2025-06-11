@@ -1,6 +1,7 @@
 # RAG Core library
 
 This repository contains the core of the STACKIT RAG template.
+It provides comprehensive document extraction capabilities including support for files (PDF, DOCX, XML), web sources via sitemaps, and Confluence pages.
 It consists of the following python packages:
 
 - [`1. Rag Core API`](#1-rag-core-api)
@@ -143,7 +144,7 @@ The extracted information will be summarized using a LLM. The summary, as well a
 #### `/upload_source`
 
 Loads all the content from an arbitrary non-file source using the [document-extractor](#3-extractor-api-lib).
-The `type`of the source needs to correspond to an extractor in the [document-extractor](#3-extractor-api-lib).
+The `type` of the source needs to correspond to an extractor in the [document-extractor](#3-extractor-api-lib). Supported types include `confluence` for Confluence pages and `sitemap` for web content via XML sitemaps.
 The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-core-api](#1-rag-core-api). An is configured. Defaults to 3600 seconds (1 hour). Can be adjusted by values in the helm chart.
 
 ### 2.3 Replaceable parts
@@ -169,8 +170,7 @@ The extracted information will be summarized using LLM. The summary, as well as 
 
 ## 3. Extractor API Lib
 
-The Extractor Library contains components that provide document parsing capabilities for various file formats. It also includes a default `dependency_container`, that is pre-configured and is a good starting point for most use-cases.
-This API should not be exposed by ingress and only used for internally.
+The Extractor Library contains components that provide document parsing capabilities for various file formats and web sources. It supports extracting content from PDF, DOCX, XML files, as well as web pages via sitemaps and Confluence pages. It also includes a default `dependency_container`, that is pre-configured and is a good starting point for most use-cases. This API should not be exposed by ingress and only used for internally.
 
 
 The following endpoints are provided by the *extractor-api-lib*:
@@ -206,11 +206,20 @@ The following types of information will be extracted:
 #### `/extract_from_source`
 
 This endpoint will extract data for non-file source.
-The type of information that is extracted will vary depending on the source, the following types of information can be extracted:
+The type of information that is extracted will vary depending on the source. Supported sources include `confluence` for Confluence pages and `sitemap` for web pages via XML sitemaps.
+The following types of information can be extracted:
 
 - `TEXT`: plain text
 - `TABLE`: data in tabular form found in the document
 - `IMAGE`: image found in the document
+
+For sitemap sources, additional parameters can be provided, e.g.:
+- `web_path`: The URL of the XML sitemap to crawl
+- `filter_urls`: JSON array of URL patterns to filter pages (optional)
+- `header_template`: JSON object for custom HTTP headers (optional)
+
+Technically, all parameters of the `SitemapLoader` from LangChain can be provided.
+
 
 ### 3.3 Replaceable parts
 
@@ -226,6 +235,9 @@ The type of information that is extracted will vary depending on the source, the
 | file_extractor | [`extractor_api_lib.api_endpoints.file_extractor.FileExtractor`](./extractor-api-lib/src/extractor_api_lib/api_endpoints/file_extractor.py) | [`extractor_api_lib.impl.api_endpoints.default_file_extractor.DefaultFileExtractor`](./extractor-api-lib/src/extractor_api_lib/impl/api_endpoints/default_file_extractor.py) | Implementation of the `/extract_from_file` endpoint. Uses *general_extractor*. |
 | general_source_extractor | [`extractor_api_lib.api_endpoints.source_extractor.SourceExtractor`](./extractor-api-lib/src/extractor_api_lib/api_endpoints/source_extractor.py) | [`extractor_api_lib.impl.api_endpoints.general_source_extractor.GeneralSourceExtractor`](./extractor-api-lib/src/extractor_api_lib/impl/api_endpoints/general_source_extractor.py) | Implementation of the `/extract_from_source` endpoint.  Will decide the correct extractor for the source. |
 | confluence_extractor | [`extractor_api_lib.extractors.information_extractor.InformationExtractor`](./extractor-api-lib/src/extractor_api_lib/extractors/information_extractor.py) | [`extractor_api_lib.impl.extractors.confluence_extractor.ConfluenceExtractor`](./extractor-api-lib/src/extractor_api_lib/extractors/confluence_extractor.py) | Implementation of an esxtractor for the source `confluence`. |
+| sitemap_extractor | [`extractor_api_lib.extractors.information_extractor.InformationExtractor`](./extractor-api-lib/src/extractor_api_lib/extractors/information_extractor.py) | [`extractor_api_lib.impl.extractors.sitemap_extractor.SitemapExtractor`](./extractor-api-lib/src/extractor_api_lib/impl/extractors/sitemap_extractor.py) | Implementation of an extractor for the source `sitemap`. Supports XML sitemap crawling with configurable parameters including URL filtering, custom headers, and crawling depth. Uses LangChain's SitemapLoader with support for custom parsing and meta functions via dependency injection. |
+| sitemap_parsing_function | `dependency_injector.providers.Factory[Callable]` | [`extractor_api_lib.impl.utils.sitemap_extractor_utils.custom_sitemap_parser_function`](./extractor-api-lib/src/extractor_api_lib/impl/utils/sitemap_extractor_utils.py) | Custom parsing function for sitemap content extraction. Used by the sitemap extractor to parse HTML content from web pages. Can be replaced to customize how web page content is processed and extracted. |
+| sitemap_meta_function | `dependency_injector.providers.Factory[Callable]` | [`extractor_api_lib.impl.utils.sitemap_extractor_utils.custom_sitemap_meta_function`](./extractor-api-lib/src/extractor_api_lib/impl/utils/sitemap_extractor_utils.py) | Custom meta function for sitemap content processing. Used by the sitemap extractor to extract metadata from web pages. Can be replaced to customize how metadata is extracted and structured from web content. |
 
 ## 4. RAG Core Lib
 

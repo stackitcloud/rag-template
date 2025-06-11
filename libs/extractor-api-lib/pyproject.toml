@@ -28,7 +28,7 @@ per-file-ignores = """
   ./src/extractor_api_lib/impl/extractor_api_impl.py: B008,
   ./src/extractor_api_lib/container.py: CCE002,CCE001,
   ./src/extractor_api_lib/apis/extractor_api_base.py: WOT001,
-  ./tests/*: S101,
+  ./tests/*: S101,E501,
 """
 
 [tool.black]
@@ -93,6 +93,7 @@ langchain-community = "^0.3.23"
 atlassian-python-api = "^4.0.3"
 markdownify = "^1.1.0"
 langchain-core = "0.3.63"
+fake-useragent = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

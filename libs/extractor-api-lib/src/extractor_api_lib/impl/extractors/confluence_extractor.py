@@ -27,7 +27,7 @@ class ConfluenceExtractor(InformationExtractor):
             An instance of ConfluenceLangchainDocument2InformationPiece used for mapping langchain documents
             to information pieces.
         """
-        self.mapper = mapper
+        self._mapper = mapper
 
     @property
     def extractor_type(self) -> ExtractorTypes:
@@ -59,4 +59,4 @@ class ConfluenceExtractor(InformationExtractor):
             confluence_loader_parameters.pop("document_name", None)
         document_loader = ConfluenceLoader(**confluence_loader_parameters)
         documents = document_loader.load()
-        return [self.mapper.map_document2informationpiece(x, extraction_parameters.document_name) for x in documents]
+        return [self._mapper.map_document2informationpiece(x, extraction_parameters.document_name) for x in documents]

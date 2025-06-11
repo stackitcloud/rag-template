@@ -1060,6 +1060,7 @@ datasets = "^3.5.1"
 debugpy = "^1.8.14"
 dependency-injector = "^4.46.0"
 docx2txt = "^0.9"
+fake-useragent = "^2.2.0"
 fastapi = "^0.115.12"
 fasttext = {git = "https://github.com/cfculhane/fastText", rev = "main"}
 html5lib = "^1.1"
@@ -1087,6 +1088,18 @@ wheel = "^0.45.1"
 [package.source]
 type = "directory"
 url = "../rag-core-library/extractor-api-lib"
+
+[[package]]
+name = "fake-useragent"
+version = "2.2.0"
+description = "Up-to-date simple useragent faker with real world database"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "fake_useragent-2.2.0-py3-none-any.whl", hash = "sha256:67f35ca4d847b0d298187443aaf020413746e56acd985a611908c73dba2daa24"},
+    {file = "fake_useragent-2.2.0.tar.gz", hash = "sha256:4e6ab6571e40cc086d788523cf9e018f618d07f9050f822ff409a4dfe17c16b2"},
+]
 
 [[package]]
 name = "fastapi"

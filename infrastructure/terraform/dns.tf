@@ -1,7 +1,7 @@
 resource "stackit_dns_zone" "rag_zone" {
   project_id = var.project_id
   name       = "${var.name_prefix}-zone"
-  dns_name   = "university-rag.stackit.gg" # Replace with your desired domain
+  dns_name   =  var.dns_name
 }
 
 output "dns_nameservers" {

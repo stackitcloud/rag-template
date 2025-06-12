@@ -1,6 +1,6 @@
 resource "stackit_ske_cluster" "rag_cluster" {
   project_id             = var.project_id
-  name                   = "ragk8s"
+  name                   = var.rag_cluster_name
   kubernetes_version_min = "1.31" # Update to the latest available version
 
   node_pools = [

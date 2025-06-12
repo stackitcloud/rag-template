@@ -2,6 +2,14 @@
 **/customer-values.yaml
 **/auth
 
+**/*.lock.*
+
+auth
+
+.DS_Store
+
+*-values.yaml
+
 */terraform.tfstate
 */Chart.lock
 *.tgz

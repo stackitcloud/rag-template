@@ -91,7 +91,7 @@ class LangfuseManager:
                 name=base_prompt_name,
                 prompt=self._managed_prompts[base_prompt_name],
                 config=llm_configurable_configs,
-                is_active=True,
+                labels=["production"],
             )
             langfuse_prompt = self._langfuse.get_prompt(base_prompt_name)
         except Exception as error:

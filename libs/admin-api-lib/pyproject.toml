@@ -92,6 +92,7 @@ flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
 # flake8-logging-format = "^2024.24.12"
 # flake8-docstrings = "^1.7.0"
+pytest-asyncio = "^1.0.0"
 
 [tool.poetry.dependencies]
 rag-core-lib = {path = "../rag-core-lib"}
@@ -103,7 +104,7 @@ python-dateutil = "^2.9.0.post0"
 tenacity = "9.1.2"
 boto3 = "^1.38.10"
 tqdm = "^4.67.1"
-langfuse = "^2.60.4"
+langfuse = "3.0.0"
 redis = "^6.0.0"
 pyyaml = "^6.0.2"
 python-multipart = "^0.0.20"

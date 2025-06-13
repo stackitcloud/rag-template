@@ -16,7 +16,7 @@ from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
 from langfuse.api.core.api_error import ApiError
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
-from langfuse.client import DatasetClient
+from langfuse._client.datasets import DatasetClient
 from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
     answer_correctness,

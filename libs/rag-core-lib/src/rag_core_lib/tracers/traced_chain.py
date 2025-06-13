@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 from langchain_core.runnables import Runnable, RunnableConfig, ensure_config
+from langfuse import get_client
 
 from rag_core_lib.chains.async_chain import AsyncChain
 
@@ -39,6 +40,7 @@ class TracedGraph(AsyncChain[RunnableInput, RunnableOutput], ABC):
             The inner chain to be traced.
         """
         self._inner_chain = inner_chain
+        self.langfuse_client = get_client()
 
     async def ainvoke(
         self, chain_input: RunnableInput, config: Optional[RunnableConfig] = None, **kwargs: Any
@@ -63,11 +65,13 @@ class TracedGraph(AsyncChain[RunnableInput, RunnableOutput], ABC):
         """
         config = ensure_config(config)
         session_id = self._get_session_id(config)
-        config_with_tracing = self._add_tracing_callback(session_id, config)
-        return await self._inner_chain.ainvoke(chain_input, config=config_with_tracing)
+        config_with_tracing = self._add_tracing_callback(config)
+        with self.langfuse_client.start_as_current_span(name="traced_runnable") as span:
+            span.update_trace(session_id=session_id)
+            return await self._inner_chain.ainvoke(chain_input, config=config_with_tracing)
 
     @abstractmethod
-    def _add_tracing_callback(self, session_id: str, config: Optional[RunnableConfig]) -> RunnableConfig: ...
+    def _add_tracing_callback(self, config: Optional[RunnableConfig]) -> RunnableConfig: ...
 
     def _get_session_id(self, config: Optional[RunnableConfig]) -> str:
         return config.get(self.METADATA_KEY, {}).get(self.SESSION_ID_KEY, str(uuid.uuid4()))

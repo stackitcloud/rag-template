@@ -127,5 +127,5 @@ export const useDocumentsStore = defineStore('chat', () => {
         uploadedDocuments.value = uploadedDocuments.value.filter(o => o.id !== documentId);
     };
 
-    return {removeUploadedDocument, uploadDocuments, loadDocuments, deleteDocument, loadConfluence, loadSitemap, allDocuments, uploadedDocuments, error};
+    return {removeUploadedDocument, uploadDocuments, loadDocuments, deleteDocument, loadConfluence, loadSitemap, allDocuments, uploadedDocuments, error, isLoadingSitemap};
 });

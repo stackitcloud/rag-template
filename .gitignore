@@ -11,7 +11,8 @@ auth
 # Node Modules
 node_modules/
 
-
+**/.notebooks
+**/todo*.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

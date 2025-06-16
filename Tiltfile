@@ -191,7 +191,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(backend_context, "/app/mcp-server"),
+        sync(mcp_context, "/app/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
 )

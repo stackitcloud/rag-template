@@ -1,7 +1,7 @@
 """Module containing the dependency injection container for managing application dependencies."""
 
 from dependency_injector.containers import DeclarativeContainer
-from dependency_injector.providers import  Singleton
+from dependency_injector.providers import Singleton
 from fastmcp import FastMCP
 
 from settings.backend_settings import BackendSettings

@@ -38,9 +38,8 @@ COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 
 WORKDIR /app/mcp-server
-COPY --chown=nonroot:nonroot mcp-server .
-
-
+COPY --chown=nonroot:nonroot mcp-server/src ./src
+COPY --chown=nonroot:nonroot mcp-server/pyproject.toml mcp-server/poetry.lock ./
 # cleanup
 RUN apt-get clean autoclean
 RUN apt-get autoremove --yes

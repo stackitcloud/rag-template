@@ -3,13 +3,14 @@ import { ref } from 'vue';
 import { DocumentModel } from "../../models/document.model.ts";
 import { ErrorType } from "../../models/error-type";
 import { UploadedDocument, mapToUploadDocument } from "../../models/uploaded-document.model";
-import { DocumentAPI, ConfluenceConfig } from "../document.api";
+import { ConfluenceConfig, DocumentAPI, SitemapConfig } from "../document.api";
 
 export const useDocumentsStore = defineStore('chat', () => {
     const uploadedDocuments = ref<UploadedDocument[]>([]);
     const allDocuments = ref<DocumentModel[]>();
     const error = ref<ErrorType | null>(null);
     const isLoadingConfluence = ref(false);
+    const isLoadingSitemap = ref(false);
 
     function updateUploadedDocumentData(documentId: string, data: Partial<UploadedDocument>) {
         const document = uploadedDocuments.value.find((d: UploadedDocument) => d.id === documentId);
@@ -75,6 +76,29 @@ export const useDocumentsStore = defineStore('chat', () => {
       }
     };
 
+    const loadSitemap = async (config: SitemapConfig) => {
+      isLoadingSitemap.value = true;
+      error.value = null;
+      try {
+        // provide sitemap configuration from frontend
+        await DocumentAPI.loadSitemap(config);
+        await loadDocuments(); // Refresh the document list after uploading
+      } catch(err) {
+        if (err.response && err.response.status === 501) {
+          error.value = "sitemap_not_configured";
+          console.error("Sitemap loader is not configured.");
+        } else if (err.response && err.response.status === 423) {
+          error.value = "sitemap_locked";
+          console.error("Sitemap loader returned a warning.");
+        } else {
+          error.value = "sitemap";
+          console.error(err);
+        }
+      } finally {
+        isLoadingSitemap.value = false;
+      }
+    };
+
     const uploadDocuments = async (files: File[]) => {
         try {
             const uploads = files.map(uploadDocument);
@@ -103,5 +127,5 @@ export const useDocumentsStore = defineStore('chat', () => {
         uploadedDocuments.value = uploadedDocuments.value.filter(o => o.id !== documentId);
     };
 
-    return {removeUploadedDocument, uploadDocuments, loadDocuments, deleteDocument, loadConfluence, allDocuments, uploadedDocuments, error};
+    return {removeUploadedDocument, uploadDocuments, loadDocuments, deleteDocument, loadConfluence, loadSitemap, allDocuments, uploadedDocuments, error, isLoadingSitemap};
 });

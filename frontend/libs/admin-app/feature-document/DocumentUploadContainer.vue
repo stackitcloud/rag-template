@@ -204,7 +204,7 @@ const getErrorMessage = (errorType: string) => {
                     <!-- configuration inputs -->
                     <div class="space-y-2 mb-4 w-full max-w-sm">
                       <label for="sitemapName" class="sr-only">Sitemap Name</label>
-                      <input v-model="sitemapName" type="text" placeholder="Name" class="input input-bordered w-full" />
+                      <input id="sitemapName" v-model="sitemapName" type="text" placeholder="Name" class="input input-bordered w-full" required/>
                       <label for="sitemapWebPath" class="sr-only">Sitemap URL</label>
                       <input v-model="sitemapWebPath" type="url" placeholder="Sitemap URL (required)" class="input input-bordered w-full" required />
                       <label for="sitemapFilterUrls" class="sr-only">Filter URLs</label>

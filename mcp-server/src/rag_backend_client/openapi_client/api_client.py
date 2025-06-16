@@ -27,7 +27,10 @@ from typing import Tuple, Optional, List, Dict, Union
 from pydantic import SecretStr
 
 from rag_backend_client.openapi_client.configuration import Configuration
-from rag_backend_client.openapi_client.api_response import ApiResponse, T as ApiResponseT
+from rag_backend_client.openapi_client.api_response import (
+    ApiResponse,
+    T as ApiResponseT,
+)
 import rag_backend_client.openapi_client.models
 from rag_backend_client.openapi_client import rest
 from rag_backend_client.openapi_client.exceptions import (
@@ -198,7 +201,13 @@ class ApiClient:
 
         # auth setting
         self.update_params_for_auth(
-            header_params, query_params, auth_settings, resource_path, method, body, request_auth=_request_auth
+            header_params,
+            query_params,
+            auth_settings,
+            resource_path,
+            method,
+            body,
+            request_auth=_request_auth,
         )
 
         # body
@@ -221,7 +230,13 @@ class ApiClient:
         return method, url, header_params, body, post_params
 
     def call_api(
-        self, method, url, header_params=None, body=None, post_params=None, _request_timeout=None
+        self,
+        method,
+        url,
+        header_params=None,
+        body=None,
+        post_params=None,
+        _request_timeout=None,
     ) -> rest.RESTResponse:
         """Makes the HTTP request (synchronous)
         :param method: Method to call.
@@ -252,7 +267,9 @@ class ApiClient:
         return response_data
 
     def response_deserialize(
-        self, response_data: rest.RESTResponse, response_types_map: Optional[Dict[str, ApiResponseT]] = None
+        self,
+        response_data: rest.RESTResponse,
+        response_types_map: Optional[Dict[str, ApiResponseT]] = None,
     ) -> ApiResponse[ApiResponseT]:
         """Deserializes response into an object.
         :param response_data: RESTResponse object to be deserialized.
@@ -364,7 +381,11 @@ class ApiClient:
                 data = json.loads(response_text)
             except ValueError:
                 data = response_text
-        elif re.match(r"^application/(json|[\w!#$&.+-^_]+\+json)\s*(;|$)", content_type, re.IGNORECASE):
+        elif re.match(
+            r"^application/(json|[\w!#$&.+-^_]+\+json)\s*(;|$)",
+            content_type,
+            re.IGNORECASE,
+        ):
             if response_text == "":
                 data = ""
             else:
@@ -548,7 +569,14 @@ class ApiClient:
         return content_types[0]
 
     def update_params_for_auth(
-        self, headers, queries, auth_settings, resource_path, method, body, request_auth=None
+        self,
+        headers,
+        queries,
+        auth_settings,
+        resource_path,
+        method,
+        body,
+        request_auth=None,
     ) -> None:
         """Updates header and query params based on authentication setting.
 
@@ -670,7 +698,10 @@ class ApiClient:
         except ImportError:
             return string
         except ValueError:
-            raise rest.ApiException(status=0, reason=("Failed to parse `{0}` as datetime object".format(string)))
+            raise rest.ApiException(
+                status=0,
+                reason=("Failed to parse `{0}` as datetime object".format(string)),
+            )
 
     def __deserialize_enum(self, data, klass):
         """Deserializes primitive type to enum.

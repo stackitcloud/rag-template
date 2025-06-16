@@ -15,7 +15,9 @@ Do not edit the class manually.
 
 # import models into model package
 from rag_backend_client.openapi_client.models.chat_history import ChatHistory
-from rag_backend_client.openapi_client.models.chat_history_message import ChatHistoryMessage
+from rag_backend_client.openapi_client.models.chat_history_message import (
+    ChatHistoryMessage,
+)
 from rag_backend_client.openapi_client.models.chat_request import ChatRequest
 from rag_backend_client.openapi_client.models.chat_response import ChatResponse
 from rag_backend_client.openapi_client.models.chat_role import ChatRole

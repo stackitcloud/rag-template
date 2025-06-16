@@ -19,7 +19,7 @@ class DependencyContainer(DeclarativeContainer):
     backend_settings = BackendSettings()
     mcp_settings = MCPSettings()
 
-    api_configuration = Singleton(Configuration,host= backend_settings.base_path)
+    api_configuration = Singleton(Configuration, host=backend_settings.base_path)
     api_client = Singleton(ApiClient, configuration=api_configuration)
     rag_api_client = Singleton(RagApi, api_client)
 

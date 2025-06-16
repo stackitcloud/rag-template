@@ -14,7 +14,9 @@ Do not edit the class manually.
 
 import unittest
 
-from rag_backend_client.openapi_client.models.chat_history_message import ChatHistoryMessage
+from rag_backend_client.openapi_client.models.chat_history_message import (
+    ChatHistoryMessage,
+)
 
 
 class TestChatHistoryMessage(unittest.TestCase):

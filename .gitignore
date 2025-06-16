@@ -12,6 +12,7 @@ auth
 node_modules/
 
 **/.notebooks
+**/.notebooks/*
 **/todo*.md
 **/mcp.json
 

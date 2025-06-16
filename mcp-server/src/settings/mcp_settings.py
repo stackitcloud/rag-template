@@ -31,5 +31,3 @@ class MCPSettings(BaseSettings):
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     name: str = Field(default="RAG MCP server")
-    tool_name:str = Field()
-    tool_description:str = Field()

@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class RagMcpServer:
     """MCP Server that connects to the RAG backend."""
 
+    TRANSPORT = "streamable-http"
+
     def __init__(self, api_client: RagApi, mcp_server: FastMCP, settings: BaseSettings):
         self._api_client = api_client
         self._server = mcp_server
@@ -54,7 +56,7 @@ class RagMcpServer:
             logger.error(f"Error in chat request: {str(e)}")
             return {"error": f"Failed to process chat request: {str(e)}"}
 
-    def run(self, transport: str = "streamable-http"):
+    def run(self):
         """Run the MCP server with specified transport."""
-        logger.info(f"Starting FastMCP Server on {transport}://{self._settings.host}:{self._settings.port}")
-        self._server.run(transport=transport, host=self._settings.host, port=self._settings.port)
+        logger.info(f"Starting FastMCP Server on {self.TRANSPORT}://{self._settings.host}:{self._settings.port}")
+        self._server.run(transport=self.TRANSPORT, host=self._settings.host, port=self._settings.port)

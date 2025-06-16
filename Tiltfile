@@ -191,7 +191,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(backend_context, "/app/mcp-server"),        
+        sync(backend_context, "/app/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
 )
@@ -342,10 +342,8 @@ value_override = [
     "features.minio.enabled=true",
     "shared.config.tls.enabled=false",
     "shared.ssl=false",
-    "shared.config.basicAuth.enabled=false",
+    "shared.config.basicAuth.enabled=true",
     "backend.mcp.enabled=true",
-    "backend.mcp.toolName=RAG",
-    "backend.mcp.toolDescription=\"Knowledge about alcohol aging.\"",
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
     # langfuse
@@ -434,7 +432,7 @@ k8s_resource(
         ),
         port_forward(
             9090,
-            container_port=8081,
+            container_port=8000,
             name="MCP-Server",
         )
     ],

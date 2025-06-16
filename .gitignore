@@ -13,6 +13,7 @@ node_modules/
 
 **/.notebooks
 **/todo*.md
+**/mcp.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

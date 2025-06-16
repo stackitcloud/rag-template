@@ -6,7 +6,7 @@ authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-mcp = "^1.7.1"
+fastmcp = "^2.8.0"
 requests = "^2.32.3"
 poetry = "^2.1.3"
 pydantic-settings = "^2.9.1"

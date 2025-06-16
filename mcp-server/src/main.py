@@ -12,5 +12,5 @@ logging.config.dictConfig(config)
 
 container = DependencyContainer()
 
-container.rag_mcp_server().start()
+container.rag_mcp_server().run()
 

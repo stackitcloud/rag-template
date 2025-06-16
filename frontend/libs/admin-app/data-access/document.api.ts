@@ -7,6 +7,15 @@ axios.defaults.auth = {
     password: import.meta.env.VITE_AUTH_PASSWORD
 };
 
+// confluence configuration interface
+export interface ConfluenceConfig {
+  spaceKey: string;
+  token: string;
+  url: string;
+  maxPages: number;
+  name: string;
+}
+
 export class DocumentAPI {
     static async loadDocuments(): Promise<DocumentModel[]> {
         try {
@@ -20,9 +29,9 @@ export class DocumentAPI {
     static async uploadDocument(file: File, onUploadProgress: (progressEvent: AxiosProgressEvent) => void): Promise<null> {
         try {
             const formData = new FormData();
-            formData.append('body', file);
+            formData.append('file', file);
 
-            const response = await axios.post<null>('/upload_documents', formData, {
+            const response = await axios.post<null>('/upload_file', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -35,9 +44,19 @@ export class DocumentAPI {
         }
     }
 
-    static async loadConfluence(): Promise<void> {
+    static async loadConfluence(config: ConfluenceConfig): Promise<void> {
         try {
-            await axios.post<void>('/load_confluence');
+            // convert config to list of key/value items for backend
+            const payload = [
+                { key: 'url', value: config.url },
+                { key: 'token', value: config.token },
+                { key: 'space_key', value: config.spaceKey },
+                { key: 'max_pages', value: String(config.maxPages) }
+            ];
+            // include required query parameters
+            await axios.post<void>('/upload_source', payload, {
+                params: { source_type: 'confluence', name: config.name }
+            });
         } catch(error) {
             this.handleError(error);
         }

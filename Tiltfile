@@ -339,6 +339,7 @@ value_override = [
     # variables
     "shared.debug.backend.enabled=%s" % backend_debug,
     "features.frontend.enabled=true",
+    "features.minio.enabled=true",
     "shared.config.tls.enabled=false",
     "shared.ssl=false",
     "shared.config.basicAuth.enabled=false",

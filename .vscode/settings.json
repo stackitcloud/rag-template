@@ -6,6 +6,9 @@
         "./rag-core-library/rag-core-api/src",
         "./rag-core-library/rag-core-lib/src",
         "./rag-core-library/extractor-api-lib/src",
+        "./admin-backend",
+        "./rag-backend",
+        "./document-extractor"
     ],
     "[yaml]": {
         "editor.tabSize": 2,
@@ -13,4 +16,12 @@
         "editor.formatOnType": true,
         "editor.autoIndent": "advanced"
     },
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": ["--import-mode","importlib"],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.envFile": "${workspaceFolder}/.env",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python-envs.pythonProjects": [],
 }

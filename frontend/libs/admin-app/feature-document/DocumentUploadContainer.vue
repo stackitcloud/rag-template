@@ -15,6 +15,14 @@ const isInvalidFileType = ref(false);
 const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml'];
 const uploadMethod = ref<'file' | 'confluence'>('file');
 
+
+// confluence configuration refs
+const confluenceName = ref('');
+const spaceKey = ref('');
+const confluenceToken = ref('');
+const confluenceUrl = ref('');
+const maxPages = ref<number>();
+
 const error = computed(() => store.error);
 
 const uploadDocuments = (files: File[]) => {
@@ -55,7 +63,14 @@ const onRemoveDocument = (documentId: string) => {
 }
 
 const handleConfluenceUpload = () => {
-    store.loadConfluence();
+    // send configured parameters to backend
+    store.loadConfluence({
+        name: confluenceName.value,
+        spaceKey: spaceKey.value,
+        token: confluenceToken.value,
+        url: confluenceUrl.value,
+        maxPages: maxPages.value
+    });
 }
 
 const clearError = () => {
@@ -113,7 +128,7 @@ const getErrorMessage = (errorType: string) => {
 
             <!-- File upload area -->
             <div v-if="uploadMethod === 'file'"
-                class="flex flex-col m-auto justify-center items-center w-full h-64 bg-base-100 rounded-box border border-base-300 border-dashed"
+                class="flex flex-col m-auto justify-center items-center w-full h-96 bg-base-100 rounded-box border border-base-300 border-dashed"
                 :class="{'bg-base-200': isDragOver}" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
                 @drop.prevent="onDrop">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
@@ -130,10 +145,23 @@ const getErrorMessage = (errorType: string) => {
 
             <!-- Confluence load area -->
             <div v-else
-                class="flex flex-col m-auto justify-center items-center w-full h-64 bg-base-100 rounded-box border border-base-300">
+                class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
                     <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
                     <p class="mb-1 font-bold">{{ t('documents.confluenceLoadTitle') }}</p>
+                    <!-- configuration inputs -->
+                    <div class="space-y-2 mb-4 w-full max-w-sm">
+                      <label for="confluenceUrl" class="sr-only">Confluence URL</label>
+                      <input v-model="confluenceUrl" type="url" placeholder="URL" class="input input-bordered w-full" />
+                      <label for="confluenceName" class="sr-only"> Confluence Name</label>
+                      <input v-model="confluenceName" type="text" placeholder="Name" class="input input-bordered w-full" />
+                      <label for="spaceKey" class="sr-only">Space key</label>
+                      <input v-model="spaceKey" type="text" placeholder="Space key" class="input input-bordered w-full" />
+                      <label for="confluenceToken" class="sr-only">Token</label>
+                      <input v-model="confluenceToken" type="password" placeholder="Token" class="input input-bordered w-full" />
+                      <label for="maxPages" class="sr-only">Max pages</label>
+                      <input v-model.number="maxPages" type="number" placeholder="Max number of pages" class="input input-bordered w-full" />
+                    </div>
                     <p class="text-xs opacity-50 mb-4">{{ t('documents.confluenceLoadDescription') }}</p>
                     <button class="btn btn-sm btn-accent" @click="handleConfluenceUpload">
                         {{ t('documents.loadConfluence') }}

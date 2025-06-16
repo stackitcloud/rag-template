@@ -9,8 +9,13 @@ description = "Extracts the content of documents, websites, etc and maps it to a
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 packages = [{ include = "extractor_api_lib", from = "src" }]
 
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
 [tool.flake8]
-exclude = [".eggs", "./src/extractor_api_lib/models/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
+exclude = [".eggs", "./src/extractor_api_lib/models/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py", "tests/test_data/generate_test_pdfs.py"]
 statistics = true
 show-source = false
 max-complexity = 10
@@ -93,10 +98,12 @@ langchain-community = "^0.3.23"
 atlassian-python-api = "^4.0.3"
 markdownify = "^1.1.0"
 langchain-core = "0.3.63"
+camelot-py = {extras = ["cv"], version = "^1.0.0"}
 fake-useragent = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
+pytest-asyncio = "^0.26.0"
 coverage = "^7.8.0"
 flake8 = "^7.2.0"
 flake8-black = "^0.3.6"

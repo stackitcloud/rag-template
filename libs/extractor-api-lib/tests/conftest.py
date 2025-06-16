@@ -6,6 +6,7 @@ from extractor_api_lib.impl.mapper.sitemap_document2information_piece import (
     SitemapLangchainDocument2InformationPiece,
 )
 from extractor_api_lib.impl.types.content_type import ContentType
+from extractor_api_lib.file_services.file_service import FileService
 
 
 @pytest.fixture
@@ -18,3 +19,9 @@ def mock_mapper():
         page_content="Test content",
     )
     return mapper
+
+
+@pytest.fixture
+def mock_file_service():
+    """Create a mock file service for testing."""
+    return MagicMock(spec=FileService)

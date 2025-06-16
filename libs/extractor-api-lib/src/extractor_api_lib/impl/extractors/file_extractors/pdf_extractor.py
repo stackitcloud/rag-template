@@ -13,6 +13,8 @@ import pdfplumber
 import pytesseract
 from pdf2image import convert_from_path
 from pdfplumber.page import Page
+from langdetect import detect
+import camelot
 
 
 from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
@@ -25,6 +27,7 @@ from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
 
 logger = logging.getLogger(__name__)
+logging.getLogger("pdfminer").setLevel(logging.WARNING)
 
 
 class PDFExtractor(InformationFileExtractor):
@@ -39,10 +42,13 @@ class PDFExtractor(InformationFileExtractor):
         Regular expression pattern to identify titles in the text.document
     TITLE_PATTERN_MULTILINE : re.Pattern
         Regular expression pattern to identify titles in the text with multiline support.
+    TEXT_THRESHOLD : float
+        Threshold for determining if a page has extractable text (default: 50 characters).
     """
 
     TITLE_PATTERN = re.compile(r"(^|\n)(\d+\.[\.\d]*[\t ][a-zA-Z0-9 äöüÄÖÜß\-]+)")
     TITLE_PATTERN_MULTILINE = re.compile(r"(^|\n)(\d+\.[\.\d]*[\t ][a-zA-Z0-9 äöüÄÖÜß\-]+)", re.MULTILINE)
+    TEXT_THRESHOLD = 50  # Minimum characters to consider page as text-based
 
     def __init__(
         self,
@@ -65,6 +71,10 @@ class PDFExtractor(InformationFileExtractor):
         self._dataframe_converter = dataframe_converter
         self._settings = pdf_extractor_settings
         self.old_image_id = None
+        self._lang_map = {
+            "en": "eng",
+            "de": "deu",
+        }
 
     @property
     def compatible_file_types(self) -> list[FileType]:
@@ -87,13 +97,14 @@ class PDFExtractor(InformationFileExtractor):
         content_type: ContentType,
         information_id: str,
         additional_meta: Optional[dict] = None,
+        related_ids: list[str] = None,
     ) -> InternalInformationPiece:
         metadata = {
             "document": document_name,
             "page": page,
             "title": title,
             "id": information_id,
-            "related": [],
+            "related": related_ids if related_ids else [],
         }
         if additional_meta:
             metadata = metadata | additional_meta
@@ -118,32 +129,58 @@ class PDFExtractor(InformationFileExtractor):
         list[InformationPiece]
             The extracted information.
         """
-        # Step 1: Convert each PDF page to an image
         images = convert_from_path(file_path)
 
         with tempfile.TemporaryDirectory() as temp_dir:
             for i, image in enumerate(images, 1):
                 image.save(Path(temp_dir, f"page_{i}.png").as_posix(), "PNG")
 
-            # Step 2: Use pdfplumber to identify table/figure coordinates and extract text
             pdf_elements = []
 
             current_title = ""
             with pdfplumber.open(file_path) as pdf:
                 for page_idx, page in enumerate(pdf.pages, 1):
-                    logger.debug("Processing page: %d" % page_idx)
+                    logger.debug("Processing page: %d/%d", page_idx, len(pdf.pages))
+
+                    is_text_based = self._is_text_based(page)
+
                     (new_pdf_elements, current_title) = self._extract_content_from_page(
                         page_index=page_idx,
                         page=page,
+                        is_text_based=is_text_based,
                         temp_dir=temp_dir,
                         title=current_title,
                         document_name=name,
                     )
                     pdf_elements += new_pdf_elements
 
+        logger.info(f"Extraction completed. Found {len(pdf_elements)} information pieces.")
         return pdf_elements
 
-    def _extract_tabluar_data(
+    def _is_text_based(self, page: Page) -> bool:
+        """Classify whether a page is text-based, scanned.
+
+        Parameters
+        ----------
+        page : Page
+            The pdfplumber page object.
+
+        Returns
+        -------
+        bool
+            returns True if the page is text-based, False if it is scanned.
+        """
+        # Try to extract text using pdfplumber
+        extractable_text = page.extract_text() or ""
+
+        # Clean and count meaningful text
+        meaningful_text = re.sub(r"\s+", " ", extractable_text.strip())
+
+        if len(meaningful_text) >= self.TEXT_THRESHOLD:
+            return True
+        return False
+
+    def _extract_tables_from_text_page(
         self,
         page: Page,
         page_index: int,
@@ -151,46 +188,56 @@ class PDFExtractor(InformationFileExtractor):
         text_x_tolerance: int = 1,
         text_y_tolerance: int = 1,
     ) -> list[InternalInformationPiece]:
-        return_value = []
-        pdfplumber_tables = page.find_tables()
-        table_strings = []
-        for table in pdfplumber_tables:
-            table_df = pd.DataFrame(table.extract(x_tolerance=text_x_tolerance, y_tolerance=text_y_tolerance))
-            try:
-                converted_table = self._dataframe_converter.convert(table_df)
-            except TypeError as e:
-                logger.error(f"Error while converting table to string: {e}")
-                continue
-            if converted_table == "":
-                continue
-            table_strings.append(self._dataframe_converter.convert(table_df))
+        table_elements = []
 
-        if table_strings:
-            for table_content in table_strings:
-                return_value.append(
+        try:
+            pdfplumber_tables = page.find_tables()
+
+            for idx, table in enumerate(pdfplumber_tables):
+                table_data = table.extract(x_tolerance=text_x_tolerance, y_tolerance=text_y_tolerance)
+                if not table_data or all(not row or all(not cell for cell in row) for row in table_data):
+                    continue
+                table_df = pd.DataFrame(table_data)
+                try:
+                    converted_table = self._dataframe_converter.convert(table_df)
+                except TypeError as e:
+                    logger.error(f"Error while converting table to string: {e}")
+                    continue
+                if not converted_table.strip():
+                    continue
+                table_elements.append(
                     self._create_information_piece(
                         document_name,
                         page_index,
-                        "",
-                        table_content,
+                        f"Table {idx + 1}",
+                        converted_table,
                         ContentType.TABLE,
                         information_id=hash_datetime(),
                     )
                 )
+        except Exception as e:
+            logger.warning(f"Failed to find tables on page {page_index}: {e}")
 
-        return return_value
+        return table_elements
 
-    def _extract_text(
+    def _auto_detect_language(self, text):
+        try:
+            return detect(text)
+        except Exception:
+            return "en"
+
+    def _extract_text_from_scanned_page(
         self,
         page: Page,
         scale_x: int,
         scale_y: int,
         image: np.ndarray,
         pdf_page_height: int,
-        pdf_page_width: int,
-    ) -> str:
+        with_image_masking: Optional[bool] = True,
+    ) -> tuple[str, bytes]:
         thickness = -1
         color = (255, 255, 255)
+        original_image = image.copy()
         for table in page.find_tables():
             table_coords = table.bbox
             start_point = (
@@ -204,45 +251,100 @@ class PDFExtractor(InformationFileExtractor):
 
             cv2.rectangle(image, start_point, end_point, color, thickness)
 
-        imgs = page.images
-        for img in imgs:
-            start_point = (
-                int(img["x0"] * scale_x),
-                int((pdf_page_height - img["y1"]) * scale_y),
+        if with_image_masking:
+            for img in page.images:
+                start_point = (
+                    int(img["x0"] * scale_x),
+                    int((pdf_page_height - img["y1"]) * scale_y),
+                )
+                end_point = (
+                    int(img["x1"] * scale_x),
+                    int((pdf_page_height - img["y0"]) * scale_y),
+                )
+                cv2.rectangle(image, start_point, end_point, color, thickness)
+
+        rough_text = pytesseract.image_to_string(image, lang="eng")
+        if not rough_text and with_image_masking:
+            return self._extract_text_from_scanned_page(
+                page, scale_x, scale_y, original_image, pdf_page_height, with_image_masking=False
             )
-            end_point = (
-                int(img["x1"] * scale_x),
-                int((pdf_page_height - img["y0"]) * scale_y),
-            )
-            cv2.rectangle(image, start_point, end_point, color, thickness)
-        lx = 0
-        ly = 0
-        start_point = (lx, ly)
-        ux = int(pdf_page_width * scale_x)
-        uy = 150
-        end_point = (ux, uy)
+        lang_code = self._auto_detect_language(rough_text)
+        tesseract_lang = self._lang_map.get(lang_code, "eng")
+        pdf_bytes = pytesseract.image_to_pdf_or_hocr(original_image, extension="pdf", lang=tesseract_lang)
+        if lang_code == "en":
+            return (rough_text, pdf_bytes)
 
-        cv2.rectangle(image, start_point, end_point, color, thickness)
+        return (pytesseract.image_to_string(image, lang=tesseract_lang), pdf_bytes)
 
-        ly = int(pdf_page_height * scale_y - 160)
-        start_point = (lx, ly)
-        ux = int(pdf_page_width * scale_x)
-        uy = int(pdf_page_height * scale_y)
-        end_point = (ux, uy)
+    def _extract_tables_from_scanned_page(
+        self, page_index: int, document_name: str, filename: str
+    ) -> list[InternalInformationPiece]:
+        """Extract tables from scanned page using multiple methods.
 
-        cv2.rectangle(image, start_point, end_point, color, thickness)
+        Parameters
+        ----------
+        page_index : int
+            The page number.
+        document_name : str
+            Name of the document.
+        filename: str
+            Path to the PDF file including the filename.
 
-        return pytesseract.image_to_string(image, lang="deu")
+        Returns
+        -------
+        list[InternalInformationPiece]
+            List of extracted table information pieces.
+        """
+        table_elements = []
+
+        # Method 1: Try Camelot (good for scanned tables)
+        try:
+            camelot_tables = camelot.read_pdf(str(filename))
+
+            for i, table in enumerate(camelot_tables):
+                if table.accuracy > 50:  # Only use tables with good accuracy
+                    try:
+                        converted_table = self._dataframe_converter.convert(table.df)
+                        if converted_table and converted_table.strip():
+                            table_elements.append(
+                                self._create_information_piece(
+                                    document_name,
+                                    page_index,
+                                    f"Table {i + 1}",
+                                    converted_table,
+                                    ContentType.TABLE,
+                                    information_id=hash_datetime(),
+                                    additional_meta={
+                                        "table_method": "camelot",
+                                        "accuracy": table.accuracy,
+                                        "table_index": i,
+                                    },
+                                )
+                            )
+                    except Exception as e:
+                        logger.warning(f"Failed to convert Camelot table {i + 1}: {e}")
+
+        except Exception as e:
+            logger.debug(f"Camelot table extraction failed for page {page_index}: {e}")
+
+        return table_elements
+
+    def _extract_text_from_text_page(self, page: Page) -> str:
+        try:
+            return page.extract_text() or ""
+        except Exception as e:
+            logger.warning(f"Failed to extract text with pdfplumber: {e}")
+            return ""
 
     def _extract_content_from_page(
         self,
         page_index: int,
         page: Page,
+        is_text_based: bool,
         temp_dir: str,
         title: str,
         document_name: str,
-    ):
-        pdf_elements = []
+    ) -> tuple[list[InternalInformationPiece], str]:
 
         im_path = Path(temp_dir, f"page_{page_index}.png")
         image = cv2.imread(im_path.as_posix())
@@ -252,44 +354,103 @@ class PDFExtractor(InformationFileExtractor):
         image_page_height = image.shape[0]
         scale_x = image_page_width / pdf_page_width
         scale_y = image_page_height / pdf_page_height
+        content = ""
+        table_elements = []
+        if is_text_based:
+            content = self._extract_text_from_text_page(page)
+            table_elements = self._extract_tables_from_text_page(
+                page=page, page_index=page_index, document_name=document_name
+            )
+        else:
+            content, pdf_bytes = self._extract_text_from_scanned_page(
+                page=page,
+                scale_x=scale_x,
+                scale_y=scale_y,
+                image=image,
+                pdf_page_height=pdf_page_height,
+            )
 
-        content = self._extract_text(
-            page=page,
-            scale_x=scale_x,
-            scale_y=scale_y,
-            image=image,
-            pdf_page_height=pdf_page_height,
-            pdf_page_width=pdf_page_width,
-        )
+            abs_filename = Path(temp_dir, f"page_{page_index}.pdf").as_posix()
+            with open(abs_filename, "wb") as f:
+                f.write(pdf_bytes)
+            table_elements = self._extract_tables_from_scanned_page(
+                page_index=page_index,
+                document_name=document_name,
+                filename=abs_filename,
+            )
 
-        if not content:
-            return [], title
+        text_element_ids = []
+        pdf_elements = []
+        if content and content.strip():
+            pdf_elements = self._process_text_content(content, title, page_index, document_name)
+            for element in pdf_elements:
+                text_element_ids.append(element.metadata["id"])
 
+        if table_elements:
+            tmp_table_elements = []
+            table_element_ids = []
+            for element in table_elements:
+                element.metadata["related"] = text_element_ids
+                tmp_table_elements.append(element)
+                table_element_ids.append(element.metadata["id"])
+            tmp_pdf_elements = []
+            for element in pdf_elements:
+                element.metadata["related"] = table_element_ids
+                tmp_pdf_elements.append(element)
+
+            pdf_elements = tmp_pdf_elements + tmp_table_elements
+
+        return pdf_elements, title
+
+    def _process_text_content(
+        self, content: str, title: str, page_index: int, document_name: str
+    ) -> list[InternalInformationPiece]:
+        """Process text content and split by titles.
+
+        Parameters
+        ----------
+        content : str
+            Raw text content.
+        title : str
+            Current title context.
+        page_index : int
+            The page number.
+        document_name : str
+            Name of the document.
+
+        Returns
+        -------
+        list[InternalInformationPiece]
+            List of processed text information pieces.
+        """
+        text_elements = []
+
+        if not content or not content.strip():
+            return text_elements
+
+        # Split content by title patterns
         content_array = re.split(self.TITLE_PATTERN_MULTILINE, content)
         content_array = [x.strip() for x in content_array if x and x.strip()]
+
+        current_title = title
 
         for content_item in content_array:
             is_title = re.match(self.TITLE_PATTERN, content_item)
             if is_title:
-                title = content_item
+                current_title = content_item.strip()
             else:
-                pdf_elements.append(
+                # Create text piece with current title context
+                full_content = f"{current_title}\n{content_item}" if current_title else content_item
+
+                text_elements.append(
                     self._create_information_piece(
                         document_name,
                         page_index,
-                        title,
-                        title + "\n" + content_item,
+                        current_title,
+                        full_content,
                         ContentType.TEXT,
                         information_id=hash_datetime(),
                     )
                 )
-        table_elements = self._extract_tabluar_data(
-            page=page,
-            page_index=page_index,
-            document_name=document_name,
-        )
 
-        if table_elements:
-            pdf_elements += table_elements
-
-        return pdf_elements, title
+        return text_elements

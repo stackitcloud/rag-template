@@ -18,15 +18,22 @@ import { ChatAPI } from "../chat.api";
 import { settings } from "@shared/settings";
 
 export const useChatStore = defineStore("chat", () => {
-  const { t, locale } = useI18n();
   const conversationId = ref();
   const chatHistory = ref<ChatMessageModel[]>([]);
   const chatDocuments = ref<ChatDocumentModel[]>([]);
   const isLoading = ref(false);
   const hasError = ref(false);
-  const initialMessage = computed(() =>
-    t("chat.initialMessage", { bot_name: settings.bot.name }),
-  );
+  
+  // Get i18n instance lazily to ensure it's available
+  const getInitialMessage = () => {
+    const { t } = useI18n();
+    try {
+      return t("chat.initialMessage", { bot_name: settings.bot.name });
+    } catch (error) {
+      console.warn("i18n interpolation failed, using fallback", error);
+      return `Hi 👋, I'm your AI Assistant ${settings.bot.name}, here to support you with any questions regarding the provided documents!`;
+    }
+  };
   const lastMessage = () => chatHistory.value[chatHistory.value.length - 1];
 
   function addHistory(prompt: string) {
@@ -111,7 +118,7 @@ export const useChatStore = defineStore("chat", () => {
     conversationId.value = id;
     chatHistory.value.push({
       id: newUid(),
-      text: initialMessage,
+      text: getInitialMessage(),
       role: "assistant",
       skipAPI: true,
     });

@@ -6,10 +6,13 @@ helm-chart/charts/rag-0.0.1.tgz
 pyrightconfig.json
 notes*.md
 notes.md
-
+auth
+*-values.yaml
 # Node Modules
 node_modules/
 
+**/.notebooks
+**/todo*.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

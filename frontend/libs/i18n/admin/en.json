@@ -12,9 +12,13 @@
     "fileTypeNotAllowedDescription": "Only PDF, DOCX, PPTX, and XML files are allowed",
     "fileUpload": "File Upload",
     "confluenceUpload": "Confluence",
-    "confluenceLoadTitle": "Load Confluence Pages",
+    "confluenceLoadTitle": "Load all Confluence pages from a space",
     "confluenceLoadDescription": "Click the button below to load pages from Confluence",
     "loadConfluence": "Load Confluence",
+    "sitemapUpload": "Sitemap",
+    "sitemapLoadTitle": "Load content from a sitemap",
+    "sitemapLoadDescription": "Enter a sitemap URL to extract and load content from all linked pages",
+    "loadSitemap": "Load Sitemap",
     "select": "Select",
     "chat": "Start chat",
     "uploadDocumentFailed": "Upload failed",
@@ -25,6 +29,9 @@
     "confluenceError": "Failed to load from Confluence",
     "confluenceNotConfigured": "Confluence is not configured",
     "confluenceLocked": "Confluence Loader is busy. Please try again later",
+    "sitemapError": "Failed to load from sitemap",
+    "sitemapNotConfigured": "Sitemap is not configured",
+    "sitemapLocked": "Sitemap Loader is busy. Please try again later",
     "unknownError": "An unknown error occurred"
   }
 }

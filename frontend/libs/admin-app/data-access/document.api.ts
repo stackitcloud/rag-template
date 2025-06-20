@@ -7,6 +7,23 @@ axios.defaults.auth = {
     password: import.meta.env.VITE_AUTH_PASSWORD
 };
 
+// confluence configuration interface
+export interface ConfluenceConfig {
+  spaceKey: string;
+  token: string;
+  url: string;
+  maxPages: number;
+  name: string;
+}
+
+// sitemap configuration interface
+export interface SitemapConfig {
+  webPath: string;
+  filterUrls: string;
+  headerTemplate: string;
+  name: string;
+}
+
 export class DocumentAPI {
     static async loadDocuments(): Promise<DocumentModel[]> {
         try {
@@ -20,9 +37,9 @@ export class DocumentAPI {
     static async uploadDocument(file: File, onUploadProgress: (progressEvent: AxiosProgressEvent) => void): Promise<null> {
         try {
             const formData = new FormData();
-            formData.append('body', file);
+            formData.append('file', file);
 
-            const response = await axios.post<null>('/upload_documents', formData, {
+            const response = await axios.post<null>('/upload_file', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -35,9 +52,59 @@ export class DocumentAPI {
         }
     }
 
-    static async loadConfluence(): Promise<void> {
+    static async loadConfluence(config: ConfluenceConfig): Promise<void> {
         try {
-            await axios.post<void>('/load_confluence');
+            // convert config to list of key/value items for backend
+            const payload = [
+                { key: 'url', value: config.url },
+                { key: 'token', value: config.token },
+                { key: 'space_key', value: config.spaceKey },
+                { key: 'max_pages', value: String(config.maxPages) }
+            ];
+            // include required query parameters
+            await axios.post<void>('/upload_source', payload, {
+                params: { source_type: 'confluence', name: config.name }
+            });
+        } catch(error) {
+            this.handleError(error);
+        }
+    }
+
+    static async loadSitemap(config: SitemapConfig): Promise<void> {
+        try {
+            // convert config to list of key/value items for backend
+            const payload = [
+                { key: 'web_path', value: config.webPath }
+            ];
+
+            // add filter_urls only if provided
+            if (config.filterUrls && config.filterUrls.trim()) {
+                // Convert multiline string to array and filter out empty lines
+                const filterUrlsArray = config.filterUrls
+                    .split('\n')
+                    .map(url => url.trim())
+                    .filter(url => url.length > 0);
+
+                if (filterUrlsArray.length > 0) {
+                    payload.push({ key: 'filter_urls', value: JSON.stringify(filterUrlsArray) });
+                }
+            }
+
+            // add header_template only if provided
+            if (config.headerTemplate && config.headerTemplate.trim()) {
+                try {
+                    // Validate JSON format
+                    JSON.parse(config.headerTemplate);
+                    payload.push({ key: 'header_template', value: config.headerTemplate });
+                } catch (jsonError) {
+                    throw new Error('Header template must be valid JSON format');
+                }
+            }
+
+            // include required query parameters
+            await axios.post<void>('/upload_source', payload, {
+                params: { source_type: 'sitemap', name: config.name }
+            });
         } catch(error) {
             this.handleError(error);
         }

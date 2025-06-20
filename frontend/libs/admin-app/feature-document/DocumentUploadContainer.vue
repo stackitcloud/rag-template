@@ -13,7 +13,21 @@ const fileInputRef = ref<HTMLInputElement>();
 const uploadedDocuments = computed((): UploadedDocument[] => store.uploadedDocuments);
 const isInvalidFileType = ref(false);
 const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml'];
-const uploadMethod = ref<'file' | 'confluence'>('file');
+const uploadMethod = ref<'file' | 'confluence' | 'sitemap'>('file');
+
+
+// confluence configuration refs
+const confluenceName = ref('');
+const spaceKey = ref('');
+const confluenceToken = ref('');
+const confluenceUrl = ref('');
+const maxPages = ref<number>();
+
+// sitemap configuration refs
+const sitemapName = ref('');
+const sitemapWebPath = ref('');
+const sitemapFilterUrls = ref('');
+const sitemapHeaderTemplate = ref('');
 
 const error = computed(() => store.error);
 
@@ -55,7 +69,24 @@ const onRemoveDocument = (documentId: string) => {
 }
 
 const handleConfluenceUpload = () => {
-    store.loadConfluence();
+    // send configured parameters to backend
+    store.loadConfluence({
+        name: confluenceName.value,
+        spaceKey: spaceKey.value,
+        token: confluenceToken.value,
+        url: confluenceUrl.value,
+        maxPages: maxPages.value
+    });
+}
+
+const handleSitemapUpload = () => {
+    // send configured parameters to backend
+    store.loadSitemap({
+        name: sitemapName.value,
+        webPath: sitemapWebPath.value,
+        filterUrls: sitemapFilterUrls.value,
+        headerTemplate: sitemapHeaderTemplate.value
+    });
 }
 
 const clearError = () => {
@@ -76,6 +107,12 @@ const getErrorMessage = (errorType: string) => {
             return t('documents.confluenceNotConfigured');
         case 'confluence_locked':
             return t('documents.confluenceLocked');
+        case 'sitemap':
+            return t('documents.sitemapError');
+        case 'sitemap_not_configured':
+            return t('documents.sitemapNotConfigured');
+        case 'sitemap_locked':
+            return t('documents.sitemapLocked');
         default:
             return t('documents.unknownError');
     }
@@ -109,11 +146,15 @@ const getErrorMessage = (errorType: string) => {
                     @click="uploadMethod = 'confluence'">
                     {{ t('documents.confluenceUpload') }}
                 </a>
+                <a class="tab" :class="{'tab-active': uploadMethod === 'sitemap'}"
+                    @click="uploadMethod = 'sitemap'">
+                    {{ t('documents.sitemapUpload') }}
+                </a>
             </div>
 
             <!-- File upload area -->
             <div v-if="uploadMethod === 'file'"
-                class="flex flex-col m-auto justify-center items-center w-full h-64 bg-base-100 rounded-box border border-base-300 border-dashed"
+                class="flex flex-col m-auto justify-center items-center w-full h-96 bg-base-100 rounded-box border border-base-300 border-dashed"
                 :class="{'bg-base-200': isDragOver}" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
                 @drop.prevent="onDrop">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
@@ -129,14 +170,51 @@ const getErrorMessage = (errorType: string) => {
             </div>
 
             <!-- Confluence load area -->
-            <div v-else
-                class="flex flex-col m-auto justify-center items-center w-full h-64 bg-base-100 rounded-box border border-base-300">
+            <div v-else-if="uploadMethod === 'confluence'"
+                class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
                     <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
                     <p class="mb-1 font-bold">{{ t('documents.confluenceLoadTitle') }}</p>
+                    <!-- configuration inputs -->
+                    <div class="space-y-2 mb-4 w-full max-w-sm">
+                      <label for="confluenceUrl" class="sr-only">Confluence URL</label>
+                      <input v-model="confluenceUrl" type="url" placeholder="URL" class="input input-bordered w-full" />
+                      <label for="confluenceName" class="sr-only"> Confluence Name</label>
+                      <input v-model="confluenceName" type="text" placeholder="Name" class="input input-bordered w-full" />
+                      <label for="spaceKey" class="sr-only">Space key</label>
+                      <input v-model="spaceKey" type="text" placeholder="Space key" class="input input-bordered w-full" />
+                      <label for="confluenceToken" class="sr-only">Token</label>
+                      <input v-model="confluenceToken" type="password" placeholder="Token" class="input input-bordered w-full" />
+                      <label for="maxPages" class="sr-only">Max pages</label>
+                      <input v-model.number="maxPages" type="number" placeholder="Max number of pages" class="input input-bordered w-full" />
+                    </div>
                     <p class="text-xs opacity-50 mb-4">{{ t('documents.confluenceLoadDescription') }}</p>
                     <button class="btn btn-sm btn-accent" @click="handleConfluenceUpload">
                         {{ t('documents.loadConfluence') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sitemap load area -->
+            <div v-else-if="uploadMethod === 'sitemap'"
+                class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
+                <div class="flex flex-col justify-center items-center pt-5 pb-6">
+                    <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <p class="mb-1 font-bold">{{ t('documents.sitemapLoadTitle') }}</p>
+                    <!-- configuration inputs -->
+                    <div class="space-y-2 mb-4 w-full max-w-sm">
+                      <label for="sitemapName" class="sr-only">Sitemap Name</label>
+                      <input id="sitemapName" v-model="sitemapName" type="text" placeholder="Name" class="input input-bordered w-full" required/>
+                      <label for="sitemapWebPath" class="sr-only">Sitemap URL</label>
+                      <input v-model="sitemapWebPath" type="url" placeholder="Sitemap URL (required)" class="input input-bordered w-full" required />
+                      <label for="sitemapFilterUrls" class="sr-only">Filter URLs</label>
+                      <textarea v-model="sitemapFilterUrls" placeholder="Filter URLs (optional) - one regex pattern per line" class="textarea textarea-bordered w-full" rows="3"></textarea>
+                      <label for="sitemapHeaderTemplate" class="sr-only">Headers JSON</label>
+                      <textarea v-model="sitemapHeaderTemplate" placeholder="Headers (optional) - JSON format: {&quot;Authorization&quot;: &quot;Bearer token&quot;}" class="textarea textarea-bordered w-full" rows="2"></textarea>
+                    </div>
+                    <p class="text-xs opacity-50 mb-4">{{ t('documents.sitemapLoadDescription') }}</p>
+                    <button class="btn btn-sm btn-accent" @click="handleSitemapUpload">
+                        {{ t('documents.loadSitemap') }}
                     </button>
                 </div>
             </div>

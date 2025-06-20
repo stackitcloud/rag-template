@@ -177,8 +177,37 @@ local_resource(
     allow_parallel=True,
 )
 
+################################## build mcp image and do live update ##################################################
+# NOTE: full image names should match the one in the helm chart values.yaml!
+registry = "ghcr.io/stackitcloud/rag-template"
+mcp_image_name = "rag-mcp"
+
+mcp_context = "./mcp-server"
+mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)
+docker_build(
+    mcp_full_image_name,
+    ".",
+    build_args={
+        "dev": "1" if backend_debug else "0",
+    },
+    live_update=[
+        sync(mcp_context, "/app/mcp-server"),
+    ],
+    dockerfile=mcp_context + "/Dockerfile",
+)
+
+# Add linter trigger
+local_resource(
+    "MCP server linting",
+    create_linter_command(mcp_context, "back"),
+    labels=["linting"],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_AUTO,
+    allow_parallel=True,
+)
+
 ########################################################################################################################
-################################## build admin backend image and do live update ##############################################
+################################## build admin backend image and do live update ########################################
 ########################################################################################################################
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
@@ -313,6 +342,8 @@ value_override = [
     "features.minio.enabled=true",
     "shared.config.tls.enabled=false",
     "shared.ssl=false",
+    "shared.config.basicAuth.enabled=true",
+    "features.mcp.enabled=true",
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
     # langfuse
@@ -398,6 +429,11 @@ k8s_resource(
             31415,
             container_port=31415,
             name="Backend-Debugger",
+        ),
+        port_forward(
+            9090,
+            container_port=8000,
+            name="MCP-Server",
         )
     ],
     labels=["backend"],

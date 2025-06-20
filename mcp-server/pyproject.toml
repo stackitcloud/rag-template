@@ -61,6 +61,7 @@ dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
   ./tests/*: S101,
+  ./src/settings/mcp_settings.py: S104,
 """
 
 

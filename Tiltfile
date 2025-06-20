@@ -343,7 +343,7 @@ value_override = [
     "shared.config.tls.enabled=false",
     "shared.ssl=false",
     "shared.config.basicAuth.enabled=true",
-    "backend.mcp.enabled=true",
+    "features.mcp.enabled=true",
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
     # langfuse

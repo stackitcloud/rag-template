@@ -72,9 +72,19 @@ npm run test
 To change the theme, open the `tailwind.config.js` file and refer to the available color configuration options for DaisyUI at https://daisyui.com/docs/colors/
 
 ## Environment variables
+
+### Application URLs
 - VITE_API_URL = The URL for the backend
 - VITE_ADMIN_URL = The URL where the admin frontend is running
 - VITE_CHAT_URL = The URL where the chat frontend is running
+
+### UI Customization
+- VITE_BOT_NAME = The AI assistant's display name (default: "Knowledge Agent")
+- VITE_UI_LOGO_PATH = Path to the main navigation logo (default: "/assets/navigation-logo.svg")
+- VITE_UI_THEME_DEFAULT = Default theme when user first visits (default: "light")
+- VITE_UI_THEME_OPTIONS = Available theme options, comma-separated (default: "light,dark")
+
+For detailed UI customization instructions, see [UI Customization Guide](../docs/UI_Customization.md).
 
 > Important: 
 >

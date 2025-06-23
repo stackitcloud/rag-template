@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-RAG SIT x Stackit
+STACKIT RAG
 
 The perfect rag solution.
 
@@ -39,7 +39,7 @@ class TestChatRequest(unittest.TestCase):
                 history = rag_backend_client.openapi_client.models.chat_history.chat_history(
                     messages = [
                         rag_backend_client.openapi_client.models.chat_history_message.chat_history_message(
-                            role = 'user', 
+                            role = 'user',
                             message = '', )
                         ], ),
                 message = ''

@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-RAG SIT x Stackit
+STACKIT RAG
 
 The perfect rag solution.
 
@@ -38,7 +38,7 @@ class TestChatHistory(unittest.TestCase):
             return ChatHistory(
                 messages = [
                     rag_backend_client.openapi_client.models.chat_history_message.chat_history_message(
-                        role = 'user', 
+                        role = 'user',
                         message = '', )
                     ]
             )
@@ -46,7 +46,7 @@ class TestChatHistory(unittest.TestCase):
             return ChatHistory(
                 messages = [
                     rag_backend_client.openapi_client.models.chat_history_message.chat_history_message(
-                        role = 'user', 
+                        role = 'user',
                         message = '', )
                     ],
         )

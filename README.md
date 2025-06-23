@@ -47,6 +47,7 @@ This repository contains the following components:
 - [*rag-backend*](#111-rag-backend): The main component of the RAG.
 - [*admin-backend*](#112-admin-backend): Manages user documents and confluence spaces, interacts with document-extractor and rag-backend.
 - [*document-extractor*](#113-document-extractor): Extracts content from documents and Confluence spaces.
+- [*mcp-server*](#114-mcp-server): Model Context Protocol server that provides MCP-compatible access to the RAG system.
 - *frontend*: Frontend for both, chat and admin APIs.
 - *rag-infrastructure*: Contains the helm-chart and other files related to infrastructure and deployment. Please consult [this README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md) for further information.
 - *rag-core-library*: Contains the API-libraries that are used to construct the backend-services in this repository. For further information, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md).
@@ -67,6 +68,17 @@ All components are provided by the *admin-api-lib*. For further information on e
 The Document extractor is a component that is used to extract the content from the documents and confluence spaces.
 
 All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md#3-extractor-api-lib).
+
+#### 1.1.4 MCP Server
+
+The MCP Server is a Model Context Protocol (MCP) server that provides a bridge between MCP-compatible clients and the RAG backend. It enables AI assistants and other tools to interact with the RAG system through standardized MCP tools.
+
+The MCP server runs as a sidecar container alongside the main RAG backend and exposes two main tools:
+
+- `chat_simple`: Basic question-answering without conversation history
+- `chat_with_history`: Advanced chat interface with conversation history and returns structured responses with `answer`, `finish_reason`, and `citations`.
+
+For further information on configuration and usage, please consult the [MCP Server README](./mcp-server/README.md).
 
 ### 1.2 Requirements
 

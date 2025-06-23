@@ -12,7 +12,9 @@ auth
 node_modules/
 
 **/.notebooks
+**/.notebooks/*
 **/todo*.md
+**/mcp.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -107,7 +107,7 @@ class SitemapExtractor(InformationExtractor):
         """
         sitemap_loader_parameters = {}
         for x in extraction_parameters.kwargs:
-            if x.key == "header_template":
+            if x.key == "header_template" or x.key == "requests_kwargs":
                 try:
                     sitemap_loader_parameters[x.key] = json.loads(x.value)
                 except (json.JSONDecodeError, TypeError):

@@ -11,8 +11,21 @@ features:
     enabled: true
   keydb:
     enabled: true
+  mcp:
+    enabled: true
 
 backend:
+
+  mcp:
+    name: "mcp"
+    port: "8000"
+    host: "0.0.0.0"
+    image:
+      repository: ghcr.io/stackitcloud/rag-template
+      name: rag-mcp
+      pullPolicy: Always
+      tag: "v1.0.0"
+
   name: backend
   replicaCount: 1
 

@@ -1,35 +1,14 @@
 {{- if .Values.backend.ingress.enabled -}}
+# Backend Main Ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "backend.ingressFullName" . }}
   annotations:
-    {{- if .Values.shared.config.basicAuth.enabled }}
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: basic-auth
-    {{- end }}
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "6000"
-    nginx.ingress.kubernetes.io/cors-max-age: "100"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, DELETE, OPTIONS"
+    {{- include "backend.ingress.commonAnnotations" . | nindent 4 }}
     nginx.ingress.kubernetes.io/rewrite-target: /chat/$2
-    {{- if .Values.shared.config.tls.enabled }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.backend.ingress.host.name }}, https://admin.{{ .Values.backend.ingress.host.name }}"
-    {{- else }}
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://{{ .Values.backend.ingress.host.name }}, http://admin.{{ .Values.backend.ingress.host.name }}"
-    {{- end }}
 spec:
-  {{- if .Values.shared.config.tls.enabled }}
-  tls:
-    - hosts:
-      - {{ .Values.shared.config.tls.host }}
-      secretName: {{ .Values.shared.config.tls.secretName }}
-  {{- end }}
-  ingressClassName: nginx
+  {{- include "backend.ingress.commonSpec" . | nindent 2 }}
   rules:
   - host: {{ .Values.backend.ingress.host.name }}
     http:
@@ -41,4 +20,27 @@ spec:
               name: {{ $.Values.backend.name }}
               port:
                 number: {{ .Values.backend.ingress.host.port }}
+{{- end }}
+---
+{{- if and .Values.backend.ingress.enabled .Values.features.mcp.enabled }}
+# MCP Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-mcp" (include "backend.ingressFullName" .) }}
+  annotations:
+    {{- include "backend.ingress.commonAnnotations" . | nindent 4 }}
+spec:
+  {{- include "backend.ingress.commonSpec" . | nindent 2 }}
+  rules:
+  - host: {{ .Values.backend.ingress.host.name }}
+    http:
+      paths:
+        - path: /mcp
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ $.Values.backend.name }}
+              port:
+                number: {{ .Values.backend.mcp.port }}
 {{- end }}

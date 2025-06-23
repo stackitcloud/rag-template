@@ -133,3 +133,14 @@ data:
   {{- range $key, $value := .Values.backend.envs.ollamaEmbedder }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.mcp" . }}
+data:
+  MCP_PORT: {{ .Values.backend.mcp.port | quote }}
+  MCP_TOOL_NAME: {{ .Values.backend.mcp.toolName }}
+  MCP_TOOL_DESCRIPTION: {{ .Values.backend.mcp.toolDescription }}
+  MCP_NAME: {{  .Values.backend.mcp.name }}
+---

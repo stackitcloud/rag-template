@@ -10,7 +10,8 @@ The documentation is structured as follows:
   - [1.3 KeyDB](#13-keydb)
   - [1.4 Frontend](#14-frontend)
   - [1.5 Backend](#15-backend)
-  - [1.6 Use Case Environment Variables](#16-use-case-environment-variables)
+  - [1.6 MCP Server](#16-mcp-server)
+  - [1.7 Use Case Environment Variables](#17-use-case-environment-variables)
 - [2. Requirements and Setup Instructions](#2-requirements-and-setup-instructions)
   - [2.1 Local setup instructions](#21-local-setup-instructions)
   - [2.2 Production setup instructions](#22-production-setup-instructions)
@@ -25,6 +26,7 @@ This Repository contains the helm chart for the following RAG components:
 - [KeyDB](https://docs.keydb.dev/) (dependency)
 - Frontend
 - Backend
+- MCP Server
 
 > 📝 NOTE: Only the settings you are most likely to adjust are listed here. For all available settings please take a look at the [values.yaml](rag/values.yaml).
 
@@ -44,6 +46,8 @@ features:
   frontend:
     enabled: true
   keydb:
+    enabled: true
+  mcp:
     enabled: true
 ```
 
@@ -287,7 +291,44 @@ shared:
 >
 > The same options are also available for the `backend.envs.embedderClassTypes.EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE`.
 
-### 1.6 Use Case Environment Variables
+### 1.6 MCP Server
+
+The MCP (Model Context Protocol) Server runs as a sidecar container alongside the main RAG backend and provides MCP-compatible access to the RAG system. It can be enabled or disabled using the following configuration:
+
+```yaml
+features:
+  mcp:
+    enabled: true # Set to false to disable MCP server
+```
+
+When enabled, the MCP server can be configured with the following values:
+
+```yaml
+backend:
+  mcp:
+    name: "mcp" # Name of the MCP server container
+    port: "8000" # Port on which the MCP server listens (default: 8000)
+    host: "0.0.0.0" # Host address for the MCP server
+    image:
+      repository: ghcr.io/stackitcloud/rag-template
+      name: rag-mcp
+      pullPolicy: Always
+      tag: "v1.0.0"
+```
+
+The MCP server exposes the following endpoints:
+
+- **Development**: Accessible via `/mcp` path through port-forward on port 9090 in Tilt setup
+- **Production**: Accessible via `/mcp` path through the main ingress
+
+> 📝 NOTE: The MCP server provides two main tools:
+>
+> - `chat_simple`: Basic question-answering without conversation history
+> - `chat_with_history`: Advanced chat interface with conversation history and returns structured responses with `answer`, `finish_reason`, and `citations`.
+>
+> For detailed information about MCP server configuration and usage, see the [MCP Server README](../mcp-server/README.md).
+
+### 1.7 Use Case Environment Variables
 
 To add use case specific environment variables, the `usecase` secret and configmap can be used. Adding new environment variables to the `usecase` secret and configmap can be done by adding the following values to the `values.yaml` file:
 

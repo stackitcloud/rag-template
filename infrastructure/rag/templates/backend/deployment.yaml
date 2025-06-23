@@ -40,6 +40,19 @@ spec:
         - name: log-dir
           mountPath: /app/rag-backend/log
       containers:
+      {{- if .Values.features.mcp.enabled }}
+      - name: {{ .Values.backend.mcp.name }}
+        image: {{ include "mcp.fullImageName" . }}
+        imagePullPolicy: {{ .Values.backend.mcp.image.pullPolicy }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.mcp" . }}
+        volumeMounts:
+          - name: config-volume
+            mountPath: /config
+          - name: log-dir
+            mountPath: /app/mcp-server/log
+      {{- end }}
       - name: {{ .Values.backend.name }}
         securityContext:
           allowPrivilegeEscalation: false

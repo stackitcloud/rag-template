@@ -6,6 +6,12 @@ spec:
   type: {{ .Values.backend.service.type }}
   ports:
   - port: {{ .Values.backend.service.port }}
+    name: backend
     targetPort: {{ .Values.backend.service.port }}
+  {{- if .Values.features.mcp.enabled }}
+  - port: {{ .Values.backend.mcp.port }}
+    targetPort: {{ .Values.backend.mcp.port }}
+    name: mcp
+  {{- end }}
   selector:
     app: {{ .Values.backend.name }}

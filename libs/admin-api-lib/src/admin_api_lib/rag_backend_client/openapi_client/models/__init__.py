@@ -2,7 +2,7 @@
 
 # flake8: noqa
 """
-RAG SIT x Stackit
+STACKIT RAG
 
 The perfect rag solution.
 

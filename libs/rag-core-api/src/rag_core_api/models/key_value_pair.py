@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-RAG SIT x Stackit
+STACKIT RAG
 
 The perfect rag solution.
 

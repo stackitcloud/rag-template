@@ -3,7 +3,7 @@ info:
     title: admin-api-lib
     version: 1.0.0
     description: >-
-        The API is used for the communication between the         admin frontend and the admin backend in the
+        The API is used for the communication between the admin frontend and the admin backend in the
         rag project.
 servers:
     -

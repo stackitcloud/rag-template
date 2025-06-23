@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   contact: {}
   description: The perfect rag solution.
-  title: RAG SIT x Stackit
+  title: STACKIT RAG
   version: 1.0.0
 servers:
 - url: /

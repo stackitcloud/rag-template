@@ -20,7 +20,7 @@ const defaultSettings: AppSettings = {
   ui: {
     logoPath: "/assets/navigation-logo.svg",
     theme: {
-      default: "light",
+      default: "dark",
       options: ["light", "dark"],
     },
   },

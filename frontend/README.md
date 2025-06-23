@@ -81,7 +81,7 @@ To change the theme, open the `tailwind.config.js` file and refer to the availab
 ### UI Customization
 - VITE_BOT_NAME = The AI assistant's display name (default: "Knowledge Agent")
 - VITE_UI_LOGO_PATH = Path to the main navigation logo (default: "/assets/navigation-logo.svg")
-- VITE_UI_THEME_DEFAULT = Default theme when user first visits (default: "light")
+- VITE_UI_THEME_DEFAULT = Default theme when user first visits (default: "dark")
 - VITE_UI_THEME_OPTIONS = Available theme options, comma-separated (default: "light,dark")
 
 For detailed UI customization instructions, see [UI Customization Guide](../docs/UI_Customization.md).

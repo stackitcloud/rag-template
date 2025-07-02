@@ -12,11 +12,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && $POETRY_VIRTUALENVS_PATH/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
-COPY rag-core-library/rag-core-lib /app/rag-core-library/rag-core-lib
-COPY rag-core-library/rag-core-api /app/rag-core-library/rag-core-api
+COPY libs/rag-core-lib /app/libs/rag-core-lib
+COPY libs/rag-core-api /app/libs/rag-core-api
 
 WORKDIR /app/rag-backend
-COPY rag-backend/pyproject.toml rag-backend/poetry.lock ./
+COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock ./
 
 RUN mkdir log && chmod 700 log
 RUN touch /app/services/rag-backend/log/logfile.log && chmod 600 /app/services/rag-backend/log/logfile.log
@@ -40,11 +40,11 @@ COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 
 
-COPY --chown=nonroot:nonroot rag-core-library/rag-core-lib /app/rag-core-library/rag-core-lib
-COPY --chown=nonroot:nonroot rag-core-library/rag-core-api /app/rag-core-library/rag-core-api
+COPY --chown=nonroot:nonroot libs/rag-core-lib /app/libs/rag-core-lib
+COPY --chown=nonroot:nonroot libs/rag-core-api /app/libs/rag-core-api
 
 WORKDIR /app/rag-backend
-COPY --chown=nonroot:nonroot rag-backend .
+COPY --chown=nonroot:nonroot services/rag-backend .
 
 
 # cleanup

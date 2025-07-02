@@ -15,10 +15,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
       && $POETRY_VIRTUALENVS_PATH/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
-COPY rag-core-library/extractor-api-lib /app/rag-core-library/extractor-api-lib
+COPY libs/extractor-api-lib /app/libs/extractor-api-lib
 
 WORKDIR /app/document-extractor
-COPY document-extractor/pyproject.toml document-extractor/poetry.lock ./
+COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock ./
 
 RUN mkdir log && chmod 700 log
 RUN touch /app/document-extractor/log/logfile.log && chmod 600 /app/document-extractor/log/logfile.log
@@ -43,11 +43,11 @@ COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --from=build /usr/share/tesseract-ocr/5/tessdata /usr/share/tesseract-ocr/5/tessdata
 
-COPY --chown=nonroot:nonroot rag-core-library/extractor-api-lib /app/rag-core-library/extractor-api-lib
+COPY --chown=nonroot:nonroot libs/extractor-api-lib /app/libs/extractor-api-lib
 
 WORKDIR /app/document-extractor
 
-COPY --chown=nonroot:nonroot document-extractor .
+COPY --chown=nonroot:nonroot services/document-extractor .
 
 
 # cleanup

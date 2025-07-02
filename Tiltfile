@@ -14,10 +14,14 @@ core_library_context = "./libs"
 
 
 def create_linter_command(folder_name, name):
+    # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
+    build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 -f "
+        + " --build-arg "
+        + build_arg
+        + " -f "
         + folder_name
         + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
@@ -26,10 +30,14 @@ def create_linter_command(folder_name, name):
 
 
 def create_test_command(folder_name, name):
+    # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
+    build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 -f "
+        + " --build-arg "
+        + build_arg
+        + " -f "
         + folder_name
         + "/Dockerfile .;docker run --rm --entrypoint make "
         + name

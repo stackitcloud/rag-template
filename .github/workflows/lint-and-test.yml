@@ -70,6 +70,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+          submodules: true
 
       - name: Set Docker Image Name
         run: |
@@ -78,7 +79,7 @@ jobs:
 
       - name: Build lint image
         run: |
-          docker build -t $IMAGE_NAME --build-arg dev=1 --build-arg TAG=debug -f services/${{ matrix.service }}/Dockerfile .
+          docker build -t $IMAGE_NAME --build-arg dev=1 --build-arg TAG=debug -f ${{ matrix.service }}/Dockerfile .
 
       - name: Generate lint report
         run: |

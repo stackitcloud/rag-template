@@ -1,28 +1,6 @@
 # RAG Template
 
-Welcome to the STACKIT RAG Template! This is a **monorepo** containing a complete RAG (Retrieve, Augment, Generate) solution with multiple services and shared libraries. This template provides a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./services/rag-backend/main.py), [container.py](./services/rag-backend/container.py) and [chat_endpoint.py](./services/rag-backend/chat_endpoint.py)).
-
-## Monorepo Structure
-
-This repository is organized as a monorepo with the following structure:
-
-```text
-rag-template-2.0/
-├── services/              # All microservices
-│   ├── rag-backend/      # Main RAG API service
-│   ├── admin-backend/    # Document management service
-│   ├── document-extractor/ # Content extraction service
-│   ├── mcp-server/       # Model Context Protocol server
-│   └── frontend/         # Vue.js frontend applications
-├── libs/                 # Shared libraries
-│   ├── rag-core-lib/     # Core RAG functionality
-│   ├── rag-core-api/     # RAG API components
-│   ├── admin-api-lib/    # Admin API components
-│   └── extractor-api-lib/ # Extractor API components
-├── infrastructure/       # Deployment and infrastructure
-├── tools/               # Build and development tools
-└── docs/                # Documentation
-```
+Welcome to the STACKIT RAG Template! This is a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py)).
 
 <!-- The RAG (Retrieve, Augment, Generate) template is here to simplify your journey into developing and deploying AI-driven applications in a kubernetes cluster. It provides a comprehensive guide, including local setup as well as production deployment instructions. Whether you're a developer, data scientist, or researcher, this template offers everything you need to build and deploy your own RAG solution.  -->
 
@@ -64,38 +42,32 @@ A [`Tiltfile`](./Tiltfile) is provided to get you started :rocket:. If Tilt is n
 
 ### 1.1 Components
 
-This monorepo contains the following components:
+This repository contains the following components:
 
-- [**services/rag-backend**](#111-rag-backend): The main component of the RAG system.
-- [**services/admin-backend**](#112-admin-backend): Manages user documents and confluence spaces, interacts with document-extractor and rag-backend.
-- [**services/document-extractor**](#113-document-extractor): Extracts content from documents and Confluence spaces.
-- [**services/mcp-server**](#114-mcp-server): Model Context Protocol server that provides MCP-compatible access to the RAG system.
-- **services/frontend**: Vue.js frontend applications for both chat and admin interfaces.
-- **libs/**: Shared libraries containing the core functionality:
-  - **rag-core-lib**: Core RAG functionality and utilities
-  - **rag-core-api**: RAG API components and endpoints
-  - **admin-api-lib**: Admin API components for document management
-  - **extractor-api-lib**: Document extraction API components
-- **infrastructure/**: Contains Helm charts and deployment configurations
-- **tools/**: Build scripts and development utilities
+- [*rag-backend*](#111-rag-backend): The main component of the RAG.
+- [*admin-backend*](#112-admin-backend): Manages user documents and confluence spaces, interacts with document-extractor and rag-backend.
+- [*document-extractor*](#113-document-extractor): Extracts content from documents and Confluence spaces.
+- [*mcp-server*](#114-mcp-server): Model Context Protocol server that provides MCP-compatible access to the RAG system.
+- *frontend*: Frontend for both, chat and admin APIs.
+- *rag-infrastructure*: Contains the helm-chart and other files related to infrastructure and deployment. Please consult [this README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md) for further information.
+- *rag-core-library*: Contains the API-libraries that are used to construct the backend-services in this repository. For further information, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md).
 
 #### 1.1.1 Rag backend
-
 The backend is the main component of the RAG. It handles all connections to the vector database, as well as chatting.
 
-All components are provided by the **libs/rag-core-api**. The service is located in **services/rag-backend/**.
+All components are provided by the *rag-core-api*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md#1-rag-core-api).
 
 #### 1.1.2 Admin backend
 
 The Admin backend is a component that is used to manage user provided documents and confluence spaces. It communicates with the document-extractor to extract the content from the documents and confluence spaces. Besides, it communicates with the rag-backend to store the document chunks into the vector database. For storing the documents, it uses the S3 object storage. It also acts as interface to provide the current status of the documents and confluence spaces in the RAG.
 
-All components are provided by the **libs/admin-api-lib**. The service is located in **services/admin-backend/**.
+All components are provided by the *admin-api-lib*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md#2-admin-api-lib).
 
 #### 1.1.3 Document extractor
 
 The Document extractor is a component that is used to extract the content from the documents and confluence spaces.
 
-All components are provided by the **libs/extractor-api-lib**. The service is located in **services/document-extractor/**.
+All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [this README](https://github.com/stackitcloud/rag-core-library/blob/main/README.md#3-extractor-api-lib).
 
 #### 1.1.4 MCP Server
 
@@ -106,7 +78,7 @@ The MCP server runs as a sidecar container alongside the main RAG backend and ex
 - `chat_simple`: Basic question-answering without conversation history
 - `chat_with_history`: Advanced chat interface with conversation history and returns structured responses with `answer`, `finish_reason`, and `citations`.
 
-The service is located in **services/mcp-server/**. For further information on configuration and usage, please consult the [MCP Server README](./services/mcp-server/README.md).
+For further information on configuration and usage, please consult the [MCP Server README](./mcp-server/README.md).
 
 ### 1.2 Requirements
 

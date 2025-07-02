@@ -14,23 +14,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
         tesseract-ocr-eng; \
     fi
 
-# Copy the entire libs directory
 COPY . .
 
 RUN pip install poetry==1.8.3
 
-# Set working directory to the specific library
 WORKDIR /app/${DIRECTORY}
-
-# Configure poetry
 RUN poetry config virtualenvs.create false
-
-# Install dependencies (no need to remove parent files since we're in a library-specific directory)
-RUN if [ "$TEST" = "1" ]; then \
-        poetry install --with dev; \
-    else \
-        poetry install; \
-    fi
-
-# Default command
-CMD ["make", "lint"]
+RUN if [ "$TEST" = "1" ]; then rm ../poetry.lock; rm ../pyproject.toml; poetry install --with dev; else poetry install; fi

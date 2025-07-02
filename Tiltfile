@@ -79,7 +79,7 @@ create_namespace_if_notexist(namespace)
 local_resource(
     "RAG core library linting",
     """set -e
-    docker build -t rag_core --build-arg TEST=0 -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t rag_core --build-arg TEST=0 -f libs/Dockerfile libs;
     docker run --rm rag_core make lint""",
     labels=["linting"],
     auto_init=False,
@@ -91,7 +91,7 @@ local_resource(
 local_resource(
     "RAG core lib testing",
     """set -e
-    docker build -t rag_core_lib --build-arg DIRECTORY=rag-core-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t rag_core_lib --build-arg DIRECTORY=rag-core-lib -f libs/Dockerfile libs;
     docker run --rm rag_core_lib make test""",
     labels=["test"],
     auto_init=False,
@@ -102,7 +102,7 @@ local_resource(
 local_resource(
     "RAG core API testing",
     """set -e
-    docker build -t rag_core_api --build-arg DIRECTORY=rag-core-api -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t rag_core_api --build-arg DIRECTORY=rag-core-api -f libs/Dockerfile libs;
     docker run --rm rag_core_api make test""",
     labels=["test"],
     auto_init=False,
@@ -113,7 +113,7 @@ local_resource(
 local_resource(
     "Admin API lib testing",
     """set -e
-    docker build -t admin_api_lib --build-arg DIRECTORY=admin-api-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t admin_api_lib --build-arg DIRECTORY=admin-api-lib -f libs/Dockerfile libs;
     docker run --rm admin_api_lib make test""",
     labels=["test"],
     auto_init=False,
@@ -124,7 +124,7 @@ local_resource(
 local_resource(
     "Extractor API lib testing",
     """set -e
-    docker build -t extractor_api_lib --build-arg DIRECTORY=extractor-api-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t extractor_api_lib --build-arg DIRECTORY=extractor-api-lib -f libs/Dockerfile libs;
     docker run --rm extractor_api_lib make test""",
     labels=["test"],
     auto_init=False,
@@ -151,8 +151,8 @@ docker_build(
     },
     live_update=[
         sync(backend_context, "/app/rag-backend"),
-        sync(core_library_context+"/rag-core-api", "/app/rag-core-library/rag-core-api"),
-        sync(core_library_context+"/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
+        sync(core_library_context+"/rag-core-api", "/app/libs/rag-core-api"),
+        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
 )
@@ -224,8 +224,8 @@ docker_build(
     },
     live_update=[
         sync(admin_backend_context, "/app/admin-backend"),
-        sync(core_library_context + "/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
-        sync(core_library_context + "/admin-api-lib", "/app/rag-core-library/admin-api-lib"),
+        sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
+        sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
 )
@@ -268,8 +268,8 @@ docker_build(
     },
     live_update=[
         sync(extractor_context, "/app/document-extractor"),
-        sync(core_library_context+"/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
-        sync(core_library_context +"/extractor-api-lib", "/app/rag-core-library/extractor-api-lib"),
+        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
+        sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
 )

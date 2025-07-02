@@ -11,7 +11,7 @@ The following endpoints are provided by the *admin-backend*:
 # Requirements
 
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
-The admin-backend uses the base Dockerfile of the [rag-core-library](../rag-core-library/) and share the system requirements with this library.
+The admin-backend uses the base Dockerfile of the [libs](../libs/) and share the system requirements with this library.
 
 # Endpoints
 

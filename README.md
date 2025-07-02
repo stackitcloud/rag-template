@@ -73,7 +73,7 @@ This monorepo contains the following components:
 - **services/frontend**: Vue.js frontend applications for both chat and admin interfaces.
 - **libs/**: Shared libraries containing the core functionality:
   - **rag-core-lib**: Core RAG functionality and utilities
-  - **rag-core-api**: RAG API components and endpoints  
+  - **rag-core-api**: RAG API components and endpoints
   - **admin-api-lib**: Admin API components for document management
   - **extractor-api-lib**: Document extraction API components
 - **infrastructure/**: Contains Helm charts and deployment configurations
@@ -133,7 +133,7 @@ This example of the rag-template includes a WebUI for document-management, as we
 After following the setup instruction for either the [local installation](#-local-setup-instructions) or the [installation on a server](#-Deployment-to-server) the WebUI is accessible via the configured ingress.
 After uploading a file in the document-management WebUI you can start asking question about your document in the chat WebUI.
 
-For a complete documentation of the available REST-APIs, please consult [the README of the rag-core-library](https://github.com/stackitcloud/rag-core-library/blob/main/README.md).
+For a complete documentation of the available REST-APIs, please consult [the README of the libs](https://github.com/stackitcloud/libs/blob/main/README.md).
 
 If you want to replace some dependencies with you own dependencies, see the rag-backend folder, especially the [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py).
 
@@ -263,17 +263,17 @@ To connect the debugger, you can use the following `launch.json`:
                     "remoteRoot": "/app/rag-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
-                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
             ]
         },
@@ -294,17 +294,17 @@ To connect the debugger, you can use the following `launch.json`:
                     "remoteRoot": "/app/document-extractor"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/extractor-api-lib",
-                    "remoteRoot": "/app/rag-core-library/extractor-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/extractor-api-lib",
+                    "remoteRoot": "/app/libs/extractor-api-lib"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
             ]
         },
@@ -325,17 +325,17 @@ To connect the debugger, you can use the following `launch.json`:
                     "remoteRoot": "/app/admin-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
-                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 }
             ]
         }
@@ -430,6 +430,5 @@ The linting-settings can be changed in the `rag-backend/pyproject.toml` file und
 
 ## 4. Contribution Guidelines
 
-This use case example contains 2 git submodules, the `rag-infrastructure` and the `rag-core-library`.
 In order to contribute please consult the [CONTRIBUTING.md](./CONTRIBUTING.md).
 

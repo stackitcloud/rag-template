@@ -41,7 +41,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.flake8]
-exclude= [".eggs", "./rag-core-library/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+exclude= [".eggs", "./libs/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
 statistics = true
 show-source = false
 max-complexity = 8

@@ -42,13 +42,13 @@ def create_test_command(folder_name, name):
 ########################################################################################################################
 local_resource(
     "core helm chart",
-    cmd="cd ./rag-infrastructure/rag && helm dependency update",
+    cmd="cd ./infrastructure/rag && helm dependency update",
     ignore=[
-        "rag-infrastructure/rag/charts/keydb-0.48.0.tgz",
-        "rag-infrastructure/rag/charts/minio-14.6.7.tgz",
-        "rag-infrastructure/rag/charts/langfuse-0.29.1.tgz",
-        "rag-infrastructure/rag/charts/qdrant-0.9.1.tgz",
-        "rag-infrastructure/rag/charts/ollama-0.29.1.tgz",
+        "infrastructure/rag/charts/keydb-0.48.0.tgz",
+        "infrastructure/rag/charts/minio-14.6.7.tgz",
+        "infrastructure/rag/charts/langfuse-0.29.1.tgz",
+        "infrastructure/rag/charts/qdrant-0.9.1.tgz",
+        "infrastructure/rag/charts/ollama-0.29.1.tgz",
     ],
     labels=["helm"],
 )
@@ -403,11 +403,11 @@ if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
 
 
 yaml = helm(
-    "./rag-infrastructure/rag",
+    "./infrastructure/rag",
     name="rag",
     namespace="rag",
     values=[
-        "./rag-infrastructure/rag/values.yaml",
+        "./infrastructure/rag/values.yaml",
     ],
     set=value_override,
 )

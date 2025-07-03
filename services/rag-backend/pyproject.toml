@@ -6,7 +6,7 @@ authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 
 [tool.poetry.dependencies]
 python = "^3.13"
-rag-core-api = { path = "../rag-core-library/rag-core-api", develop = true}
+rag-core-api = { path = "../../libs/rag-core-api", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"

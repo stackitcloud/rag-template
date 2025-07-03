@@ -10,7 +10,7 @@ config.define_bool("debug")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
 
-core_library_context = "./rag-core-library"
+core_library_context = "./libs"
 
 
 def create_linter_command(folder_name, name):
@@ -141,7 +141,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 rag_api_image_name = "rag-backend"
 
-backend_context = "./rag-backend"
+backend_context = "./services/rag-backend"
 rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
 docker_build(
     rag_api_full_image_name,
@@ -182,7 +182,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 mcp_image_name = "rag-mcp"
 
-mcp_context = "./mcp-server"
+mcp_context = "./services/mcp-server"
 mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)
 docker_build(
     mcp_full_image_name,
@@ -214,7 +214,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 admin_api_image_name = "admin-backend"
 
-admin_backend_context = "./admin-backend"
+admin_backend_context = "./services/admin-backend"
 admin_api_full_image_name = "%s/%s" % (registry, admin_api_image_name)
 docker_build(
     admin_api_full_image_name,
@@ -258,7 +258,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 document_extractor_image_name = "document-extractor"
 
-extractor_context = "./document-extractor"
+extractor_context = "./services/document-extractor"
 document_extractor_full_image_name = "%s/%s" % (registry, document_extractor_image_name)
 docker_build(
     document_extractor_full_image_name,
@@ -299,27 +299,27 @@ local_resource(
 ################################## build frontend image and do live update #############################################
 ########################################################################################################################
 
-frontend_context = "./frontend"
+frontend_context = "./services/frontend"
 frontend_image_name = "%s/frontend" % (registry)
 
 docker_build(
     frontend_image_name,
     ".",
-    dockerfile="./frontend/apps/chat-app/Dockerfile",
-    live_update=[sync("./frontend/apps/chat-app", "/app")],
+    dockerfile="./services/frontend/apps/chat-app/Dockerfile",
+    live_update=[sync("./services/frontend/apps/chat-app", "/app")],
 )
 
 ########################################################################################################################
 ################################## build admin frontend image and do live update ########################################
 ########################################################################################################################
 
-adminfrontend_context = "./frontend"
+adminfrontend_context = "./services/frontend"
 adminfrontend_image_name = "%s/admin-frontend" % (registry)
 docker_build(
     adminfrontend_image_name,
     ".",
-    dockerfile="frontend/apps/admin-app/Dockerfile",
-    live_update=[sync("./frontend/apps/admin-app", "/app")],
+    dockerfile="services/frontend/apps/admin-app/Dockerfile",
+    live_update=[sync("./services/frontend/apps/admin-app", "/app")],
 )
 
 

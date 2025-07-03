@@ -90,4 +90,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-admin-api-lib = {path = "../rag-core-library/admin-api-lib", develop = true}
+admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}

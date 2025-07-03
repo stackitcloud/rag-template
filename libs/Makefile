@@ -1,4 +1,4 @@
-.PHONY: lint test
+.PHONY: lint update-lock black test
 
 lint:
 	cd rag-core-lib;make lint

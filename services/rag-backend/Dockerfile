@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
 ARG dev=0
-ENV POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv
+ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
 ENV POETRY_VERSION=1.8.3
 
 WORKDIR /app
@@ -15,7 +15,7 @@ ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 COPY libs/rag-core-lib /app/libs/rag-core-lib
 COPY libs/rag-core-api /app/libs/rag-core-api
 
-WORKDIR /app/rag-backend
+WORKDIR /app/services/rag-backend
 COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock ./
 
 RUN mkdir log && chmod 700 log
@@ -33,7 +33,7 @@ ARG dev=0
 
 RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
-ENV POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv
+ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
@@ -43,7 +43,7 @@ COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --chown=nonroot:nonroot libs/rag-core-lib /app/libs/rag-core-lib
 COPY --chown=nonroot:nonroot libs/rag-core-api /app/libs/rag-core-api
 
-WORKDIR /app/rag-backend
+WORKDIR /app/services/rag-backend
 COPY --chown=nonroot:nonroot services/rag-backend .
 
 
@@ -55,13 +55,13 @@ RUN if [ "$dev" = "0" ]; then \
         while read -r shell; do rm -f "$shell"; done < /etc/shells; \
         rm -rf /var/lib/{apt,dpkg,cache,log}/ \
     else \
-        echo "POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv" >> /etc/environment;\
-        export POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv;\
+        echo "POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv" >> /etc/environment;\
+        export POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv;\
         export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
     fi
 
 
 USER nonroot
-COPY --from=build --chown=nonroot:nonroot  /app/rag-backend/log /app/rag-backend/log
+COPY --from=build --chown=nonroot:nonroot  /app/services/rag-backend/log /app/services/rag-backend/log
 
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"

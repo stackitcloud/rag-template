@@ -40,6 +40,7 @@ COPY --from=build /usr/local/lib/ /usr/local/lib/
 WORKDIR /app/services/mcp-server
 COPY --chown=nonroot:nonroot services/mcp-server/src ./src
 COPY --chown=nonroot:nonroot services/mcp-server/pyproject.toml services/mcp-server/poetry.lock ./
+COPY --chown=nonroot:nonroot services/mcp-server/Makefile ./
 # cleanup
 RUN apt-get clean autoclean
 RUN apt-get autoremove --yes

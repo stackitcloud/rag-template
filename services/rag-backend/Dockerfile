@@ -19,7 +19,7 @@ WORKDIR /app/services/rag-backend
 COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock ./
 
 RUN mkdir log && chmod 700 log
-RUN touch /app/rag-backend/log/logfile.log && chmod 600 /app/rag-backend/log/logfile.log
+RUN touch /app/services/rag-backend/log/logfile.log && chmod 600 /app/services/rag-backend/log/logfile.log
 
 RUN poetry config virtualenvs.create false &&\
     if [ "$dev" = "1" ]; then \

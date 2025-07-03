@@ -50,11 +50,11 @@ jobs:
 
       - name: Generate lint report
         run: |
-          docker run --rm --entrypoint make "$IMAGE_NAME" lint
+          docker run --rm $IMAGE_NAME make lint
 
       - name: Run tests
         run: |
-          docker run --rm --entrypoint make "$IMAGE_NAME" test
+          docker run --rm $IMAGE_NAME make test
 
   build-and-lint-libs:
     name: Build and Lint Libraries
@@ -75,12 +75,16 @@ jobs:
 
       - name: Build lint image
         run: |
-          docker build -t $IMAGE_NAME --build-arg DIRECTORY=${{ matrix.library }} --build-arg TEST=1 -f libs/Dockerfile .
+          docker build -t $IMAGE_NAME --build-arg TEST=0 -f libs/Dockerfile libs
 
       - name: Generate lint report
         run: |
-          docker run --rm --entrypoint make "$IMAGE_NAME" lint
+          docker run --rm $IMAGE_NAME make lint
+
+      - name: Build test image
+        run: |
+          docker build -t $IMAGE_NAME-test --build-arg DIRECTORY=${{ matrix.library }} --build-arg TEST=1 -f libs/Dockerfile libs
 
       - name: Run tests
         run: |
-          docker run --rm --entrypoint make "$IMAGE_NAME" test
+          docker run --rm $IMAGE_NAME-test make test

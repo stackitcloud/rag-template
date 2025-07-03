@@ -1,0 +1,46 @@
+{{- if .Values.backend.ingress.enabled -}}
+# Backend Main Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "backend.ingressFullName" . }}
+  annotations:
+    {{- include "backend.ingress.commonAnnotations" . | nindent 4 }}
+    nginx.ingress.kubernetes.io/rewrite-target: /chat/$2
+spec:
+  {{- include "backend.ingress.commonSpec" . | nindent 2 }}
+  rules:
+  - host: {{ .Values.backend.ingress.host.name }}
+    http:
+      paths:
+        - path: {{ .Values.backend.ingress.host.path }}
+          pathType: {{ .Values.backend.ingress.host.pathType }}
+          backend:
+            service:
+              name: {{ $.Values.backend.name }}
+              port:
+                number: {{ .Values.backend.ingress.host.port }}
+{{- end }}
+---
+{{- if and .Values.backend.ingress.enabled .Values.features.mcp.enabled }}
+# MCP Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-mcp" (include "backend.ingressFullName" .) }}
+  annotations:
+    {{- include "backend.ingress.commonAnnotations" . | nindent 4 }}
+spec:
+  {{- include "backend.ingress.commonSpec" . | nindent 2 }}
+  rules:
+  - host: {{ .Values.backend.ingress.host.name }}
+    http:
+      paths:
+        - path: /mcp
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ $.Values.backend.name }}
+              port:
+                number: {{ .Values.backend.mcp.port }}
+{{- end }}

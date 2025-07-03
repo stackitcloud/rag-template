@@ -26,8 +26,9 @@ The following types of information will be extracted:
 - `TEXT`: plain text
 - `TABLE`: data in tabular form found in the document
 
-# Deployment
-A detailed explanation of the deployment can be found in the [Readme](../README.md) of the project.
-The *helm-chart* used for the deployment can be found [here](../helm-chart/charts/admin-backend/).
+## Deployment
+
+A detailed explanation of the deployment can be found in the [project README](../../README.md).
+The *helm-chart* used for the deployment can be found in the [infrastructure directory](../../infrastructure/).
 
 

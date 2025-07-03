@@ -33,7 +33,7 @@ ARG dev=0
 
 RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
-ENV POETRY_VIRTUALENVS_PATH=/app/rag-backend/.venv
+ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make

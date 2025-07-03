@@ -11,15 +11,10 @@ update-lock:
 	cd rag-core-api;poetry lock --regenerate
 	cd admin-api-lib;poetry lock --regenerate
 	cd extractor-api-lib;poetry lock --regenerate
+	poetry lock --regenerate
 
 black:
 	cd rag-core-lib;black .
 	cd rag-core-api;black .
 	cd admin-api-lib;black .
 	cd extractor-api-lib;black .
-
-test:
-	cd rag-core-lib;make test
-	cd rag-core-api;make test
-	cd admin-api-lib;make test
-	cd extractor-api-lib;make test

@@ -1,7 +1,7 @@
-# RAG Core library
+# RAG Core Libraries
 
-This repository contains the core of the STACKIT RAG template.
-It provides comprehensive document extraction capabilities including support for files (PDF, DOCX, XML), web sources via sitemaps, and Confluence pages.
+This directory contains the core libraries of the STACKIT RAG template.
+These libraries provide comprehensive document extraction capabilities including support for files (PDF, DOCX, XML), web sources via sitemaps, and Confluence pages.
 It consists of the following python packages:
 
 - [`1. Rag Core API`](#1-rag-core-api)
@@ -24,9 +24,9 @@ Each of the packages defines the replaceable parts([1.3 Replaceable Parts](#13-r
 
 > ⓘ INFO: If you replace parts it is important to keep the name of the component, otherwise the replacing-logic will not work.
 
-This repository also contains a `Dockerfile` that is used to ensure proper linting and testing of the packages.
+This directory also contains a `Dockerfile` that is used to ensure proper linting and testing of the library packages.
 
-For an example on how to use the packages, please consult the [RAG Template repository](../).
+For an example on how to use the packages, please consult the [RAG Template project](../) or the individual service implementations in the [services directory](../services/).
 
 ## 1. RAG Core API
 

@@ -87,7 +87,7 @@ create_namespace_if_notexist(namespace)
 local_resource(
     "RAG core library linting",
     """set -e
-    docker build -t rag_core --build-arg TEST=1 -f libs/Dockerfile libs;
+    docker build -t rag_core --build-arg TEST=0 -f libs/Dockerfile libs;
     docker run --rm rag_core make lint""",
     labels=["linting"],
     auto_init=False,

@@ -1,0 +1,56 @@
+{{- if $.Values.features.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.adminFrontend.name }}
+spec:
+  replicas: {{ .Values.adminFrontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.adminFrontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.adminFrontend.name }}
+    spec:
+      volumes:
+      - name: {{ .Values.adminFrontend.name }}
+        emptyDir: {}
+      - name: nginx-cache-dir
+        emptyDir: {}
+      - name: run-dir
+        emptyDir: {}
+      containers:
+      - name: {{ .Values.adminFrontend.name }}
+        startupProbe:
+          exec:
+            command:
+            - /bin/sh
+            - "-c"
+            - "cp -r /app/frontend/. /usr/share/nginx/html && /bin/sh /app/env.sh"
+        securityContext:
+          runAsUser: 101
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        image: {{ template "adminFrontend.fullImageName" . }}
+        imagePullPolicy: {{ .Values.adminFrontend.image.pullPolicy }}
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: {{ .Values.adminFrontend.name }}
+        - mountPath: var/cache/nginx/
+          name: nginx-cache-dir
+        - mountPath: /var/run
+          name: run-dir
+        ports:
+        - containerPort: {{ .Values.adminFrontend.service.port }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.frontendName" . }}
+          - secretRef:
+              name: "vite-auth"
+      {{- if .Values.shared.imagePullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.shared.imagePullSecret.name }}
+      {{- end }}
+{{- end }}

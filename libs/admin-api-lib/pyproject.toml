@@ -1,0 +1,116 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "admin-api-lib"
+version = "1.0.1"
+description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
+authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+packages = [{ include = "admin_api_lib", from = "src" }]
+
+[tool.flake8]
+exclude= [".eggs", "./rag-core-library/*", "./src/admin_api_lib/models/*", "./src/admin_api_lib/rag_backend_client/*", "./src/admin_api_lib/extractor_api_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
+statistics = true
+show-source = false
+max-complexity = 8
+max-annotations-complexity = 3
+docstring-convention = 'numpy'
+max-line-length = 120
+ignore = ["E203", "W503", "E704"]
+inline-quotes = '"'
+docstring-quotes = '"""'
+multiline-quotes = '"""'
+dictionaries = ["en_US", "python", "technical", "pandas"]
+ban-relative-imports = true
+per-file-ignores = """
+  ./src/admin_api_lib/prompt_templates/summarize_prompt.py: E501,
+  ./src/admin_api_lib/apis/admin_api.py: B008,WOT001,
+  ./src/admin_api_lib/impl/admin_api.py: B008,
+  ./src/admin_api_lib/dependency_container.py: CCE002,CCE001,
+  ./src/admin_api_lib/apis/admin_api_base.py: WOT001,
+  ./tests/*: S101,S106,D100,D103,PT011,N802
+  ./src/admin_api_lib/impl/settings/confluence_settings.py: C901,N805,
+  ./src/admin_api_lib/impl/utils/comma_separated_bool_list.py: R505,
+  ./src/admin_api_lib/impl/utils/comma_separated_str_list.py: R505,
+"""
+
+[tool.black]
+line-length = 120
+exclude = """
+/(
+      .eggs
+    | .git
+    | .hg
+    | .mypy_cache
+    | .nox
+    | .pants.d
+    | .tox
+    | .venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | node_modules
+    | venv
+)/
+"""
+
+[tool.isort]
+profile = "black"
+skip = ['.eggs', '.git', '.hg', '.mypy_cache', '.nox', '.pants.d', '.tox', '.venv', '_build', 'buck-out', 'build', 'dist', 'node_modules', 'venv']
+skip_gitignore = true
+known_local_folder = ["admin_api_lib", "rag_core_lib"]
+
+[tool.pylint]
+max-line-length = 120
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
+pytest = "^8.3.5"
+coverage = "^7.8.0"
+flake8 = "^7.2.0"
+flake8-black = "^0.3.6"
+flake8-pyproject = "^1.2.3"
+flake8-quotes = "^3.4.0"
+flake8-return = "^1.2.0"
+flake8-annotations-complexity = "^0.1.0"
+flake8-bandit = "^4.1.1"
+flake8-bugbear = "^24.12.12"
+flake8-builtins = "^2.5.0"
+flake8-comprehensions = "^3.15.0"
+flake8-eradicate = "^1.5.0"
+flake8-expression-complexity = "^0.0.11"
+flake8-pytest-style = "^2.1.0"
+pep8-naming = "^0.15.1"
+flake8-eol = "^0.0.8"
+flake8-exceptions = "^0.0.1a0"
+flake8-simplify = "^0.21.0"
+flake8-wot = "^0.2.0"
+flake8-function-order = "^0.0.5"
+flake8-tidy-imports = "^4.10.0"
+black = "^25.1.0"
+# flake8-logging-format = "^2024.24.12"
+# flake8-docstrings = "^1.7.0"
+pytest-asyncio = "^1.0.0"
+
+[tool.poetry.dependencies]
+rag-core-lib = {path = "../rag-core-lib"}
+python = "^3.13"
+uvicorn = "^0.34.2"
+fastapi = "^0.115.12"
+dependency-injector = "^4.46.0"
+python-dateutil = "^2.9.0.post0"
+tenacity = "9.1.2"
+boto3 = "^1.38.10"
+tqdm = "^4.67.1"
+langfuse = "3.0.0"
+redis = "^6.0.0"
+pyyaml = "^6.0.2"
+python-multipart = "^0.0.20"
+
+[tool.pytest.ini_options]
+log_cli = 1
+log_cli_level = "DEBUG"
+pythonpath = "src"
+testpaths = "src/tests"

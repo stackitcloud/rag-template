@@ -1,0 +1,153 @@
+openapi: 3.0.2
+info:
+    title: extractor-api-lib
+    version: 1.0.0
+servers:
+    -
+        url: /
+paths:
+    /extract_from_file:
+        post:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/extraction_request'
+                required: true
+            tags:
+                - extractor
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/information_piece'
+                    description: List of extracted information.
+                '422':
+                    description: Body is not a valid PDF.
+                '500':
+                    description: Something somewhere went terribly wrong.
+            operationId: extract_from_file_post
+    /extract_from_source:
+        post:
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/extraction_parameters'
+                required: true
+            tags:
+                - extractor
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/information_piece'
+                    description: ok
+                '404':
+                    description: not found
+                '422':
+                    description: unprocessable entity
+                '500':
+                    description: internal server error
+            operationId: extract_from_source
+components:
+    schemas:
+        extraction_request:
+            title: ExtractionRequest
+            description: ''
+            required:
+                - document_name
+                - path_on_s3
+            type: object
+            properties:
+                path_on_s3:
+                    title: PathOnS3
+                    description: ''
+                    type: string
+                document_name:
+                    description: ''
+                    type: string
+            example:
+                path_on_s3: path on s3
+        key_value_pair:
+            title: MetaInformationPiece
+            description: ''
+            type: object
+            properties:
+                key:
+                    title: Key
+                    description: ''
+                value:
+                    title: Value
+                    description: ''
+            example:
+                value: value
+                key: key
+        content_type:
+            title: InformationType
+            description: ''
+            enum:
+                - IMAGE
+                - TABLE
+                - TEXT
+            type: string
+        information_piece:
+            title: InformationPiece
+            description: A piece of information that has been extracted.
+            required:
+                - metadata
+                - page_content
+                - type
+            type: object
+            properties:
+                metadata:
+                    title: MetaInformation
+                    description: ''
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/key_value_pair'
+                page_content:
+                    description: ''
+                    type: string
+                type:
+                    $ref: '#/components/schemas/content_type'
+            example:
+                metadata:
+                    -
+                        key: key
+                        value: value
+                    -
+                        key: key
+                        value: value
+                page_content: some text
+                type: TEXT
+        extraction_parameters:
+            title: confluence_parameters
+            description: ''
+            required:
+                - document_name
+                - source_type
+            type: object
+            properties:
+                document_name:
+                    title: document_name
+                    description: >-
+                        The name that will be used to store the confluence db in the key value db and the
+                        vectordatabase (metadata.document).
+                    type: string
+                kwargs:
+                    title: confluence_kwargs
+                    description: Kwargs for the extractor
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/key_value_pair'
+                source_type:
+                    title: type
+                    description: Extractortype
+                    type: string

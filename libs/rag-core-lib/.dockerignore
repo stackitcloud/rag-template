@@ -1,0 +1,9 @@
+.git
+.azure
+.devcontainer
+.vscode
+.venv
+.idea
+
+# Generated files
+flake8_dashboard

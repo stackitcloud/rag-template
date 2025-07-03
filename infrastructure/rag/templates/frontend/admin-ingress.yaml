@@ -1,0 +1,35 @@
+{{- if $.Values.features.frontend.enabled }}
+{{- if .Values.adminFrontend.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ingress.adminFrontendFullname" . }}
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    {{- if .Values.shared.config.tls.enabled }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    {{- else }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    {{- end }}
+spec:
+  {{- if .Values.shared.config.tls.enabled }}
+  tls:
+    - hosts:
+      - {{ .Values.shared.config.tls.host }}
+      secretName: {{ .Values.shared.config.tls.secretName }}
+  {{- end }}
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.adminFrontend.ingress.host.name }}
+      http:
+        paths:
+          - path: {{ .Values.adminFrontend.ingress.host.path }}
+            pathType: {{ .Values.adminFrontend.ingress.host.pathType }}
+            backend:
+              service:
+                name: {{ .Values.adminFrontend.name }}
+                port:
+                  number: {{ .Values.adminFrontend.ingress.host.port }}
+{{- end }}
+{{- end }}

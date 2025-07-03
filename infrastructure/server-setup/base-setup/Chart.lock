@@ -1,0 +1,9 @@
+dependencies:
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.12.3
+- name: nginx-ingress-controller
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.4.1
+digest: sha256:50d1681804095d5d70589f1fd828181320e89b1666675ae0d12c803e792e6760
+generated: "2024-09-11T22:43:52.025580423+02:00"

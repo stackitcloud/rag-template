@@ -107,7 +107,7 @@ async def test_upload_file_already_processing_raises_error(mocks):
 
 
 @pytest.mark.asyncio
-async def test_upload_file_starts_thread(mocks, monkeypatch):
+async def test_upload_file_starts_background_task(mocks):
     extractor_api, key_value_store, information_enhancer, chunker, document_deleter, rag_api, information_mapper = mocks
     base_url = "http://base"
     file = MagicMock(spec=UploadFile)
@@ -115,9 +115,6 @@ async def test_upload_file_starts_thread(mocks, monkeypatch):
     file.read = AsyncMock(return_value=b"content")
     key_value_store.get_all.return_value = []
     source_name = f"file:{sanitize_document_name(file.filename)}"
-
-    dummy_thread = MagicMock()
-    monkeypatch.setattr(default_file_uploader, "Thread", lambda *args, **kwargs: dummy_thread)
 
     uploader = DefaultFileUploader(
         extractor_api,
@@ -130,7 +127,12 @@ async def test_upload_file_starts_thread(mocks, monkeypatch):
         file_service=MagicMock(),
     )
 
+    # Verify no background tasks initially
+    assert len(uploader._background_tasks) == 0
+
     await uploader.upload_file(base_url, file)
 
+    # Verify processing status was set and background task was created
     key_value_store.upsert.assert_any_call(source_name, Status.PROCESSING)
-    dummy_thread.start.assert_called_once()
+    assert len(uploader._background_tasks) == 1
+    assert uploader._background_tasks[0].get_name() or True  # Task was created

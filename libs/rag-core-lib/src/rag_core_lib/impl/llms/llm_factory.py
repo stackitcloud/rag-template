@@ -3,6 +3,7 @@ from langchain.chat_models import init_chat_model
 from langchain.chat_models.base import _SUPPORTED_PROVIDERS
 from langchain_core.language_models.base import BaseLanguageModel
 from langchain_core.runnables import ConfigurableField
+from langchain_community.llms.fake import FakeListLLM
 
 
 def extract_configurable_fields(settings: BaseSettings) -> dict[str, ConfigurableField]:
@@ -86,3 +87,21 @@ def chat_model_provider(
         return chat.configurable_fields(**config_fields)
 
     return chat
+
+
+def fake_llm_provider(settings: BaseSettings) -> FakeListLLM:
+    """
+    Initialize a FakeListLLM with settings from a Pydantic BaseSettings object.
+
+    Parameters
+    ----------
+    settings : BaseSettings
+        Pydantic settings subclass containing configuration for FakeListLLM.
+
+    Returns
+    -------
+    FakeListLLM
+        Initialized FakeListLLM instance.
+    """
+    # Convert Pydantic settings to dict and pass as keyword arguments
+    return FakeListLLM(**settings.model_dump(exclude_none=True))

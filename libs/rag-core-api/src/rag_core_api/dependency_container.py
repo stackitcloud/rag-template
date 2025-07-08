@@ -4,6 +4,7 @@ import qdrant_client
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import (  # noqa: WOT001
     Configuration,
+    Factory,
     List,
     Selector,
     Singleton,
@@ -61,7 +62,8 @@ from rag_core_api.prompt_templates.question_rephrasing_prompt import (
 )
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.llms.llm_factory import chat_model_provider
+from rag_core_lib.impl.llms.llm_factory import chat_model_provider, create_chat_model_from_config
+from rag_core_lib.impl.llm_config.llm_config_manager import LLMConfigManager
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
@@ -179,10 +181,40 @@ class DependencyContainer(DeclarativeContainer):
 
     information_piece_mapper = Singleton(InformationPieceMapper)
 
+    # Enhanced LLM Configuration System
+    # Create a configuration map from settings instances
+    llm_config_map = Factory(lambda: {
+        "stackit": {
+            "model": DependencyContainer.stackit_vllm_settings.model,
+            "base_url": DependencyContainer.stackit_vllm_settings.base_url,
+            "api_key": DependencyContainer.stackit_vllm_settings.api_key,
+            "temperature": DependencyContainer.stackit_vllm_settings.temperature,
+            "top_p": DependencyContainer.stackit_vllm_settings.top_p,
+        },
+        "ollama": {
+            "model": DependencyContainer.ollama_settings.model,
+            "base_url": DependencyContainer.ollama_settings.base_url, 
+            "temperature": DependencyContainer.ollama_settings.temperature,
+            "top_k": DependencyContainer.ollama_settings.top_k,
+            "top_p": DependencyContainer.ollama_settings.top_p,
+        }
+    })
+    
+    llm_config_manager = Singleton(LLMConfigManager, llm_config_map)
+
+    # Enhanced LLM selection using the new configuration system
+    enhanced_large_language_model = Selector(
+        class_selector_config.llm_type,
+        ollama=Singleton(create_chat_model_from_config, llm_config_manager, "ollama"),
+        stackit=Singleton(create_chat_model_from_config, llm_config_manager, "stackit"),
+        fake=Singleton(FakeListLLM, fake_llm_settings),
+    )
+
+    # Use the enhanced LLM for new configurations, fallback to legacy for compatibility
     large_language_model = Selector(
         class_selector_config.llm_type,
-        ollama=Singleton(chat_model_provider, ollama_settings, "ollama"),
-        stackit=Singleton(chat_model_provider, stackit_vllm_settings, "openai"),
+        ollama=enhanced_large_language_model.provided.ollama,
+        stackit=enhanced_large_language_model.provided.stackit,
         fake=Singleton(FakeListLLM, fake_llm_settings),
     )
 
@@ -204,6 +236,8 @@ class DependencyContainer(DeclarativeContainer):
             RephrasingChain.__name__: rephrasing_prompt,
         },
         llm=large_language_model,
+        llm_config_manager=llm_config_manager,
+        provider_name=Factory(lambda: DependencyContainer.rag_class_type_settings.llm_type.value),
     )
 
     answer_generation_chain = Singleton(

@@ -1,13 +1,16 @@
 """Module for managing Langfuse prompts and Langfuse Language Models (LLMs)."""
 
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from langchain.prompts import PromptTemplate
 from langchain_core.language_models.llms import LLM
+from langchain_core.language_models.base import BaseLanguageModel
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.model import TextPromptClient
+
+from rag_core_lib.impl.llm_config.llm_config_manager import LLMConfigManager
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,9 @@ class LangfuseManager:
         self,
         langfuse: Langfuse,
         managed_prompts: dict[str, str],
-        llm: LLM,
+        llm: Union[LLM, BaseLanguageModel],
+        llm_config_manager: Optional[LLMConfigManager] = None,
+        provider_name: Optional[str] = None,
     ):
         """
         Initialize the LangfuseManager.
@@ -38,12 +43,18 @@ class LangfuseManager:
             An instance of the Langfuse class.
         managed_prompts : dict of str
             A dictionary where keys and values are strings representing managed prompts.
-        llm : LLM
-            An instance of the LLM class.
+        llm : Union[LLM, BaseLanguageModel]
+            An instance of the LLM or BaseLanguageModel class.
+        llm_config_manager : Optional[LLMConfigManager]
+            Configuration manager for LLM providers.
+        provider_name : Optional[str]
+            The name of the LLM provider for enhanced configuration.
         """
         self._langfuse = langfuse
         self._llm = llm
         self._managed_prompts = managed_prompts
+        self._llm_config_manager = llm_config_manager
+        self._provider_name = provider_name
 
     def init_prompts(self) -> None:
         """
@@ -84,9 +95,7 @@ class LangfuseManager:
             langfuse_prompt = self._langfuse.get_prompt(base_prompt_name)
         except NotFoundError:
             logger.info("Prompt not found in LangFuse. Creating new.")
-            llm_configurable_configs = {
-                config.id: config.default for config in self._llm.config_specs if self.API_KEY_FILTER not in config.id
-            }
+            llm_configurable_configs = self._get_llm_configurable_configs()
             self._langfuse.create_prompt(
                 name=base_prompt_name,
                 prompt=self._managed_prompts[base_prompt_name],
@@ -103,7 +112,38 @@ class LangfuseManager:
 
         return langfuse_prompt
 
-    def get_base_llm(self, name: str) -> LLM:
+    def _get_llm_configurable_configs(self) -> dict:
+        """
+        Get LLM configurable configurations.
+
+        Returns
+        -------
+        dict
+            Dictionary of configurable parameters for the LLM
+        """
+        if self._llm_config_manager and self._provider_name:
+            # Use enhanced configuration manager
+            configurable_fields = self._llm_config_manager.get_configurable_fields(self._provider_name)
+            settings = self._llm_config_manager.get_provider_settings(self._provider_name)
+
+            # Convert to format expected by Langfuse
+            configs = {}
+            for field_name, display_name in configurable_fields.items():
+                if hasattr(settings, field_name):
+                    configs[field_name] = getattr(settings, field_name)
+
+            return configs
+        else:
+            # Legacy handling - use config_specs if available
+            if hasattr(self._llm, 'config_specs'):
+                return {
+                    config.id: config.default
+                    for config in self._llm.config_specs
+                    if self.API_KEY_FILTER not in config.id
+                }
+            return {}
+
+    def get_base_llm(self, name: str) -> Union[LLM, BaseLanguageModel]:
         """
         Get the Langfuse prompt, the configuration as well as Large Language Model (LLM).
 
@@ -114,7 +154,7 @@ class LangfuseManager:
 
         Returns
         -------
-        LLM
+        Union[LLM, BaseLanguageModel]
             The base Large Language Model. If the Langfuse prompt is not found,
             returns the LLM with a fallback configuration.
         """

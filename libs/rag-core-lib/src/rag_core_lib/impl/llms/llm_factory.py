@@ -1,66 +1,89 @@
-"""Module for creating LLM instances from settings and the LLM class."""
+from typing import Dict
 
-from typing import Callable, Type
-
-from langchain_community.llms.vllm import VLLMOpenAI
-from langchain_core.language_models.llms import LLM
-from langchain_core.runnables import ConfigurableField
 from pydantic_settings import BaseSettings
+from langchain.chat_models import init_chat_model
+from langchain.chat_models.base import _SUPPORTED_PROVIDERS
+from langchain_core.language_models.base import BaseLanguageModel
+from langchain_core.runnables import ConfigurableField
 
-
-def _generic_llm_factory(
-    llm_class: Type[LLM],
-    configurable_fields: dict[str, ConfigurableField],
-) -> Callable[[BaseSettings], LLM]:
-    def factory(settings: BaseSettings) -> LLM:
-        llm_instance = llm_class(**settings.model_dump())
-        return llm_instance.configurable_fields(**configurable_fields)
-
-    return factory
-
-
-def get_configurable_fields_from(settings: BaseSettings) -> dict[str, ConfigurableField]:
+def extract_configurable_fields(settings: BaseSettings) -> Dict[str, ConfigurableField]:
     """
     Extract configurable fields from the given settings.
 
     Parameters
     ----------
     settings : BaseSettings
-        An instance of BaseSettings containing model fields with their respective settings.
+        Pydantic settings instance containing model field metadata.
 
     Returns
     -------
-    dict[str, ConfigurableField]
-        A dictionary where the keys are field names and the values are ConfigurableField instances
-        with the field's id and name set based on the settings.
+    Dict[str, ConfigurableField]
+        Mapping from field name to ConfigurableField for fields with a title.
 
     Notes
     -----
-    Only fields with a non-None title in their settings are included in the returned dictionary.
+    Uses getattr() to access the class attribute 'model_fields' so as to avoid
+    instance-level deprecation warnings in Pydantic v2+ and static analysis tools.
     """
-    _fields = {}
-    for field_name in settings.model_fields:
-        settings_of_interest = settings.model_fields[field_name]
-        if settings_of_interest.title is not None:
-            _fields[field_name] = ConfigurableField(id=field_name, name=settings_of_interest.title)
-    return _fields
+    fields: Dict[str, ConfigurableField] = {}
+    cls = settings.__class__
+    fields_meta = getattr(cls, "model_fields")
+    for name, meta in fields_meta.items():
+        if meta.title:
+            fields[name] = ConfigurableField(id=name, name=meta.title)
+    return fields
 
 
-def llm_provider(settings: BaseSettings, llm_cls: Type[LLM] = VLLMOpenAI) -> LLM:
+# Mapping of generic names to provider-specific kwarg keys
+_PROVIDER_KEY_MAP: Dict[str, Dict[str, str]] = {
+    "openai": {"api_key": "openai_api_key", "base_url": "openai_api_base"},
+}
+
+
+def chat_model_provider(
+    settings: BaseSettings,
+    provider: str = "openai",
+) -> BaseLanguageModel:
     """
-    Create an instance of a LLM provider based on the given settings and class type.
+    Initialize a LangChain chat model with unified settings mapping and configurable fields.
 
     Parameters
     ----------
     settings : BaseSettings
-        Configuration settings for the LLM.
-    llm_cls : Type[LLM], optional
-        The class type of the LLM to instantiate (default VLLMOpenAI).
+        Pydantic settings subclass containing at least 'model'.
+    provider : str, optional
+        Name of the chat model provider (default 'openai').
 
     Returns
     -------
-    LLM
-        An instance of the specified language model provider.
+    BaseLanguageModel
+        Initialized chat model instance.
+
+    Raises
+    ------
+    ValueError
+        If 'model' is not defined in settings or if the provider is unsupported.
     """
-    provider = _generic_llm_factory(llm_cls, get_configurable_fields_from(settings))
-    return provider(settings)
+    data = settings.model_dump(exclude_none=True)
+    model_name = data.pop("model", None)
+    if not model_name:
+        raise ValueError("'model' must be defined in settings")
+
+    key_map = _PROVIDER_KEY_MAP.get(provider, {})
+    for generic_key, specific_key in key_map.items():
+        if generic_key in data:
+            data[specific_key] = data.pop(generic_key)
+
+    if provider not in _SUPPORTED_PROVIDERS:
+        raise ValueError(f"Unsupported provider '{provider}'. Supported: {_SUPPORTED_PROVIDERS}")
+
+    chat = init_chat_model(
+        model=model_name,
+        model_provider=provider,
+        **data,
+    )
+    config_fields = extract_configurable_fields(settings)
+    if config_fields:
+        chat = chat.configurable_fields(**config_fields)
+
+    return chat

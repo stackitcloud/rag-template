@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ArrowTopRightOnSquareIcon, DocumentIcon } from "@heroicons/vue/24/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
 import { ChatDocumentGroupModel } from "../models/chat-document-group.model";
 
 const data = defineProps<ChatDocumentGroupModel>();

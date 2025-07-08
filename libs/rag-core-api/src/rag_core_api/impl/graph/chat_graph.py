@@ -207,7 +207,7 @@ class DefaultChatGraph(GraphBase):
     async def _rephrase_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         rephrased_question = await self._rephrasing_chain.ainvoke(chain_input=state, config=config)
         # Ensure rephrased_question is a string
-        if hasattr(rephrased_question, 'content'):
+        if hasattr(rephrased_question, "content"):
             rephrased_question = rephrased_question.content
         elif not isinstance(rephrased_question, str):
             rephrased_question = str(rephrased_question)
@@ -215,7 +215,7 @@ class DefaultChatGraph(GraphBase):
 
     async def _generate_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         answer_text = await self._answer_generation_chain.ainvoke(state, config)
-        if hasattr(answer_text, 'content'):
+        if hasattr(answer_text, "content"):
             answer_text = answer_text.content
         elif not isinstance(answer_text, str):
             answer_text = str(answer_text)

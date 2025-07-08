@@ -1,12 +1,11 @@
-from typing import Dict
-
 from pydantic_settings import BaseSettings
 from langchain.chat_models import init_chat_model
 from langchain.chat_models.base import _SUPPORTED_PROVIDERS
 from langchain_core.language_models.base import BaseLanguageModel
 from langchain_core.runnables import ConfigurableField
 
-def extract_configurable_fields(settings: BaseSettings) -> Dict[str, ConfigurableField]:
+
+def extract_configurable_fields(settings: BaseSettings) -> dict[str, ConfigurableField]:
     """
     Extract configurable fields from the given settings.
 
@@ -17,7 +16,7 @@ def extract_configurable_fields(settings: BaseSettings) -> Dict[str, Configurabl
 
     Returns
     -------
-    Dict[str, ConfigurableField]
+    dict[str, ConfigurableField]
         Mapping from field name to ConfigurableField for fields with a title.
 
     Notes
@@ -25,7 +24,7 @@ def extract_configurable_fields(settings: BaseSettings) -> Dict[str, Configurabl
     Uses getattr() to access the class attribute 'model_fields' so as to avoid
     instance-level deprecation warnings in Pydantic v2+ and static analysis tools.
     """
-    fields: Dict[str, ConfigurableField] = {}
+    fields: dict[str, ConfigurableField] = {}
     cls = settings.__class__
     fields_meta = getattr(cls, "model_fields")
     for name, meta in fields_meta.items():
@@ -35,7 +34,7 @@ def extract_configurable_fields(settings: BaseSettings) -> Dict[str, Configurabl
 
 
 # Mapping of generic names to provider-specific kwarg keys
-_PROVIDER_KEY_MAP: Dict[str, Dict[str, str]] = {
+_PROVIDER_KEY_MAP: dict[str, dict[str, str]] = {
     "openai": {"api_key": "openai_api_key", "base_url": "openai_api_base"},
 }
 
@@ -84,6 +83,6 @@ def chat_model_provider(
     )
     config_fields = extract_configurable_fields(settings)
     if config_fields:
-        chat = chat.configurable_fields(**config_fields)
+        return chat.configurable_fields(**config_fields)
 
     return chat

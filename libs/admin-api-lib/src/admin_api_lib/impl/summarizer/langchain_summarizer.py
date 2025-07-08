@@ -79,14 +79,14 @@ class LangchainSummarizer(Summarizer):
                 try:
                     result = await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
                     # Extract content from AIMessage if it's not already a string
-                    content = result.content if hasattr(result, 'content') else str(result)
+                    content = result.content if hasattr(result, "content") else str(result)
                     outputs.append(content)
                 except Exception as e:
                     logger.error("Error in summarizing langchain doc: %s %s", e, traceback.format_exc())
                     config["tries_remaining"] = tries_remaining - 1
                     result = await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
                     # Extract content from AIMessage if it's not already a string
-                    content = result.content if hasattr(result, 'content') else str(result)
+                    content = result.content if hasattr(result, "content") else str(result)
                     outputs.append(content)
 
         if len(outputs) == 1:

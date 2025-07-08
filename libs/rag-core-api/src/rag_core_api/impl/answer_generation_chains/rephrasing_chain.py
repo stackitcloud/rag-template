@@ -58,7 +58,7 @@ class RephrasingChain(AsyncChain[RunnableInput, RunnableOutput]):
 
     def _create_chain(self) -> Runnable:
         return (
-            self._langfuse_manager.get_base_prompt(self.__class__.__name__) 
+            self._langfuse_manager.get_base_prompt(self.__class__.__name__)
             | self._langfuse_manager.get_base_llm(self.__class__.__name__)
             | StrOutputParser()
         )

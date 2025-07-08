@@ -69,7 +69,7 @@ class DefaultFileUploader(FileUploader):
         self._information_enhancer = information_enhancer
         self._chunker = chunker
         self._document_deleter = document_deleter
-        self._background_tasks = []  # Changed from threads to tasks
+        self._background_tasks = []
         self._file_service = file_service
 
     async def upload_file(

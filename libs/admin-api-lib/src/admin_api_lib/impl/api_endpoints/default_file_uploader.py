@@ -101,9 +101,7 @@ class DefaultFileUploader(FileUploader):
             content = await file.read()
             s3_path = await self._asave_new_document(content, file.filename, source_name)
 
-            task = asyncio.create_task(
-                self._handle_source_upload(s3_path, source_name, file.filename, base_url)
-            )
+            task = asyncio.create_task(self._handle_source_upload(s3_path, source_name, file.filename, base_url))
             self._background_tasks.append(task)
         except ValueError as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
@@ -152,7 +150,7 @@ class DefaultFileUploader(FileUploader):
             # Run blocking extractor API call in thread pool to avoid blocking event loop
             information_pieces = await asyncio.to_thread(
                 self._extractor_api.extract_from_file_post,
-                ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name)
+                ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name),
             )
 
             if not information_pieces:

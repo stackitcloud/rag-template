@@ -6,7 +6,6 @@ from fastapi import UploadFile
 from admin_api_lib.impl.api_endpoints.default_file_uploader import DefaultFileUploader
 from admin_api_lib.models.status import Status
 from admin_api_lib.utils.utils import sanitize_document_name
-from admin_api_lib.impl.api_endpoints import default_file_uploader
 
 
 @pytest.fixture
@@ -135,4 +134,4 @@ async def test_upload_file_starts_background_task(mocks):
     # Verify processing status was set and background task was created
     key_value_store.upsert.assert_any_call(source_name, Status.PROCESSING)
     assert len(uploader._background_tasks) == 1
-    assert uploader._background_tasks[0].get_name() or True  # Task was created
+    assert uploader._background_tasks[0].get_name()  # Task was created

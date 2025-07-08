@@ -11,7 +11,6 @@ from dependency_injector.providers import (  # noqa: WOT001
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings.ollama import OllamaEmbeddings
 from langchain_community.embeddings.fake import FakeEmbeddings
-from langchain_community.llms.fake import FakeListLLM
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langchain_qdrant import QdrantVectorStore, FastEmbedSparse

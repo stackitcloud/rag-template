@@ -27,4 +27,4 @@ build_and_push:
 	docker buildx build --platform linux/amd64 -t $(REGISTRY)/document-extractor:$(IMAGE_TAG)  -f document-extractor/Dockerfile --push .
 	docker buildx build --platform linux/amd64 -t $(REGISTRY)/frontend:$(IMAGE_TAG)  -f frontend/apps/chat-app/Dockerfile --push .
 	docker buildx build --platform linux/amd64 -t $(REGISTRY)/admin-frontend:$(IMAGE_TAG)  -f frontend/apps/admin-app/Dockerfile --push .
-    docker buildx build --platform linux/amd64 -t $(REGISTRY)/mcp-server:$(IMAGE_TAG)  -f mcp-server/Dockerfile --push .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/mcp-server:$(IMAGE_TAG)  -f mcp-server/Dockerfile --push .

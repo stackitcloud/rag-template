@@ -23,12 +23,12 @@
         "forceConsistentCasingInFileNames": true,
         "baseUrl": ".",
         "paths": {
-            "@chat": ["libs/chat-app/index"],
+            "@chat": ["libs/chat-app/index.ts"],
             "@admin": ["libs/admin-app/index"],
-            "@i18n/chat": ["libs/i18n/chat/index"],
+            "@i18n/chat": ["libs/i18n/chat/index.ts"],
             "@i18n/admin": ["libs/i18n/admin/index"],
-            "@shared/ui": ["libs/shared/ui/index"],
-            "@shared/utils": ["libs/shared/utils/src/index"],
+            "@shared/ui": ["libs/shared/ui/index.ts"],
+            "@shared/utils": ["libs/shared/utils/src/index.ts"],
             "@shared/style": ["libs/shared/global.css"]
         }
     },

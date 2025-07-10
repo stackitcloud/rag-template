@@ -102,6 +102,7 @@ class DefaultFileUploader(FileUploader):
             s3_path = await self._asave_new_document(content, file.filename, source_name)
 
             task = asyncio.create_task(self._handle_source_upload(s3_path, source_name, file.filename, base_url))
+            task.add_done_callback(self._log_task_exception)
             self._background_tasks.append(task)
         except ValueError as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
@@ -110,6 +111,22 @@ class DefaultFileUploader(FileUploader):
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.error("Error while uploading %s = %s", source_name, str(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def _log_task_exception(self, task: asyncio.Task) -> None:
+        """
+        Log exceptions from completed background tasks.
+
+        Parameters
+        ----------
+        task : asyncio.Task
+            The completed task to check for exceptions.
+        """
+        if task.done() and not task.cancelled():
+            try:
+                task.result()  # This will raise the exception if one occurred
+            except Exception as e:
+                logger.error("Background task failed with exception: %s", str(e))
+                logger.debug("Background task exception traceback: %s", traceback.format_exc())
 
     def _prune_background_tasks(self) -> None:
         """

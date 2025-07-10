@@ -28,8 +28,8 @@ class StackitVllmSettings(BaseSettings):
         env_prefix = "STACKIT_VLLM_"
         case_sensitive = False
 
-    model: str = Field(default="cortecs/Meta-Llama-3-70B-Instruct-GPTQ-8b")
-    base_url: str = Field(default="https://ecd9b66f-15d1-4efd-a7ef-5bc90c60883f.model-serving.eu01.onSTACKIT.cloud/v1")
+    model: str = Field(default="cortecs/Llama-3.3-70B-Instruct-FP8-Dynamic")
+    base_url: str = Field(default="https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1")
     api_key: str
 
     top_p: float = Field(default=0.1, title="LLM Top P")

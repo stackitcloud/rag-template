@@ -5,6 +5,7 @@
         "sourceMap": true,
         "declaration": false,
         "moduleResolution": "bundler",
+        "allowJs": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "useDefineForClassFields": true,

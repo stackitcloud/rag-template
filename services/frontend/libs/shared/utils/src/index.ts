@@ -1,6 +1,6 @@
-export * from './lib/date.utils'
-export * from './lib/file-size-formatter.utils'
-export * from './lib/is-empty.utils'
-export * from './lib/marked.utils'
-export * from './lib/uuid.util'
+export * from './lib/date.utils.js'
+export * from './lib/file-size-formatter.utils.js'
+export * from './lib/is-empty.utils.js'
+export * from './lib/marked.utils.js'
+export * from './lib/uuid.util.js'
 

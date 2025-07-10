@@ -5,5 +5,5 @@
         "tslib": "^2.3.0"
     },
     "type": "module",
-    "main": "./src/index.ts"
+    "main": "./src/index.js"
 }

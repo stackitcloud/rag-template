@@ -14,5 +14,8 @@ dependencies:
 - name: ollama
   repository: https://otwld.github.io/ollama-helm/
   version: 1.1.0
-digest: sha256:9c99676d554fe68802c434b3daac2d50778e38d2793d10b84d1f4d6d78f99726
-generated: "2025-07-02T12:36:38.510315+02:00"
+- name: neo4j
+  repository: https://helm.neo4j.com/neo4j
+  version: 2025.6.0
+digest: sha256:1a8a07d72055903645e2053c2d5f0e52432e2d156ef82a11bc2483ef5db1d5ee
+generated: "2025-07-11T08:23:08.423621+02:00"

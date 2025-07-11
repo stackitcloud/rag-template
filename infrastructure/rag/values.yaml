@@ -13,6 +13,8 @@ features:
     enabled: true
   mcp:
     enabled: true
+  neo4j:
+    enabled: true
 
 backend:
 
@@ -512,3 +514,24 @@ ollama:
 qdrant:
   image:
     tag: v1.14.1
+
+neo4j:
+  nameOverride: "neo4j"
+  neo4j:
+    name: "neo4j"
+    resources:
+      cpu: "0.5"
+      memory: "2Gi"
+
+    password: "my-initial-password"
+    # Existing secret to use for initial database password
+    passwordFromSecret: ""
+    edition: "community"
+    operations:
+      image: "neo4j/helm-charts-operations:2025.06.0"
+
+  volumes:
+    data:
+      mode: "dynamic"
+      dynamic:
+        storageClassName: premium-perf4-stackit

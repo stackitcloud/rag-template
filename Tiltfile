@@ -352,8 +352,11 @@ value_override = [
     "shared.ssl=false",
     "shared.config.basicAuth.enabled=true",
     "features.mcp.enabled=true",
+    "features.neo4j.enabled=true",
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
+    # neo4j configuration for k3d
+    "neo4j.volumes.data.dynamic.storageClassName=local-path",
     # langfuse
     "langfuse.langfuse.additionalEnv[0].name=LANGFUSE_INIT_ORG_ID",
     "langfuse.langfuse.additionalEnv[0].value=\"%s\"" % os.environ["LANGFUSE_INIT_ORG_ID"],
@@ -528,6 +531,27 @@ k8s_resource(
             3000,
             container_port=3000,
             name="Langfuse Web",
+        ),
+    ],
+    labels=["infrastructure"],
+)
+
+########################################################################################################################
+###################################### port forwarding neo4j  #######################################################
+########################################################################################################################
+
+k8s_resource(
+    "rag-neo4j",
+    port_forwards=[
+        port_forward(
+            7474,
+            container_port=7474,
+            name="Neo4j Browser",
+        ),
+        port_forward(
+            7687,
+            container_port=7687,
+            name="Neo4j Bolt",
         ),
     ],
     labels=["infrastructure"],

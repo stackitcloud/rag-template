@@ -15,7 +15,7 @@
               "${file}"
             ],
             "console": "integratedTerminal",
-            "justMyCode": false,
+            "justMyCode": false
         },
         {
             "name": "rag_backend",
@@ -30,22 +30,22 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/rag-backend",
-                    "remoteRoot": "/app/rag-backend"
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
-                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
-                },
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
+                }
             ]
         },
         {
@@ -61,22 +61,22 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/document-extractor",
-                    "remoteRoot": "/app/document-extractor"
+                    "localRoot": "${workspaceFolder}/services/document-extractor",
+                    "remoteRoot": "/app/services/document-extractor"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/extractor-api-lib",
-                    "remoteRoot": "/app/rag-core-library/extractor-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/extractor-api-lib",
+                    "remoteRoot": "/app/libs/extractor-api-lib"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
-                },
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
+                }
             ]
         },
         {
@@ -92,25 +92,27 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/admin-backend",
-                    "remoteRoot": "/app/admin-backend"
+                    "localRoot": "${workspaceFolder}/services/admin-backend",
+                    "remoteRoot": "/app/services/admin-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
-                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 }
             ]
         }
-
-
     ]
 }

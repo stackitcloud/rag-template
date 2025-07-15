@@ -1,0 +1,3 @@
+project_id  = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX"
+name_prefix = "rag-prod"
+region      = "eu01"

@@ -1,0 +1,26 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: rag
+servers: 1
+agents: 0
+ports:
+  - port: 80:80
+    nodeFilters:
+      - loadbalancer
+registries:
+  create:
+    name: registry.localhost
+    host: "0.0.0.0"
+    hostPort: "5000"
+options:
+    k3s:
+        extraArgs:
+            - arg: --kubelet-arg=eviction-hard=imagefs.available<1%,nodefs.available<1%
+              nodeFilters:
+                - server:*
+                - agent:*
+            - arg: --kubelet-arg=eviction-minimum-reclaim=imagefs.available=1%,nodefs.available=1%
+              nodeFilters:
+                - server:*
+                - agent:*

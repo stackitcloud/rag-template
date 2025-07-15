@@ -1,0 +1,52 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# Sensitive credentials
+sa_key.json
+**/credentials/*.json
+*.pem
+*.key
+
+# Local .terraform directories
+**/.terraform/*
+
+# Terraform plan outputs
+*.tfplan
+
+# Variable files that may contain sensitive data
+*.tfvars
+!terraform.tfvars  # If you intentionally want to track this file in version control
+*.auto.tfvars
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+
+# Output files that may contain sensitive data
+output.json
+terraform-output.json
+
+# STACKIT Service Account credentials
+sa_key.json

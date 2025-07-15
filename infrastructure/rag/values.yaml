@@ -1,0 +1,517 @@
+features:
+  ollama:
+    enabled: false
+  minio:
+    enabled: false
+  langfuse:
+    enabled: true
+  qdrant:
+    enabled: true
+  frontend:
+    enabled: true
+  keydb:
+    enabled: true
+  mcp:
+    enabled: true
+
+backend:
+
+  mcp:
+    name: "mcp"
+    port: "8000"
+    host: "0.0.0.0"
+    image:
+      repository: ghcr.io/stackitcloud/rag-template
+      name: rag-mcp
+      pullPolicy: Always
+      tag: "v1.0.0"
+
+  name: backend
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/stackitcloud/rag-template
+    name: rag-backend
+    pullPolicy: Always
+    tag: "v1.0.0"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_rag_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--loop"
+  - "asyncio"
+
+  workers: 3
+  wsMaxQueue: 6
+
+  debugArgs:
+  - "python"
+  - "-Xfrozen_modules=off"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_rag_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/services/rag-backend"
+  - "--reload-dir"
+  - "/app/libs/rag-core-api"
+  - "--reload-dir"
+  - "/app/libs/rag-core-lib"
+  - "--loop"
+  - "asyncio"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+  ingress:
+    enabled: true
+    host:
+      name: rag.localhost
+      path: /api/chat(/|$)(.*)
+      pathType: ImplementationSpecific
+      port: 8080
+
+  secrets:
+    basicAuth: ""
+    langfuse:
+      publicKey: "pk-lf"
+      secretKey: "sk-lf"
+    stackitEmbedder:
+      apiKey: ""
+    stackitVllm:
+      apiKey: "sk-123"
+    ragas:
+      openaiApikey: ""
+
+  envs:
+    stackitVllm:
+      STACKIT_VLLM_MODEL: cortecs/Llama-3.3-70B-Instruct-FP8-Dynamic
+      STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+    database:
+      VECTOR_DB_COLLECTION_NAME: rag-db
+      VECTOR_DB_LOCATION: http://rag-qdrant:6333
+      VECTOR_DB_VALIDATE_COLLECTION_CONFIG: false
+    retriever:
+      RETRIEVER_THRESHOLD: 0.3
+      RETRIEVER_K_DOCUMENTS: 10
+      RETRIEVER_TOTAL_K: 7
+      RETRIEVER_SUMMARY_THRESHOLD: 0.3
+      RETRIEVER_SUMMARY_K_DOCUMENTS: 10
+      RETRIEVER_TABLE_THRESHOLD: 0.3
+      RETRIEVER_TABLE_K_DOCUMENTS: 10
+      RETRIEVER_IMAGE_THRESHOLD: 0.7
+      RETRIEVER_IMAGE_K_DOCUMENTS: 10
+    errorMessages:
+      ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: "I'm sorry, my responses are limited. You must ask the right questions."
+      ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: "No documents were provided for searching."
+      ERROR_MESSAGES_HARMFUL_QUESTION: "I'm sorry, but harmful requests cannot be processed."
+      ERROR_MESSAGES_NO_ANSWER_FOUND: "I'm sorry, I couldn't find an answer with the context provided."
+      ERROR_MESSAGE_EMPTY_MESSAGE: "I'm sorry, but I can't answer an empty question."
+    langfuse:
+      LANGFUSE_DATASET_NAME: "rag_test_ds"
+      LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+      LANGFUSE_HOST: "http://rag-langfuse-web:3000" #NOTE: http protocol needs to be defined!
+    ragClassTypes:
+      RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+    ragas:
+      RAGAS_IS_DEBUG: false
+      RAGAS_MODEL: "gpt-4o-mini"
+      RAGAS_USE_OPENAI: true
+      RAGAS_TIMEOUT: 60
+      RAGAS_EVALUATION_DATASET_NAME: "eval-data"
+      RAGAS_MAX_CONCURRENCY: "5"
+    embedderClassTypes:
+      EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
+    stackitEmbedder:
+      STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
+      STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+    ollama:
+      OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
+      OLLAMA_BASE_URL: "http://rag-ollama:11434"
+      OLLAMA_TOP_K: 0
+      OLLAMA_TOP_P: 0
+      OLLAMA_TEMPERATURE: 0
+    ollamaEmbedder:
+      OLLAMA_EMBEDDER_MODEL: "bge-m3"
+      OLLAMA_EMBEDDER_BASE_URL: "http://rag-ollama:11434"
+    fakeEmbedder:
+      FAKE_EMBEDDER_SIZE: 386
+    reranker:
+      RERANKER_K_DOCUMENTS: 5
+      RERANKER_MIN_RELEVANCE_SCORE: 0.001
+    chatHistory:
+      CHAT_HISTORY_LIMIT: 4
+      CHAT_HISTORY_REVERSE: true
+
+frontend:
+  name: frontend
+  replicaCount: 1
+  image:
+    repository: ghcr.io/stackitcloud/rag-template
+    name: frontend
+    pullPolicy: Always
+    tag: "v1.0.0"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: true
+    host:
+      name: rag.localhost
+      path: /
+      pathType: ImplementationSpecific
+      port: 8080
+
+  secrets:
+    viteAuth:
+      VITE_AUTH_USERNAME: ""
+      VITE_AUTH_PASSWORD: ""
+
+  envs:
+    vite:
+      VITE_CHAT_AUTH_ENABLED: true
+      VITE_API_URL: "http://rag.localhost/api"
+      VITE_CHAT_URL: "http://rag.localhost"
+      VITE_ADMIN_URL: "http://admin.rag.localhost"
+      VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
+
+adminBackend:
+  replicaCount: 1
+
+  name: admin-backend
+
+  image:
+    repository: ghcr.io/stackitcloud/rag-template
+    name: admin-backend
+    pullPolicy: Always
+    tag: "v1.0.0"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_admin_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--root-path"
+  - "/api"
+  debugArgs:
+  - "python"
+  - "-Xfrozen_modules=off"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_admin_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/services/admin-backend"
+  - "--reload-dir"
+  - "/app/libs/rag-core-lib"
+  - "--reload-dir"
+  - "/app/libs/admin-api-lib"
+  - "--root-path"
+  - "/api"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+  ingress:
+    enabled: true
+    host:
+      name: admin.rag.localhost
+      path: /api(/|$)(.*)
+      pathType: ImplementationSpecific
+      port: 8080
+
+  minio:
+    enabled: true
+
+  envs:
+    summarizer:
+      SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
+      SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
+    ragapi:
+      RAG_API_HOST: "http://backend:8080"
+    chunker:
+      CHUNKER_MAX_SIZE: 1000
+      CHUNKER_OVERLAP: 300
+    keyValueStore:
+      USECASE_KEYVALUE_PORT: 6379
+      USECASE_KEYVALUE_HOST: "rag-keydb"
+    sourceUploader:
+      SOURCE_UPLOADER_TIMEOUT: 3600
+
+extractor:
+  replicaCount: 1
+  name: extractor
+  image:
+    repository: ghcr.io/stackitcloud/rag-template
+    name: document-extractor
+    pullPolicy: Always
+    tag: "v1.0.0"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_extractor_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  debugArgs:
+  - "python"
+  - "-Xfrozen_modules=off"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_extractor_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/services/document-extractor"
+  - "--reload-dir"
+  - "/app/libs/extractor-api-lib"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+adminFrontend:
+  name: admin-frontend
+  replicaCount: 1
+  image:
+    repository: ghcr.io/stackitcloud/rag-template
+    name: admin-frontend
+    pullPolicy: Always
+    tag: "v1.0.0"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  exports:
+    chart_name:
+      adminFrontendChartName: admin-frontend
+
+  ingress:
+    enabled: true
+    host:
+      name: admin.rag.localhost
+      path: /
+      pathType: ImplementationSpecific
+      port: 8080
+
+shared:
+  # These values are used across all templates
+  ssl: true
+
+  debug:
+    backend:
+      enabled: false
+
+  imagePullSecret:
+    # create: false
+    # name: cr-credentials
+    # auths:
+    #   username: github-username # replace with your github username
+    #   pat: github-pat # replace with your github personal access token
+    #   email: email-address@domain.de # replace with your email address
+    #   registry: ghcr.io
+
+  config:
+    dns:
+    - rag.localhost
+    - admin.rag.localhost
+    basicAuth:
+      enabled: true
+    tls:
+      enabled: true
+      host: rag.localhost
+      secretName: tls-certificate
+      issuerName: letsencrypt-cluster-issuer
+      issuerKind: ClusterIssuer
+
+  secrets:
+    s3:
+      accessKey: "admin"
+      secretKey: "adminpassword"
+    usecase:
+
+
+  envs:
+    pdfExtractor:
+      PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME: "connection_diagrams"
+      PDF_EXTRACTOR_FOOTER_HEIGHT: 155
+    s3:
+      S3_ENDPOINT: http://rag-minio:9000
+      S3_BUCKET: documents
+    usecase:
+
+
+langfuse:
+  minio:
+    deploy: false
+  valkey:
+    deploy: false #<--- keydb is used instead of valkey
+  image:
+    repository: ghcr.io/langfuse/langfuse
+    pullPolicy: Always
+    tag: "3.27.2"
+  postgresql:
+    deploy: true
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+  langfuse:
+    nextauth:
+      url: http://localhost:3000
+      secret: changeme
+    salt: changeme
+    additionalEnv:
+    - name: LANGFUSE_INIT_ORG_ID
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_ID
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
+      value: ""
+    - name: LANGFUSE_INIT_USER_EMAIL
+      value: ""
+    - name: LANGFUSE_INIT_USER_NAME
+      value: ""
+    - name: LANGFUSE_INIT_USER_PASSWORD
+      value: ""
+    # REDIS
+    - name: "REDIS_CONNECTION_STRING"
+      value: "redis://rag-keydb:6379"
+    # CLICKHOUSE
+    - name: "CLICKHOUSE_MIGRATION_URL"
+      value: "clickhouse://rag-clickhouse:9000"
+    - name: "CLICKHOUSE_URL"
+      value: "http://rag-clickhouse:8123"
+    - name: "CLICKHOUSE_USER"
+      value: "default"
+    - name: "CLICKHOUSE_PASSWORD"
+      value: "changeme"
+    # S3 / MinIO
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENABLED"
+      value: "true"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_BUCKET"
+      value: "langfuse"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_REGION"
+      value: "auto"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID"
+      value: "admin"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY"
+      value: "adminpassword"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT"
+      value: "http://rag-minio:9000"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE"
+      value: "true"
+    extraInitContainers:
+    - name: wait-for-postgres
+      image: busybox
+      command:
+      - sh
+      - -c
+      - |
+        until nc -z rag-postgresql 5432; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 2
+        done
+      # Define a reasonable timeout in case PostgreSQL fails to come up
+      timeoutSeconds: 300
+
+minio:
+  auth:
+    ## @param auth.rootUser MinIO&reg; root username
+    ##
+    rootUser: admin
+    ## @param auth.rootPassword Password for MinIO&reg; root user
+    ##
+    rootPassword: "adminpassword"
+  ## @param defaultBuckets Comma, semi-colon or space separated list of buckets to create at initialization (only in standalone mode)
+  ## e.g:
+  ## defaultBuckets: "my-bucket, my-second-bucket"
+  ##
+  defaultBuckets: "documents,langfuse"
+  networkPolicy:
+    enabled: false
+  mode: standalone
+
+
+
+
+
+ollama:
+  image:
+    tag: 0.5.1
+  ollama:
+    models:
+      pull:
+        - llama3.2:3b-instruct-fp16
+        - bge-m3
+      runs:
+        - llama3.2:3b-instruct-fp16
+        - bge-m3
+
+qdrant:
+  image:
+    tag: v1.14.1

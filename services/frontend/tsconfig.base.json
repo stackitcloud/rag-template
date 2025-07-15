@@ -1,0 +1,37 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "bundler",
+        "allowJs": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "useDefineForClassFields": true,
+        "importHelpers": true,
+        "target": "esnext",
+        "jsx": "preserve",
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+        "allowImportingTsExtensions": true,
+        "jsxImportSource": "vue",
+        "module": "esnext",
+        "lib": ["es2020", "dom", "DOM.Iterable"],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "paths": {
+            "@chat": ["libs/chat-app/index.ts"],
+            "@admin": ["libs/admin-app/index.ts"],
+            "@i18n/chat": ["libs/i18n/chat/index.ts"],
+            "@i18n/admin": ["libs/i18n/admin/index.ts"],
+            "@shared/ui": ["libs/shared/ui/index.ts"],
+            "@shared/utils": ["libs/shared/utils/src/index.ts"],
+            "@shared/style": ["libs/shared/global.css"]
+        }
+    },
+    "exclude": ["node_modules", "tmp"]
+}

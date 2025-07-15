@@ -8,9 +8,9 @@ lint:
 
 update-lock:
 	cd libs;make update-lock
-	cd services/admin-backend;poetry lock --regenerate
-	cd services/rag-backend;poetry lock --regenerate
-	cd services/document-extractor;poetry lock --regenerate
+	cd services/admin-backend;poetry lock --no-update
+	cd services/rag-backend;poetry lock --no-update
+	cd services/document-extractor;poetry lock --no-update
 
 black:
 	cd libs;make black

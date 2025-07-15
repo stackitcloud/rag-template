@@ -1,7 +1,7 @@
 <script lang="ts"
         setup>
-        import { ChatBubbleModel } from '../models/chat-bubble.model';
         import { DocumentIcon } from '@heroicons/vue/24/outline';
+import { ChatBubbleModel } from '../models/chat-bubble.model';
 
         const props = defineProps<ChatBubbleModel>()
 
@@ -49,6 +49,7 @@
                      class="flex gap-3 text-info text-sm cursor-pointer mt-2">
                     <div class="flex items-center"
                          v-for="anchorId in anchorIds"
+                         :key="anchorId"
                          @click="scrollReveal(anchorId.toString())">
                         <DocumentIcon class="w-4 h-4 mr-1" />
                         {{ anchorId }}

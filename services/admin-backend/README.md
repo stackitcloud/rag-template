@@ -11,7 +11,7 @@ The following endpoints are provided by the *admin-backend*:
 # Requirements
 
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
-The admin-backend uses the base Dockerfile of the [rag-core-library](../rag-core-library/) and share the system requirements with this library.
+The admin-backend uses the base Dockerfile of the [libs](../../libs/) and share the system requirements with this library.
 
 # Endpoints
 
@@ -35,7 +35,7 @@ Will return a list of all available documents in the connected storage.
 PDF files can be uploaded here. This endpoint will process the document in a background and will extract information using the [document-extractor](../document-extractor/).
 The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-backend](../rag-backend/).
 
-# Deployment
+## Deployment
 
-A detailed explanation of the deployment can be found in the [Readme](../README.md) of the project.
-The _helm-chart_ used for the deployment can be found [here](../helm-chart/charts/adminfrontend/).
+A detailed explanation of the deployment can be found in the [project README](../../README.md).
+The *helm-chart* used for the deployment can be found in the [infrastructure directory](../../infrastructure/).

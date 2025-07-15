@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 python:3.11.7-bookworm AS build
 
 ARG dev=0
-ENV POETRY_VIRTUALENVS_PATH=/app/mcp-server/.venv
+ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
 ENV POETRY_VERSION=1.8.3
 
 WORKDIR /app
@@ -13,11 +13,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
 
-WORKDIR /app/mcp-server
-COPY mcp-server/pyproject.toml mcp-server/poetry.lock ./
+WORKDIR /app/services/mcp-server
+COPY services/mcp-server/pyproject.toml services/mcp-server/poetry.lock ./
 
 RUN mkdir log && chmod 700 log
-RUN touch /app/mcp-server/log/logfile.log && chmod 600 /app/mcp-server/log/logfile.log
+RUN touch /app/services/mcp-server/log/logfile.log && chmod 600 /app/services/mcp-server/log/logfile.log
 
 RUN poetry config virtualenvs.create false &&\
     if [ "$dev" = "1" ]; then \
@@ -31,15 +31,16 @@ ARG dev=0
 
 RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
-ENV POETRY_VIRTUALENVS_PATH=/app/mcp-server/.venv
+ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 
-WORKDIR /app/mcp-server
-COPY --chown=nonroot:nonroot mcp-server/src ./src
-COPY --chown=nonroot:nonroot mcp-server/pyproject.toml mcp-server/poetry.lock ./
+WORKDIR /app/services/mcp-server
+COPY --chown=nonroot:nonroot services/mcp-server/src ./src
+COPY --chown=nonroot:nonroot services/mcp-server/pyproject.toml services/mcp-server/poetry.lock ./
+COPY --chown=nonroot:nonroot services/mcp-server/Makefile ./
 # cleanup
 RUN apt-get clean autoclean
 RUN apt-get autoremove --yes
@@ -48,14 +49,14 @@ RUN if [ "$dev" = "0" ]; then \
         while read -r shell; do rm -f "$shell"; done < /etc/shells; \
         rm -rf /var/lib/{apt,dpkg,cache,log}/ \
     else \
-        echo "POETRY_VIRTUALENVS_PATH=/app/mcp-server/.venv" >> /etc/environment;\
-        export POETRY_VIRTUALENVS_PATH=/app/mcp-server/.venv;\
+        echo "POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv" >> /etc/environment;\
+        export POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv;\
         export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
     fi
 
 
 USER nonroot
-COPY --from=build --chown=nonroot:nonroot  /app/mcp-server/log /app/mcp-server/log
+COPY --from=build --chown=nonroot:nonroot  /app/services/mcp-server/log /app/services/mcp-server/log
 
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
 

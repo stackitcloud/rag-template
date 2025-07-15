@@ -1,6 +1,7 @@
 # RAG Infrastructure
 
-This repository contains the infrastructure setup for the STACKIT RAG template.
+This directory contains the infrastructure setup and deployment configuration for the STACKIT RAG template.
+It includes Helm charts, Kubernetes manifests, Terraform scripts, and cluster setup tools.
 
 The documentation is structured as follows:
 
@@ -19,7 +20,7 @@ The documentation is structured as follows:
 
 ## 1. Components and Configuration Values to Adjust
 
-This Repository contains the helm chart for the following RAG components:
+This directory contains the Helm chart for the following RAG components:
 
 - [Langfuse](https://langfuse.com/) (dependency)
 - [Qdrant](https://qdrant.tech/) (dependency)
@@ -361,7 +362,7 @@ In the following, the *k3d* cluster setup and the setup inside the *k3d* will be
 
 #### 2.1.1 k3d Cluster Setup
 
-Assumption: You are in the root directory of this repository. A local registry is created at `registry.localhost:5000`.
+Assumption: You are in the root directory of this project. A local registry is created at `registry.localhost:5000`.
 
 ```shell
 cd local-cluster-setup && bash setup-k3d-cluster.sh
@@ -438,7 +439,7 @@ On *Windows* you can adjust the hosts file as described [here](https://docs.digi
 
 ### 2.2 Production Setup Instructions
 
-The *helm* chart provided in this repository requires a *NGINX Ingress Controller*, (e.g. [Bitnami package for NGINX Ingress Controller](https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller)).
+The *helm* chart provided in this directory requires a *NGINX Ingress Controller*, (e.g. [Bitnami package for NGINX Ingress Controller](https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller)).
 If you want to use SSL-Encryption, a Cert-Manager is also required. An installation tutorial for the *STACKIT Cert-Manager Webhook* can be found in the [Github Repository](https://github.com/stackitcloud/stackit-cert-manager-webhook).
 For deployment of the *NGINX Ingress Controller* and a cert-manager, the following helm chart can be used:
 

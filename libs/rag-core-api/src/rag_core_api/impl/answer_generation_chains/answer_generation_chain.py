@@ -4,6 +4,7 @@ from typing import Any, Optional
 
 from langchain_core.documents import Document
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 
 from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 from rag_core_lib.chains.async_chain import AsyncChain
@@ -62,4 +63,5 @@ class AnswerGenerationChain(AsyncChain[RunnableInput, RunnableOutput]):
             RunnablePassthrough.assign(context=(lambda x: self._format_docs(x["langchain_documents"])))
             | self._langfuse_manager.get_base_prompt(self.__class__.__name__)
             | self._langfuse_manager.get_base_llm(self.__class__.__name__)
+            | StrOutputParser()
         )

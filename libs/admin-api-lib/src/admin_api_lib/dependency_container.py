@@ -9,7 +9,6 @@ from dependency_injector.providers import (  # noqa: WOT001
     Singleton,
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.llms import Ollama, VLLMOpenAI
 from langfuse import Langfuse
 
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import (
@@ -61,7 +60,7 @@ from admin_api_lib.rag_backend_client.openapi_client.configuration import (
     Configuration as RagConfiguration,
 )
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.llms.llm_factory import llm_provider
+from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
@@ -108,8 +107,8 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        ollama=Singleton(llm_provider, ollama_settings, Ollama),
-        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
+        ollama=Singleton(chat_model_provider, ollama_settings, "ollama"),
+        stackit=Singleton(chat_model_provider, stackit_vllm_settings, "openai"),
     )
 
     summary_text_splitter = Singleton(RecursiveCharacterTextSplitter)(

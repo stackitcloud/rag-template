@@ -77,15 +77,17 @@ class LangchainSummarizer(Summarizer):
         for langchain_document in langchain_documents:
             async with self._semaphore:
                 try:
-                    outputs.append(
-                        await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
-                    )
+                    result = await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
+                    # Extract content from AIMessage if it's not already a string
+                    content = result.content if hasattr(result, "content") else str(result)
+                    outputs.append(content)
                 except Exception as e:
                     logger.error("Error in summarizing langchain doc: %s %s", e, traceback.format_exc())
                     config["tries_remaining"] = tries_remaining - 1
-                    outputs.append(
-                        await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
-                    )
+                    result = await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
+                    # Extract content from AIMessage if it's not already a string
+                    content = result.content if hasattr(result, "content") else str(result)
+                    outputs.append(content)
 
         if len(outputs) == 1:
             return outputs[0]

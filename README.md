@@ -1,28 +1,6 @@
 # RAG Template
 
-Welcome to the STACKIT RAG Template! This is a **monorepo** containing a complete RAG (Retrieve, Augment, Generate) solution with multiple services and shared libraries. This template provides a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./services/rag-backend/main.py), [container.py](./services/rag-backend/container.py) and [chat_endpoint.py](./services/rag-backend/chat_endpoint.py)).
-
-## Monorepo Structure
-
-This repository is organized as a monorepo with the following structure:
-
-```text
-rag-template-2.0/
-├── services/              # All microservices
-│   ├── rag-backend/      # Main RAG API service
-│   ├── admin-backend/    # Document management service
-│   ├── document-extractor/ # Content extraction service
-│   ├── mcp-server/       # Model Context Protocol server
-│   └── frontend/         # Vue.js frontend applications
-├── libs/                 # Shared libraries
-│   ├── rag-core-lib/     # Core RAG functionality
-│   ├── rag-core-api/     # RAG API components
-│   ├── admin-api-lib/    # Admin API components
-│   └── extractor-api-lib/ # Extractor API components
-├── infrastructure/       # Deployment and infrastructure
-├── tools/               # Build and development tools
-└── docs/                # Documentation
-```
+Welcome to the STACKIT RAG Template! This is a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./services/rag-backend/main.py), [container.py](./services/rag-backend/container.py) and [chat_endpoint.py](./services/rag-backend/chat_endpoint.py)).
 
 <!-- The RAG (Retrieve, Augment, Generate) template is here to simplify your journey into developing and deploying AI-driven applications in a kubernetes cluster. It provides a comprehensive guide, including local setup as well as production deployment instructions. Whether you're a developer, data scientist, or researcher, this template offers everything you need to build and deploy your own RAG solution.  -->
 
@@ -64,38 +42,32 @@ A [`Tiltfile`](./Tiltfile) is provided to get you started :rocket:. If Tilt is n
 
 ### 1.1 Components
 
-This monorepo contains the following components:
+This repository contains the following components:
 
-- [**services/rag-backend**](#111-rag-backend): The main component of the RAG system.
-- [**services/admin-backend**](#112-admin-backend): Manages user documents and confluence spaces, interacts with document-extractor and rag-backend.
-- [**services/document-extractor**](#113-document-extractor): Extracts content from documents and Confluence spaces.
-- [**services/mcp-server**](#114-mcp-server): Model Context Protocol server that provides MCP-compatible access to the RAG system.
-- **services/frontend**: Vue.js frontend applications for both chat and admin interfaces.
-- **libs/**: Shared libraries containing the core functionality:
-  - **rag-core-lib**: Core RAG functionality and utilities
-  - **rag-core-api**: RAG API components and endpoints  
-  - **admin-api-lib**: Admin API components for document management
-  - **extractor-api-lib**: Document extraction API components
-- **infrastructure/**: Contains Helm charts and deployment configurations
-- **tools/**: Build scripts and development utilities
+- [*services/rag-backend*](#111-rag-backend): The main component of the RAG.
+- [*services/admin-backend*](#112-admin-backend): Manages user documents and confluence spaces, interacts with document-extractor and rag-backend.
+- [*services/document-extractor*](#113-document-extractor): Extracts content from documents and Confluence spaces.
+- [*services/mcp-server*](#114-mcp-server): Model Context Protocol server that provides MCP-compatible access to the RAG system.
+- [*services/frontend*](#115-frontend): Frontend for both, chat and admin APIs.
+- [*infrastructure*](#116-infrastructure): Contains the helm-chart and other files related to infrastructure and deployment.
+- [*libs*](#117-libs): Contains the API-libraries that are used to construct the backend-services in this repository.
 
 #### 1.1.1 Rag backend
-
 The backend is the main component of the RAG. It handles all connections to the vector database, as well as chatting.
 
-All components are provided by the **libs/rag-core-api**. The service is located in **services/rag-backend/**.
+All components are provided by the *rag-core-api*. For further information on endpoints and requirements, please consult [the libs README](./libs/README.md#1-rag-core-api).
 
 #### 1.1.2 Admin backend
 
 The Admin backend is a component that is used to manage user provided documents and confluence spaces. It communicates with the document-extractor to extract the content from the documents and confluence spaces. Besides, it communicates with the rag-backend to store the document chunks into the vector database. For storing the documents, it uses the S3 object storage. It also acts as interface to provide the current status of the documents and confluence spaces in the RAG.
 
-All components are provided by the **libs/admin-api-lib**. The service is located in **services/admin-backend/**.
+All components are provided by the *admin-api-lib*. For further information on endpoints and requirements, please consult [the libs README](./libs/README.md#2-admin-api-lib).
 
 #### 1.1.3 Document extractor
 
 The Document extractor is a component that is used to extract the content from the documents and confluence spaces.
 
-All components are provided by the **libs/extractor-api-lib**. The service is located in **services/document-extractor/**.
+All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [the libs README](./libs/README.md#3-extractor-api-lib).
 
 #### 1.1.4 MCP Server
 
@@ -106,7 +78,28 @@ The MCP server runs as a sidecar container alongside the main RAG backend and ex
 - `chat_simple`: Basic question-answering without conversation history
 - `chat_with_history`: Advanced chat interface with conversation history and returns structured responses with `answer`, `finish_reason`, and `citations`.
 
-The service is located in **services/mcp-server/**. For further information on configuration and usage, please consult the [MCP Server README](./services/mcp-server/README.md).
+For further information on configuration and usage, please consult the [MCP Server README](./services/mcp-server/README.md).
+
+#### 1.1.5 Frontend
+
+The frontend provides user-friendly interfaces for both chat and document management. It consists of two main applications:
+
+- **Chat App**: Interface for interacting with the RAG system
+- **Admin App**: Interface for managing documents and system configuration
+
+For further information, please consult the [Frontend README](./services/frontend/README.md).
+
+#### 1.1.6 Infrastructure
+
+Contains the Helm chart and other files related to infrastructure and deployment, including Kubernetes manifests, Terraform scripts, and cluster setup tools.
+
+For further information, please consult the [Infrastructure README](./infrastructure/README.md).
+
+#### 1.1.7 Libs
+
+Contains the API libraries that are used to construct the backend services in this repository. This includes core RAG functionality, admin APIs, and document extraction APIs.
+
+For further information, please consult the [Libs README](./libs/README.md).
 
 ### 1.2 Requirements
 
@@ -133,9 +126,9 @@ This example of the rag-template includes a WebUI for document-management, as we
 After following the setup instruction for either the [local installation](#-local-setup-instructions) or the [installation on a server](#-Deployment-to-server) the WebUI is accessible via the configured ingress.
 After uploading a file in the document-management WebUI you can start asking question about your document in the chat WebUI.
 
-For a complete documentation of the available REST-APIs, please consult [the README of the rag-core-library](https://github.com/stackitcloud/rag-core-library/blob/main/README.md).
+For a complete documentation of the available REST-APIs, please consult [the libs README](./libs/README.md).
 
-If you want to replace some dependencies with you own dependencies, see the rag-backend folder, especially the [main.py](./rag-backend/main.py), [container.py](./rag-backend/container.py) and [chat_endpoint.py](./rag-backend/chat_endpoint.py).
+If you want to replace some dependencies with you own dependencies, see the services/rag-backend folder, especially the [main.py](./services/rag-backend/main.py), [container.py](./services/rag-backend/container.py) and [chat_endpoint.py](./services/rag-backend/chat_endpoint.py).
 
 ### 1.4 Local setup instructions
 
@@ -180,39 +173,31 @@ This results in a basic auth with username=`foo` and password=`bar`.
 > - `ollama`: Uses ollama as an LLM provider.
 >
 
-Optionally you can set the following values in the `.env` file:
+#### 1.4.1 Environment Variables Setup
 
-```dotenv
-# Instead of generating the org, project, user, public key
-# and secret key through the UI, you can set INIT values for them.
-LANGFUSE_INIT_ORG_ID=...
-LANGFUSE_INIT_PROJECT_ID=...
-LANGFUSE_INIT_PROJECT_PUBLIC_KEY=pk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-LANGFUSE_INIT_PROJECT_SECRET_KEY=sk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+Before running the application, you need to configure environment variables. Copy the provided example file and fill in your values:
 
-LANGFUSE_INIT_USER_EMAIL=...
-LANGFUSE_INIT_USER_NAME=...
-LANGFUSE_INIT_USER_PASSWORD=...
-
-# If you wanna extract content from a confluence space, you need to provide the following values
-CONFLUENCE_URL=...
-CONFLUENCE_TOKEN=...
-CONFLUENCE_SPACE_KEY=...
+```shell
+cp .env.template .env
 ```
+
+Edit the `.env` file with your actual configuration values. The [`.env.template`](./.env.template) file contains all required and optional environment variables with descriptions.
+
+> 📝 **Important**: The `.env` file is required for the application to work.
 
 In the following, the *k3d* cluster setup and the setup inside the *k3d* will be explained.
 
-#### 1.4.1 *k3d* cluster setup
+#### 1.4.2 *k3d* cluster setup
 
-For a detailed explanation of the *k3d* setup, please consult the [rag-infrastructure README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#211-k3d-cluster-setup).
+For a detailed explanation of the *k3d* setup, please consult the [infrastructure README](./infrastructure/README.md).
 
-#### 1.4.2 Tilt deployment
+#### 1.4.3 Tilt deployment
 
 If this is the first time you are starting the `Tiltfile` you have to build the helm-chart first.
 This can be done with the following command from the root of the git-repository:
 
 ```shell
-cd rag-infrastructure/rag;helm dependency update; cd ../..
+cd infrastructure/rag;helm dependency update; cd ../..
 ```
 
 > 📝 NOTE: The configuration of the `Tiltfile` requires `features.frontend.enabled=true`, `features.keydb.enabled=true`, `features.langfuse.enabled=true` and `features.qdrant.enabled=true`.
@@ -259,21 +244,21 @@ To connect the debugger, you can use the following `launch.json`:
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/rag-backend",
-                    "remoteRoot": "/app/rag-backend"
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
-                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
             ]
         },
@@ -290,21 +275,21 @@ To connect the debugger, you can use the following `launch.json`:
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/document-extractor",
-                    "remoteRoot": "/app/document-extractor"
+                    "localRoot": "${workspaceFolder}/services/document-extractor",
+                    "remoteRoot": "/app/services/document-extractor"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/extractor-api-lib",
-                    "remoteRoot": "/app/rag-core-library/extractor-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/extractor-api-lib",
+                    "remoteRoot": "/app/libs/extractor-api-lib"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
             ]
         },
@@ -321,21 +306,21 @@ To connect the debugger, you can use the following `launch.json`:
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/admin-backend",
-                    "remoteRoot": "/app/admin-backend"
+                    "localRoot": "${workspaceFolder}/services/admin-backend",
+                    "remoteRoot": "/app/services/admin-backend"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-lib",
-                    "remoteRoot": "/app/rag-core-library/rag-core-lib"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
                 },
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/admin-api-lib",
-                    "remoteRoot": "/app/rag-core-library/admin-api-lib"
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
                 },
                 // avoid tilt warning of missing path mapping
                 {
-                    "localRoot": "${workspaceFolder}/rag-core-library/rag-core-api",
-                    "remoteRoot": "/app/rag-core-library/rag-core-api"
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
                 }
             ]
         }
@@ -351,9 +336,9 @@ The following will delete everything deployed with `tilt up` command
 tilt down
 ```
 
-#### 1.4.3 Access via ingress
+#### 1.4.4 Access via ingress
 
-A detailed explanation of, how to access a service via ingress, can be found in the [rag-infrastructure README](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#213-access-via-ingress).
+A detailed explanation of, how to access a service via ingress, can be found in the [infrastructure README](./infrastructure/README.md).
 
 
 
@@ -417,19 +402,18 @@ resource "stackit_objectstorage_bucket" "docs" {
 
 For further information please consult the [STACKIT Terrraform Provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
 
-Further requirements for the server can be found [here](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#22-production-setup-instructions).
+Further requirements for the server can be found in the [infrastructure README](./infrastructure/README.md).
 
 ### 2.2 Langfuse
 
-A detailed description regarding the configuration of Langfuse can be found [here](https://github.com/stackitcloud/rag-infrastructure/blob/main/README.md#11-langfuse).
+A detailed description regarding the configuration of Langfuse can be found in the [infrastructure README](./infrastructure/README.md).
 
 
 ## 3. Build and Test
 The example `Tiltfile` provides a triggered linting and testing.
-The linting-settings can be changed in the `rag-backend/pyproject.toml` file under section `tool.flake8`.
+The linting-settings can be changed in the `services/rag-backend/pyproject.toml` file under section `tool.flake8`.
 
 ## 4. Contribution Guidelines
 
-This use case example contains 2 git submodules, the `rag-infrastructure` and the `rag-core-library`.
 In order to contribute please consult the [CONTRIBUTING.md](./CONTRIBUTING.md).
 

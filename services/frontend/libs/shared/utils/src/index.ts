@@ -1,5 +1,6 @@
-export * from './lib/date.utils.ts'
-export * from './lib/uuid.util.ts'
-export * from './lib/file-size-formatter.utils.ts'
-export * from './lib/marked.utils.ts'
-export * from './lib/is-empty.utils.ts'
+export * from './lib/date.utils.js'
+export * from './lib/file-size-formatter.utils.js'
+export * from './lib/is-empty.utils.js'
+export * from './lib/marked.utils.js'
+export * from './lib/uuid.util.js'
+

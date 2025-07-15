@@ -141,7 +141,7 @@ class AdminApi(BaseAdminApi):
         await file_uploader.upload_file(str(request.base_url), file)
 
     @inject
-    async def document_reference_id_get(
+    async def document_reference(
         self,
         identification: str,
         document_reference_retriever: DocumentReferenceRetriever = Depends(

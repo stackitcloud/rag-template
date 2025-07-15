@@ -15,7 +15,7 @@
               "${file}"
             ],
             "console": "integratedTerminal",
-            "justMyCode": false,
+            "justMyCode": false
         },
         {
             "name": "rag_backend",
@@ -30,8 +30,8 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/rag-backend",
-                    "remoteRoot": "/app/rag-backend"
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
                 },
                 {
                     "localRoot": "${workspaceFolder}/libs/rag-core-lib",
@@ -45,7 +45,7 @@
                 {
                     "localRoot": "${workspaceFolder}/libs/admin-api-lib",
                     "remoteRoot": "/app/libs/admin-api-lib"
-                },
+                }
             ]
         },
         {
@@ -61,8 +61,8 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/document-extractor",
-                    "remoteRoot": "/app/document-extractor"
+                    "localRoot": "${workspaceFolder}/services/document-extractor",
+                    "remoteRoot": "/app/services/document-extractor"
                 },
                 {
                     "localRoot": "${workspaceFolder}/libs/extractor-api-lib",
@@ -76,7 +76,7 @@
                 {
                     "localRoot": "${workspaceFolder}/libs/admin-api-lib",
                     "remoteRoot": "/app/libs/admin-api-lib"
-                },
+                }
             ]
         },
         {
@@ -92,8 +92,12 @@
             },
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/admin-backend",
-                    "remoteRoot": "/app/admin-backend"
+                    "localRoot": "${workspaceFolder}/services/admin-backend",
+                    "remoteRoot": "/app/services/admin-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
                 },
                 {
                     "localRoot": "${workspaceFolder}/libs/rag-core-lib",
@@ -110,7 +114,5 @@
                 }
             ]
         }
-
-
     ]
 }

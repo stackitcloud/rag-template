@@ -158,7 +158,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(backend_context, "/app/rag-backend"),
+        sync(backend_context, "/app/services/rag-backend"),
         sync(core_library_context+"/rag-core-api", "/app/libs/rag-core-api"),
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
@@ -199,7 +199,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(mcp_context, "/app/mcp-server"),
+        sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
 )
@@ -231,7 +231,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(admin_backend_context, "/app/admin-backend"),
+        sync(admin_backend_context, "/app/services/admin-backend"),
         sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
         sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
@@ -275,7 +275,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(extractor_context, "/app/document-extractor"),
+        sync(extractor_context, "/app/services/document-extractor"),
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],

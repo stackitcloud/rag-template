@@ -55,6 +55,7 @@ backend:
 
   debugArgs:
   - "python"
+  - "-Xfrozen_modules=off"
   - "-m"
   - "debugpy"
   - "--wait-for-client"
@@ -69,7 +70,7 @@ backend:
   - "8080"
   - "--reload"
   - "--reload-dir"
-  - "/app/rag-backend"
+  - "/app/services/rag-backend"
   - "--reload-dir"
   - "/app/libs/rag-core-api"
   - "--reload-dir"
@@ -225,6 +226,7 @@ adminBackend:
   - "/api"
   debugArgs:
   - "python"
+  - "-Xfrozen_modules=off"
   - "-m"
   - "debugpy"
   - "--wait-for-client"
@@ -239,7 +241,7 @@ adminBackend:
   - "8080"
   - "--reload"
   - "--reload-dir"
-  - "/app/admin-backend"
+  - "/app/services/admin-backend"
   - "--reload-dir"
   - "/app/libs/rag-core-lib"
   - "--reload-dir"
@@ -303,6 +305,7 @@ extractor:
   - "8080"
   debugArgs:
   - "python"
+  - "-Xfrozen_modules=off"
   - "-m"
   - "debugpy"
   - "--wait-for-client"
@@ -317,7 +320,7 @@ extractor:
   - "8080"
   - "--reload"
   - "--reload-dir"
-  - "/app/document-extractor"
+  - "/app/services/document-extractor"
   - "--reload-dir"
   - "/app/libs/extractor-api-lib"
 

@@ -1,6 +1,4 @@
 import { newUid } from "@shared/utils";
-import { InformationPiece } from "libs/chat-app/models/chat-response.model";
-import { DocumentResponseModel } from "libs/chat-app/models/document-response.model";
 import { marked } from "marked";
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -8,10 +6,12 @@ import { useI18n } from 'vue-i18n';
 import { ChatDocumentModel, mapToChatDocuments } from "../../models/chat-document.model";
 import { ChatMessageModel } from "../../models/chat-message.model";
 import { ChatRequestModel, mapToChatRequestModel } from "../../models/chat-request.model";
+import { InformationPiece } from "../../models/chat-response.model";
+import { DocumentResponseModel } from "../../models/document-response.model";
 import { ChatAPI } from "../chat.api";
 
 export const useChatStore = defineStore('chat', () => {
-    const {t, locale} = useI18n();
+    const {t} = useI18n();
     const conversationId = ref();
     const chatHistory = ref<ChatMessageModel[]>([]);
     const chatDocuments = ref<ChatDocumentModel[]>([]);

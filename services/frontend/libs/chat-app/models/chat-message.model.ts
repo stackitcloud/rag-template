@@ -7,5 +7,5 @@ export interface ChatMessageModel {
     dateTime?: Date;
     role: ChatRole;
     hasError?: boolean;
-    skipAPI?: Boolean;
+    skipAPI?: boolean;
 }

@@ -10,14 +10,18 @@ config.define_bool("debug")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
 
-core_library_context = "./rag-core-library"
+core_library_context = "./libs"
 
 
 def create_linter_command(folder_name, name):
+    # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
+    build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 -f "
+        + " --build-arg "
+        + build_arg
+        + " -f "
         + folder_name
         + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
@@ -26,10 +30,14 @@ def create_linter_command(folder_name, name):
 
 
 def create_test_command(folder_name, name):
+    # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
+    build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
     return (
         "docker build -t "
         + name
-        + " --build-arg dev=1 -f "
+        + " --build-arg "
+        + build_arg
+        + " -f "
         + folder_name
         + "/Dockerfile .;docker run --rm --entrypoint make "
         + name
@@ -42,13 +50,13 @@ def create_test_command(folder_name, name):
 ########################################################################################################################
 local_resource(
     "core helm chart",
-    cmd="cd ./rag-infrastructure/rag && helm dependency update",
+    cmd="cd ./infrastructure/rag && helm dependency update",
     ignore=[
-        "rag-infrastructure/rag/charts/keydb-0.48.0.tgz",
-        "rag-infrastructure/rag/charts/minio-14.6.7.tgz",
-        "rag-infrastructure/rag/charts/langfuse-0.29.1.tgz",
-        "rag-infrastructure/rag/charts/qdrant-0.9.1.tgz",
-        "rag-infrastructure/rag/charts/ollama-0.29.1.tgz",
+        "infrastructure/rag/charts/keydb-0.48.0.tgz",
+        "infrastructure/rag/charts/minio-14.6.7.tgz",
+        "infrastructure/rag/charts/langfuse-0.29.1.tgz",
+        "infrastructure/rag/charts/qdrant-0.9.1.tgz",
+        "infrastructure/rag/charts/ollama-0.29.1.tgz",
     ],
     labels=["helm"],
 )
@@ -79,7 +87,7 @@ create_namespace_if_notexist(namespace)
 local_resource(
     "RAG core library linting",
     """set -e
-    docker build -t rag_core --build-arg TEST=0 -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t rag_core --build-arg TEST=0 -f libs/Dockerfile libs;
     docker run --rm rag_core make lint""",
     labels=["linting"],
     auto_init=False,
@@ -91,7 +99,7 @@ local_resource(
 local_resource(
     "RAG core lib testing",
     """set -e
-    docker build -t rag_core_lib --build-arg DIRECTORY=rag-core-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t rag_core_lib --build-arg DIRECTORY=rag-core-lib --build-arg TEST=1 -f libs/Dockerfile libs;
     docker run --rm rag_core_lib make test""",
     labels=["test"],
     auto_init=False,
@@ -102,7 +110,7 @@ local_resource(
 local_resource(
     "RAG core API testing",
     """set -e
-    docker build -t rag_core_api --build-arg DIRECTORY=rag-core-api -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t rag_core_api --build-arg DIRECTORY=rag-core-api --build-arg TEST=1 -f libs/Dockerfile libs;
     docker run --rm rag_core_api make test""",
     labels=["test"],
     auto_init=False,
@@ -113,7 +121,7 @@ local_resource(
 local_resource(
     "Admin API lib testing",
     """set -e
-    docker build -t admin_api_lib --build-arg DIRECTORY=admin-api-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t admin_api_lib --build-arg DIRECTORY=admin-api-lib --build-arg TEST=1 -f libs/Dockerfile libs;
     docker run --rm admin_api_lib make test""",
     labels=["test"],
     auto_init=False,
@@ -124,7 +132,7 @@ local_resource(
 local_resource(
     "Extractor API lib testing",
     """set -e
-    docker build -t extractor_api_lib --build-arg DIRECTORY=extractor-api-lib -f rag-core-library/Dockerfile rag-core-library;
+    docker build -t extractor_api_lib --build-arg DIRECTORY=extractor-api-lib --build-arg TEST=1 -f libs/Dockerfile libs;
     docker run --rm extractor_api_lib make test""",
     labels=["test"],
     auto_init=False,
@@ -141,7 +149,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 rag_api_image_name = "rag-backend"
 
-backend_context = "./rag-backend"
+backend_context = "./services/rag-backend"
 rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
 docker_build(
     rag_api_full_image_name,
@@ -150,9 +158,9 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(backend_context, "/app/rag-backend"),
-        sync(core_library_context+"/rag-core-api", "/app/rag-core-library/rag-core-api"),
-        sync(core_library_context+"/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
+        sync(backend_context, "/app/services/rag-backend"),
+        sync(core_library_context+"/rag-core-api", "/app/libs/rag-core-api"),
+        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
 )
@@ -182,7 +190,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 mcp_image_name = "rag-mcp"
 
-mcp_context = "./mcp-server"
+mcp_context = "./services/mcp-server"
 mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)
 docker_build(
     mcp_full_image_name,
@@ -191,7 +199,7 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(mcp_context, "/app/mcp-server"),
+        sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
 )
@@ -214,7 +222,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 admin_api_image_name = "admin-backend"
 
-admin_backend_context = "./admin-backend"
+admin_backend_context = "./services/admin-backend"
 admin_api_full_image_name = "%s/%s" % (registry, admin_api_image_name)
 docker_build(
     admin_api_full_image_name,
@@ -223,9 +231,9 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(admin_backend_context, "/app/admin-backend"),
-        sync(core_library_context + "/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
-        sync(core_library_context + "/admin-api-lib", "/app/rag-core-library/admin-api-lib"),
+        sync(admin_backend_context, "/app/services/admin-backend"),
+        sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
+        sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
 )
@@ -258,7 +266,7 @@ local_resource(
 registry = "ghcr.io/stackitcloud/rag-template"
 document_extractor_image_name = "document-extractor"
 
-extractor_context = "./document-extractor"
+extractor_context = "./services/document-extractor"
 document_extractor_full_image_name = "%s/%s" % (registry, document_extractor_image_name)
 docker_build(
     document_extractor_full_image_name,
@@ -267,9 +275,9 @@ docker_build(
         "dev": "1" if backend_debug else "0",
     },
     live_update=[
-        sync(extractor_context, "/app/document-extractor"),
-        sync(core_library_context+"/rag-core-lib", "/app/rag-core-library/rag-core-lib"),
-        sync(core_library_context +"/extractor-api-lib", "/app/rag-core-library/extractor-api-lib"),
+        sync(extractor_context, "/app/services/document-extractor"),
+        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
+        sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
 )
@@ -299,27 +307,27 @@ local_resource(
 ################################## build frontend image and do live update #############################################
 ########################################################################################################################
 
-frontend_context = "./frontend"
+frontend_context = "./services/frontend"
 frontend_image_name = "%s/frontend" % (registry)
 
 docker_build(
     frontend_image_name,
     ".",
-    dockerfile="./frontend/apps/chat-app/Dockerfile",
-    live_update=[sync("./frontend/apps/chat-app", "/app")],
+    dockerfile="./services/frontend/apps/chat-app/Dockerfile",
+    live_update=[sync("./services/frontend/apps/chat-app", "/app")],
 )
 
 ########################################################################################################################
 ################################## build admin frontend image and do live update ########################################
 ########################################################################################################################
 
-adminfrontend_context = "./frontend"
+adminfrontend_context = "./services/frontend"
 adminfrontend_image_name = "%s/admin-frontend" % (registry)
 docker_build(
     adminfrontend_image_name,
     ".",
-    dockerfile="frontend/apps/admin-app/Dockerfile",
-    live_update=[sync("./frontend/apps/admin-app", "/app")],
+    dockerfile="services/frontend/apps/admin-app/Dockerfile",
+    live_update=[sync("./services/frontend/apps/admin-app", "/app")],
 )
 
 
@@ -403,11 +411,11 @@ if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
 
 
 yaml = helm(
-    "./rag-infrastructure/rag",
+    "./infrastructure/rag",
     name="rag",
     namespace="rag",
     values=[
-        "./rag-infrastructure/rag/values.yaml",
+        "./infrastructure/rag/values.yaml",
     ],
     set=value_override,
 )

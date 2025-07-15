@@ -1,5 +1,5 @@
 [tool.flake8]
-exclude= [".eggs", "./rag-core-library/*", "./src/admin_backend/models/*", "./src/admin_backend/rag_backend_client/*", "./src/admin_backend/document_extractor_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+exclude= [".eggs", "./libs/*", "./src/admin_backend/models/*", "./src/admin_backend/rag_backend_client/*", "./src/admin_backend/document_extractor_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
 statistics = true
 show-source = false
 max-complexity = 8
@@ -90,4 +90,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-admin-api-lib = {path = "../rag-core-library/admin-api-lib", develop = true}
+admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}

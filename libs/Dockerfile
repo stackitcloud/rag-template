@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make; \
-    if [ ${DIRECTORY}="extractor-api-lib" ]; then DEBIAN_FRONTEND=noninteractive apt-get install -y ffmpeg \
+    if [ "${DIRECTORY}" = "extractor-api-lib" ]; then DEBIAN_FRONTEND=noninteractive apt-get install -y ffmpeg \
         poppler-utils \
         tesseract-ocr \
         tesseract-ocr-deu \

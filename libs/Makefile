@@ -7,11 +7,11 @@ lint:
 	cd extractor-api-lib;make lint
 
 update-lock:
-	cd rag-core-lib;poetry lock --regenerate
-	cd rag-core-api;poetry lock --regenerate
-	cd admin-api-lib;poetry lock --regenerate
-	cd extractor-api-lib;poetry lock --regenerate
-	poetry lock --regenerate
+	cd rag-core-lib;poetry lock --no-update
+	cd rag-core-api;poetry lock --no-update
+	cd admin-api-lib;poetry lock --no-update
+	cd extractor-api-lib;poetry lock --no-update
+	poetry lock --no-update
 
 black:
 	cd rag-core-lib;black .

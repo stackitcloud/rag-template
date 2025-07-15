@@ -10,10 +10,6 @@ from dependency_injector.providers import (  # noqa: WOT001
 )
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings.ollama import OllamaEmbeddings
-from langchain_community.embeddings.fake import FakeEmbeddings
-from langchain_community.llms.ollama import Ollama
-from langchain_community.llms.vllm import VLLMOpenAI
-from langchain_community.llms.fake import FakeListLLM
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langchain_qdrant import QdrantVectorStore, FastEmbedSparse
@@ -63,15 +59,13 @@ from rag_core_api.prompt_templates.question_rephrasing_prompt import (
 )
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.llms.llm_factory import llm_provider
+from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-from rag_core_lib.impl.settings.fake_llm_settings import FakeLlmSettings
-from rag_core_api.impl.settings.fake_embedder_settings import FakeEmbedderSettings
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -85,10 +79,8 @@ class DependencyContainer(DeclarativeContainer):
     retriever_settings = RetrieverSettings()
     ollama_settings = OllamaSettings()
     ollama_embedder_settings = OllamaEmbedderSettings()
-    fake_embedder_settings = FakeEmbedderSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
-    fake_llm_settings = FakeLlmSettings()
     error_messages = ErrorMessages()
     rag_class_type_settings = RAGClassTypeSettings()
     ragas_settings = RagasSettings()
@@ -107,9 +99,6 @@ class DependencyContainer(DeclarativeContainer):
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
         ),
         stackit=Singleton(StackitEmbedder, stackit_embedder_settings),
-        fake=Singleton(
-            LangchainCommunityEmbedder, embedder=Singleton(FakeEmbeddings, **fake_embedder_settings.model_dump())
-        ),
     )
 
     sparse_embedder = Singleton(FastEmbedSparse, **sparse_embedder_settings.model_dump())
@@ -183,9 +172,8 @@ class DependencyContainer(DeclarativeContainer):
 
     large_language_model = Selector(
         class_selector_config.llm_type,
-        ollama=Singleton(llm_provider, ollama_settings, Ollama),
-        stackit=Singleton(llm_provider, stackit_vllm_settings, VLLMOpenAI),
-        fake=Singleton(llm_provider, fake_llm_settings, FakeListLLM),
+        ollama=Singleton(chat_model_provider, ollama_settings, "ollama"),
+        stackit=Singleton(chat_model_provider, stackit_vllm_settings, "openai"),
     )
 
     prompt = ANSWER_GENERATION_PROMPT
@@ -252,7 +240,7 @@ class DependencyContainer(DeclarativeContainer):
                 model=ragas_settings.model if ragas_settings.model else stackit_vllm_settings.model,
                 timeout=ragas_settings.timeout,
                 openai_api_base=stackit_vllm_settings.base_url,
-                api_key=stackit_vllm_settings.api_key,
+                openai_api_key=stackit_vllm_settings.api_key,
             ),
             ollama=Singleton(
                 ChatOllama,

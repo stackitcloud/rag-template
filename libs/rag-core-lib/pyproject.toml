@@ -21,7 +21,8 @@ requests-oauthlib = "^2.0.0"
 langfuse = "3.0.0"
 deprecated = "^1.2.18"
 openai = "^1.77.0"
-langchain-core = "0.3.63"
+langchain-core = "0.3.68"
+langchain-openai = "^0.3.27"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -67,7 +68,11 @@ docstring-quotes = '"""'
 multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
-per-file-ignores = """./src/rag_core/impl/prompt_templates/answer_generation_prompt.py: E501,./tests/*: S101"""
+per-file-ignores = """
+./src/rag_core/impl/prompt_templates/answer_generation_prompt.py: E501,
+./tests/*: S101,E402,
+./src/rag_core_lib/impl/llms/llm_factory.py: B009
+"""
 
 [tool.black]
 line-length = 120

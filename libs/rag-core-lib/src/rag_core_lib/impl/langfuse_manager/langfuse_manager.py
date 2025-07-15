@@ -3,7 +3,7 @@
 import logging
 from typing import Optional
 
-from langchain.prompts import PromptTemplate
+from langchain.prompts import ChatPromptTemplate
 from langchain_core.language_models.llms import LLM
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
@@ -26,7 +26,7 @@ class LangfuseManager:
     def __init__(
         self,
         langfuse: Langfuse,
-        managed_prompts: dict[str, str],
+        managed_prompts: dict[str, ChatPromptTemplate],
         llm: LLM,
     ):
         """
@@ -36,8 +36,8 @@ class LangfuseManager:
         ----------
         langfuse : Langfuse
             An instance of the Langfuse class.
-        managed_prompts : dict of str
-            A dictionary where keys and values are strings representing managed prompts.
+        managed_prompts : dict of ChatPromptTemplate
+            A dictionary where keys are strings and values are ChatPromptTemplate instances representing managed prompts.
         llm : LLM
             An instance of the LLM class.
         """
@@ -63,6 +63,9 @@ class LangfuseManager:
         """
         Retrieve the prompt from Langfuse Prompt Management.
 
+        This method tries to fetch the prompt from Langfuse. If not found, it creates
+        a new chat prompt from the local ChatPromptTemplate.
+
         Parameters
         ----------
         base_prompt_name : str
@@ -71,37 +74,43 @@ class LangfuseManager:
         Returns
         -------
         Optional[TextPromptClient]
-            The Langfuse prompt template if found, otherwise None.
-
-        Raises
-        ------
-        NotFoundError
-            If the prompt is not found in Langfuse, a new prompt is created.
-        Exception
-            If an error occurs while retrieving the prompt template from Langfuse.
+            The Langfuse prompt client if found, None otherwise.
         """
         try:
-            langfuse_prompt = self._langfuse.get_prompt(base_prompt_name)
+            langfuse_prompt = self._langfuse.get_prompt(base_prompt_name, type="chat")
+            return langfuse_prompt
         except NotFoundError:
-            logger.info("Prompt not found in LangFuse. Creating new.")
+            logger.info(f"Prompt '{base_prompt_name}' not found in Langfuse. Creating new chat prompt.")
+
+            # Convert ChatPromptTemplate to Langfuse chat format
+            local_prompt = self._managed_prompts[base_prompt_name]
+            chat_messages = self._convert_chat_prompt_to_langfuse_format(local_prompt)
+
+            # Get LLM config (excluding API keys)
             llm_configurable_configs = {
-                config.id: config.default for config in self._llm.config_specs if self.API_KEY_FILTER not in config.id
+                config.id: config.default for config in self._llm.config_specs
+                if self.API_KEY_FILTER not in config.id
             }
+
+            # Create chat prompt in Langfuse
             self._langfuse.create_prompt(
                 name=base_prompt_name,
-                prompt=self._managed_prompts[base_prompt_name],
+                type="chat",
+                prompt=chat_messages,
                 config=llm_configurable_configs,
                 labels=["production"],
             )
-            langfuse_prompt = self._langfuse.get_prompt(base_prompt_name)
+
+            # Retrieve the newly created prompt
+            langfuse_prompt = self._langfuse.get_prompt(base_prompt_name, type="chat")
+            return langfuse_prompt
+
         except Exception as error:
             logger.error(
-                "Error occured while getting prompt template from langfuse. Error:\n{error}",
-                extra={error: error},
+                f"Error occurred while getting prompt template from langfuse. Error: {error}",
+                extra={"error": error},
             )
             return None
-
-        return langfuse_prompt
 
     def get_base_llm(self, name: str) -> LLM:
         """
@@ -125,9 +134,13 @@ class LangfuseManager:
 
         return self._llm.with_config({"configurable": langfuse_prompt.config})
 
-    def get_base_prompt(self, name: str) -> PromptTemplate:
+    def get_base_prompt(self, name: str) -> ChatPromptTemplate:
         """
-        Retrieve the base prompt from Langfuse Prompt Management.
+        Retrieve the base prompt from managed prompts, with optional Langfuse integration.
+
+        This method attempts to fetch the prompt from Langfuse. If found, it creates a
+        ChatPromptTemplate with Langfuse metadata for proper tracing integration.
+        If not found, it returns the fallback ChatPromptTemplate.
 
         Parameters
         ----------
@@ -136,17 +149,84 @@ class LangfuseManager:
 
         Returns
         -------
-        PromptTemplate
-            The base prompt template.
-
-        Notes
-        -----
-        If the prompt cannot be retrieved from Langfuse, a fallback value is used.
+        ChatPromptTemplate
+            The ChatPromptTemplate for the requested prompt, optionally with Langfuse metadata.
         """
         langfuse_prompt = self.get_langfuse_prompt(name)
-        if not langfuse_prompt:
-            logger.error("Could not retrieve prompt template from langfuse. Using fallback value.")
-            return PromptTemplate.from_template(self._managed_prompts[name])
 
-        langchain_prompt = langfuse_prompt.get_langchain_prompt()
-        return PromptTemplate.from_template(langchain_prompt)
+        if langfuse_prompt:
+            # For chat prompts, get_langchain_prompt() returns a list of messages
+            # We need to convert this back to ChatPromptTemplate
+            chat_messages = langfuse_prompt.get_langchain_prompt()
+
+            # Convert Langfuse chat messages to LangChain message templates
+            from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
+
+            langchain_messages = []
+            for message in chat_messages:
+                # Handle different message formats that might be returned
+                if isinstance(message, dict):
+                    # Standard dictionary format: {"role": "system", "content": "..."}
+                    role = message.get("role")
+                    content = message.get("content", "")
+                elif isinstance(message, (list, tuple)) and len(message) >= 2:
+                    # Tuple/list format: ("system", "content")
+                    role = message[0]
+                    content = message[1] if len(message) > 1 else ""
+                else:
+                    logger.warning(f"Unexpected message format: {message}")
+                    continue
+
+                # Create appropriate message template based on role
+                if role == "system":
+                    langchain_messages.append(SystemMessagePromptTemplate.from_template(content))
+                elif role == "user":
+                    langchain_messages.append(HumanMessagePromptTemplate.from_template(content))
+                # Add more role types as needed
+
+            # Create ChatPromptTemplate from messages with metadata for tracing
+            return ChatPromptTemplate.from_messages(
+                langchain_messages,
+                metadata={"langfuse_prompt": langfuse_prompt}
+            )
+        else:
+            # Use fallback ChatPromptTemplate
+            logger.error("Could not retrieve prompt template from langfuse. Using fallback value.")
+            return self._managed_prompts[name]
+
+    def _convert_chat_prompt_to_langfuse_format(self, chat_prompt: ChatPromptTemplate) -> list[dict]:
+        """
+        Convert a ChatPromptTemplate to Langfuse chat format.
+
+        Parameters
+        ----------
+        chat_prompt : ChatPromptTemplate
+            The ChatPromptTemplate to convert.
+
+        Returns
+        -------
+        list[dict]
+            A list of message dictionaries in Langfuse format.
+        """
+        chat_messages = []
+
+        for message in chat_prompt.messages:
+            # Convert SystemMessagePromptTemplate
+            if hasattr(message, 'prompt') and message.prompt.template:
+                if message.__class__.__name__ == 'SystemMessagePromptTemplate':
+                    chat_messages.append({
+                        "role": "system",
+                        "content": message.prompt.template
+                    })
+                elif message.__class__.__name__ == 'HumanMessagePromptTemplate':
+                    chat_messages.append({
+                        "role": "user",
+                        "content": message.prompt.template
+                    })
+                elif message.__class__.__name__ == 'AIMessagePromptTemplate':
+                    chat_messages.append({
+                        "role": "assistant",
+                        "content": message.prompt.template
+                    })
+
+        return chat_messages

@@ -1,6 +1,6 @@
 """Mock implementation of LangfuseManager for testing."""
 
-from langchain.prompts import PromptTemplate
+from langchain.prompts import ChatPromptTemplate
 from langchain_core.language_models.llms import LLM
 from unittest.mock import Mock
 
@@ -21,13 +21,13 @@ class MockLangfuseManager:
         """Mock get_langfuse_prompt method."""
         return self._managed_prompts[base_prompt_name]
 
-
     def get_base_llm(self, name: str) -> LLM:
         """Mock get_base_llm method."""
         return self._llm
 
-    def get_base_prompt(self, name: str) -> PromptTemplate:
+    def get_base_prompt(self, name: str) -> ChatPromptTemplate:
         """Mock get_base_prompt method."""
         if name in self._managed_prompts:
-            return PromptTemplate.from_template(self._managed_prompts[name])
-        return PromptTemplate.from_template("Default prompt template")
+            return self._managed_prompts[name]
+        # Return a default ChatPromptTemplate if not found
+        return ChatPromptTemplate.from_template("Default prompt template")

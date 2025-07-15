@@ -36,8 +36,8 @@ from rag_core_api.models.information_piece import InformationPiece
 from rag_core_api.models.content_type import ContentType
 from rag_core_api.models.key_value_pair import KeyValuePair
 from rag_core_api.models.delete_request import DeleteRequest
-from rag_core_api.impl.settings.fake_embedder_settings import FakeEmbedderSettings
-from rag_core_lib.impl.settings.fake_llm_settings import FakeLlmSettings
+from settings.fake_embedder_settings import FakeEmbedderSettings
+from settings.fake_llm_settings import FakeLlmSettings
 from rag_core_api.impl.settings.error_messages import ErrorMessages
 from rag_core_api.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
 from rag_core_api.prompt_templates.question_rephrasing_prompt import QUESTION_REPHRASING_PROMPT

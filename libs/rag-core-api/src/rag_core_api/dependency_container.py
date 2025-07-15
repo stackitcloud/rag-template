@@ -10,7 +10,6 @@ from dependency_injector.providers import (  # noqa: WOT001
 )
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.embeddings.ollama import OllamaEmbeddings
-from langchain_community.embeddings.fake import FakeEmbeddings
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langchain_qdrant import QdrantVectorStore, FastEmbedSparse
@@ -67,8 +66,6 @@ from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSett
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-from rag_core_lib.impl.settings.fake_llm_settings import FakeLlmSettings
-from rag_core_api.impl.settings.fake_embedder_settings import FakeEmbedderSettings
 
 
 class DependencyContainer(DeclarativeContainer):
@@ -82,10 +79,8 @@ class DependencyContainer(DeclarativeContainer):
     retriever_settings = RetrieverSettings()
     ollama_settings = OllamaSettings()
     ollama_embedder_settings = OllamaEmbedderSettings()
-    # fake_embedder_settings = FakeEmbedderSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
-    # fake_llm_settings = FakeLlmSettings()
     error_messages = ErrorMessages()
     rag_class_type_settings = RAGClassTypeSettings()
     ragas_settings = RagasSettings()

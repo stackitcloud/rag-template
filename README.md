@@ -181,15 +181,9 @@ Before running the application, you need to configure environment variables. Cop
 cp .env.template .env
 ```
 
-Edit the `.env` file with your actual configuration values. The `.env.template` file contains all required and optional environment variables with descriptions. Key variables include:
+Edit the `.env` file with your actual configuration values. The [`.env.template`](./.env.template) file contains all required and optional environment variables with descriptions.
 
-- **S3 Storage**: `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` (Required)
-- **Authentication**: `BASIC_AUTH`, `VITE_AUTH_USERNAME`, `VITE_AUTH_PASSWORD` (Required)
-- **Langfuse**: `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` (Required for observability)
-- **LLM Provider**: `STACKIT_VLLM_API_KEY`, `STACKIT_EMBEDDER_API_KEY` (Required for AI functionality)
-- **Confluence**: `CONFLUENCE_URL`, `CONFLUENCE_TOKEN`, `CONFLUENCE_SPACE_KEY` (Optional)
-
-> 📝 **Important**: The `.env` file is required for the application to work. See [`.env.template`](./.env.template) for the complete list of available configuration options.
+> 📝 **Important**: The `.env` file is required for the application to work.
 
 In the following, the *k3d* cluster setup and the setup inside the *k3d* will be explained.
 

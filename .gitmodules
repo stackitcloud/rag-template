@@ -1,8 +1,0 @@
-#TODO: add tag to the submodules
-
-[submodule "rag-infrastructure"]
-	path = rag-infrastructure
-	url = git@github.com:stackitcloud/rag-infrastructure.git
-[submodule "rag-core-library"]
-	path = rag-core-library
-	url = git@github.com:stackitcloud/rag-core-library.git

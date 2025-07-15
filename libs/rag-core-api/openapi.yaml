@@ -1,0 +1,254 @@
+openapi: 3.0.2
+info:
+  contact: {}
+  description: The perfect rag solution.
+  title: STACKIT RAG
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /evaluate:
+    post:
+      operationId: evaluate
+      responses:
+        "201":
+          description: Accepted.
+        "500":
+          description: Internal Server Error.
+      tags:
+      - rag
+  /chat/{session_id}:
+    post:
+      operationId: chat
+      parameters:
+      - explode: false
+        in: path
+        name: session_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/chat_request'
+        description: Chat with RAG.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/chat_response'
+          description: OK.
+        "500":
+          description: Internal Server Error!
+      tags:
+      - rag
+    summary: QNA or Rag Chat.
+  /information_pieces/remove:
+    post:
+      operationId: remove_information_piece
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/delete_request'
+        required: true
+      responses:
+        "202":
+          description: Accepted.
+        "404":
+          description: Ressource not Found
+        "422":
+          description: ID or metadata missing.
+        "500":
+          description: Internal Server Error.
+      summary: remove information piece
+      tags:
+      - rag
+  /information_pieces/upload:
+    post:
+      operationId: upload_information_piece
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/information_piece'
+              type: array
+        required: true
+      responses:
+        "201":
+          description: The file was successful uploaded.
+        "422":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Wrong json format.
+        "500":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Internal Server Error.
+      summary: Upload information pieces for vectordatabase
+      tags:
+      - rag
+components:
+  schemas:
+    key_value_pair:
+      description: The key value pair.
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          description: ""
+          title: key
+          type: string
+        value:
+          description: '    '
+          title: value
+          type: string
+      required:
+      - key
+      - value
+      title: key_value_pair
+      type: object
+    chat_history:
+      description: ""
+      properties:
+        messages:
+          items:
+            $ref: '#/components/schemas/chat_history_message'
+          title: messages
+          type: array
+      required:
+      - messages
+      title: chat_history
+      type: object
+    chat_role:
+      description: ""
+      enum:
+      - user
+      - assistant
+      title: chat_role
+      type: string
+    chat_history_message:
+      description: ""
+      properties:
+        role:
+          $ref: '#/components/schemas/chat_role'
+        message:
+          description: ""
+          title: message
+          type: string
+      required:
+      - message
+      - role
+      title: chat_history_message
+      type: object
+    content_type:
+      description: ""
+      enum:
+      - TEXT
+      - IMAGE
+      - TABLE
+      - SUMMARY
+      title: content_type
+      type: string
+    delete_request:
+      description: ""
+      properties:
+        metadata:
+          description: ""
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: metadata
+          type: array
+      title: file_request
+      type: object
+    chat_request:
+      description: ""
+      properties:
+        history:
+          $ref: '#/components/schemas/chat_history'
+        message:
+          description: ""
+          title: message
+          type: string
+      required:
+      - message
+      title: chat_request
+      type: object
+    chat_response:
+      description: ""
+      example:
+        finish_reason: finish_reason
+        citations:
+        - metadata:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          content: content
+        - metadata:
+          - value: value
+            key: key
+          - value: value
+            key: key
+          content: content
+        answer: answer
+      properties:
+        answer:
+          description: ""
+          title: answer
+          type: string
+        finish_reason:
+          description: '    '
+          title: finish_reason
+          type: string
+        citations:
+          description: ""
+          items:
+            $ref: '#/components/schemas/information_piece'
+          title: citations
+          type: array
+      required:
+      - answer
+      - citations
+      - finish_reason
+      title: chat_response
+      type: object
+    information_piece:
+      description: Uploading a json with chunks and metadata.
+      example:
+        metadata:
+        - key: key
+          value: value
+        - key: key
+          value: value
+        page_content: some text
+        type: TEXT
+      properties:
+        metadata:
+          description: The metadata of the documents that are stored in the vectordatabase.
+          items:
+            $ref: '#/components/schemas/key_value_pair'
+          title: metadata
+          type: array
+        page_content:
+          description: The content of the document
+          title: content
+          type: string
+        type:
+          $ref: '#/components/schemas/content_type'
+      required:
+      - metadata
+      - page_content
+      - type
+      title: file
+      type: object

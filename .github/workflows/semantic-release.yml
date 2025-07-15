@@ -90,7 +90,7 @@ jobs:
 
           # Update Helm values using Python script
           pip install ruamel.yaml
-          python3 scripts/update-helm-values.py "$NEW_VERSION"
+          python3 tools/update-helm-values.py "$NEW_VERSION"
 
           # Show git diff for verification
           if ! git diff --quiet "$VALUES_FILE"; then

@@ -59,13 +59,12 @@ async def adjusted_app() -> AsyncGenerator[FastAPI, None]:
     with app.container.vectordb_client.override(
         providers.Singleton(QdrantClient, os.environ.get("VECTOR_DB_LOCATION"))
     ):
-        app.container.large_language_model.override(
-            providers.Singleton(FakeListLLM, **FakeLlmSettings().model_dump())
-        )
+        app.container.large_language_model.override(providers.Singleton(FakeListLLM, **FakeLlmSettings().model_dump()))
         app.container.embedder.override(
             providers.Singleton(
-            LangchainCommunityEmbedder, embedder=providers.Singleton(FakeEmbeddings, **FakeEmbedderSettings().model_dump())
-        )
+                LangchainCommunityEmbedder,
+                embedder=providers.Singleton(FakeEmbeddings, **FakeEmbedderSettings().model_dump()),
+            )
         )
 
         # Override Langfuse with mock implementation

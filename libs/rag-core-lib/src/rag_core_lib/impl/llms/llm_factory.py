@@ -3,7 +3,6 @@ from langchain.chat_models import init_chat_model
 from langchain.chat_models.base import _SUPPORTED_PROVIDERS
 from langchain_core.language_models.base import BaseLanguageModel
 from langchain_core.runnables import ConfigurableField
-from langchain_community.llms.fake import FakeListLLM
 
 
 def extract_configurable_fields(settings: BaseSettings) -> dict[str, ConfigurableField]:

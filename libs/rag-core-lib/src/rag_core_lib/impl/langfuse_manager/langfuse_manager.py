@@ -38,7 +38,8 @@ class LangfuseManager:
         langfuse : Langfuse
             An instance of the Langfuse class.
         managed_prompts : dict of ChatPromptTemplate
-            A dictionary where keys are strings and values are ChatPromptTemplate instances representing managed prompts.
+            A dictionary where keys are strings and values are ChatPromptTemplate instances representing
+            managed prompts.
         llm : LLM
             An instance of the LLM class.
         """
@@ -88,8 +89,7 @@ class LangfuseManager:
 
             # Get LLM config (excluding API keys)
             llm_configurable_configs = {
-                config.id: config.default for config in self._llm.config_specs
-                if self.API_KEY_FILTER not in config.id
+                config.id: config.default for config in self._llm.config_specs if self.API_KEY_FILTER not in config.id
             }
 
             self._langfuse.create_prompt(
@@ -179,9 +179,8 @@ class LangfuseManager:
             chat_prompt_template.metadata = {"langfuse_prompt": langfuse_prompt}
 
             return chat_prompt_template
-        else:
-            logger.error("Could not retrieve prompt template from langfuse. Using fallback value.")
-            return self._managed_prompts[name]
+        logger.error("Could not retrieve prompt template from langfuse. Using fallback value.")
+        return self._managed_prompts[name]
 
     def _convert_chat_prompt_to_langfuse_format(self, chat_prompt: ChatPromptTemplate) -> list[dict]:
         """
@@ -201,21 +200,12 @@ class LangfuseManager:
 
         for message in chat_prompt.messages:
             # Convert SystemMessagePromptTemplate
-            if hasattr(message, 'prompt') and message.prompt.template:
-                if message.__class__.__name__ == 'SystemMessagePromptTemplate':
-                    chat_messages.append({
-                        "role": "system",
-                        "content": message.prompt.template
-                    })
-                elif message.__class__.__name__ == 'HumanMessagePromptTemplate':
-                    chat_messages.append({
-                        "role": "user",
-                        "content": message.prompt.template
-                    })
-                elif message.__class__.__name__ == 'AIMessagePromptTemplate':
-                    chat_messages.append({
-                        "role": "assistant",
-                        "content": message.prompt.template
-                    })
+            if hasattr(message, "prompt") and message.prompt.template:
+                if message.__class__.__name__ == "SystemMessagePromptTemplate":
+                    chat_messages.append({"role": "system", "content": message.prompt.template})
+                elif message.__class__.__name__ == "HumanMessagePromptTemplate":
+                    chat_messages.append({"role": "user", "content": message.prompt.template})
+                elif message.__class__.__name__ == "AIMessagePromptTemplate":
+                    chat_messages.append({"role": "assistant", "content": message.prompt.template})
 
         return chat_messages

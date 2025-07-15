@@ -87,21 +87,3 @@ def chat_model_provider(
         return chat.configurable_fields(**config_fields)
 
     return chat
-
-
-def fake_llm_provider(settings: BaseSettings) -> FakeListLLM:
-    """
-    Initialize a FakeListLLM with settings from a Pydantic BaseSettings object.
-
-    Parameters
-    ----------
-    settings : BaseSettings
-        Pydantic settings subclass containing configuration for FakeListLLM.
-
-    Returns
-    -------
-    FakeListLLM
-        Initialized FakeListLLM instance.
-    """
-    # Convert Pydantic settings to dict and pass as keyword arguments
-    return FakeListLLM(**settings.model_dump(exclude_none=True))

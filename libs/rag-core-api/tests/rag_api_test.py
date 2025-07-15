@@ -13,9 +13,16 @@ from fastapi import FastAPI
 from dependency_injector import providers
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
+from langchain_community.llms.fake import FakeListLLM
+from langchain_community.embeddings.fake import FakeEmbeddings
+from rag_core_api.impl.embeddings.langchain_community_embedder import (
+    LangchainCommunityEmbedder,
+)
+from unittest.mock import MagicMock
 
-from mock_environment_variables import mock_environment_variables
-from mock_logging_directory import mock_logging_config
+from mocks.mock_environment_variables import mock_environment_variables
+from mocks.mock_logging_directory import mock_logging_config
+from mocks import MockLangfuseManager
 
 mock_environment_variables()
 mock_logging_config()
@@ -30,7 +37,12 @@ from rag_core_api.models.content_type import ContentType
 from rag_core_api.models.key_value_pair import KeyValuePair
 from rag_core_api.models.delete_request import DeleteRequest
 from rag_core_api.impl.settings.fake_embedder_settings import FakeEmbedderSettings
+from rag_core_lib.impl.settings.fake_llm_settings import FakeLlmSettings
 from rag_core_api.impl.settings.error_messages import ErrorMessages
+from rag_core_api.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
+from rag_core_api.prompt_templates.question_rephrasing_prompt import QUESTION_REPHRASING_PROMPT
+from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
+from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
 
 
 @pytest_asyncio.fixture
@@ -47,6 +59,30 @@ async def adjusted_app() -> AsyncGenerator[FastAPI, None]:
     with app.container.vectordb_client.override(
         providers.Singleton(QdrantClient, os.environ.get("VECTOR_DB_LOCATION"))
     ):
+        app.container.large_language_model.override(
+            providers.Singleton(FakeListLLM, **FakeLlmSettings().model_dump())
+        )
+        app.container.embedder.override(
+            providers.Singleton(
+            LangchainCommunityEmbedder, embedder=providers.Singleton(FakeEmbeddings, **FakeEmbedderSettings().model_dump())
+        )
+        )
+
+        # Override Langfuse with mock implementation
+        mock_langfuse = providers.Singleton(MagicMock)
+        app.container.langfuse.override(mock_langfuse)
+        mock_langfuse_manager = providers.Singleton(
+            MockLangfuseManager,
+            langfuse=mock_langfuse,
+            managed_prompts={
+                AnswerGenerationChain.__name__: ANSWER_GENERATION_PROMPT,
+                RephrasingChain.__name__: QUESTION_REPHRASING_PROMPT,
+            },
+            llm=app.container.large_language_model,
+        )
+        app.container.langfuse_manager.override(mock_langfuse_manager)
+        app.container.traced_chat_graph.override(app.container.chat_graph)
+
         client = app.container.vectordb_client()
         if not client.collection_exists(collection_name):
             client.create_collection(

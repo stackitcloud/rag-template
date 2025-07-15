@@ -60,7 +60,7 @@ from rag_core_api.prompt_templates.question_rephrasing_prompt import (
 )
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.llms.llm_factory import chat_model_provider, fake_llm_provider
+from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
@@ -82,10 +82,10 @@ class DependencyContainer(DeclarativeContainer):
     retriever_settings = RetrieverSettings()
     ollama_settings = OllamaSettings()
     ollama_embedder_settings = OllamaEmbedderSettings()
-    fake_embedder_settings = FakeEmbedderSettings()
+    # fake_embedder_settings = FakeEmbedderSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
-    fake_llm_settings = FakeLlmSettings()
+    # fake_llm_settings = FakeLlmSettings()
     error_messages = ErrorMessages()
     rag_class_type_settings = RAGClassTypeSettings()
     ragas_settings = RagasSettings()
@@ -104,9 +104,6 @@ class DependencyContainer(DeclarativeContainer):
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
         ),
         stackit=Singleton(StackitEmbedder, stackit_embedder_settings),
-        fake=Singleton(
-            LangchainCommunityEmbedder, embedder=Singleton(FakeEmbeddings, **fake_embedder_settings.model_dump())
-        ),
     )
 
     sparse_embedder = Singleton(FastEmbedSparse, **sparse_embedder_settings.model_dump())
@@ -182,7 +179,6 @@ class DependencyContainer(DeclarativeContainer):
         class_selector_config.llm_type,
         ollama=Singleton(chat_model_provider, ollama_settings, "ollama"),
         stackit=Singleton(chat_model_provider, stackit_vllm_settings, "openai"),
-        fake=Singleton(fake_llm_provider, fake_llm_settings),
     )
 
     prompt = ANSWER_GENERATION_PROMPT

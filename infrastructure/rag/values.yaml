@@ -55,6 +55,7 @@ backend:
 
   debugArgs:
   - "python"
+  - "-Xfrozen_modules=off"
   - "-m"
   - "debugpy"
   - "--wait-for-client"
@@ -69,11 +70,11 @@ backend:
   - "8080"
   - "--reload"
   - "--reload-dir"
-  - "/app/rag-backend"
+  - "/app/services/rag-backend"
   - "--reload-dir"
-  - "/app/rag-core-library/rag-core-api"
+  - "/app/libs/rag-core-api"
   - "--reload-dir"
-  - "/app/rag-core-library/rag-core-lib"
+  - "/app/libs/rag-core-lib"
   - "--loop"
   - "asyncio"
 
@@ -225,6 +226,7 @@ adminBackend:
   - "/api"
   debugArgs:
   - "python"
+  - "-Xfrozen_modules=off"
   - "-m"
   - "debugpy"
   - "--wait-for-client"
@@ -239,11 +241,11 @@ adminBackend:
   - "8080"
   - "--reload"
   - "--reload-dir"
-  - "/app/admin-backend"
+  - "/app/services/admin-backend"
   - "--reload-dir"
-  - "/app/rag-core-library/rag-core-lib"
+  - "/app/libs/rag-core-lib"
   - "--reload-dir"
-  - "/app/rag-core-library/admin-api-lib"
+  - "/app/libs/admin-api-lib"
   - "--root-path"
   - "/api"
 
@@ -303,6 +305,7 @@ extractor:
   - "8080"
   debugArgs:
   - "python"
+  - "-Xfrozen_modules=off"
   - "-m"
   - "debugpy"
   - "--wait-for-client"
@@ -317,9 +320,9 @@ extractor:
   - "8080"
   - "--reload"
   - "--reload-dir"
-  - "/app/document-extractor"
+  - "/app/services/document-extractor"
   - "--reload-dir"
-  - "/app/rag-core-library/extractor-api-lib"
+  - "/app/libs/extractor-api-lib"
 
   service:
     type: ClusterIP

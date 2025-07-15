@@ -1,14 +1,13 @@
 import logging
 from pathlib import Path
 import traceback
-from threading import Thread
 import urllib
 import tempfile
+import asyncio
 from contextlib import suppress
 
 from fastapi import UploadFile, status, HTTPException
 from langchain_core.documents import Document
-from asyncio import run
 
 from admin_api_lib.file_services.file_service import FileService
 from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import ExtractionRequest
@@ -70,7 +69,7 @@ class DefaultFileUploader(FileUploader):
         self._information_enhancer = information_enhancer
         self._chunker = chunker
         self._document_deleter = document_deleter
-        self._background_threads = []
+        self._background_tasks = []
         self._file_service = file_service
 
     async def upload_file(
@@ -92,7 +91,7 @@ class DefaultFileUploader(FileUploader):
         -------
         None
         """
-        self._prune_background_threads()
+        self._prune_background_tasks()
 
         try:
             file.filename = sanitize_document_name(file.filename)
@@ -101,11 +100,10 @@ class DefaultFileUploader(FileUploader):
             self._key_value_store.upsert(source_name, Status.PROCESSING)
             content = await file.read()
             s3_path = await self._asave_new_document(content, file.filename, source_name)
-            thread = Thread(
-                target=lambda: run(self._handle_source_upload(s3_path, source_name, file.filename, base_url))
-            )  # TODO: add timeout. same logic like in default_source_uploader leaded to strange behavior
-            thread.start()
-            self._background_threads.append(thread)
+
+            task = asyncio.create_task(self._handle_source_upload(s3_path, source_name, file.filename, base_url))
+            task.add_done_callback(self._log_task_exception)
+            self._background_tasks.append(task)
         except ValueError as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -113,6 +111,28 @@ class DefaultFileUploader(FileUploader):
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.error("Error while uploading %s = %s", source_name, str(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def _log_task_exception(self, task: asyncio.Task) -> None:
+        """
+        Log exceptions from completed background tasks.
+
+        Parameters
+        ----------
+        task : asyncio.Task
+            The completed task to check for exceptions.
+        """
+        if task.done() and not task.cancelled():
+            try:
+                task.result()  # This will raise the exception if one occurred
+            except Exception as e:
+                logger.error("Background task failed with exception: %s", str(e))
+                logger.debug("Background task exception traceback: %s", traceback.format_exc())
+
+    def _prune_background_tasks(self) -> None:
+        """
+        Remove completed background tasks from the list.
+        """
+        self._background_tasks = [task for task in self._background_tasks if not task.done()]
 
     def _check_if_already_in_processing(self, source_name: str) -> None:
         """
@@ -144,8 +164,10 @@ class DefaultFileUploader(FileUploader):
         base_url: str,
     ):
         try:
-            information_pieces = self._extractor_api.extract_from_file_post(
-                ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name)
+            # Run blocking extractor API call in thread pool to avoid blocking event loop
+            information_pieces = await asyncio.to_thread(
+                self._extractor_api.extract_from_file_post,
+                ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name),
             )
 
             if not information_pieces:
@@ -156,7 +178,8 @@ class DefaultFileUploader(FileUploader):
             for piece in information_pieces:
                 documents.append(self._information_mapper.extractor_information_piece2document(piece))
 
-            chunked_documents = self._chunker.chunk(documents)
+            # Run blocking chunker call in thread pool to avoid blocking event loop
+            chunked_documents = await asyncio.to_thread(self._chunker.chunk, documents)
 
             enhanced_documents = await self._information_enhancer.ainvoke(chunked_documents)
             self._add_file_url(file_name, base_url, enhanced_documents)
@@ -169,7 +192,8 @@ class DefaultFileUploader(FileUploader):
             with suppress(Exception):
                 await self._document_deleter.adelete_document(source_name, remove_from_key_value_store=False)
 
-            self._rag_api.upload_information_piece(rag_information_pieces)
+            # Run blocking RAG API call in thread pool to avoid blocking event loop
+            await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
             self._key_value_store.upsert(source_name, Status.READY)
             logger.info("Source uploaded successfully: %s", source_name)
         except Exception as e:

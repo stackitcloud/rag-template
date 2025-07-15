@@ -8,6 +8,7 @@ from langchain_core.language_models.llms import LLM
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.model import TextPromptClient
+from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +161,6 @@ class LangfuseManager:
             chat_messages = langfuse_prompt.get_langchain_prompt()
 
             # Convert Langfuse chat messages to LangChain message templates
-            from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
             langchain_messages = []
             for message in chat_messages:
@@ -185,10 +185,12 @@ class LangfuseManager:
                 # Add more role types as needed
 
             # Create ChatPromptTemplate from messages with metadata for tracing
-            return ChatPromptTemplate.from_messages(
-                langchain_messages,
-                metadata={"langfuse_prompt": langfuse_prompt}
-            )
+            chat_prompt_template = ChatPromptTemplate.from_messages(langchain_messages)
+
+            # Add Langfuse metadata for tracing integration
+            chat_prompt_template.metadata = {"langfuse_prompt": langfuse_prompt}
+
+            return chat_prompt_template
         else:
             # Use fallback ChatPromptTemplate
             logger.error("Could not retrieve prompt template from langfuse. Using fallback value.")

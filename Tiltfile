@@ -548,3 +548,55 @@ k8s_resource(
     ],
     labels=["infrastructure"],
 )
+
+# Frontend test and lint resources (matching GitHub Actions)
+local_resource(
+    'Frontend testing',
+    cmd='cd services/frontend && npm run test',
+    deps=['services/frontend/apps', 'services/frontend/libs'],
+    labels=['test'],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True,
+)
+
+local_resource(
+    'Frontend linting',
+    cmd='cd services/frontend && npm run eslint',
+    deps=['services/frontend/apps', 'services/frontend/libs'],
+    labels=['linting'],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True,
+)
+
+# Infrastructure validation resources (matching GitHub Actions)
+local_resource(
+    'Terraform format check',
+    cmd='cd infrastructure/terraform && terraform fmt -check -recursive',
+    deps=['infrastructure/terraform'],
+    labels=['linting'],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True,
+)
+
+local_resource(
+    'Terraform validate',
+    cmd='cd infrastructure/terraform && terraform init -backend=false && terraform validate',
+    deps=['infrastructure/terraform'],
+    labels=['linting'],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True,
+)
+
+local_resource(
+    'Helm chart validation',
+    cmd='helm lint infrastructure/rag/',
+    deps=['infrastructure/rag'],
+    labels=['linting'],
+    auto_init=False,
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    allow_parallel=True,
+)

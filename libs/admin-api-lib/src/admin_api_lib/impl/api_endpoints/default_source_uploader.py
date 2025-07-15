@@ -162,10 +162,12 @@ class DefaultSourceUploader(SourceUploader):
         kwargs: list[KeyValuePair],
     ):
         try:
-            information_pieces = self._extractor_api.extract_from_source(
+            # Run blocking extractor API call in thread pool to avoid blocking event loop
+            information_pieces = await asyncio.to_thread(
+                self._extractor_api.extract_from_source,
                 ExtractionParameters(
                     source_type=source_type, document_name=source_name, kwargs=[x.to_dict() for x in kwargs]
-                )
+                ),
             )
 
             if not information_pieces:
@@ -176,7 +178,8 @@ class DefaultSourceUploader(SourceUploader):
             for piece in information_pieces:
                 documents.append(self._information_mapper.extractor_information_piece2document(piece))
 
-            chunked_documents = self._chunker.chunk(documents)
+            # Run blocking chunker call in thread pool to avoid blocking event loop
+            chunked_documents = await asyncio.to_thread(self._chunker.chunk, documents)
 
             # limit concurrency to avoid spawning multiple threads per call
             enhanced_documents = await self._information_enhancer.ainvoke(
@@ -190,7 +193,8 @@ class DefaultSourceUploader(SourceUploader):
             with suppress(Exception):
                 await self._document_deleter.adelete_document(source_name, remove_from_key_value_store=False)
 
-            self._rag_api.upload_information_piece(rag_information_pieces)
+            # Run blocking RAG API call in thread pool to avoid blocking event loop
+            await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
             self._key_value_store.upsert(source_name, Status.READY)
             logger.info("Source uploaded successfully: %s", source_name)
         except Exception as e:

@@ -34,11 +34,11 @@ spec:
           - sh
           - -c
           - |
-            touch /app/rag-backend/log/logfile.log && \
-            chmod 600 /app/rag-backend/log/logfile.log
+            touch /app/services/rag-backend/log/logfile.log && \
+            chmod 600 /app/services/rag-backend/log/logfile.log
         volumeMounts:
         - name: log-dir
-          mountPath: /app/rag-backend/log
+          mountPath: /app/services/rag-backend/log
       containers:
       {{- if .Values.features.mcp.enabled }}
       - name: {{ .Values.backend.mcp.name }}
@@ -51,7 +51,7 @@ spec:
           - name: config-volume
             mountPath: /config
           - name: log-dir
-            mountPath: /app/mcp-server/log
+            mountPath: /app/services/mcp-server/log
       {{- end }}
       - name: {{ .Values.backend.name }}
         securityContext:
@@ -63,7 +63,7 @@ spec:
         - name: config-volume
           mountPath: /config
         - name: log-dir
-          mountPath: /app/rag-backend/log
+          mountPath: /app/services/rag-backend/log
         - name: tmp-dir
           mountPath: /tmp
         image: {{ include "backend.fullImageName" . }}

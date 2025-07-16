@@ -163,6 +163,7 @@ docker_build(
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
+    ignore=["infrastructure/"],
 )
 
 # Add linter trigger
@@ -202,6 +203,7 @@ docker_build(
         sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
+    ignore=["infrastructure/"],
 )
 
 # Add linter trigger
@@ -236,6 +238,7 @@ docker_build(
         sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
+    ignore=["infrastructure/"],
 )
 
 # Add linter trigger
@@ -276,10 +279,10 @@ docker_build(
     },
     live_update=[
         sync(extractor_context, "/app/services/document-extractor"),
-        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
+    ignore=["infrastructure/"],
 )
 
 # Add linter trigger
@@ -314,7 +317,8 @@ docker_build(
     frontend_image_name,
     ".",
     dockerfile="./services/frontend/apps/chat-app/Dockerfile",
-    live_update=[sync("./services/frontend/apps/chat-app", "/app")],
+    live_update=[sync("./services/frontend", "/usr/src/app")],
+    ignore=["infrastructure/"],
 )
 
 ########################################################################################################################
@@ -327,7 +331,8 @@ docker_build(
     adminfrontend_image_name,
     ".",
     dockerfile="services/frontend/apps/admin-app/Dockerfile",
-    live_update=[sync("./services/frontend/apps/admin-app", "/app")],
+    live_update=[sync("./services/frontend", "/usr/src/app")],
+    ignore=["infrastructure/"],
 )
 
 

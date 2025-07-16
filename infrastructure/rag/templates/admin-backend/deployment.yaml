@@ -34,11 +34,11 @@ spec:
           - sh
           - -c
           - |
-            touch /app/admin-backend/log/logfile.log && \
-            chmod 600 /app/admin-backend/log/logfile.log
+            touch /app/services/admin-backend/log/logfile.log && \
+            chmod 600 /app/services/admin-backend/log/logfile.log
         volumeMounts:
         - name: log-dir
-          mountPath: /app/admin-backend/log
+          mountPath: /app/services/admin-backend/log
       containers:
       - name: {{ .Values.adminBackend.name }}
         securityContext:
@@ -50,7 +50,7 @@ spec:
         - name: config-volume
           mountPath: /config
         - name: log-dir
-          mountPath: /app/admin-backend/log
+          mountPath: /app/services/admin-backend/log
         - name: tmp-dir
           mountPath: /tmp
         image: {{ template "adminBackend.fullImageName" . }}

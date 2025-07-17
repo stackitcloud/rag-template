@@ -103,7 +103,7 @@ def test_render_docstring_with_notes_and_examples(docstring_system):
     assert "Notes" in result
     assert "This is a test note" in result
     assert "Examples" in result
-    assert ">>> example_function()" in result
+    assert "&gt;&gt;&gt; example_function()" in result
 
 
 def test_render_docstring_without_notes_and_examples(docstring_system):
@@ -283,7 +283,7 @@ def test_custom_configuration(test_class_factory):
     assert "Notes" in simple_doc
     assert "Custom notes section" in simple_doc
     assert "Examples" in simple_doc
-    assert ">>> custom_example()" in simple_doc
+    assert "&gt;&gt;&gt; custom_example()" in simple_doc
 
 
 def test_function_execution_still_works(settings, test_class_factory):

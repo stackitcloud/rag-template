@@ -140,7 +140,7 @@ metadata:
   name: {{ template "configmap.mcp" . }}
 data:
   MCP_PORT: {{ .Values.backend.mcp.port | quote }}
-  MCP_TOOL_NAME: {{ .Values.backend.mcp.toolName }}
-  MCP_TOOL_DESCRIPTION: {{ .Values.backend.mcp.toolDescription }}
-  MCP_NAME: {{  .Values.backend.mcp.name }}
----
+  MCP_HOST: {{ .Values.backend.mcp.host | quote }}
+  MCP_NAME: {{ .Values.backend.mcp.name | quote }}
+  MCP_CHAT_SIMPLE_DESCRIPTION: {{ .Values.backend.mcp.chatSimpleDescription | quote }}
+  MCP_CHAT_WITH_HISTORY_DESCRIPTION: {{ .Values.backend.mcp.chatWithHistoryDescription | quote }}

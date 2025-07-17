@@ -31,3 +31,17 @@ class MCPSettings(BaseSettings):
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     name: str = Field(default="RAG MCP server")
+    chat_simple_description: str = Field(
+        default="""Send a message to the RAG system and get a simple text response.
+
+        This is the simplest way to interact with the RAG system - just provide a message
+        and get back the answer as plain text.
+        """
+    )
+    chat_with_history_description: str = Field(
+        default="""Send a message with conversation history and get structured response.
+
+        Provide conversation history as a simple list of dictionaries.
+        Each history item should have 'role' (either 'user' or 'assistant') and 'message' keys.
+        """
+    )

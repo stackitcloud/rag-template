@@ -25,8 +25,8 @@ class DocstringTemplateSystem:
 
     def _setup_templates(self):
         """Set up the default Jinja2 templates."""
-        # Base template that can be used for any function
-        base_template = '''{{ docstring_content }}
+        # Single template string
+        self.template_string = '''{{ docstring_content }}
 
 Parameters
 ----------
@@ -52,50 +52,12 @@ Examples
 {{ examples }}
 {% endif %}'''
 
-        template_strings = {
-            'chat_simple': base_template,
-            'chat_with_history': base_template,
-            '_default': base_template  # Default template for any function
-        }
-
-        self.env = Environment(loader=DictLoader(template_strings))
-
-    def get_template(self, template_name: str):
-        """Get a Jinja2 template by name.
-
-        Parameters
-        ----------
-        template_name : str
-            Name of the template to retrieve
-
-        Returns
-        -------
-        jinja2.Template
-            The requested template
-        """
-        try:
-            return self.env.get_template(template_name)
-        except Exception:
-            # Fallback to default template if specific template not found
-            return self.env.get_template('_default')
+        self.env = Environment()
+        self.template = self.env.from_string(self.template_string)
 
     def render_docstring(self, template_name: str, **kwargs) -> str:
-        """Render a docstring using the specified template.
-
-        Parameters
-        ----------
-        template_name : str
-            Name of the template to use
-        **kwargs
-            Variables to pass to the template
-
-        Returns
-        -------
-        str
-            The rendered docstring
-        """
-        template = self.get_template(template_name)
-        return template.render(**kwargs)
+        """Render a docstring using the template."""
+        return self.template.render(**kwargs)
 
 
 def extensible_docstring(config_prefix: str):

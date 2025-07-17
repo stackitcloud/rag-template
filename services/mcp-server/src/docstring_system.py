@@ -20,7 +20,6 @@ class DocstringTemplateSystem:
             Settings object containing template configurations
         """
         self.settings = settings
-        self.templates = {}
         self._setup_templates()
 
     def render_docstring(self, template_name: str, **kwargs) -> str:

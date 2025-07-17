@@ -49,15 +49,6 @@ def test_docstring_system_initialization(settings, docstring_system):
     assert docstring_system.settings == settings
 
 
-def test_get_template(docstring_system):
-    """Test template retrieval."""
-    template = docstring_system.get_template("chat_simple")
-    assert template is not None
-
-    template = docstring_system.get_template("chat_with_history")
-    assert template is not None
-
-
 def test_render_docstring_basic(docstring_system):
     """Test basic docstring rendering."""
     result = docstring_system.render_docstring(

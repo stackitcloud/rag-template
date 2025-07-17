@@ -2,9 +2,9 @@
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, Optional
+from typing import Callable
 
-from jinja2 import Environment, DictLoader
+from jinja2 import Environment
 from pydantic_settings import BaseSettings
 
 
@@ -23,10 +23,14 @@ class DocstringTemplateSystem:
         self.templates = {}
         self._setup_templates()
 
+    def render_docstring(self, template_name: str, **kwargs) -> str:
+        """Render a docstring using the template."""
+        return self.template.render(**kwargs)
+
     def _setup_templates(self):
         """Set up the default Jinja2 templates."""
         # Single template string
-        self.template_string = '''{{ docstring_content }}
+        self.template_string = """{{ docstring_content }}
 
 Parameters
 ----------
@@ -50,14 +54,104 @@ Notes
 Examples
 --------
 {{ examples }}
-{% endif %}'''
+{% endif %}"""
 
-        self.env = Environment()
+        self.env = Environment(autoescape=True)
         self.template = self.env.from_string(self.template_string)
 
-    def render_docstring(self, template_name: str, **kwargs) -> str:
-        """Render a docstring using the template."""
-        return self.template.render(**kwargs)
+
+def _extract_parameter_info(sig: inspect.Signature, param_descriptions: dict) -> list[dict]:
+    """Extract parameter information from function signature.
+
+    Parameters
+    ----------
+    sig : inspect.Signature
+        Function signature to extract parameters from
+    param_descriptions : dict
+        Dictionary mapping parameter names to descriptions
+
+    Returns
+    -------
+    list[dict]
+        List of parameter dictionaries with name, type, and description
+    """
+    parameters = []
+
+    for param_name, param in sig.parameters.items():
+        if param_name == "self":  # Skip 'self' parameter
+            continue
+
+        # Get type annotation
+        param_type = "Any"
+        if param.annotation != inspect.Parameter.empty:
+            param_type = getattr(param.annotation, "__name__", str(param.annotation))
+
+        # Add default value info if present
+        if param.default != inspect.Parameter.empty:
+            if param.default is None:
+                param_type += ", optional"
+            else:
+                param_type += f", default={param.default}"
+
+        # Get description from settings or use default
+        description = param_descriptions.get(param_name, f"Parameter {param_name}")
+        parameters.append({"name": param_name, "type": param_type, "description": description})
+
+    return parameters
+
+
+def _get_return_info(func: Callable, settings, config_prefix: str) -> dict:
+    """Get return type and description information.
+
+    Parameters
+    ----------
+    func : Callable
+        Function to get return info for
+    settings : object
+        Settings object containing configuration
+    config_prefix : str
+        Configuration prefix for settings lookup
+
+    Returns
+    -------
+    dict
+        Dictionary with return type and description
+    """
+    return_type = "Any"
+    if func.__annotations__.get("return") is not None:
+        return_annotation = func.__annotations__["return"]
+        return_type = getattr(return_annotation, "__name__", str(return_annotation))
+
+    return_description = "Return value"
+    if hasattr(settings, f"{config_prefix}_returns"):
+        return_description = getattr(settings, f"{config_prefix}_returns")
+
+    return {"type": return_type, "description": return_description}
+
+
+def _get_settings_value(settings, config_prefix: str, suffix: str, default: str = "") -> str:
+    """Get a value from settings with the given prefix and suffix.
+
+    Parameters
+    ----------
+    settings : object
+        Settings object to get value from
+    config_prefix : str
+        Configuration prefix
+    suffix : str
+        Configuration suffix
+    default : str, optional
+        Default value if setting not found
+
+    Returns
+    -------
+    str
+        The settings value or default
+    """
+    attr_name = f"{config_prefix}_{suffix}"
+    if hasattr(settings, attr_name):
+        return getattr(settings, attr_name)
+    return default
 
 
 def extensible_docstring(config_prefix: str):
@@ -73,6 +167,7 @@ def extensible_docstring(config_prefix: str):
     Callable
         Decorated function with dynamic docstring
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -80,89 +175,46 @@ def extensible_docstring(config_prefix: str):
 
         # Get the instance and settings from the method
         def update_docstring(instance):
-            if hasattr(instance, '__docstring_system'):
-                docstring_system = instance.__docstring_system
+            if not hasattr(instance, "__docstring_system"):
+                return
 
-                # Get docstring content from settings
-                docstring_content = ""
-                if hasattr(instance._settings, f"{config_prefix}_description"):
-                    docstring_content = getattr(instance._settings, f"{config_prefix}_description")
+            docstring_system = instance.__docstring_system
 
-                # Extract parameters from function signature
-                sig = inspect.signature(func)
-                parameters = []
-                param_descriptions = {}
+            # Get docstring content from settings
+            docstring_content = _get_settings_value(instance._settings, config_prefix, "description")
 
-                # Get parameter descriptions from settings if available
-                if hasattr(instance._settings, f"{config_prefix}_parameter_descriptions"):
-                    param_descriptions = getattr(instance._settings, f"{config_prefix}_parameter_descriptions")
+            # Extract parameters from function signature
+            sig = inspect.signature(func)
+            param_descriptions = {}
+            if hasattr(instance._settings, f"{config_prefix}_parameter_descriptions"):
+                param_descriptions = getattr(instance._settings, f"{config_prefix}_parameter_descriptions")
 
-                # Build parameter list from function signature
-                for param_name, param in sig.parameters.items():
-                    if param_name == 'self':  # Skip 'self' parameter
-                        continue
+            parameters = _extract_parameter_info(sig, param_descriptions)
+            returns = _get_return_info(func, instance._settings, config_prefix)
 
-                    # Get type annotation
-                    param_type = "Any"
-                    if param.annotation != inspect.Parameter.empty:
-                        param_type = getattr(param.annotation, '__name__', str(param.annotation))
+            # Get optional notes and examples
+            notes = _get_settings_value(instance._settings, config_prefix, "notes")
+            examples = _get_settings_value(instance._settings, config_prefix, "examples")
 
-                    # Add default value info if present
-                    if param.default != inspect.Parameter.empty:
-                        if param.default is None:
-                            param_type += ", optional"
-                        else:
-                            param_type += f", default={param.default}"
+            # Render the docstring using the function name as template
+            template_name = func.__name__
+            rendered_docstring = docstring_system.render_docstring(
+                template_name,
+                docstring_content=docstring_content,
+                parameters=parameters,
+                returns=returns,
+                notes=notes,
+                examples=examples,
+            )
 
-                    # Get description from settings or use default
-                    description = param_descriptions.get(param_name, f"Parameter {param_name}")
-
-                    parameters.append({
-                        "name": param_name,
-                        "type": param_type,
-                        "description": description
-                    })
-
-                # Get return configuration from function signature and settings
-                return_type = "Any"
-                if func.__annotations__.get('return') is not None:
-                    return_annotation = func.__annotations__['return']
-                    return_type = getattr(return_annotation, '__name__', str(return_annotation))
-
-                return_description = "Return value"
-                if hasattr(instance._settings, f"{config_prefix}_returns"):
-                    return_description = getattr(instance._settings, f"{config_prefix}_returns")
-
-                returns = {"type": return_type, "description": return_description}
-
-                # Get optional notes
-                notes = ""
-                if hasattr(instance._settings, f"{config_prefix}_notes"):
-                    notes = getattr(instance._settings, f"{config_prefix}_notes")
-
-                # Get optional examples
-                examples = ""
-                if hasattr(instance._settings, f"{config_prefix}_examples"):
-                    examples = getattr(instance._settings, f"{config_prefix}_examples")
-
-                # Render the docstring using the function name as template
-                template_name = func.__name__
-                rendered_docstring = docstring_system.render_docstring(
-                    template_name,
-                    docstring_content=docstring_content,
-                    parameters=parameters,
-                    returns=returns,
-                    notes=notes,
-                    examples=examples
-                )
-
-                wrapper.__doc__ = rendered_docstring
+            wrapper.__doc__ = rendered_docstring
 
         # Store the update function for later use
         wrapper._update_docstring = update_docstring
         wrapper._original_func = func
 
         return wrapper
+
     return decorator
 
 
@@ -181,5 +233,5 @@ def setup_extensible_docstrings(instance, docstring_system: DocstringTemplateSys
     # Find all methods with extensible docstrings and update them
     for attr_name in dir(instance):
         attr = getattr(instance, attr_name)
-        if hasattr(attr, '_update_docstring'):
+        if hasattr(attr, "_update_docstring"):
             attr._update_docstring(instance)

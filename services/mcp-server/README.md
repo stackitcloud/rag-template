@@ -151,6 +151,49 @@ def chat_simple(session_id: str, message: str) -> str:
 
 This numpy-style docstring format ensures compatibility with documentation tools and provides clear, structured information to MCP clients about how to use each tool.
 
+### Helm Chart Configuration
+
+For production deployments, the MCP server documentation can be configured through the Helm chart's `values.yaml` file. This provides a structured way to manage tool documentation across different environments.
+
+The MCP configuration is located under `backend.mcp` in the [values.yaml](../../infrastructure/rag/values.yaml) file:
+
+```yaml
+backend:
+  mcp:
+    # Basic MCP server settings
+    name: "mcp"
+    port: "8000"
+    host: "0.0.0.0"
+
+    # Chat simple tool configuration
+    chatSimpleDescription: "Send a message to the RAG system and get a simple text response.\n\nThis is the simplest way to interact with the RAG system - just provide a message and get back the answer as plain text."
+    chatSimpleParameterDescriptions:
+      session_id: "Unique identifier for the chat session."
+      message: "The message/question to ask the RAG system."
+    chatSimpleReturns: "The answer from the RAG system as plain text."
+    chatSimpleNotes: ""
+    chatSimpleExamples: ""
+
+    # Chat with history tool configuration
+    chatWithHistoryDescription: "Send a message with conversation history and get structured response.\n\nProvide conversation history as a simple list of dictionaries.\nEach history item should have 'role' (either 'user' or 'assistant') and 'message' keys."
+    chatWithHistoryParameterDescriptions:
+      session_id: "Unique identifier for the chat session."
+      message: "The current message/question to ask."
+      history: "Previous conversation history. Each item should be:\n    {\"role\": \"user\" or \"assistant\", \"message\": \"the message text\"}"
+    chatWithHistoryReturns: "Response containing:\n    - answer: The response text\n    - finish_reason: Why the response ended\n    - citations: List of source documents used (simplified)"
+    chatWithHistoryNotes: ""
+    chatWithHistoryExamples: ""
+```
+
+These values are automatically converted to the appropriate environment variables (with `MCP_` prefix) when the Helm chart is deployed. The `chatSimpleParameterDescriptions` and `chatWithHistoryParameterDescriptions` dictionaries are automatically converted to JSON format for consumption by the MCP server.
+
+This approach allows you to:
+
+- Manage documentation consistently across environments
+- Version control your tool documentation
+- Use different documentation for different deployments (dev, staging, production)
+- Leverage Helm's templating features for dynamic documentation
+
 ## Deployment
 
 The MCP server is designed to be deployed alongside the main RAG backend as a sidecar container. A detailed explanation of the deployment can be found in the [main README](../README.md) and the [infrastructure README](../rag-infrastructure/README.md) of the project.

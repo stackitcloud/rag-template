@@ -25,11 +25,11 @@ class RagMcpServer:
         self._api_client = api_client
         self._server = mcp_server
         self._settings = settings
-        
+
         # Initialize the docstring system
         docstring_system = DocstringTemplateSystem(settings)
         setup_extensible_docstrings(self, docstring_system)
-        
+
         self._register_tools()
 
     def run(self):

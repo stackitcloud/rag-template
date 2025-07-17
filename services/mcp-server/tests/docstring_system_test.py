@@ -20,6 +20,7 @@ def docstring_system(settings):
 @pytest.fixture
 def test_class_factory():
     """Factory fixture for creating test classes."""
+
     def _create_test_class(settings):
         class TestClass:
             def __init__(self, settings):
@@ -36,6 +37,7 @@ def test_class_factory():
                 return {"answer": f"Response for {session_id}: {message}", "citations": []}
 
         return TestClass(settings)
+
     return _create_test_class
 
 
@@ -49,22 +51,22 @@ def test_docstring_system_initialization(settings, docstring_system):
 
 def test_get_template(docstring_system):
     """Test template retrieval."""
-    template = docstring_system.get_template('chat_simple')
+    template = docstring_system.get_template("chat_simple")
     assert template is not None
 
-    template = docstring_system.get_template('chat_with_history')
+    template = docstring_system.get_template("chat_with_history")
     assert template is not None
 
 
 def test_render_docstring_basic(docstring_system):
     """Test basic docstring rendering."""
     result = docstring_system.render_docstring(
-        'chat_simple',
+        "chat_simple",
         docstring_content="Test description",
         parameters=[],
         returns={"type": "str", "description": "Test return"},
         notes="",
-        examples=""
+        examples="",
     )
 
     assert "Test description" in result
@@ -78,16 +80,16 @@ def test_render_docstring_with_parameters(docstring_system):
     """Test docstring rendering with parameters."""
     parameters = [
         {"name": "param1", "type": "str", "description": "First parameter"},
-        {"name": "param2", "type": "int", "description": "Second parameter"}
+        {"name": "param2", "type": "int", "description": "Second parameter"},
     ]
 
     result = docstring_system.render_docstring(
-        'chat_simple',
+        "chat_simple",
         docstring_content="Test description",
         parameters=parameters,
         returns={"type": "str", "description": "Test return"},
         notes="",
-        examples=""
+        examples="",
     )
 
     assert "param1: str" in result
@@ -99,12 +101,12 @@ def test_render_docstring_with_parameters(docstring_system):
 def test_render_docstring_with_notes_and_examples(docstring_system):
     """Test docstring rendering with notes and examples."""
     result = docstring_system.render_docstring(
-        'chat_simple',
+        "chat_simple",
         docstring_content="Test description",
         parameters=[],
         returns={"type": "str", "description": "Test return"},
         notes="This is a test note",
-        examples=">>> example_function()\n'result'"
+        examples=">>> example_function()\n'result'",
     )
 
     assert "Notes" in result
@@ -116,12 +118,12 @@ def test_render_docstring_with_notes_and_examples(docstring_system):
 def test_render_docstring_without_notes_and_examples(docstring_system):
     """Test docstring rendering without notes and examples."""
     result = docstring_system.render_docstring(
-        'chat_simple',
+        "chat_simple",
         docstring_content="Test description",
         parameters=[],
         returns={"type": "str", "description": "Test return"},
         notes="",
-        examples=""
+        examples="",
     )
 
     assert "Notes" not in result
@@ -140,12 +142,13 @@ def test_decorator_creation():
         pass
 
     assert test_function is not None
-    assert hasattr(test_function, '_update_docstring')
-    assert hasattr(test_function, '_original_func')
+    assert hasattr(test_function, "_update_docstring")
+    assert hasattr(test_function, "_original_func")
 
 
 def test_decorator_preserves_function_metadata():
     """Test that the decorator preserves function metadata."""
+
     @extensible_docstring("chat_simple")
     def test_function(param1: str, param2: int) -> str:
         """Original docstring."""
@@ -157,6 +160,7 @@ def test_decorator_preserves_function_metadata():
 
 def test_decorator_function_execution():
     """Test that decorated functions still execute correctly."""
+
     @extensible_docstring("chat_simple")
     def test_function(x: int) -> int:
         return x * 2
@@ -169,7 +173,7 @@ def test_decorator_function_execution():
 def test_default_settings(settings):
     """Test that default settings are loaded correctly."""
     # Test basic settings
-    assert settings.host == "0.0.0.0"
+    assert settings.host == "0.0.0.0"  # nosec S104 - test setting only
     assert settings.port == 8000
     assert settings.name == "RAG MCP server"
 
@@ -190,13 +194,9 @@ def test_default_settings(settings):
 
 def test_parameter_descriptions():
     """Test parameter descriptions configuration."""
-    param_descriptions = {
-        "test_param": "Test description for parameter"
-    }
+    param_descriptions = {"test_param": "Test description for parameter"}
 
-    settings = MCPSettings(
-        chat_simple_parameter_descriptions=param_descriptions
-    )
+    settings = MCPSettings(chat_simple_parameter_descriptions=param_descriptions)
 
     assert settings.chat_simple_parameter_descriptions == param_descriptions
 
@@ -209,9 +209,7 @@ def test_return_config():
 
 def test_custom_settings():
     """Test custom settings override."""
-    custom_param_descriptions = {
-        "custom_param": "Custom parameter description"
-    }
+    custom_param_descriptions = {"custom_param": "Custom parameter description"}
     custom_returns = "Custom return description"
 
     settings = MCPSettings(
@@ -219,7 +217,7 @@ def test_custom_settings():
         chat_simple_parameter_descriptions=custom_param_descriptions,
         chat_simple_returns=custom_returns,
         chat_simple_notes="Custom notes",
-        chat_simple_examples="Custom examples"
+        chat_simple_examples="Custom examples",
     )
 
     assert settings.chat_simple_description == "Custom description"
@@ -235,7 +233,7 @@ def test_setup_extensible_docstrings(settings, test_class_factory):
     instance = test_class_factory(settings)
 
     # Check that the docstring system is set up
-    assert hasattr(instance, '__docstring_system')
+    assert hasattr(instance, "__docstring_system")
 
     # Check that docstrings are generated
     assert instance.chat_simple.__doc__ is not None
@@ -273,11 +271,11 @@ def test_custom_configuration(test_class_factory):
         chat_simple_description="Custom simple description",
         chat_simple_parameter_descriptions={
             "session_id": "Custom session parameter",
-            "message": "Custom message parameter"
+            "message": "Custom message parameter",
         },
         chat_simple_returns="Custom return value",
         chat_simple_notes="Custom notes section",
-        chat_simple_examples=">>> custom_example()\n'result'"
+        chat_simple_examples=">>> custom_example()\n'result'",
     )
 
     instance = test_class_factory(custom_settings)
@@ -318,8 +316,8 @@ def test_missing_settings_attributes():
     settings = MCPSettings()
 
     # Remove some attributes to test handling
-    delattr(settings, 'chat_simple_notes')
-    delattr(settings, 'chat_simple_examples')
+    delattr(settings, "chat_simple_notes")
+    delattr(settings, "chat_simple_examples")
 
     class TestClass:
         def __init__(self, settings):
@@ -339,10 +337,7 @@ def test_missing_settings_attributes():
 def test_empty_configuration():
     """Test behavior with empty configuration."""
     settings = MCPSettings(
-        chat_simple_description="",
-        chat_simple_parameter_descriptions={},
-        chat_simple_notes="",
-        chat_simple_examples=""
+        chat_simple_description="", chat_simple_parameter_descriptions={}, chat_simple_notes="", chat_simple_examples=""
     )
 
     class TestClass:

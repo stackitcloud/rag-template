@@ -143,10 +143,12 @@ data:
   MCP_HOST: {{ .Values.backend.mcp.host | quote }}
   MCP_NAME: {{ .Values.backend.mcp.name | quote }}
   MCP_CHAT_SIMPLE_DESCRIPTION: {{ .Values.backend.mcp.chatSimpleDescription | quote }}
+  MCP_CHAT_SIMPLE_PARAMETER_DESCRIPTIONS: {{ .Values.backend.mcp.chatSimpleParameterDescriptions | toJson | quote }}
   MCP_CHAT_SIMPLE_RETURNS: {{ .Values.backend.mcp.chatSimpleReturns | quote }}
   MCP_CHAT_SIMPLE_NOTES: {{ .Values.backend.mcp.chatSimpleNotes | quote }}
   MCP_CHAT_SIMPLE_EXAMPLES: {{ .Values.backend.mcp.chatSimpleExamples | quote }}
   MCP_CHAT_WITH_HISTORY_DESCRIPTION: {{ .Values.backend.mcp.chatWithHistoryDescription | quote }}
+  MCP_CHAT_WITH_HISTORY_PARAMETER_DESCRIPTIONS: {{ .Values.backend.mcp.chatWithHistoryParameterDescriptions | toJson | quote }}
   MCP_CHAT_WITH_HISTORY_RETURNS: {{ .Values.backend.mcp.chatWithHistoryReturns | quote }}
   MCP_CHAT_WITH_HISTORY_NOTES: {{ .Values.backend.mcp.chatWithHistoryNotes | quote }}
   MCP_CHAT_WITH_HISTORY_EXAMPLES: {{ .Values.backend.mcp.chatWithHistoryExamples | quote }}

@@ -78,6 +78,27 @@ The MCP server runs as a sidecar container alongside the main RAG backend and ex
 - `chat_simple`: Basic question-answering without conversation history
 - `chat_with_history`: Advanced chat interface with conversation history and returns structured responses with `answer`, `finish_reason`, and `citations`.
 
+##### Configuring Tool Documentation
+
+The MCP server supports customizable documentation for its tools through environment variables. This allows you to customize the descriptions, parameter explanations, and examples shown to MCP clients. All documentation configuration uses the `MCP_` prefix and can be configured with the [values.yaml](infrastructure/rag/values.yaml). The following configuration options exist:
+
+**For `chat_simple` tool:**
+
+- `MCP_CHAT_SIMPLE_DESCRIPTION`: Main description of the tool
+- `MCP_CHAT_SIMPLE_PARAMETER_DESCRIPTIONS`: JSON object mapping parameter names to descriptions
+- `MCP_CHAT_SIMPLE_RETURNS`: Description of the return value
+- `MCP_CHAT_SIMPLE_NOTES`: Additional notes about the tool
+- `MCP_CHAT_SIMPLE_EXAMPLES`: Usage examples
+
+**For `chat_with_history` tool:**
+
+- `MCP_CHAT_WITH_HISTORY_DESCRIPTION`: Main description of the tool
+- `MCP_CHAT_WITH_HISTORY_PARAMETER_DESCRIPTIONS`: JSON object mapping parameter names to descriptions
+- `MCP_CHAT_WITH_HISTORY_RETURNS`: Description of the return value
+- `MCP_CHAT_WITH_HISTORY_NOTES`: Additional notes about the tool
+- `MCP_CHAT_WITH_HISTORY_EXAMPLES`: Usage examples
+
+
 For further information on configuration and usage, please consult the [MCP Server README](./services/mcp-server/README.md).
 
 #### 1.1.5 Frontend

@@ -78,6 +78,79 @@ The server supports configuration through environment variables with the followi
 
 - `BACKEND_BASE_PATH`: RAG backend URL (default: `http://127.0.0.1:8080`)
 
+### Tool Documentation Configuration
+
+The MCP server supports customizable documentation for its tools through environment variables. This allows you to customize the descriptions, parameter explanations, and examples shown to MCP clients.
+
+#### Chat Simple Tool Documentation
+
+- `MCP_CHAT_SIMPLE_DESCRIPTION`: Main description of the tool
+- `MCP_CHAT_SIMPLE_PARAMETER_DESCRIPTIONS`: JSON object mapping parameter names to descriptions
+- `MCP_CHAT_SIMPLE_RETURNS`: Description of the return value
+- `MCP_CHAT_SIMPLE_NOTES`: Additional notes about the tool
+- `MCP_CHAT_SIMPLE_EXAMPLES`: Usage examples
+
+#### Chat With History Tool Documentation
+
+- `MCP_CHAT_WITH_HISTORY_DESCRIPTION`: Main description of the tool
+- `MCP_CHAT_WITH_HISTORY_PARAMETER_DESCRIPTIONS`: JSON object mapping parameter names to descriptions
+- `MCP_CHAT_WITH_HISTORY_RETURNS`: Description of the return value
+- `MCP_CHAT_WITH_HISTORY_NOTES`: Additional notes about the tool
+- `MCP_CHAT_WITH_HISTORY_EXAMPLES`: Usage examples
+
+#### Example Configuration
+
+```env
+# Custom tool descriptions
+MCP_CHAT_SIMPLE_DESCRIPTION="Ask questions about your documents and get instant answers."
+MCP_CHAT_SIMPLE_EXAMPLES="chat_simple(session_id='my-session', message='What is the main topic of the document?')"
+
+# Custom parameter descriptions (JSON format)
+MCP_CHAT_SIMPLE_PARAMETER_DESCRIPTIONS='{"session_id": "A unique session identifier for your conversation", "message": "Your question about the documents"}'
+
+# Custom return description
+MCP_CHAT_SIMPLE_RETURNS="A plain text answer based on your document content"
+
+# Notes about usage
+MCP_CHAT_SIMPLE_NOTES="This tool is best for simple questions that don't require conversation context."
+```
+
+#### Template Rendering
+
+The MCP server uses Jinja2 templates to generate tool documentation in **numpy docstring format**. When the environment variables are set, they are rendered into a structured docstring that MCP clients can parse and display.
+
+**Example of rendered docstring:**
+
+Given the configuration above, the `chat_simple` tool's docstring would be rendered as:
+
+```python
+def chat_simple(session_id: str, message: str) -> str:
+    """Ask questions about your documents and get instant answers.
+
+    Parameters
+    ----------
+    session_id : str
+        A unique session identifier for your conversation
+    message : str
+        Your question about the documents
+
+    Returns
+    -------
+    str
+        A plain text answer based on your document content
+
+    Notes
+    -----
+    This tool is best for simple questions that don't require conversation context.
+
+    Examples
+    --------
+    chat_simple(session_id='my-session', message='What is the main topic of the document?')
+    """
+```
+
+This numpy-style docstring format ensures compatibility with documentation tools and provides clear, structured information to MCP clients about how to use each tool.
+
 ## Deployment
 
 The MCP server is designed to be deployed alongside the main RAG backend as a sidecar container. A detailed explanation of the deployment can be found in the [main README](../README.md) and the [infrastructure README](../rag-infrastructure/README.md) of the project.

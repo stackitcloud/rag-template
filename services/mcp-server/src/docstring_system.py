@@ -22,8 +22,21 @@ class DocstringTemplateSystem:
         self.settings = settings
         self._setup_templates()
 
-    def render_docstring(self, template_name: str, **kwargs) -> str:
-        """Render a docstring using the template."""
+    def render_docstring(self, template_name: str, **kwargs: dict) -> str:
+        """Render a docstring using the template.
+
+        Parameters
+        ----------
+        template_name : str
+            Name of the template to render
+        **kwargs : dict
+            Keyword arguments to pass to the render function of the template
+
+        Returns
+        -------
+        str
+            Rendered docstring
+        """
         return self.template.render(**kwargs)
 
     def _setup_templates(self):

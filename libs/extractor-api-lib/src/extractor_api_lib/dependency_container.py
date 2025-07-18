@@ -5,6 +5,7 @@ from dependency_injector.providers import Factory, List, Singleton  # noqa: WOT0
 
 from extractor_api_lib.impl.api_endpoints.general_source_extractor import GeneralSourceExtractor
 from extractor_api_lib.impl.extractors.confluence_extractor import ConfluenceExtractor
+from extractor_api_lib.impl.extractors.file_extractors.epub_extractor import EpubExtractor
 from extractor_api_lib.impl.extractors.file_extractors.ms_docs_extractor import MSDocsExtractor
 from extractor_api_lib.impl.extractors.file_extractors.pdf_extractor import PDFExtractor
 from extractor_api_lib.impl.extractors.file_extractors.xml_extractor import XMLExtractor
@@ -46,7 +47,9 @@ class DependencyContainer(DeclarativeContainer):
     intern2external = Singleton(Internal2ExternalInformationPiece)
     langchain_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
     sitemap_document2information_piece = Singleton(SitemapLangchainDocument2InformationPiece)
-    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor)
+    epub_extractor = Singleton(EpubExtractor, file_service, langchain_document2information_piece)
+
+    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor, epub_extractor)
 
     general_file_extractor = Singleton(GeneralFileExtractor, file_service, file_extractors, intern2external)
     confluence_extractor = Singleton(ConfluenceExtractor, mapper=langchain_document2information_piece)

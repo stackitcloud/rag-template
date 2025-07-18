@@ -20,6 +20,53 @@ backend:
     name: "mcp"
     port: "8000"
     host: "0.0.0.0"
+
+    # Chat simple tool configuration
+    # The following configuration for the chat_simple tool will render as follows:
+    # """Send a message to the RAG system and get a simple text response.
+
+    # This is the simplest way to interact with the RAG system - just provide a message and get back the answer as plain text.
+    #
+    # Parameters
+    # ----------
+    # session_id : str
+    #     Unique identifier for the chat session.
+    # message : str
+    #     The message/question to ask the RAG system.
+    #
+    # Returns
+    # -------
+    # str
+    #     The answer from the RAG system as plain text.
+    # """
+    chatSimpleDescription: "Send a message to the RAG system and get a simple text response.\n\nThis is the simplest way to interact with the RAG system - just provide a message and get back the answer as plain text."
+    chatSimpleParameterDescriptions:
+      session_id: "Unique identifier for the chat session."
+      message: "The message/question to ask the RAG system."
+    chatSimpleReturns: "The answer from the RAG system as plain text."
+    chatSimpleNotes: ""
+    # If you add a Value to chatSimpleNotes e.g. "This tool is best for simple questions that don't require conversation context."
+    # it will render to:
+    # Notes
+    # -----
+    # This tool is best for simple questions that don't require conversation context.
+    chatSimpleExamples: ""
+    # If you add a Value to chatSimpleExamples e.g. "chat_simple(session_id='my-session', message='What is the main topic of the document?')"
+    # it will render to:
+    # Examples
+    # --------
+    # chat_simple(session_id='my-session', message='What is the main topic of the document?')
+
+    # Chat with history tool configuration
+    chatWithHistoryDescription: "Send a message with conversation history and get structured response.\n\nProvide conversation history as a simple list of dictionaries.\nEach history item should have 'role' (either 'user' or 'assistant') and 'message' keys."
+    chatWithHistoryParameterDescriptions:
+      session_id: "Unique identifier for the chat session."
+      message: "The current message/question to ask."
+      history: "Previous conversation history. Each item should be:\n    {\"role\": \"user\" or \"assistant\", \"message\": \"the message text\"}"
+    chatWithHistoryReturns: "Response containing:\n    - answer: The response text\n    - finish_reason: Why the response ended\n    - citations: List of source documents used (simplified)"
+    chatWithHistoryNotes: ""
+    chatWithHistoryExamples: ""
+
     image:
       repository: ghcr.io/stackitcloud/rag-template
       name: rag-mcp

@@ -11,6 +11,8 @@ from rag_backend_client.openapi_client.models.chat_history_message import ChatHi
 from rag_backend_client.openapi_client.models.chat_role import ChatRole
 from typing import Any
 
+from docstring_system import DocstringTemplateSystem, extensible_docstring, setup_extensible_docstrings
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +25,11 @@ class RagMcpServer:
         self._api_client = api_client
         self._server = mcp_server
         self._settings = settings
+
+        # Initialize the docstring system
+        docstring_system = DocstringTemplateSystem(settings)
+        setup_extensible_docstrings(self, docstring_system)
+
         self._register_tools()
 
     def run(self):
@@ -30,54 +37,16 @@ class RagMcpServer:
         logger.info(f"Starting FastMCP Server on {self.TRANSPORT}://{self._settings.host}:{self._settings.port}")
         self._server.run(transport=self.TRANSPORT, host=self._settings.host, port=self._settings.port)
 
+    @extensible_docstring("chat_simple")
     async def chat_simple(self, session_id: str, message: str) -> str:
-        """Send a message to the RAG system and get a simple text response.
-
-        This is the simplest way to interact with the RAG system - just provide a message
-        and get back the answer as plain text.
-
-        Parameters
-        ----------
-        session_id: str
-            Unique identifier for the chat session.
-        message: str
-            The message/question to ask the RAG system.
-
-        Returns
-        -------
-        str
-            The answer from the RAG system as plain text.
-        """
         chat_request = ChatRequest(message=message)
         response = await self._handle_chat(session_id, chat_request)
         return response.answer
 
+    @extensible_docstring("chat_with_history")
     async def chat_with_history(
         self, session_id: str, message: str, history: list[dict[str, str]] = None
     ) -> dict[str, Any]:
-        """Send a message with conversation history and get structured response.
-
-        Provide conversation history as a simple list of dictionaries.
-        Each history item should have 'role' (either 'user' or 'assistant') and 'message' keys.
-
-        Parameters
-        ----------
-        session_id: str
-            Unique identifier for the chat session.
-        message: str
-            The current message/question to ask.
-        history: List[Dict[str, str]], optional
-            Previous conversation history. Each item should be:
-            {"role": "user" or "assistant", "message": "the message text"}
-
-        Returns
-        -------
-        Dict[str, Any]
-            Response containing:
-            - answer: The response text
-            - finish_reason: Why the response ended
-            - citations: List of source documents used (simplified)
-        """
         # Build chat history if provided
         chat_history = None
         if history:

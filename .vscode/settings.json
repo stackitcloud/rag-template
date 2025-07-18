@@ -6,9 +6,10 @@
         "./libs/rag-core-api/src",
         "./libs/rag-core-lib/src",
         "./libs/extractor-api-lib/src",
-        "./admin-backend",
-        "./rag-backend",
-        "./document-extractor"
+        "./services/mcp-server/src",
+        "./services/admin-backend",
+        "./services/rag-backend",
+        "./services/document-extractor"
     ],
     "[yaml]": {
         "editor.tabSize": 2,

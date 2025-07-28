@@ -9,9 +9,6 @@ from extractor_api_lib.extractors.information_file_extractor import (
     InformationFileExtractor,
 )
 from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
-    ConfluenceLangchainDocument2InformationPiece,
-)
 from extractor_api_lib.impl.mapper.langchain_document2information_piece import (
     LangchainDocument2InformationPiece,
 )

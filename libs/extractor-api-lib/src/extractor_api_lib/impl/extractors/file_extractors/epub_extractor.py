@@ -3,17 +3,22 @@
 import logging
 from pathlib import Path
 
+from langchain_community.document_loaders import UnstructuredEPubLoader
 
+from extractor_api_lib.extractors.information_file_extractor import (
+    InformationFileExtractor,
+)
+from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
 )
-from langchain_community.document_loaders import UnstructuredEPubLoader
-
-
-from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
+from extractor_api_lib.impl.mapper.langchain_document2information_piece import (
+    LangchainDocument2InformationPiece,
+)
 from extractor_api_lib.impl.types.file_type import FileType
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +29,7 @@ class EpubExtractor(InformationFileExtractor):
     def __init__(
         self,
         file_service: FileService,
-        mapper: ConfluenceLangchainDocument2InformationPiece,
+        mapper: LangchainDocument2InformationPiece,
     ):
         """Initialize the EpubExtractor.
 
@@ -32,8 +37,8 @@ class EpubExtractor(InformationFileExtractor):
         ----------
         file_service : FileService
             Handler for downloading the file to extract content from and upload results to if required.
-        mapper : ConfluenceLangchainDocument2InformationPiece
-            An instance of ConfluenceLangchainDocument2InformationPiece used for mapping langchain documents
+        mapper : LangchainDocument2InformationPiece
+            An instance of LangchainDocument2InformationPiece used for mapping langchain documents
             to information pieces.
         """
         super().__init__(file_service=file_service)
@@ -42,12 +47,12 @@ class EpubExtractor(InformationFileExtractor):
     @property
     def compatible_file_types(self) -> list[FileType]:
         """
-        List of compatible file types for the XML extractor.
+        List of compatible file types for the EPUB extractor.
 
         Returns
         -------
         list[FileType]
-            A list containing the compatible file types, which in this case is XML.
+            A list containing the compatible file types, which in this case is EPUB.
         """
         return [FileType.EPUB]
 
@@ -68,4 +73,4 @@ class EpubExtractor(InformationFileExtractor):
             A list of processed information pieces extracted from the epub file.
         """
         elements = UnstructuredEPubLoader(file_path.as_posix()).load()
-        return [self._mapper.map_document2informationpiece(x, name) for x in elements]
+        return [self._mapper.map_document2informationpiece(document=x, document_name=name) for x in elements]

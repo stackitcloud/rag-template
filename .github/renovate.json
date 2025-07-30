@@ -126,30 +126,6 @@
       "registryUrls": ["https://otwld.github.io/ollama-helm/"]
     }
   ],
-  "customManagers": [
-    {
-      "description": "Update Helm chart versions in scripts",
-      "customType": "regex",
-      "fileMatch": ["\\.sh$"],
-      "matchStrings": [
-        "helm install .* --version \"(?<currentValue>.*?)\"",
-        "helm upgrade .* --version \"(?<currentValue>.*?)\""
-      ],
-      "datasourceTemplate": "helm",
-      "depNameTemplate": "bitnami/nginx-ingress-controller"
-    },
-    {
-      "description": "Update Docker image tags in Dockerfiles/scripts",
-      "customType": "regex",
-      "fileMatch": ["(^|/)Dockerfile$", "\\.sh$"],
-      "matchStrings": [
-        "FROM (?<depName>[^ :]+):(?<currentValue>[^@\\s]+)@sha256:",
-        "FROM (?<depName>[^ :]+):(?<currentValue>[^@\\s]+)\\s",
-        "docker.*(?<depName>[a-z0-9._-]+/[a-z0-9._-]+):(?<currentValue>[a-z0-9._-]+)"
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ],
   "ignoreDeps": [],
   "ignorePaths": [
     "**/node_modules/**",

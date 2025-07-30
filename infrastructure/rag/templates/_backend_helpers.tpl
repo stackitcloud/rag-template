@@ -95,11 +95,11 @@
 {{- end -}}
 
 {{- define "backend.fullImageName" -}}
-{{- printf "%s/%s:%s" .Values.backend.image.repository .Values.backend.image.name .Values.backend.image.tag | trimSuffix ":" | trimSuffix "-" }}
+{{- printf "%s:%s" .Values.backend.image.repository .Values.backend.image.tag | trimSuffix ":" | trimSuffix "-" }}
 {{- end -}}
 
 {{- define "mcp.fullImageName" -}}
-{{- printf "%s/%s:%s" .Values.backend.mcp.image.repository .Values.backend.mcp.image.name .Values.backend.mcp.image.tag | trimSuffix ":" | trimSuffix "-" }}
+{{- printf "%s:%s" .Values.backend.mcp.image.repository .Values.backend.mcp.image.tag | trimSuffix ":" | trimSuffix "-" }}
 {{- end -}}
 
 

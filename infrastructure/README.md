@@ -311,8 +311,7 @@ backend:
     port: "8000" # Port on which the MCP server listens (default: 8000)
     host: "0.0.0.0" # Host address for the MCP server
     image:
-      repository: ghcr.io/stackitcloud/rag-template
-      name: rag-mcp
+      repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
       tag: "v1.0.0"
 ```

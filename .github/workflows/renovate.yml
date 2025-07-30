@@ -1,7 +1,6 @@
 name: Renovate
 
 on:
-  # Run monthly on the first day at 2 AM UTC
   schedule:
     - cron: '0 2 1 * *'
   # Allow manual triggering

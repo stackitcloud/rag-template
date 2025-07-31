@@ -4,18 +4,23 @@ import { settings } from "../settings";
 
 export const useThemeStore = defineStore("theme", () => {
   const THEME_STORAGE_KEY = "app-theme";
-  const availableThemes = settings.ui.theme.options;
+  type Theme = "light" | "dark" | "system"; // Define allowed theme values
+  const availableThemes: Theme[] = settings.ui.theme.options as Theme[];
   const currentTheme = ref(loadSavedTheme());
+
+  function isValidTheme(theme: string): theme is Theme {
+    return availableThemes.includes(theme as Theme);
+  }
 
   function loadSavedTheme() {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    return savedTheme && availableThemes.includes(savedTheme)
+    return savedTheme && isValidTheme(savedTheme)
       ? savedTheme
       : settings.ui.theme.default;
   }
 
   function setTheme(theme: string) {
-    if (!availableThemes.includes(theme)) return;
+    if (!isValidTheme(theme)) return;
     currentTheme.value = theme;
     localStorage.setItem(THEME_STORAGE_KEY, theme);
     applyTheme(theme);

@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.adminBackend.name }}
+spec:
+  replicas: {{ .Values.adminBackend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.adminBackend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.adminBackend.name }}
+    spec:
+      securityContext:
+        runAsUser: 65532
+        runAsNonRoot: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "configmap.loggingName" . }}
+        - name: log-dir
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
+      {{- if .Values.shared.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.shared.imagePullSecret.name }}
+      {{- end }}
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command:
+          - sh
+          - -c
+          - |
+            touch /app/services/admin-backend/log/logfile.log && \
+            chmod 600 /app/services/admin-backend/log/logfile.log
+        volumeMounts:
+        - name: log-dir
+          mountPath: /app/services/admin-backend/log
+      containers:
+      - name: {{ .Values.adminBackend.name }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          {{- if not .Values.shared.debug.backend.enabled }}
+          readOnlyRootFilesystem: true
+          {{- end }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: log-dir
+          mountPath: /app/services/admin-backend/log
+        - name: tmp-dir
+          mountPath: /tmp
+        image: {{ template "adminBackend.fullImageName" . }}
+        imagePullPolicy: {{ .Values.adminBackend.image.pullPolicy }}
+        {{- if not (empty .Values.adminBackend.command) }}
+        command:
+        {{- range $cmd :=  .Values.adminBackend.command }}
+        - {{ $cmd -}}
+        {{ end }}
+        {{- end }}
+        {{- if not .Values.shared.debug.backend.enabled }}
+        {{- if not (empty .Values.adminBackend.args) }}
+        args:
+        {{- range $arg :=  .Values.adminBackend.args }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- else }}
+        {{- if not (empty .Values.adminBackend.debugArgs) }}
+        args:
+        {{- range $arg :=  .Values.adminBackend.debugArgs }}
+        - {{ $arg | quote -}}
+        {{ end }}
+        {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.adminBackend.service.port }}
+        {{- if .Values.shared.debug.backend.enabled }}
+        - containerPort: 31415
+        {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "configmap.ragClassTypesName" . }}
+          - configMapRef:
+              name: {{ template "configmap.summarizerName" . }}
+          - configMapRef:
+              name: {{ template "configmap.langfuseName" . }}
+          - configMapRef:
+              name: {{ template "configmap.ollamaName" . }}
+          - configMapRef:
+              name: {{ template "configmap.ollamaEmbedderName" . }}
+          - configMapRef:
+              name: {{ template "configmap.usecaseName" . }}
+          - configMapRef:
+              name: {{ template "configmap.s3Name" . }}
+          - configMapRef:
+              name: {{ template "configmap.ragapiName" . }}
+          - configMapRef:
+              name: {{ template "configmap.stackitVllmName" . }}
+          - configMapRef:
+              name: {{ template "configmap.pdfextractorName" . }}
+          - configMapRef:
+              name: {{ template "configmap.keyValueStoreName" . }}
+          - configMapRef:
+              name: {{ template "configmap.sourceUploaderName" . }}
+          - secretRef:
+              name: {{ template "secret.langfuseName" . }}
+          - secretRef:
+              name: {{ template "secret.usecaseName" . }}
+          - secretRef:
+              name: {{ template "secret.s3Name" . }}
+          - secretRef:
+              name: {{ template "secret.stackitVllmName" . }}
+        env:
+          - name: PYTHONPATH
+            value: {{ .Values.adminBackend.pythonPathEnv.PYTHONPATH }}

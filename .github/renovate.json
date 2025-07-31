@@ -1,0 +1,137 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "UTC",
+  "schedule": ["before 4am"],
+  "labels": ["renovate"],
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 50,
+  "stabilityDays": 7,
+  "repositories": ["stackitcloud/rag-template"],
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "ghcr.io"
+    },
+    {
+      "hostType": "helm",
+      "matchHost": "charts.bitnami.com"
+    },
+    {
+      "hostType": "helm",
+      "matchHost": "langfuse.github.io"
+    },
+    {
+      "hostType": "helm",
+      "matchHost": "qdrant.github.io"
+    },
+    {
+      "hostType": "helm",
+      "matchHost": "enapter.github.io"
+    },
+    {
+      "hostType": "helm",
+      "matchHost": "otwld.github.io"
+    }
+  ],
+
+  "packageRules": [
+    {
+      "description": "Group all non-major updates together",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Require manual review for major updates",
+      "matchUpdateTypes": ["major"],
+      "labels": ["major-update"],
+      "automerge": false
+    },
+    {
+      "description": "Label Python dependencies",
+      "matchManagers": ["poetry", "pip_requirements"],
+      "addLabels": ["python"]
+    },
+    {
+      "description": "Label Node.js dependencies",
+      "matchManagers": ["npm"],
+      "addLabels": ["nodejs"]
+    },
+    {
+      "description": "Label Docker images",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "addLabels": ["docker"]
+    },
+    {
+      "description": "Label Helm charts",
+      "matchManagers": ["helm-requirements", "helm-values", "helmv3"],
+      "addLabels": ["helm"]
+    },
+    {
+      "description": "Label Kubernetes manifests",
+      "matchManagers": ["kubernetes"],
+      "addLabels": ["kubernetes"]
+    },
+    {
+      "description": "Automerge GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "addLabels": ["github-actions"],
+      "automerge": true
+    },
+    {
+      "description": "Ignore malformed platform flags",
+      "matchPackageNames": [
+        "--platform=linux/amd64 python",
+        "--platform=linux/amd64 node"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Bitnami Helm charts",
+      "matchManagers": ["helm-requirements", "helm-values", "helmv3"],
+      "matchPackageNames": ["minio", "bitnami/nginx-ingress-controller"],
+      "registryUrls": ["https://charts.bitnami.com/bitnami"]
+    },
+    {
+      "description": "Langfuse Helm chart",
+      "matchManagers": ["helm-requirements", "helm-values", "helmv3"],
+      "matchPackageNames": ["langfuse"],
+      "registryUrls": ["https://langfuse.github.io/langfuse-k8s"]
+    },
+    {
+      "description": "Qdrant Helm chart",
+      "matchManagers": ["helm-requirements", "helm-values", "helmv3"],
+      "matchPackageNames": ["qdrant"],
+      "registryUrls": ["https://qdrant.github.io/qdrant-helm"]
+    },
+    {
+      "description": "KeyDB Helm chart",
+      "matchManagers": ["helm-requirements", "helm-values", "helmv3"],
+      "matchPackageNames": ["keydb"],
+      "registryUrls": ["https://enapter.github.io/charts/"]
+    },
+    {
+      "description": "Ollama Helm chart",
+      "matchManagers": ["helm-requirements", "helm-values", "helmv3"],
+      "matchPackageNames": ["ollama"],
+      "registryUrls": ["https://otwld.github.io/ollama-helm/"]
+    }
+  ],
+  "ignoreDeps": [],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/__pycache__/**",
+    "**/venv/**",
+    "**/.venv/**"
+  ]
+}

@@ -1,14 +1,15 @@
 {
     "python.analysis.extraPaths": [
-        "./rag-core-library/admin-api-lib/src",
-        "./rag-core-library/admin-api-lib/src/admin_api_lib/extractor_client",
-        "./rag-core-library/admin-api-lib/src/admin_api_lib/rag_backend_client",
-        "./rag-core-library/rag-core-api/src",
-        "./rag-core-library/rag-core-lib/src",
-        "./rag-core-library/extractor-api-lib/src",
-        "./admin-backend",
-        "./rag-backend",
-        "./document-extractor"
+        "./libs/admin-api-lib/src",
+        "./libs/admin-api-lib/src/admin_api_lib/extractor_client",
+        "./libs/admin-api-lib/src/admin_api_lib/rag_backend_client",
+        "./libs/rag-core-api/src",
+        "./libs/rag-core-lib/src",
+        "./libs/extractor-api-lib/src",
+        "./services/mcp-server/src",
+        "./services/admin-backend",
+        "./services/rag-backend",
+        "./services/document-extractor"
     ],
     "[yaml]": {
         "editor.tabSize": 2,

@@ -12,7 +12,9 @@ auth
 node_modules/
 
 **/.notebooks
+**/.notebooks/*
 **/todo*.md
+**/mcp.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -32,6 +34,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+# Exception for frontend libs
+!services/frontend/libs/**/lib
 parts/
 sdist/
 var/

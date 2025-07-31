@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG USER=vscode
 
 RUN DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \ 
+    && apt-get update \
     && apt-get install -y build-essential --no-install-recommends make \
         ca-certificates \
         git \
@@ -27,7 +27,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 # Python and poetry installation
 USER $USER
 ARG HOME="/home/$USER"
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.13
 
 ENV PYENV_ROOT="${HOME}/.pyenv"
 ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${HOME}/.local/bin:$PATH"

@@ -11,3 +11,4 @@ class FileType(StrEnum):
     DOCX = "DOCX"
     PPTX = "PPTX"
     XML = "XML"
+    EPUB = "EPUB"

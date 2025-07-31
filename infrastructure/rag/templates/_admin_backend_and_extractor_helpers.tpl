@@ -74,11 +74,11 @@
 
 # image
 {{- define "adminBackend.fullImageName" -}}
-{{- printf "%s/%s:%s" .Values.adminBackend.image.repository .Values.adminBackend.image.name .Values.adminBackend.image.tag | trimSuffix ":" }}
+{{- printf "%s:%s" .Values.adminBackend.image.repository .Values.adminBackend.image.tag | trimSuffix ":" }}
 {{- end -}}
 
 {{- define "extractor.fullImageName" -}}
-{{- printf "%s/%s:%s" .Values.extractor.image.repository .Values.extractor.image.name .Values.extractor.image.tag | trimSuffix ":" }}
+{{- printf "%s:%s" .Values.extractor.image.repository .Values.extractor.image.tag | trimSuffix ":" }}
 {{- end -}}
 
 # ingress

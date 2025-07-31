@@ -103,9 +103,12 @@ const executeDelete = () => {
   <div
     v-if="showDeleteModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-modal-title"
   >
     <div class="bg-base-100 p-6 rounded-box max-w-md w-full">
-      <h3 class="font-bold text-lg mb-4">Confirm Deletion</h3>
+      <h3 id="delete-modal-title" class="font-bold text-lg mb-4">Confirm Deletion</h3>
       <p class="mb-4">
         Are you sure you want to delete
         <span class="font-semibold">{{ props.data.name }}</span

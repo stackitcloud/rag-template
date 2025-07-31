@@ -21,9 +21,10 @@ export const useChatStore = defineStore("chat", () => {
   const isLoading = ref(false);
   const hasError = ref(false);
 
-  // Get i18n instance lazily to ensure it's available
+  // Get i18n instance at the top level
+  const { t } = useI18n();
+
   const getInitialMessage = () => {
-    const { t } = useI18n();
     try {
       return t("chat.initialMessage", { bot_name: settings.bot.name });
     } catch (error) {

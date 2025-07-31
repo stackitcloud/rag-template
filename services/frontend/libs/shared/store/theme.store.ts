@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { settings } from "../settings";
 
 export const useThemeStore = defineStore("theme", () => {
@@ -30,5 +30,8 @@ export const useThemeStore = defineStore("theme", () => {
   // Initialize theme
   applyTheme(currentTheme.value);
 
-  return { currentTheme, setTheme, availableThemes };
+  // Computed property for dark mode check
+  const isDarkMode = computed(() => currentTheme.value === "dark");
+
+  return { currentTheme, setTheme, availableThemes, isDarkMode };
 });

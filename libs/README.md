@@ -223,8 +223,6 @@ Technically, all parameters of the `SitemapLoader` from LangChain can be provide
 
 ### 3.3 Replaceable parts
 
-TODO: proceed with confluence extractor.
-
 | Name | Type | Default | Notes |
 |----------|---------|--------------|--------------|
 | file_service | [`extractor_api_lib.file_services.file_service.FileService`](./extractor-api-lib/src/extractor_api_lib/file_services/file_service.py) | [`extractor_api_lib.impl.file_services.s3_service.S3Service`](./extractor-api-lib/src/extractor_api_lib/impl/file_services/s3_service.py) | Handles operations on the connected storage. |

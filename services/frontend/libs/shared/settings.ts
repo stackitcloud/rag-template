@@ -9,6 +9,9 @@ export interface AppSettings {
       options: string[];
     };
   };
+  features?: {
+    useMockData?: boolean;
+  };
   // Add other configuration sections as needed
 }
 
@@ -23,6 +26,9 @@ const defaultSettings: AppSettings = {
       default: "dark",
       options: ["light", "dark"],
     },
+  },
+  features: {
+    useMockData: false,
   },
 };
 
@@ -41,5 +47,8 @@ export const settings: AppSettings = {
         ? import.meta.env.VITE_UI_THEME_OPTIONS.split(",")
         : defaultSettings.ui.theme.options,
     },
+  },
+  features: {
+    useMockData: import.meta.env.VITE_USE_MOCK_DATA === "true" || defaultSettings.features?.useMockData || false,
   },
 };

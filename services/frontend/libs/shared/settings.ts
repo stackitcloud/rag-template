@@ -37,8 +37,8 @@ export const settings: AppSettings = {
       default:
         import.meta.env.VITE_UI_THEME_DEFAULT ||
         defaultSettings.ui.theme.default,
-      options: import.meta.env.VITE_UI_THEME_OPTIONS
-        ? (import.meta.env.VITE_UI_THEME_OPTIONS as string).split(",")
+      options: typeof import.meta.env.VITE_UI_THEME_OPTIONS === "string" && import.meta.env.VITE_UI_THEME_OPTIONS.trim()
+        ? import.meta.env.VITE_UI_THEME_OPTIONS.split(",")
         : defaultSettings.ui.theme.options,
     },
   },

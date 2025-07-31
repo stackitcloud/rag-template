@@ -1,6 +1,6 @@
 {
   "chat": {
-    "initialMessage": "Hi 👋, I’m the AI Docs Chatbot, here to support you with any questions regarding the provided documents!",
+    "initialMessage": "Hi 👋, I’m your AI Assistant {bot_name}, here to support you with any questions regarding the provided documents!",
     "send": "Send",
     "justAsk": "How can i help you?",
     "sources": "Sources",

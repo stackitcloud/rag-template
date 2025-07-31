@@ -30,7 +30,9 @@
             "@i18n/admin": ["libs/i18n/admin/index.ts"],
             "@shared/ui": ["libs/shared/ui/index.ts"],
             "@shared/utils": ["libs/shared/utils/src/index.ts"],
-            "@shared/style": ["libs/shared/global.css"]
+            "@shared/style": ["libs/shared/global.css"],
+            "@shared/settings": ["./libs/shared/settings.ts"],
+            "@shared/store/theme.store": ["./libs/shared/store/theme.store.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]

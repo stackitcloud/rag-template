@@ -10,15 +10,15 @@ appVersion: "1.0.0"
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: "0.12.1"
+  version: "0.13.1"
   condition: features.langfuse.enabled
 - name: qdrant
-  version: 1.12.6
+  version: 1.15.0
   repository: "https://qdrant.github.io/qdrant-helm"
   condition: features.qdrant.enabled
 - name: minio
   repository: https://charts.bitnami.com/bitnami
-  version: "15.0.3"
+  version: "15.0.7"
   condition: features.minio.enabled
 - name: keydb
   repository: https://enapter.github.io/charts/
@@ -26,6 +26,6 @@ dependencies:
   condition: features.keydb.enabled
 - name: ollama
   alias: ollama
-  version: 1.1.0
+  version: 1.24.0
   repository: https://otwld.github.io/ollama-helm/
   condition: features.ollama.enabled

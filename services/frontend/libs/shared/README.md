@@ -45,7 +45,7 @@ import { settings } from '@/libs/shared/settings';
   <NavigationContainer>
     <!-- Navigation content -->
   </NavigationContainer>
-  
+
   <SideBarContainer header="Documents" count="5">
     <!-- Sidebar content -->
   </SideBarContainer>

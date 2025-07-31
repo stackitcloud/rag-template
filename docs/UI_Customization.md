@@ -100,7 +100,7 @@ The application supports a flexible theme system with user preference persistenc
    ```bash
    # Only allow light mode (remove theme toggle)
    VITE_UI_THEME_OPTIONS=light
-   
+
    # Support both themes (default)
    VITE_UI_THEME_OPTIONS=light,dark
    ```
@@ -119,10 +119,10 @@ The application supports a flexible theme system with user preference persistenc
    ```bash
    # Bot customization
    VITE_BOT_NAME=Development Bot
-   
+
    # Logo customization
    VITE_UI_LOGO_PATH=/assets/dev-logo.svg
-   
+
    # Theme customization
    VITE_UI_THEME_DEFAULT=light
    VITE_UI_THEME_OPTIONS=light,dark

@@ -2,7 +2,7 @@ name: Renovate
 
 on:
   schedule:
-    - cron: '0 2 1 * *'
+    - cron: '0 0 * * 0'
   # Allow manual triggering
   workflow_dispatch:
     inputs:

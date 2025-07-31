@@ -11,7 +11,7 @@ const themeStore = useThemeStore();
 </script>
 
 <template>
-  <div :class="`${themeStore.isDarkMode ? 'bg-dark-primary' : 'bg-light-primary'} flex p-4`">
+  <div class="bg-primary flex p-4">
     <div class="flex-1">
       <img :src="logoPath" class="w-32" />
     </div>

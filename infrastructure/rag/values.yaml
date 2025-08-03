@@ -452,7 +452,7 @@ langfuse:
   image:
     repository: ghcr.io/langfuse/langfuse
     pullPolicy: Always
-    tag: "3.88.1"
+    tag: "3.90.0"
   postgresql:
     deploy: true
     auth:

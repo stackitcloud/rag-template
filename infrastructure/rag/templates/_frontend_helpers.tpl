@@ -3,7 +3,7 @@
 {{- end -}}
 
 {{- define "frontend.fullImageName" -}}
-{{- printf "%s/%s:%s" .Values.frontend.image.repository .Values.frontend.image.name .Values.frontend.image.tag | trimSuffix ":" -}}
+{{- printf "%s:%s" .Values.frontend.image.repository .Values.frontend.image.tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{- define "ingress.frontendFullname" -}}

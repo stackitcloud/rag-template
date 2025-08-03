@@ -1,7 +1,7 @@
 {{- define "adminFrontend.fullImageName" -}}
 {{- if .Values.adminFrontend.image -}}
     {{- if .Values.adminFrontend.image.repository -}}
-        {{- printf "%s/%s:%s" .Values.adminFrontend.image.repository .Values.adminFrontend.image.name .Values.adminFrontend.image.tag | trimSuffix ":" }}
+        {{- printf "%s:%s" .Values.adminFrontend.image.repository .Values.adminFrontend.image.tag | trimSuffix ":" }}
     {{- else -}}
         {{ required "A valid .Values.adminFrontend.image.repository entry required!" . }}
     {{- end -}}

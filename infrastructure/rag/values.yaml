@@ -445,25 +445,43 @@ shared:
 
 
 langfuse:
-  minio:
-    deploy: false
-  valkey:
-    deploy: false #<--- keydb is used instead of valkey
-  image:
-    repository: ghcr.io/langfuse/langfuse
-    pullPolicy: Always
-    tag: "3.88.1"
-  postgresql:
-    deploy: true
-    auth:
-      username: postgres
-      password: postgres
-      database: langfuse
+  # Core Langfuse Configuration
   langfuse:
+    # Used to hash API keys
+    salt:
+      value: "changeme"
+
+    # Authentication settings
+    features:
+      telemetryEnabled: true
+      signUpDisabled: false
+
+    # Image configuration
+    image:
+      tag: "3.88.1"
+      pullPolicy: Always
+
+    # Web deployment configuration
+    web:
+      image:
+        repository: langfuse/langfuse
+        tag: "3.88.1"
+        pullPolicy: Always
+
+    # Worker deployment configuration
+    worker:
+      image:
+        repository: langfuse/langfuse-worker
+        tag: "3.88.1"
+        pullPolicy: Always
+
+    # NextAuth configuration
     nextauth:
       url: http://localhost:3000
-      secret: changeme
-    salt: changeme
+      secret:
+        value: "changeme"
+
+    # Additional environment variables (only for init values)
     additionalEnv:
     - name: LANGFUSE_INIT_ORG_ID
       value: ""
@@ -479,33 +497,8 @@ langfuse:
       value: ""
     - name: LANGFUSE_INIT_USER_PASSWORD
       value: ""
-    # REDIS
-    - name: "REDIS_CONNECTION_STRING"
-      value: "redis://rag-keydb:6379"
-    # CLICKHOUSE
-    - name: "CLICKHOUSE_MIGRATION_URL"
-      value: "clickhouse://rag-clickhouse:9000"
-    - name: "CLICKHOUSE_URL"
-      value: "http://rag-clickhouse:8123"
-    - name: "CLICKHOUSE_USER"
-      value: "default"
-    - name: "CLICKHOUSE_PASSWORD"
-      value: "changeme"
-    # S3 / MinIO
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENABLED"
-      value: "true"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_BUCKET"
-      value: "langfuse"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_REGION"
-      value: "auto"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID"
-      value: "admin"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY"
-      value: "adminpassword"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT"
-      value: "http://rag-minio:9000"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE"
-      value: "true"
+
+    # Additional init containers
     extraInitContainers:
     - name: wait-for-postgres
       image: busybox
@@ -519,6 +512,61 @@ langfuse:
         done
       # Define a reasonable timeout in case PostgreSQL fails to come up
       timeoutSeconds: 300
+
+  # PostgreSQL Configuration (use external PostgreSQL)
+  postgresql:
+    deploy: true
+    host: "rag-postgresql"
+    port: 5432
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+
+  # Redis Configuration (external KeyDB)
+  redis:
+    deploy: false
+    host: "rag-keydb"
+    port: 6379
+    auth:
+      username: "default"
+      password: ""
+
+  # ClickHouse Configuration (external ClickHouse)
+  clickhouse:
+    deploy: true
+    host: "rag-clickhouse"
+    httpPort: 8123
+    nativePort: 9000
+    auth:
+      username: "default"
+      password: "changeme"
+    migration:
+      url: "clickhouse://rag-clickhouse:9000"
+      ssl: false
+      autoMigrate: true
+
+  # S3/MinIO Configuration (external MinIO)
+  s3:
+    deploy: false
+    bucket: "langfuse"
+    region: "auto"
+    endpoint: "http://rag-minio:9000"
+    forcePathStyle: true
+    accessKeyId:
+      value: "admin"
+    secretAccessKey:
+      value: "adminpassword"
+    eventUpload:
+      enabled: true
+      bucket: "langfuse"
+      region: "auto"
+      endpoint: "http://rag-minio:9000"
+      forcePathStyle: true
+      accessKeyId:
+        value: "admin"
+      secretAccessKey:
+        value: "adminpassword"
 
 minio:
   auth:

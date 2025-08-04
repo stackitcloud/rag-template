@@ -1,0 +1,39 @@
+name: Renovate
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: false
+        default: 'info'
+        type: choice
+        options:
+          - info
+          - debug
+      dryRun:
+        description: 'Dry run'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  renovate:
+    name: Renovate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v43.0.5
+        with:
+          configurationFile: .github/renovate.json
+          token: ${{ secrets.RENOVATE_TOKEN }}
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun || false }}
+          RENOVATE_BASE_BRANCH_PATTERNS: deps-main
+          TZ: Europe/Berlin

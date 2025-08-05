@@ -192,6 +192,9 @@ backend:
     stackitEmbedder:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
       STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+      STACKIT_EMBEDDER_MAX_RETRIES: 10
+      STACKIT_EMBEDDER_RETRY_BASE_DELAY: 1.0
+      STACKIT_EMBEDDER_RETRY_MAX_DELAY: 60.0
     ollama:
       OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
       OLLAMA_BASE_URL: "http://rag-ollama:11434"

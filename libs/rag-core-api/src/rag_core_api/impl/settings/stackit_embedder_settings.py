@@ -17,6 +17,12 @@ class StackitEmbedderSettings(BaseSettings):
         (default "https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1").
     api_key : str
         The API key for authentication.
+    max_retries : int
+        Maximum number of retry attempts (default 10).
+    retry_base_delay : float
+        Base delay in seconds for exponential backoff (default 1.0).
+    retry_max_delay : float
+        Maximum delay in seconds between retries (default 60.0).
     """
 
     class Config:
@@ -28,3 +34,6 @@ class StackitEmbedderSettings(BaseSettings):
     model: str = Field(default="intfloat/e5-mistral-7b-instruct")
     base_url: str = Field(default="https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1")
     api_key: str = Field(default="")
+    max_retries: int = Field(default=10, description="Maximum number of retry attempts")
+    retry_base_delay: float = Field(default=1.0, description="Base delay in seconds for exponential backoff")
+    retry_max_delay: float = Field(default=60.0, description="Maximum delay in seconds between retries")

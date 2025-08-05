@@ -72,18 +72,19 @@ class StackitEmbedder(Embedder, Embeddings):
 
             except Exception as e:
                 if attempt == self._settings.max_retries:
-                    logger.error("Failed to embed batch after %d attempts: %s",
-                               self._settings.max_retries + 1, str(e))
+                    logger.error("Failed to embed batch after %d attempts: %s", self._settings.max_retries + 1, str(e))
                     raise
 
                 # Calculate exponential backoff delay
-                delay = min(
-                    self._settings.retry_base_delay * (2 ** attempt),
-                    self._settings.retry_max_delay
-                )
+                delay = min(self._settings.retry_base_delay * (2**attempt), self._settings.retry_max_delay)
 
-                logger.warning("Embedding attempt %d/%d failed: %s. Retrying in %.2f seconds...",
-                             attempt + 1, self._settings.max_retries + 1, str(e), delay)
+                logger.warning(
+                    "Embedding attempt %d/%d failed: %s. Retrying in %.2f seconds...",
+                    attempt + 1,
+                    self._settings.max_retries + 1,
+                    str(e),
+                    delay,
+                )
 
                 time.sleep(delay)
 

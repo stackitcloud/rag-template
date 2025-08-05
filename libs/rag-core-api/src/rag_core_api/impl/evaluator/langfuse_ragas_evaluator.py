@@ -162,12 +162,11 @@ class LangfuseRagasEvaluator(Evaluator):
         async with self._semaphore:
             chat_request = ChatRequest(message=item.input)
 
-
             # Use item.run context manager for trace
             with item.run(
                 run_name=experiment_name,
                 run_metadata={"model": self._settings.model},
-                run_description=f"Evaluation run for {experiment_name}"
+                run_description=f"Evaluation run for {experiment_name}",
             ) as root_span:
                 # Use langfuse.start_as_current_generation for generation
                 try:
@@ -175,30 +174,36 @@ class LangfuseRagasEvaluator(Evaluator):
                 except Exception as e:
                     logger.info("Error while answering question %s: %s", item.input, e)
                     response = None
-                output = {"answer": response.answer if response else None,
-                    "documents": [x.page_content for x in response.citations] if response and response.citations else None}
+                output = {
+                    "answer": response.answer if response else None,
+                    "documents": (
+                        [x.page_content for x in response.citations] if response and response.citations else None
+                    ),
+                }
                 with self._langfuse.start_as_current_generation(
                     name="rag-eval-llm-call",
                     input={"question": item.input, "context": output["documents"]},
                     metadata={"item_id": item.id, "run": experiment_name},
-                    model=self._settings.model
+                    model=self._settings.model,
                 ) as generation:
 
                     generation.update(output=output["answer"])
                     generation.update_trace(
                         input={"question": item.input, "context": output["documents"]},
                         metadata={"item_id": item.id, "run": experiment_name},
-                        output=output["answer"]
+                        output=output["answer"],
                     )
 
                 # Ragas metrics
                 if response and response.citations:
-                    eval_data = Dataset.from_dict({
-                        "question": [item.input],
-                        "answer": [output["answer"]],
-                        "contexts": [output["documents"]],
-                        "ground_truth": [item.expected_output],
-                    })
+                    eval_data = Dataset.from_dict(
+                        {
+                            "question": [item.input],
+                            "answer": [output["answer"]],
+                            "contexts": [output["documents"]],
+                            "ground_truth": [item.expected_output],
+                        }
+                    )
                     result = ragas.evaluate(
                         eval_data,
                         metrics=self.METRICS,
@@ -212,7 +217,6 @@ class LangfuseRagasEvaluator(Evaluator):
                 else:
                     for metric in self.METRICS:
                         root_span.score_trace(name=metric.name, value=self.DEFAULT_SCORE_VALUE)
-
 
     def _get_dataset(self, dataset_name: str) -> DatasetClient:
         dataset = None

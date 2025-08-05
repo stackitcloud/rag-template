@@ -72,7 +72,6 @@ class TracedRunnable(AsyncRunnable[RunnableInput, RunnableOutput], ABC):
             span.update_trace(output=output)
             return output
 
-
     @abstractmethod
     def _add_tracing_callback(self, config: Optional[RunnableConfig]) -> RunnableConfig: ...
 

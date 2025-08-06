@@ -46,7 +46,7 @@ class StackitEmbedder(Embedder, Embeddings):
 
         Parameters
         ----------
-        texts : list of str
+        texts : list[str]
             A batch of texts to be embedded.
 
         Returns

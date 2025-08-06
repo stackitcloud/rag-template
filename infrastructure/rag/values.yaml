@@ -477,6 +477,7 @@ langfuse:
         repository: langfuse/langfuse-worker
         tag: "3.88.1"
         pullPolicy: Always
+      port: 3030
 
     # NextAuth configuration
     nextauth:
@@ -548,6 +549,22 @@ langfuse:
       url: "clickhouse://rag-clickhouse:9000"
       ssl: false
       autoMigrate: true
+    resources:
+      limits:
+        cpu: "2"
+        memory: "8Gi"
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+
+    zookeeper:
+      resources:
+        limits:
+          cpu: "2"
+          memory: "2Gi"
+        requests:
+          cpu: "1"
+          memory: "1Gi"
 
   # S3/MinIO Configuration (external MinIO)
   s3:
@@ -588,10 +605,6 @@ minio:
     enabled: false
   mode: standalone
 
-
-
-
-
 ollama:
   image:
     tag: 0.5.1
@@ -607,3 +620,8 @@ ollama:
 qdrant:
   image:
     tag: v1.14.1
+
+keydb:
+  multiMaster: "no"
+  activeReplicas: "no"
+  nodes: 1

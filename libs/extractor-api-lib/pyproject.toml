@@ -101,6 +101,7 @@ langchain-core = "0.3.72"
 camelot-py = {extras = ["cv"], version = "^1.0.0"}
 fake-useragent = "^2.2.0"
 pypdfium2 = "4.30.0"
+pypandoc-binary = "^1.15"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

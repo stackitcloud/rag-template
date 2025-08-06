@@ -58,7 +58,7 @@ class DependencyContainer(DeclarativeContainer):
     xml_extractor = Singleton(XMLExtractor, file_service)
 
     intern2external = Singleton(Internal2ExternalInformationPiece)
-    confluence_langchain_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
+    confluence_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
     langchain_document2information_piece = Singleton(LangchainDocument2InformationPiece)
     sitemap_document2information_piece = Singleton(SitemapLangchainDocument2InformationPiece)
     epub_extractor = Singleton(EpubExtractor, file_service, langchain_document2information_piece)
@@ -66,7 +66,7 @@ class DependencyContainer(DeclarativeContainer):
     file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor, epub_extractor)
 
     general_file_extractor = Singleton(GeneralFileExtractor, file_service, file_extractors, intern2external)
-    confluence_extractor = Singleton(ConfluenceExtractor, mapper=confluence_langchain_document2information_piece)
+    confluence_extractor = Singleton(ConfluenceExtractor, mapper=confluence_document2information_piece)
 
     sitemap_extractor = Singleton(
         SitemapExtractor,

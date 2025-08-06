@@ -65,7 +65,7 @@ from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
-from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
+from rag_core_lib.impl.tracers.langfuse_traced_runnable import LangfuseTracedRunnable
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 
@@ -138,18 +138,18 @@ class DependencyContainer(DeclarativeContainer):
         chunker=summary_text_splitter,
         semaphore=Singleton(AsyncThreadsafeSemaphore, summarizer_settings.maximum_concurrreny),
     )
+    traced_summarizer = Singleton(
+        LangfuseTracedRunnable,
+        inner_chain=summarizer,
+        settings=langfuse_settings,
+    )
 
     summary_enhancer = List(
-        Singleton(PageSummaryEnhancer, summarizer, chunker_settings),
-    )
-    untraced_information_enhancer = Singleton(
-        GeneralEnhancer,
-        summary_enhancer,
+        Singleton(PageSummaryEnhancer, traced_summarizer, chunker_settings),
     )
     information_enhancer = Singleton(
-        LangfuseTracedGraph,
-        inner_chain=untraced_information_enhancer,
-        settings=langfuse_settings,
+        GeneralEnhancer,
+        summary_enhancer,
     )
 
     document_deleter = Singleton(

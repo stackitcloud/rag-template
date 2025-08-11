@@ -4006,34 +4006,6 @@ fastembed = ["fastembed (>=0.7,<0.8)"]
 fastembed-gpu = ["fastembed-gpu (>=0.7,<0.8)"]
 
 [[package]]
-name = "rag-core-lib"
-version = "1.0.1"
-description = "The perfect rag template"
-optional = false
-python-versions = "^3.13"
-groups = ["main"]
-files = []
-develop = true
-
-[package.dependencies]
-deprecated = "^1.2.18"
-flashrank = "^0.2.10"
-langchain = "^0.3.25"
-langchain-community = "0.3.23"
-langchain-core = "0.3.68"
-langchain-openai = "^0.3.27"
-langfuse = "3.0.0"
-oauthlib = "^3.2.2"
-openai = "^1.77.0"
-pydantic = "^2.11.4"
-pydantic-settings = "^2.2.1"
-requests-oauthlib = "^2.0.0"
-
-[package.source]
-type = "directory"
-url = "../rag-core-lib"
-
-[[package]]
 name = "ragas"
 version = "0.2.15"
 description = ""
@@ -5140,4 +5112,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "88f3259a6b320cbf2d0a21654e6025b953f62adf59dbce780ff8f52f1b1dffce"
+content-hash = "c2adec6b5d58918ad5894abac3bed4cbf28f5c2b0dc41438bdfcbbd37925e8ae"

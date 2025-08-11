@@ -70,7 +70,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "latest"
+      tag: "v2.0.0"
 
   name: backend
   replicaCount: 1
@@ -78,7 +78,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   command:
   - "poetry"
@@ -128,7 +128,7 @@ backend:
     port: 8080
 
   pythonPathEnv:
-    PYTHONPATH: src
+    PYTHONPATH: "/app/services/rag-backend/src:/app/libs/rag-core-api/src:/app/libs/rag-core-lib/src"
 
   ingress:
     enabled: true
@@ -216,7 +216,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   service:
     type: ClusterIP
@@ -251,7 +251,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   command:
   - "poetry"
@@ -297,7 +297,7 @@ adminBackend:
     port: 8080
 
   pythonPathEnv:
-    PYTHONPATH: src
+    PYTHONPATH: "/app/services/admin-backend/src:/app/libs/admin-api-lib/src:/app/libs/rag-core-lib/src"
 
   ingress:
     enabled: true
@@ -331,7 +331,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   command:
   - "poetry"
@@ -371,7 +371,7 @@ extractor:
     port: 8080
 
   pythonPathEnv:
-    PYTHONPATH: src
+    PYTHONPATH: "/app/services/document-extractor/src:/app/libs/extractor-api-lib/src"
 
 adminFrontend:
   name: admin-frontend
@@ -379,7 +379,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   service:
     type: ClusterIP

@@ -43,15 +43,14 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "pdfextractor_server"
-version = "0.0.0"
-description = "Extracts the content of pdf  documents."
+name = "document-extractor"
+version = "2.2.0"
+description = "Extracts content from files and sources like Confluence spaces, sitemaps etc."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.2.0"

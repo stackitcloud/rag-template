@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "extractor_api_lib"
-version = "1.0.1"
+version = "2.2.0"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 packages = [{ include = "extractor_api_lib", from = "src" }]
@@ -134,7 +134,7 @@ black = "^25.1.0"
 httpx = "^0.28.1"
 
 [tool.pytest.ini_options]
-log_cli = 1
+log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = "src"
 testpaths = "src/tests"

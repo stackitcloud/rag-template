@@ -4,8 +4,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "admin-api-lib"
-version = "1.0.1"
-description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
+version = "2.2.0"
+description = "The admin api lib is responsible for the file and source management. This includes deletion, upload and returning the source document."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 packages = [{ include = "admin_api_lib", from = "src" }]
 
@@ -95,7 +95,6 @@ black = "^25.1.0"
 pytest-asyncio = "^1.0.0"
 
 [tool.poetry.dependencies]
-rag-core-lib = {path = "../rag-core-lib"}
 python = "^3.13"
 uvicorn = "^0.34.2"
 fastapi = "^0.115.12"
@@ -110,7 +109,7 @@ pyyaml = "^6.0.2"
 python-multipart = "^0.0.20"
 
 [tool.pytest.ini_options]
-log_cli = 1
+log_cli = true
 log_cli_level = "DEBUG"
-pythonpath = "src"
+pythonpath = ["src", "../rag-core-lib/src"]
 testpaths = "src/tests"

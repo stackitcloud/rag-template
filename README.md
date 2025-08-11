@@ -38,7 +38,7 @@ The template supports multiple LLM (Large Language Model) providers, such as STA
 
 
 ## 1. Getting Started
-A [`Tiltfile`](./Tiltfile) is provided to get you started :rocket:. If Tilt is new for you, and you want to learn more about it, please take a look at the [Tilt guides](https://docs.tilt.dev/tiltfile_authoring.html).
+A [`Tiltfile`](./Tiltfile) is provided to get you started :rocket:. If Tilt is new for you, and you want to learn more about it, please take a look at the [Tilt guides](https://docs.tilt.dev/tiltfile_authoring).
 
 ### 1.1 Components
 
@@ -98,7 +98,6 @@ The MCP server supports customizable documentation for its tools through environ
 - `MCP_CHAT_WITH_HISTORY_NOTES`: Additional notes about the tool
 - `MCP_CHAT_WITH_HISTORY_EXAMPLES`: Usage examples
 
-
 For further information on configuration and usage, please consult the [MCP Server README](./services/mcp-server/README.md).
 
 #### 1.1.5 Frontend
@@ -124,28 +123,40 @@ For further information, please consult the [Libs README](./libs/README.md).
 
 ### 1.2 Requirements
 
-> 📝  *Windows users*: make sure you use wsl for infrastructure setup & orchestration.
+> 📝  Windows users: make sure you use WSL for infrastructure setup & orchestration.
 
-Every package contains a `pyproject.toml` with the required Python packages.
-[Poetry](https://python-poetry.org/)  is used for requirement management.
-To ensure the requirements are consistent, you have to update the `poetry.lock` in addition to the `pyproject.toml` when updating/changing requirements. Additional requirements like *black* and *flake8* are provided for development. You can install them with `poetry install --with dev` inside the package-directory.
+Every package contains a `pyproject.toml` with the required Python packages. [Poetry](https://python-poetry.org/) is used for requirement management. To ensure the requirements are consistent, you have to update the `poetry.lock` in addition to the `pyproject.toml` when updating/changing requirements. Additional requirements like *black* and *flake8* are provided for development. You can install them with `poetry install --with dev` inside the package-directory.
 
 > 📝 Do not update the requirements in the `pyproject.toml` manually. Doing so will invalidate the `poetry.lock`. Use the *poetry* application for this.
 
+#### Directory-based local libraries (no local packages)
+
+- Services do not install local libs as packages. Instead, containers set `PYTHONPATH` to include the service `src` and the needed `libs/*/src` folders.
+- During image builds, libs' third-party dependencies are installed with `poetry install --no-root` in each lib directory. The service is also installed with `--no-root`.
+- If you run services locally outside Docker, export `PYTHONPATH` accordingly, e.g. for rag-backend:
+
+  ```bash
+  export PYTHONPATH="services/rag-backend/src:libs/rag-core-api/src:libs/rag-core-lib/src:$PYTHONPATH"
+  ```
+
+
 #### Adding new requirements
-Run
+
+Run:
+
 ```bash
 poetry add --lock <package>
 ```
-insisde of the package directory in order to add new packages. This will automatically update the `pyproject.toml` and the `poetry.lock`.
+
+inside of the package directory in order to add new packages. This will automatically update the `pyproject.toml` and the `poetry.lock`.
 
 System requirements have to manually be added to the `Dockerfile`.
 
 ### 1.3 Usage
+
 This example of the rag-template includes a WebUI for document-management, as well as for the chat.
 
-After following the setup instruction for either the [local installation](#-local-setup-instructions) or the [installation on a server](#-Deployment-to-server) the WebUI is accessible via the configured ingress.
-After uploading a file in the document-management WebUI you can start asking question about your document in the chat WebUI.
+After following the setup instruction for either the [local installation](#14-local-setup-instructions) or the [installation on a server](#2-deployment-to-server) the WebUI is accessible via the configured ingress. After uploading a file in the document-management WebUI you can start asking question about your document in the chat WebUI.
 
 For a complete documentation of the available REST-APIs, please consult [the libs README](./libs/README.md).
 
@@ -182,17 +193,14 @@ STACKIT_EMBEDDER_API_KEY=...
 # or be created via the langfuse UI.
 LANGFUSE_PUBLIC_KEY=pk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 LANGFUSE_SECRET_KEY=sk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-
 ```
 
 This results in a basic auth with username=`foo` and password=`bar`.
 
-> 📝 NOTE: All values containing `...` are placeholders and have to be replaced with real values.
-> This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to on of the following values:
+> 📝 NOTE: All values containing `...` are placeholders and have to be replaced with real values. This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to one of the following values:
 >
 > - `stackit`: Uses an OpenAI compatible LLM, like the STACKIT model serving service.
 > - `ollama`: Uses ollama as an LLM provider.
->
 
 #### 1.4.1 Environment Variables Setup
 
@@ -351,7 +359,7 @@ To connect the debugger, you can use the following `launch.json`:
 }
 ```
 
-The following will delete everything deployed with `tilt up` command
+The following will delete everything deployed with `tilt up` command:
 
 ```shell
 tilt down
@@ -359,9 +367,7 @@ tilt down
 
 #### 1.4.4 Access via ingress
 
-A detailed explanation of, how to access a service via ingress, can be found in the [infrastructure README](./infrastructure/README.md).
-
-
+A detailed explanation of how to access a service via ingress can be found in the [infrastructure README](./infrastructure/README.md).
 
 ## 2. Deployment to server
 
@@ -371,7 +377,8 @@ The RAG template requires *at least*:
  - A Kubernetes Cluster
  - S3 ObjectStorage
 
-Provided is an example Terraform script, using the [STACKIT Terrraform Provider](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs):
+Provided is an example Terraform script, using the [STACKIT Terraform Provider](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs):
+
 ```terraform
 resource "stackit_ske_project" "rag-ske" {
   project_id = var.stackit_project_id
@@ -421,7 +428,7 @@ resource "stackit_objectstorage_bucket" "docs" {
 }
 ```
 
-For further information please consult the [STACKIT Terrraform Provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
+For further information please consult the [STACKIT Terraform Provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
 
 Further requirements for the server can be found in the [infrastructure README](./infrastructure/README.md).
 
@@ -429,10 +436,9 @@ Further requirements for the server can be found in the [infrastructure README](
 
 A detailed description regarding the configuration of Langfuse can be found in the [infrastructure README](./infrastructure/README.md).
 
-
 ## 3. Build and Test
-The example `Tiltfile` provides a triggered linting and testing.
-The linting-settings can be changed in the `services/rag-backend/pyproject.toml` file under section `tool.flake8`.
+
+The example `Tiltfile` provides a triggered linting and testing. The linting-settings can be changed in the `services/rag-backend/pyproject.toml` file under section `tool.flake8`.
 
 ## 4. Contribution Guidelines
 

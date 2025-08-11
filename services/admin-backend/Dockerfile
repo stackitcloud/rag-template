@@ -2,7 +2,8 @@ FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
 ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv
-ENV POETRY_VERSION=1.8.3
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
+ENV POETRY_VERSION=2.1.3
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make && \
@@ -10,8 +11,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
       && $POETRY_VIRTUALENVS_PATH/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
-COPY libs/admin-api-lib /app/libs/admin-api-lib
-COPY libs/rag-core-lib /app/libs/rag-core-lib
+COPY libs/admin-api-lib/pyproject.toml libs/admin-api-lib/poetry.lock /app/libs/admin-api-lib/
+COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
 
 WORKDIR /app/services/admin-backend
 COPY services/admin-backend/pyproject.toml services/admin-backend/poetry.lock ./
@@ -20,10 +21,15 @@ RUN mkdir log && chmod 700 log
 RUN touch /app/services/admin-backend/log/logfile.log && chmod 600 /app/services/admin-backend/log/logfile.log
 
 RUN poetry config virtualenvs.create false && \
+    cd /app/services/admin-backend && \
     if [ "$dev" = "1" ]; then \
-        poetry install --no-interaction --no-ansi --no-root --with dev; \
+        poetry install --no-interaction --no-ansi --no-root --with dev && \
+        cd /app/libs/rag-core-lib && poetry install --no-interaction --no-ansi --no-root --with dev && \
+        cd /app/libs/admin-api-lib && poetry install --no-interaction --no-ansi --no-root --with dev; \
     else \
-        poetry install --no-interaction --no-ansi --no-root; \
+        poetry install --no-interaction --no-ansi --no-root && \
+        cd /app/libs/rag-core-lib && poetry install --no-interaction --no-ansi --no-root && \
+        cd /app/libs/admin-api-lib && poetry install --no-interaction --no-ansi --no-root; \
     fi
 
 FROM --platform=linux/amd64 python:3.13-bookworm
@@ -50,15 +56,14 @@ RUN apt-get autoremove --yes
 
 RUN if [ "$dev" = "0" ]; then \
         while read -r shell; do rm -f "$shell"; done < /etc/shells; \
-        rm -rf /var/lib/{apt,dpkg,cache,log}/ \
-    else \
-        echo "POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv" >> /etc/environment;\
-        export POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv;\
-        export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
+        rm -rf /var/lib/{apt,dpkg,cache,log}/; \
     fi
 
 
 USER nonroot
 COPY --from=build --chown=nonroot:nonroot  /app/services/admin-backend/log /app/services/admin-backend/log
 
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
+# Ensure libs are importable at runtime without installing them as packages
+ENV PYTHONPATH="/app/services/admin-backend/src:/app/libs/admin-api-lib/src:/app/libs/rag-core-lib/src"

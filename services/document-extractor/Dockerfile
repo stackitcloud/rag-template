@@ -47,12 +47,7 @@ COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --from=build /usr/share/tesseract-ocr/5/tessdata /usr/share/tesseract-ocr/5/tessdata
 
-COPY --chown=nonroot:nonroot libs/extractor-api-lib /app/libs/extractor-api-lib
-
 WORKDIR /app/services/document-extractor
-
-COPY --chown=nonroot:nonroot services/document-extractor .
-
 
 # cleanup
 RUN apt-get clean autoclean
@@ -63,11 +58,12 @@ RUN if [ "$dev" = "0" ]; then \
         rm -rf /var/lib/{apt,dpkg,cache,log}/; \
     fi
 
-
-USER nonroot
-COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log
-
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
-# Ensure libs are importable at runtime without installing them as packages
 ENV PYTHONPATH="/app/services/document-extractor/src:/app/libs/extractor-api-lib/src"
+
+USER nonroot
+
+COPY --chown=nonroot:nonroot libs/extractor-api-lib /app/libs/extractor-api-lib
+COPY --chown=nonroot:nonroot services/document-extractor .
+COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log

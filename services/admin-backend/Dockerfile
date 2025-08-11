@@ -35,6 +35,8 @@ RUN poetry config virtualenvs.create false && \
 FROM --platform=linux/amd64 python:3.13-bookworm
 ARG dev=0
 
+WORKDIR /app/services/admin-backend
+
 RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv
@@ -42,13 +44,6 @@ COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VI
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
-
-COPY --chown=nonroot:nonroot libs/admin-api-lib /app/libs/admin-api-lib
-COPY --chown=nonroot:nonroot libs/rag-core-lib /app/libs/rag-core-lib
-
-WORKDIR /app/services/admin-backend
-
-COPY --chown=nonroot:nonroot services/admin-backend .
 
 # cleanup
 RUN apt-get clean autoclean
@@ -60,10 +55,14 @@ RUN if [ "$dev" = "0" ]; then \
     fi
 
 
-USER nonroot
-COPY --from=build --chown=nonroot:nonroot  /app/services/admin-backend/log /app/services/admin-backend/log
-
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
 # Ensure libs are importable at runtime without installing them as packages
 ENV PYTHONPATH="/app/services/admin-backend/src:/app/libs/admin-api-lib/src:/app/libs/rag-core-lib/src"
+
+USER nonroot
+
+COPY --chown=nonroot:nonroot services/admin-backend .
+COPY --from=build --chown=nonroot:nonroot  /app/services/admin-backend/log /app/services/admin-backend/log
+COPY --chown=nonroot:nonroot libs/admin-api-lib /app/libs/admin-api-lib
+COPY --chown=nonroot:nonroot libs/rag-core-lib /app/libs/rag-core-lib

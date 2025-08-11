@@ -79,46 +79,6 @@ jobs:
             echo "ℹ️  No new release published"
           fi
 
-      - name: update-helm-values
-        if: steps.semantic-release.outputs.new-release-published == 'true'
-        run: |
-          echo "🔍 Debug: new-release-published = ${{ steps.semantic-release.outputs.new-release-published }}"
-          echo "🔍 Debug: new-release-version = ${{ steps.semantic-release.outputs.new-release-version }}"
-
-          NEW_VERSION="${{ steps.semantic-release.outputs.new-release-version }}"
-          VALUES_FILE="infrastructure/rag/values.yaml"
-
-          # Update Helm values using Python script
-          pip install ruamel.yaml
-          python3 tools/update-helm-values.py "$NEW_VERSION"
-
-          # Show git diff for verification
-          if ! git diff --quiet "$VALUES_FILE"; then
-            echo "Changes made to values.yaml:"
-            git diff "$VALUES_FILE"
-          else
-            echo "⚠️  No changes detected in values.yaml"
-          fi
-
-      - name: commit-helm-changes
-        if: steps.semantic-release.outputs.new-release-published == 'true'
-        run: |
-          # Check if there are changes to commit
-          if ! git diff --quiet infrastructure/rag/values.yaml; then
-            echo "📝 Committing Helm values changes..."
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add infrastructure/rag/values.yaml
-
-            # Create a new commit for the Helm changes (don't amend since semantic-release already pushed)
-            git commit -m "chore: update helm chart image tags to v${{ steps.semantic-release.outputs.new-release-version }}"
-            git push
-
-            echo "✅ Helm chart changes committed and pushed"
-          else
-            echo "ℹ️  No Helm chart changes to commit"
-          fi
-
   build-and-push-images:
     name: build-and-push-images
     runs-on: ubuntu-latest
@@ -194,4 +154,3 @@ jobs:
           echo "- frontend" >> $GITHUB_STEP_SUMMARY
           echo "- admin-frontend" >> $GITHUB_STEP_SUMMARY
           echo "**Registry:** ghcr.io/${{ github.repository_owner }}/rag-template" >> $GITHUB_STEP_SUMMARY
-          echo "**Helm chart updated:** infrastructure/rag/values.yaml" >> $GITHUB_STEP_SUMMARY

@@ -22,9 +22,9 @@ IMAGE_TAG?=v1.0.0
 REGISTRY?=
 
 build_and_push:
-	docker buildx build --platform linux/amd64 -t $(REGISTRY)/rag-backend:$(IMAGE_TAG)  -f services/rag-backend/Dockerfile --push  .
-	docker buildx build --platform linux/amd64 -t $(REGISTRY)/admin-backend:$(IMAGE_TAG)  -f services/admin-backend/Dockerfile --push .
-	docker buildx build --platform linux/amd64 -t $(REGISTRY)/document-extractor:$(IMAGE_TAG)  -f services/document-extractor/Dockerfile --push .
-	docker buildx build --platform linux/amd64 -t $(REGISTRY)/frontend:$(IMAGE_TAG)  -f services/frontend/apps/chat-app/Dockerfile --push .
-	docker buildx build --platform linux/amd64 -t $(REGISTRY)/admin-frontend:$(IMAGE_TAG)  -f services/frontend/apps/admin-app/Dockerfile --push .
-	docker buildx build --platform linux/amd64 -t $(REGISTRY)/mcp-server:$(IMAGE_TAG)  -f services/mcp-server/Dockerfile --push .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/rag-backend:$(IMAGE_TAG) -t $(REGISTRY)/rag-backend:latest -f services/rag-backend/Dockerfile --push  .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/admin-backend:$(IMAGE_TAG) -t $(REGISTRY)/admin-backend:latest -f services/admin-backend/Dockerfile --push .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/document-extractor:$(IMAGE_TAG) -t $(REGISTRY)/document-extractor:latest -f services/document-extractor/Dockerfile --push .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/frontend:$(IMAGE_TAG) -t $(REGISTRY)/frontend:latest -f services/frontend/apps/chat-app/Dockerfile --push .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/admin-frontend:$(IMAGE_TAG) -t $(REGISTRY)/admin-frontend:latest -f services/frontend/apps/admin-app/Dockerfile --push .
+	docker buildx build --platform linux/amd64 -t $(REGISTRY)/mcp-server:$(IMAGE_TAG) -t $(REGISTRY)/mcp-server:latest -f services/mcp-server/Dockerfile --push .

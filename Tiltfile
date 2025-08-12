@@ -163,7 +163,15 @@ docker_build(
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "libs/admin-api-lib/",
+        "libs/extractor-api-lib/",
+        "services/admin-backend/",
+        "services/document-extractor/",
+        "services/mcp-server/",
+        "services/frontend/",
+    ],
 )
 
 # Add linter trigger
@@ -189,7 +197,7 @@ local_resource(
 ################################## build mcp image and do live update ##################################################
 # NOTE: full image names should match the one in the helm chart values.yaml!
 registry = "ghcr.io/stackitcloud/rag-template"
-mcp_image_name = "rag-mcp"
+mcp_image_name = "mcp-server"
 
 mcp_context = "./services/mcp-server"
 mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)
@@ -203,7 +211,14 @@ docker_build(
         sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "libs/",
+        "services/admin-backend/",
+        "services/document-extractor/",
+        "services/rag-backend/",
+        "services/frontend/",
+    ],
 )
 
 # Add linter trigger
@@ -238,7 +253,15 @@ docker_build(
         sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "libs/rag-core-api/",
+        "libs/extractor-api-lib/",
+        "services/rag-backend/",
+        "services/document-extractor/",
+        "services/mcp-server/",
+        "services/frontend/",
+    ],
 )
 
 # Add linter trigger
@@ -282,7 +305,16 @@ docker_build(
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "libs/rag-core-api/",
+        "libs/rag-core-lib/",
+        "libs/admin-api-lib/",
+        "services/rag-backend/",
+        "services/admin-backend/",
+        "services/mcp-server/",
+        "services/frontend/",
+    ],
 )
 
 # Add linter trigger
@@ -318,7 +350,14 @@ docker_build(
     ".",
     dockerfile="./services/frontend/apps/chat-app/Dockerfile",
     live_update=[sync("./services/frontend", "/usr/src/app")],
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "libs/",
+        "services/admin-backend/",
+        "services/document-extractor/",
+        "services/mcp-server/",
+        "services/rag-backend/",
+    ],
 )
 
 ########################################################################################################################
@@ -332,7 +371,14 @@ docker_build(
     ".",
     dockerfile="services/frontend/apps/admin-app/Dockerfile",
     live_update=[sync("./services/frontend", "/usr/src/app")],
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "libs/",
+        "services/admin-backend/",
+        "services/document-extractor/",
+        "services/mcp-server/",
+        "services/rag-backend/",
+    ],
 )
 
 

@@ -128,7 +128,7 @@ backend:
     port: 8080
 
   pythonPathEnv:
-    PYTHONPATH: src
+    PYTHONPATH: "/app/services/rag-backend/src:/app/libs/rag-core-api/src:/app/libs/rag-core-lib/src"
 
   ingress:
     enabled: true
@@ -297,7 +297,7 @@ adminBackend:
     port: 8080
 
   pythonPathEnv:
-    PYTHONPATH: src
+    PYTHONPATH: "/app/services/admin-backend/src:/app/libs/admin-api-lib/src:/app/libs/rag-core-lib/src"
 
   ingress:
     enabled: true
@@ -371,7 +371,7 @@ extractor:
     port: 8080
 
   pythonPathEnv:
-    PYTHONPATH: src
+    PYTHONPATH: "/app/services/document-extractor/src:/app/libs/extractor-api-lib/src"
 
 adminFrontend:
   name: admin-frontend

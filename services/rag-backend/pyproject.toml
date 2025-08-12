@@ -1,12 +1,11 @@
 [tool.poetry]
-name = "rag-usecase-example"
-version = "0.1.0"
+name = "rag-backend"
+version = "2.2.0"
 description = ""
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 
 [tool.poetry.dependencies]
 python = "^3.13"
-rag-core-api = { path = "../../libs/rag-core-api", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"

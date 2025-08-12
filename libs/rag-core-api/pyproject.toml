@@ -4,14 +4,13 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "1.0.1"
-description = "The core of the rag-template."
+version = "2.2.0"
+description = "Contains default implementation for the RAG. It manages the communication with the knowledge base and how the answers are generated."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 packages = [{ include = "rag_core_api", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"
-rag-core-lib = { path = "../rag-core-lib", develop = true}
 uvicorn = "^0.34.2"
 langchain-qdrant = "^0.2.0"
 dependency-injector = "^4.46.0"
@@ -121,6 +120,6 @@ max-line-length = 120
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "DEBUG"
-pythonpath = ["src", "tests"]
+pythonpath = ["src", "tests", "../rag-core-lib/src"]
 testpaths = ["tests"]
 

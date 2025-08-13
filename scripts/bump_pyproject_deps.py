@@ -17,24 +17,17 @@ LIBS = [
     ROOT / 'libs' / 'extractor-api-lib' / 'pyproject.toml',
 ]
 
-SERVICES_VERSION = [
-    ROOT / 'services' / 'rag-backend' / 'pyproject.toml',
-    ROOT / 'services' / 'admin-backend' / 'pyproject.toml',
-    ROOT / 'services' / 'document-extractor' / 'pyproject.toml',
-    ROOT / 'services' / 'mcp-server' / 'pyproject.toml',
-]
-
 SERVICE_PINS = {
     ROOT / 'services' / 'rag-backend' / 'pyproject.toml': {
-        'rag-core-api': '=={v}',
-        'rag-core-lib': '=={v}',
+        'tool.poetry.group.prod.dependencies.rag-core-api': '=={v}',
+        'tool.poetry.group.prod.dependencies.rag-core-lib': '=={v}',
     },
     ROOT / 'services' / 'admin-backend' / 'pyproject.toml': {
-        'admin-api-lib': '=={v}',
-        'rag-core-lib': '=={v}',
+        'tool.poetry.group.prod.dependencies.admin-api-lib': '=={v}',
+        'tool.poetry.group.prod.dependencies.rag-core-lib': '=={v}',
     },
     ROOT / 'services' / 'document-extractor' / 'pyproject.toml': {
-        'extractor-api-lib': '=={v}',
+        'tool.poetry.group.prod.dependencies.extractor-api-lib': '=={v}',
     },
 }
 
@@ -69,44 +62,31 @@ def _get_table(doc: tomlkit.TOMLDocument, path: List[str]) -> Optional[Table]:
 
 
 def bump(version: str):
-    # 1) bump libs versions
+    # 1) bump libs versions (textual, non-destructive)
     for file in LIBS:
         txt = file.read_text()
         new_txt = replace_version_line(txt, version)
         file.write_text(new_txt)
         print(f"Updated {file} -> tool.poetry.version = {version}")
 
-    # 2) bump service app versions (including mcp-server)
-    for file in SERVICES_VERSION:
-        if not file.exists():
-            continue
-        txt = file.read_text()
-        new_txt = replace_version_line(txt, version)
-        file.write_text(new_txt)
-        print(f"Updated {file} -> tool.poetry.version = {version}")
-
-    # 3) bump service pins inside prod group, fallback to root dependencies
+    # 2) bump service pins only inside [tool.poetry.group.prod.dependencies]
     for file, mapping in SERVICE_PINS.items():
-        if not file.exists():
-            continue
         txt = file.read_text()
         doc = tomlkit.parse(txt)
-        deps = _get_table(doc, ['tool', 'poetry', 'group', 'prod', 'dependencies'])
-        location = 'prod'
+        deps = _get_table(doc, [
+            'tool', 'poetry', 'group', 'prod', 'dependencies'
+        ])
         if deps is None:
-            deps = _get_table(doc, ['tool', 'poetry', 'dependencies'])
-            location = 'root'
-        if deps is None:
-            print(f"Skip {file}: no dependencies table found")
-            file.write_text(tomlkit.dumps(doc))
+            print(f"Skip {file}: prod dependencies table not found")
             continue
-        for pkg, template in mapping.items():
+        for dotted, template in mapping.items():
+            pkg = dotted.split('.')[-1]
             if pkg in deps:
                 val = template.format(v=version)
                 deps[pkg] = val
-                print(f"Pinned {file} ({location}) -> {pkg} = {val}")
+                print(f"Pinned {file} -> {pkg} = {val}")
             else:
-                print(f"Skip {file}: {pkg} not present in {location} dependencies")
+                print(f"Skip {file}: {pkg} not present in prod dependencies")
         file.write_text(tomlkit.dumps(doc))
 
 

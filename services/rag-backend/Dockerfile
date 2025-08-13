@@ -12,7 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
-# Copy only service lockfiles and install runtime deps (no local lib sources)
+# Copy service manifest + lockfile and install runtime deps using the lock
 WORKDIR /app/services/rag-backend
 COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock ./
 

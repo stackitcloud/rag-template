@@ -8,7 +8,7 @@ on:
       - 'services/**/pyproject.toml'
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -47,3 +47,51 @@ jobs:
             echo "Publishing $lib"
             (cd "$lib" && poetry version "${{ steps.ver.outputs.version }}" && poetry build && poetry publish -r testpypi)
           done
+
+  lock-services:
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(cat .version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry==2.1.3
+
+      - name: Refresh service lockfiles
+        run: |
+          set -e
+          for svc in services/rag-backend services/admin-backend services/document-extractor services/mcp-server; do
+            if [ -f "$svc/pyproject.toml" ]; then
+              echo "Locking $svc"
+              (cd "$svc" && poetry lock)
+            fi
+          done
+
+      - name: Commit updated lockfiles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          if git diff --quiet -- services/**/poetry.lock; then
+            echo "No lockfile changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add services/**/poetry.lock
+          git commit -m "chore(release): refresh service lockfiles for ${{ steps.ver.outputs.version }}"
+          git push

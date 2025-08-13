@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
   push:
   # Only trigger on merged PRs, not on every PR push
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - main
 
 permissions:
   contents: write

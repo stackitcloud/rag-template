@@ -81,7 +81,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $IMAGE_NAME --build-arg dev=1 -f services/${{ matrix.service }}/Dockerfile .
+          docker build -t $IMAGE_NAME -f services/${{ matrix.service }}/Dockerfile.dev .
 
       - name: Run linting
         run: |

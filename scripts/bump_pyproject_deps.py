@@ -5,6 +5,7 @@ import sys
 from typing import Dict, Any
 
 import tomlkit
+from tomlkit.items import Table
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -31,13 +32,21 @@ SERVICE_PINS = {
 #
 
 
+def _ensure_table(parent: Dict[str, Any], key: str) -> Table:
+    if key in parent:
+        val = parent[key]
+        if isinstance(val, Table):
+            return val
+        # If present but not a Table, replace with a Table (conservative fallback)
+    parent[key] = tomlkit.table()
+    return parent[key]  # type: ignore[return-value]
+
+
 def set_value(doc: tomlkit.TOMLDocument, dotted_path: str, value: Any):
     parts = dotted_path.split('.')
-    ref: Dict[str, Any] = doc
+    ref: Dict[str, Any] = doc  # tomlkit document behaves like a dict
     for p in parts[:-1]:
-        if p not in ref or not isinstance(ref[p], dict):
-            ref[p] = tomlkit.table()
-        ref = ref[p]
+        ref = _ensure_table(ref, p)
     ref[parts[-1]] = value
 
 
@@ -48,13 +57,16 @@ def bump(version: str):
         doc = tomlkit.parse(txt)
         set_value(doc, dotted, version)
         file.write_text(tomlkit.dumps(doc))
+        print(f"Updated {file} -> {dotted} = {version}")
 
     # 2) bump service pins
     for file, mapping in SERVICE_PINS.items():
         txt = file.read_text()
         doc = tomlkit.parse(txt)
         for dotted, template in mapping.items():
-            set_value(doc, dotted, template.format(v=version))
+            val = template.format(v=version)
+            set_value(doc, dotted, val)
+            print(f"Pinned {file} -> {dotted} = {val}")
         file.write_text(tomlkit.dumps(doc))
 
 

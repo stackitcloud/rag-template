@@ -12,10 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 def bump_chart(chart_path: pathlib.Path, app_version: str):
     data = yaml.safe_load(chart_path.read_text())
     data['appVersion'] = str(app_version)
-    cv = Version(str(data['version']))
-    # bump patch
-    bumped = Version(f"{cv.major}.{cv.minor}.{cv.micro + 1}")
-    data['version'] = str(bumped)
+    data['version'] = str(app_version)
     chart_path.write_text(yaml.safe_dump(data, sort_keys=False))
 
 

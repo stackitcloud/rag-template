@@ -3,7 +3,7 @@ import argparse
 import pathlib
 import re
 import sys
-from typing import Dict, Any, List, Optional
+from typing import Any, List, Optional
 
 import tomlkit
 from tomlkit.items import Table
@@ -56,13 +56,16 @@ def replace_version_line(text: str, new_version: str) -> str:
     return out + f"\n[tool.poetry]\nversion = \"{new_version}\"\n"
 
 
-def _get_table(doc: tomlkit.TOMLDocument, path: List[str]) -> Optional[Table]:
+def _get_table(doc: tomlkit.TOMLDocument, path: List[str]) -> Optional[Any]:
     ref: Any = doc
     for key in path:
-        if not isinstance(ref, (tomlkit.TOMLDocument, Table)) or key not in ref:
+        try:
+            if key not in ref:  # mapping-like check
+                return None
+            ref = ref[key]
+        except Exception:
             return None
-        ref = ref[key]
-    return ref if isinstance(ref, Table) else None
+    return ref
 
 
 def bump(version: str):
@@ -80,8 +83,9 @@ def bump(version: str):
         deps = _get_table(doc, [
             'tool', 'poetry', 'group', 'prod', 'dependencies'
         ])
-        if deps is None:
+        if deps is None or not hasattr(deps, '__contains__'):
             print(f"Skip {file}: prod dependencies table not found")
+            file.write_text(tomlkit.dumps(doc))
             continue
         for dotted, template in mapping.items():
             pkg = dotted.split('.')[-1]

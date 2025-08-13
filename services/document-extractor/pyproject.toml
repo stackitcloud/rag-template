@@ -52,6 +52,15 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.13"
 
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+[tool.poetry.group.prod.dependencies]
+extractor-api-lib = "==2.2.0"
+
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.2.0"
 pytest = "^8.0.1"

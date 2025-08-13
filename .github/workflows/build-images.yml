@@ -20,6 +20,16 @@ jobs:
         run: |
           echo "version=$(cat .version)" >> $GITHUB_OUTPUT
 
+      - name: Setup Node (for frontend context)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend deps (workspace cache for Docker layer cache)
+        working-directory: services/frontend
+        run: |
+          npm ci || true
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -38,19 +48,32 @@ jobs:
           docker buildx build --push -t ghcr.io/stackitcloud/rag-template/admin-backend:${VERSION} -f services/admin-backend/Dockerfile .
           docker buildx build --push -t ghcr.io/stackitcloud/rag-template/document-extractor:${VERSION} -f services/document-extractor/Dockerfile .
           docker buildx build --push -t ghcr.io/stackitcloud/rag-template/mcp-server:${VERSION} -f services/mcp-server/Dockerfile .
+          # Frontend apps (chat-app and admin-app)
+          docker buildx build --push -t ghcr.io/stackitcloud/rag-template/frontend:${VERSION} -f services/frontend/apps/chat-app/Dockerfile .
+          docker buildx build --push -t ghcr.io/stackitcloud/rag-template/admin-frontend:${VERSION} -f services/frontend/apps/admin-app/Dockerfile .
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Capture image digests
         run: |
           VERSION="${{ steps.ver.outputs.version }}"
           : > image-digests.json
-          for svc in rag-backend admin-backend document-extractor mcp-server; do
-            ref="ghcr.io/stackitcloud/rag-template/${svc}:${VERSION}"
-            digest=$(docker buildx imagetools inspect "$ref" --format '{{json .Manifest.Digest}}' | jq -r .)
+          for ref in \
+            ghcr.io/stackitcloud/rag-template/rag-backend:${VERSION} \
+            ghcr.io/stackitcloud/rag-template/admin-backend:${VERSION} \
+            ghcr.io/stackitcloud/rag-template/document-extractor:${VERSION} \
+            ghcr.io/stackitcloud/rag-template/mcp-server:${VERSION} \
+            ghcr.io/stackitcloud/rag-template/frontend:${VERSION} \
+            ghcr.io/stackitcloud/rag-template/admin-frontend:${VERSION}
+          do
+            svc=$(basename "${ref%:*}")
+            digest=$(docker buildx imagetools inspect "$ref" --format '{{json .Manifest.Digest}}' | jq -r . || true)
             tmp=$(mktemp)
             jq --arg s "$svc" --arg t "$VERSION" --arg d "$digest" \
                '.[$s] = {"tag": $t, "digest": $d}' \
-               image-digests.json > "$tmp"
-            mv "$tmp" image-digests.json
+               image-digests.json > "$tmp" || echo '{}' > image-digests.json
+            mv "$tmp" image-digests.json || true
           done
 
       - name: Upload digests

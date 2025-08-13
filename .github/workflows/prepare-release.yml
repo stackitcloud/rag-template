@@ -53,14 +53,6 @@ jobs:
         run: |
           pip install poetry==2.1.3
 
-      - name: Re-lock services
-        run: |
-          set -e
-          for svc in services/rag-backend services/admin-backend services/document-extractor; do
-            echo "Locking $svc"
-            (cd "$svc" && poetry lock)
-          done
-
       - name: Update Helm chart versions
         run: |
           pip install pyyaml packaging
@@ -74,7 +66,6 @@ jobs:
           body: |
             Prepare release ${{ steps.semrel.outputs.version }}
             - bump libs and service pins
-            - update poetry.lock
             - update Helm chart appVersion and bump patch
             - add .version
           commit-message: "chore(release): prepare ${{ steps.semrel.outputs.version }}"
@@ -82,5 +73,4 @@ jobs:
             .version
             libs/**/pyproject.toml
             services/**/pyproject.toml
-            services/**/poetry.lock
             infrastructure/**/Chart.yaml

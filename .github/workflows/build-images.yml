@@ -1,5 +1,7 @@
 name: build-images
 on:
+  workflow_dispatch: {}
+
   workflow_run:
     workflows: [publish-libs-on-merge]
     types: [completed]

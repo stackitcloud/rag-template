@@ -15,6 +15,10 @@ LIBS = [
     ROOT / 'libs' / 'rag-core-api' / 'pyproject.toml',
     ROOT / 'libs' / 'admin-api-lib' / 'pyproject.toml',
     ROOT / 'libs' / 'extractor-api-lib' / 'pyproject.toml',
+    ROOT / "services" / "admin-backend" / "pyproject.toml",
+    ROOT / "services" / "rag-backend" / "pyproject.toml",
+    ROOT / "services" / "document-extractor" / "pyproject.toml",
+    ROOT / "services" / "mcp-server" / "pyproject.toml",
 ]
 
 SERVICE_PINS = {

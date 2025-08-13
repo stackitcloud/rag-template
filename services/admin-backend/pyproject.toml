@@ -51,7 +51,7 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "admin_backend"
+name = "admin-backend"
 version = "2.2.0"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and getting particular documents or document lists."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]

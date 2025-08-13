@@ -74,11 +74,25 @@
 
 # image
 {{- define "adminBackend.fullImageName" -}}
-{{- printf "%s:%s" .Values.adminBackend.image.repository .Values.adminBackend.image.tag | trimSuffix ":" }}
+{{- $repo := .Values.adminBackend.image.repository -}}
+{{- $tag := default .Chart.AppVersion .Values.adminBackend.image.tag -}}
+{{- $digest := default "" .Values.adminBackend.image.digest -}}
+{{- if $digest -}}
+{{- printf "%s@%s" $repo $digest -}}
+{{- else -}}
+{{- printf "%s:%s" $repo $tag -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "extractor.fullImageName" -}}
-{{- printf "%s:%s" .Values.extractor.image.repository .Values.extractor.image.tag | trimSuffix ":" }}
+{{- $repo := .Values.extractor.image.repository -}}
+{{- $tag := default .Chart.AppVersion .Values.extractor.image.tag -}}
+{{- $digest := default "" .Values.extractor.image.digest -}}
+{{- if $digest -}}
+{{- printf "%s@%s" $repo $digest -}}
+{{- else -}}
+{{- printf "%s:%s" $repo $tag -}}
+{{- end -}}
 {{- end -}}
 
 # ingress

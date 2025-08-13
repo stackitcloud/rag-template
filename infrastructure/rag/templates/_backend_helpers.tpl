@@ -95,11 +95,25 @@
 {{- end -}}
 
 {{- define "backend.fullImageName" -}}
-{{- printf "%s:%s" .Values.backend.image.repository .Values.backend.image.tag | trimSuffix ":" | trimSuffix "-" }}
+{{- $repo := .Values.backend.image.repository -}}
+{{- $tag := default .Chart.AppVersion .Values.backend.image.tag -}}
+{{- $digest := default "" .Values.backend.image.digest -}}
+{{- if $digest -}}
+{{- printf "%s@%s" $repo $digest -}}
+{{- else -}}
+{{- printf "%s:%s" $repo $tag -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "mcp.fullImageName" -}}
-{{- printf "%s:%s" .Values.backend.mcp.image.repository .Values.backend.mcp.image.tag | trimSuffix ":" | trimSuffix "-" }}
+{{- $repo := .Values.backend.mcp.image.repository -}}
+{{- $tag := default .Chart.AppVersion .Values.backend.mcp.image.tag -}}
+{{- $digest := default "" .Values.backend.mcp.image.digest -}}
+{{- if $digest -}}
+{{- printf "%s@%s" $repo $digest -}}
+{{- else -}}
+{{- printf "%s:%s" $repo $tag -}}
+{{- end -}}
 {{- end -}}
 
 

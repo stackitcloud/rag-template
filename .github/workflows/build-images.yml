@@ -1,0 +1,60 @@
+name: build-images
+on:
+  workflow_run:
+    workflows: [publish-libs-on-merge]
+    types: [completed]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: |
+          echo "version=$(cat .version)" >> $GITHUB_OUTPUT
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push images
+        run: |
+          set -e
+          VERSION="${{ steps.ver.outputs.version }}"
+          docker buildx build --push -t ghcr.io/stackitcloud/rag-template/rag-backend:${VERSION} -f services/rag-backend/Dockerfile .
+          docker buildx build --push -t ghcr.io/stackitcloud/rag-template/admin-backend:${VERSION} -f services/admin-backend/Dockerfile .
+          docker buildx build --push -t ghcr.io/stackitcloud/rag-template/document-extractor:${VERSION} -f services/document-extractor/Dockerfile .
+          docker buildx build --push -t ghcr.io/stackitcloud/rag-template/mcp-server:${VERSION} -f services/mcp-server/Dockerfile .
+
+      - name: Capture image digests
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          : > image-digests.json
+          for svc in rag-backend admin-backend document-extractor mcp-server; do
+            ref="ghcr.io/stackitcloud/rag-template/${svc}:${VERSION}"
+            digest=$(docker buildx imagetools inspect "$ref" --format '{{json .Manifest.Digest}}' | jq -r .)
+            tmp=$(mktemp)
+            jq --arg s "$svc" --arg t "$VERSION" --arg d "$digest" \
+               '.[$s] = {"tag": $t, "digest": $d}' \
+               image-digests.json > "$tmp"
+            mv "$tmp" image-digests.json
+          done
+
+      - name: Upload digests
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-digests
+          path: image-digests.json

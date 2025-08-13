@@ -1,0 +1,45 @@
+name: publish-libs-on-merge
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.version'
+      - 'libs/**'
+      - 'services/**/pyproject.toml'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(cat .version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry==2.1.3
+
+      - name: Build and publish libs to PyPI
+        env:
+          POETRY_HTTP_BASIC_PYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          set -e
+          for lib in libs/*; do
+            [ -d "$lib" ] || continue
+            echo "Publishing $lib"
+            (cd "$lib" && poetry version "${{ steps.ver.outputs.version }}" && poetry build && poetry publish)
+          done

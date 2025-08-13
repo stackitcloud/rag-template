@@ -70,7 +70,8 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "latest"
+      tag: "" # when empty, defaults to .Chart.AppVersion
+      digest: "" # optional: set to sha256:... to pin image; takes precedence over tag
 
   name: backend
   replicaCount: 1
@@ -78,7 +79,8 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "" # when empty, defaults to .Chart.AppVersion
+    digest: "" # optional: set to sha256:... to pin image; takes precedence over tag
 
   command:
   - "poetry"
@@ -216,7 +218,8 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "" # when empty, defaults to .Chart.AppVersion
+    digest: "" # optional: set to sha256:... to pin image; takes precedence over tag
 
   service:
     type: ClusterIP
@@ -251,7 +254,8 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "" # when empty, defaults to .Chart.AppVersion
+    digest: "" # optional: set to sha256:... to pin image; takes precedence over tag
 
   command:
   - "poetry"
@@ -331,7 +335,8 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "" # when empty, defaults to .Chart.AppVersion
+    digest: "" # optional: set to sha256:... to pin image; takes precedence over tag
 
   command:
   - "poetry"
@@ -379,7 +384,8 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "" # when empty, defaults to .Chart.AppVersion
+    digest: "" # optional: set to sha256:... to pin image; takes precedence over tag
 
   service:
     type: ClusterIP

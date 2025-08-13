@@ -101,7 +101,9 @@ spec:
           - secretRef:
               name: {{ template "secret.s3Name" . }}
         env:
+          {{- if .Values.shared.debug.backend.enabled }}
           - name: PYTHONPATH
             value: {{ .Values.extractor.pythonPathEnv.PYTHONPATH }}
+          {{- end }}
           - name: NLTK_DATA
             value: /home/nonroot/nltk_data

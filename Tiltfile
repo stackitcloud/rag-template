@@ -14,32 +14,33 @@ core_library_context = "./libs"
 
 
 def create_linter_command(folder_name, name):
-    # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
-    build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
+    # Build with Dockerfile.dev for services, Dockerfile for libs
+    dockerfile = folder_name + ("/Dockerfile" if folder_name == "./libs" else "/Dockerfile.dev")
+    # Only libs use TEST build arg; services use no build args
+    build_args = " --build-arg TEST=1" if folder_name == "./libs" else ""
     return (
         "docker build -t "
         + name
-        + " --build-arg "
-        + build_arg
+        + build_args
         + " -f "
-        + folder_name
-        + "/Dockerfile .;docker run --rm --entrypoint make "
+        + dockerfile
+        + " .;docker run --rm --entrypoint make "
         + name
         + " lint"
     )
 
 
 def create_test_command(folder_name, name):
-    # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
-    build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
+    # Build with Dockerfile.dev for services, Dockerfile for libs
+    dockerfile = folder_name + ("/Dockerfile" if folder_name == "./libs" else "/Dockerfile.dev")
+    build_args = " --build-arg TEST=1" if folder_name == "./libs" else ""
     return (
         "docker build -t "
         + name
-        + " --build-arg "
-        + build_arg
+        + build_args
         + " -f "
-        + folder_name
-        + "/Dockerfile .;docker run --rm --entrypoint make "
+        + dockerfile
+        + " .;docker run --rm --entrypoint make "
         + name
         + " test"
     )
@@ -154,15 +155,12 @@ rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
 docker_build(
     rag_api_full_image_name,
     ".",
-    build_args={
-        "dev": "1" if backend_debug else "0",
-    },
     live_update=[
         sync(backend_context, "/app/services/rag-backend"),
         sync(core_library_context+"/rag-core-api", "/app/libs/rag-core-api"),
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
-    dockerfile=backend_context + "/Dockerfile",
+    dockerfile=backend_context + "/Dockerfile.dev",
     ignore=[
         "infrastructure/",
         "libs/admin-api-lib/",
@@ -204,13 +202,10 @@ mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)
 docker_build(
     mcp_full_image_name,
     ".",
-    build_args={
-        "dev": "1" if backend_debug else "0",
-    },
     live_update=[
         sync(mcp_context, "/app/services/mcp-server"),
     ],
-    dockerfile=mcp_context + "/Dockerfile",
+    dockerfile=mcp_context + "/Dockerfile.dev",
     ignore=[
         "infrastructure/",
         "libs/",
@@ -244,15 +239,12 @@ admin_api_full_image_name = "%s/%s" % (registry, admin_api_image_name)
 docker_build(
     admin_api_full_image_name,
     ".",
-    build_args={
-        "dev": "1" if backend_debug else "0",
-    },
     live_update=[
         sync(admin_backend_context, "/app/services/admin-backend"),
         sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
         sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
-    dockerfile=admin_backend_context + "/Dockerfile",
+    dockerfile=admin_backend_context + "/Dockerfile.dev",
     ignore=[
         "infrastructure/",
         "libs/rag-core-api/",
@@ -297,14 +289,11 @@ document_extractor_full_image_name = "%s/%s" % (registry, document_extractor_ima
 docker_build(
     document_extractor_full_image_name,
     ".",
-    build_args={
-        "dev": "1" if backend_debug else "0",
-    },
     live_update=[
         sync(extractor_context, "/app/services/document-extractor"),
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
-    dockerfile=extractor_context + "/Dockerfile",
+    dockerfile=extractor_context + "/Dockerfile.dev",
     ignore=[
         "infrastructure/",
         "libs/rag-core-api/",

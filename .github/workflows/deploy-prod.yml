@@ -1,0 +1,90 @@
+name: deploy-prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "App version to deploy (e.g. 2.2.0)"
+        required: true
+        type: string
+      release_name:
+        description: "Helm release name"
+        required: true
+        default: "rag"
+        type: string
+      namespace:
+        description: "Kubernetes namespace"
+        required: true
+        default: "rag"
+        type: string
+      chart_path:
+        description: "Path to Helm chart"
+        required: true
+        default: "infrastructure/rag"
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set kubeconfig
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          test -n "$KUBE_CONFIG" || { echo "KUBE_CONFIG secret is required"; exit 1; }
+          mkdir -p "$HOME/.kube"
+          echo "$KUBE_CONFIG" > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Login to GHCR (for image inspect)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx (for imagetools)
+        uses: docker/setup-buildx-action@v3
+
+      - name: Resolve image digests
+        id: digests
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          backend_ref="ghcr.io/stackitcloud/rag-template/rag-backend:${VERSION}"
+          admin_ref="ghcr.io/stackitcloud/rag-template/admin-backend:${VERSION}"
+          extractor_ref="ghcr.io/stackitcloud/rag-template/document-extractor:${VERSION}"
+          mcp_ref="ghcr.io/stackitcloud/rag-template/mcp-server:${VERSION}"
+          frontend_ref="ghcr.io/stackitcloud/rag-template/frontend:${VERSION}"
+
+          echo "backend=$(docker buildx imagetools inspect "$backend_ref" --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+          echo "admin=$(docker buildx imagetools inspect "$admin_ref" --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+          echo "extractor=$(docker buildx imagetools inspect "$extractor_ref" --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+          echo "mcp=$(docker buildx imagetools inspect "$mcp_ref" --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+          echo "frontend=$(docker buildx imagetools inspect "$frontend_ref" --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+
+      - name: Helm upgrade
+        env:
+          RELEASE: ${{ inputs.release_name }}
+          NAMESPACE: ${{ inputs.namespace }}
+          CHART_PATH: ${{ inputs.chart_path }}
+        run: |
+          set -euo pipefail
+          helm upgrade --install "$RELEASE" "$CHART_PATH" \
+            --namespace "$NAMESPACE" --create-namespace \
+            --set backend.image.digest='${{ steps.digests.outputs.backend }}' \
+            --set adminBackend.image.digest='${{ steps.digests.outputs.admin }}' \
+            --set extractor.image.digest='${{ steps.digests.outputs.extractor }}' \
+            --set backend.mcp.image.digest='${{ steps.digests.outputs.mcp }}' \
+            --set frontend.image.digest='${{ steps.digests.outputs.frontend }}'

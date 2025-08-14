@@ -118,7 +118,7 @@ class StackitEmbedder(Embedder, Embeddings):
                             self._settings.retry_max_delay,
                         )
                     )
-                    # Fixed jitter independent of wait to avoid thundering herd (50–250ms)
+                    # Jitter to avoid too many parallel requests at the same time
                     jitter = random.uniform(self.JITTER_MIN_SECONDS, self.JITTER_MAX_SECONDS)
                     total_wait = min(wait + jitter, self._settings.retry_max_delay)
 

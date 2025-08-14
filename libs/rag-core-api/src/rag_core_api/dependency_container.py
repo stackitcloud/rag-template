@@ -64,7 +64,7 @@ from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
-from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
+from rag_core_lib.impl.tracers.langfuse_traced_runnable import LangfuseTracedRunnable
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 
@@ -218,7 +218,7 @@ class DependencyContainer(DeclarativeContainer):
 
     # wrap graph in tracer
     traced_chat_graph = Singleton(
-        LangfuseTracedGraph,
+        LangfuseTracedRunnable,
         inner_chain=chat_graph,
         settings=langfuse_settings,
     )

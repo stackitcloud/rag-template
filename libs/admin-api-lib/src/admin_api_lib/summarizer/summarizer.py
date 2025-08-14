@@ -5,13 +5,13 @@ from typing import Optional
 
 from langchain_core.runnables import RunnableConfig
 
-from rag_core_lib.chains.async_chain import AsyncChain
+from rag_core_lib.runnables.async_runnable import AsyncRunnable
 
 SummarizerInput = str
 SummarizerOutput = str
 
 
-class Summarizer(AsyncChain[SummarizerInput, SummarizerOutput], ABC):
+class Summarizer(AsyncRunnable[SummarizerInput, SummarizerOutput], ABC):
     """Baseclass for summarizers."""
 
     @abstractmethod

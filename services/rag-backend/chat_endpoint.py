@@ -4,13 +4,13 @@ from langchain_core.runnables import RunnableConfig
 from rag_core_api.api_endpoints.chat import Chat
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
-from rag_core_lib.tracers.traced_chain import TracedGraph
+from rag_core_lib.tracers.traced_runnable import TracedRunnable
 
 logger = logging.getLogger(__name__)
 
 
 class UseCaseChat(Chat):
-    def __init__(self, chat_graph: TracedGraph):
+    def __init__(self, chat_graph: TracedRunnable):
         self._chat_graph = chat_graph
 
     async def achat(

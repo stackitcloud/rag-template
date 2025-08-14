@@ -7,10 +7,10 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.runnables.utils import Input, Output
 from langgraph.graph import StateGraph
 
-from rag_core_lib.chains.async_chain import AsyncChain
+from rag_core_lib.runnables.async_runnable import AsyncRunnable
 
 
-class GraphBase(AsyncChain[Input, Output], ABC):
+class GraphBase(AsyncRunnable[Input, Output], ABC):
     """
     Base class for a langgraph graph.
 

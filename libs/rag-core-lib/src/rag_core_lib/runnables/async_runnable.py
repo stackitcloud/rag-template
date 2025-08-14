@@ -7,7 +7,7 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.runnables.utils import Input, Output
 
 
-class AsyncChain(Runnable[Input, Output], ABC):
+class AsyncRunnable(Runnable[Input, Output], ABC):
     """Base class for asynchronous chains."""
 
     @abstractmethod

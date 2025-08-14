@@ -76,7 +76,8 @@ class StackitEmbedder(Embedder, Embeddings):
                     raise
 
                 # Calculate exponential backoff delay
-                delay = min(self._settings.retry_base_delay * (2**attempt), self._settings.retry_max_delay)
+                # Calculate exponential backoff delay (cap exponent to prevent overflow)
+                delay = min(self._settings.retry_base_delay * (2**min(attempt, 10)), self._settings.retry_max_delay)
 
                 logger.warning(
                     "Embedding attempt %d/%d failed: %s. Retrying in %.2f seconds...",

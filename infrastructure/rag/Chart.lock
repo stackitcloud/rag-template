@@ -4,7 +4,7 @@ dependencies:
   version: 1.3.4
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
-  version: 1.15.0
+  version: 1.15.1
 - name: minio
   repository: https://charts.bitnami.com/bitnami
   version: 15.0.7
@@ -13,6 +13,6 @@ dependencies:
   version: 0.48.0
 - name: ollama
   repository: https://otwld.github.io/ollama-helm/
-  version: 1.24.0
-digest: sha256:30cc964388864bd738eb0668367576dbad45eb9d6a885cdc48ef7c07c9692aa0
-generated: "2025-08-04T09:23:39.885193+02:00"
+  version: 1.25.0
+digest: sha256:6d5a1f94963aa5661a841b4093ef849b60f5352221316a7be55da5ccff3e2e57
+generated: "2025-08-10T01:48:39.455762378Z"

@@ -24,3 +24,5 @@ class KeyValueSettings(BaseSettings):
 
     host: str = Field()
     port: int = Field()
+    username: str = Field()
+    password: str = Field()

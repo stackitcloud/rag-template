@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY ./services/frontend/package*.json ./
 
-RUN npm install
+RUN npm install --verbose
 
 COPY ./services/frontend .
 

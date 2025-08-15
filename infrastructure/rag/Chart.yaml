@@ -20,11 +20,6 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: "15.0.7"
   condition: features.minio.enabled
-- name: keydb
-  alias: keydb
-  repository: https://enapter.github.io/charts/
-  version: "0.48.0"
-  condition: features.keydb.enabled
 - name: ollama
   alias: ollama
   version: 1.24.0

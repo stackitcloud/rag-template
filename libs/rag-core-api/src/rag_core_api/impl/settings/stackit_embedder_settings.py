@@ -36,4 +36,4 @@ class StackitEmbedderSettings(BaseSettings):
     api_key: str = Field(default="")
     max_retries: int = Field(default=10, description="Maximum number of retry attempts")
     retry_base_delay: float = Field(default=1.0, description="Base delay in seconds for exponential backoff")
-    retry_max_delay: float = Field(default=60.0, description="Maximum delay in seconds between retries")
+    retry_max_delay: float = Field(default=600.0, description="Maximum delay in seconds between retries")

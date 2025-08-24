@@ -1,10 +1,10 @@
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: 1.3.4
+  version: 1.4.0
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
-  version: 1.15.0
+  version: 1.15.3
 - name: minio
   repository: https://charts.bitnami.com/bitnami
   version: 15.0.7
@@ -13,6 +13,6 @@ dependencies:
   version: 0.48.0
 - name: ollama
   repository: https://otwld.github.io/ollama-helm/
-  version: 1.24.0
-digest: sha256:30cc964388864bd738eb0668367576dbad45eb9d6a885cdc48ef7c07c9692aa0
-generated: "2025-08-04T09:23:39.885193+02:00"
+  version: 1.27.0
+digest: sha256:1f120b4dd22c5d0c669e5a84224092ff78240e0ba46ed4cc40fafdd8b53dd998
+generated: "2025-08-24T01:41:06.004458478Z"

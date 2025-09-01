@@ -14,7 +14,7 @@ from rag_core_lib.impl.utils.utils import headers_from_exception, status_code_fr
 
 @dataclass
 class RetrySettings:
-    max_retries: int = 5          # total retries (not counting the first attempt)
+    max_retries: int = 5          # total retries (not counting the first attempt, should be > 0)
     retry_base_delay: float = 0.5   # seconds
     retry_max_delay: float = 600.0   # cap for any single wait
     backoff_factor: float = 2.0     # exponential factor

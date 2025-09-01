@@ -9,8 +9,6 @@ features:
     enabled: true
   frontend:
     enabled: true
-  keydb:
-    enabled: true
   mcp:
     enabled: true
 
@@ -70,7 +68,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "latest"
+      tag: "v2.1.0"
 
   name: backend
   replicaCount: 1
@@ -78,7 +76,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.1.0"
 
   command:
   - "poetry"
@@ -192,6 +190,9 @@ backend:
     stackitEmbedder:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
       STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+      STACKIT_EMBEDDER_MAX_RETRIES: 10
+      STACKIT_EMBEDDER_RETRY_BASE_DELAY: 1.0
+      STACKIT_EMBEDDER_RETRY_MAX_DELAY: 600.0
     ollama:
       OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
       OLLAMA_BASE_URL: "http://rag-ollama:11434"
@@ -216,7 +217,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.1.0"
 
   service:
     type: ClusterIP
@@ -251,7 +252,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.1.0"
 
   command:
   - "poetry"
@@ -321,7 +322,9 @@ adminBackend:
       CHUNKER_OVERLAP: 300
     keyValueStore:
       USECASE_KEYVALUE_PORT: 6379
-      USECASE_KEYVALUE_HOST: "rag-keydb"
+      USECASE_KEYVALUE_HOST: "rag-redis-primary"
+      USECASE_KEYVALUE_USERNAME: "default"
+      USECASE_KEYVALUE_PASSWORD: "MOqTsoa22R"
     sourceUploader:
       SOURCE_UPLOADER_TIMEOUT: 3600
 
@@ -331,7 +334,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.1.0"
 
   command:
   - "poetry"
@@ -379,7 +382,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.1.0"
 
   service:
     type: ClusterIP
@@ -526,12 +529,12 @@ langfuse:
 
   # Redis Configuration (external KeyDB)
   redis:
-    deploy: false
-    host: "rag-keydb"
+    deploy: true
+    host: "rag-redis-primary"
     port: 6379
     auth:
       username: "default"
-      password: ""
+      password: "MOqTsoa22R"
 
   # ClickHouse Configuration (external ClickHouse)
   clickhouse:
@@ -617,8 +620,3 @@ ollama:
 qdrant:
   image:
     tag: v1.14.1
-
-keydb:
-  multiMaster: "no"
-  activeReplicas: "no"
-  nodes: 1

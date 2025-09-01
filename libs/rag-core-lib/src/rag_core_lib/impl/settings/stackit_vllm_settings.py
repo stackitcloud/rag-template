@@ -1,5 +1,6 @@
 """Module contains settings regarding the STACKIT vLLM."""
 
+from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -34,3 +35,5 @@ class StackitVllmSettings(BaseSettings):
 
     top_p: float = Field(default=0.1, title="LLM Top P")
     temperature: float = Field(default=0, title="LLM Temperature")
+    # Always include response headers; disallow overriding via env by constraining to Literal[True]
+    include_response_headers: Literal[True] = Field(default=True, title="Include Response Headers")

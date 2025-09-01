@@ -1,14 +1,25 @@
 """Module that contains the StackitEmbedder class."""
 
+import logging
+
 from langchain_core.embeddings import Embeddings
-from openai import OpenAI
+from openai import OpenAI, APIError, APITimeoutError, RateLimitError, APIConnectionError
 
 from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
+from rag_core_lib.impl.utils.retry_decorator import RetrySettings, retry_with_backoff
+
+
+logger = logging.getLogger(__name__)
 
 
 class StackitEmbedder(Embedder, Embeddings):
     """A class that represents any Langchain provided Embedder."""
+
+    ATTEMPT_CAP = 10
+    BACKOFF_FACTOR = 2
+    JITTER_MIN_SECONDS = 0.05
+    JITTER_MAX_SECONDS = 0.25
 
     def __init__(self, stackit_embedder_settings: StackitEmbedderSettings):
         """
@@ -36,24 +47,36 @@ class StackitEmbedder(Embedder, Embeddings):
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """
-        Embed a list of documents into numerical vectors.
+        Embed a batch of texts with exponential backoff retry logic. Batching is handled by the vector
+        database client.
 
         Parameters
         ----------
-        texts : list of str
-            A list of documents to be embedded.
+        texts : list[str]
+            A batch of texts to be embedded.
 
         Returns
         -------
         list[list[float]]
-            A list where each element is a list of floats representing the embedded vector of a document.
-        """
-        responses = self._client.embeddings.create(
-            input=texts,
-            model=self._settings.model,
-        )
+            A list of embeddings for the batch.
 
-        return [data.embedding for data in responses.data]
+        Raises
+        ------
+        Exception
+            If all retry attempts fail.
+        """
+        if not texts:
+            return []
+
+        @self._retry_wrapper()
+        def _call(batch: list[str]) -> list[list[float]]:
+            response = self._client.embeddings.with_raw_response.create(
+                input=batch,
+                model=self._settings.model,
+            )
+            return [data.embedding for data in response.parse().data]
+
+        return _call(texts)
 
     def embed_query(self, text: str) -> list[float]:
         """
@@ -69,4 +92,26 @@ class StackitEmbedder(Embedder, Embeddings):
         list[float]
             The embedded representation of the query text.
         """
-        return self.embed_documents([text])[0]
+        embeddings_list = self.embed_documents([text])
+        if embeddings_list:
+            embeddings = embeddings_list[0]
+            return embeddings if embeddings else []
+        return embeddings_list
+
+    def _retry_wrapper(self):
+        """Build a retry decorator *with runtime settings* from self._settings."""
+        return retry_with_backoff(
+            settings=RetrySettings(
+                max_retries=self._settings.max_retries,
+                retry_base_delay=self._settings.retry_base_delay,
+                retry_max_delay=self._settings.retry_max_delay,
+                backoff_factor=self.BACKOFF_FACTOR,
+                attempt_cap=self.ATTEMPT_CAP,
+                jitter_min=self.JITTER_MIN_SECONDS,
+                jitter_max=self.JITTER_MAX_SECONDS,
+            ),
+            exceptions=(APIError, RateLimitError, APITimeoutError, APIConnectionError),
+            rate_limit_exceptions=(RateLimitError,),
+            logger=logger,
+        )
+

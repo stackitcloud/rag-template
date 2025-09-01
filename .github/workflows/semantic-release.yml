@@ -101,7 +101,7 @@ jobs:
             build-args: "dev=0"
           - name: mcp-server
             dockerfile: services/mcp-server/Dockerfile
-            image: rag-mcp
+            image: mcp-server
             build-args: "dev=0"
           - name: frontend
             dockerfile: services/frontend/apps/chat-app/Dockerfile

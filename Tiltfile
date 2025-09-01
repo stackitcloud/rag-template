@@ -189,7 +189,7 @@ local_resource(
 ################################## build mcp image and do live update ##################################################
 # NOTE: full image names should match the one in the helm chart values.yaml!
 registry = "ghcr.io/stackitcloud/rag-template"
-mcp_image_name = "rag-mcp"
+mcp_image_name = "mcp-server"
 
 mcp_context = "./services/mcp-server"
 mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)

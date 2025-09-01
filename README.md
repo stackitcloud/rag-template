@@ -7,7 +7,7 @@ Welcome to the STACKIT RAG Template! This is a basic example of how to use the R
 
 ## Features 🚀
 
-**Document Management**: Supports PDFs, DOCX, PPTX, XML, and Confluence documents.
+**Document Management**: Supports PDFs, DOCX, PPTX, XML, EPUB documents and websource via confluence as well as sitemaps.
 
 **AI Integration**: Multiple LLM and embedder providers for flexibility.
 
@@ -38,7 +38,7 @@ The template supports multiple LLM (Large Language Model) providers, such as STA
 
 
 ## 1. Getting Started
-A [`Tiltfile`](./Tiltfile) is provided to get you started :rocket:. If Tilt is new for you, and you want to learn more about it, please take a look at the [Tilt guides](https://docs.tilt.dev/tiltfile_authoring).
+A [`Tiltfile`](./Tiltfile) is provided to get you started :rocket:. If Tilt is new for you, and you want to learn more about it, please take a look at the [Tilt guides](https://docs.tilt.dev/tiltfile_authoring.html).
 
 ### 1.1 Components
 

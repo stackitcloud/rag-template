@@ -6,10 +6,10 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langfuse.langchain import CallbackHandler
 
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
-from rag_core_lib.tracers.traced_chain import TracedGraph
+from rag_core_lib.tracers.traced_runnable import TracedRunnable
 
 
-class LangfuseTracedGraph(TracedGraph):
+class LangfuseTracedRunnable(TracedRunnable):
     """A class to trace the execution of a Runnable using Langfuse.
 
     This class wraps an inner Runnable and adds tracing capabilities using the Langfuse tracer.

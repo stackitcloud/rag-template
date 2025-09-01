@@ -92,8 +92,11 @@ class StackitEmbedder(Embedder, Embeddings):
         list[float]
             The embedded representation of the query text.
         """
-        embeddings = self.embed_documents([text])[0]
-        return embeddings if embeddings else []
+        embeddings_list = self.embed_documents([text])
+        if embeddings_list:
+            embeddings = embeddings_list[0]
+            return embeddings if embeddings else []
+        return []
 
     def _retry_wrapper(self):
         """Build a retry decorator *with runtime settings* from self._settings."""

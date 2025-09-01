@@ -96,7 +96,7 @@ class StackitEmbedder(Embedder, Embeddings):
         if embeddings_list:
             embeddings = embeddings_list[0]
             return embeddings if embeddings else []
-        return []
+        return embeddings_list
 
     def _retry_wrapper(self):
         """Build a retry decorator *with runtime settings* from self._settings."""

@@ -18,6 +18,7 @@ It consists of the following python packages:
   - [3.3 Replaceable parts](#33-replaceable-parts)
 - [`4. RAG Core lib`](#4-rag-core-lib)
   - [4.1 Requirements](#41-requirements)
+  - [4.2 Retry decorator (exponential backoff)](#42-retry-decorator-exponential-backoff)
 
 With the exception of the `RAG Core lib` all of these packages contain an API definition and are easy to adjust for your specific use case.
 Each of the packages defines the replaceable parts([1.3 Replaceable Parts](#13-replaceable-parts), [2.3 Replaceable Parts](#23-replaceable-parts), [3.3 Replaceable Parts](#33-replaceable-parts)), expected types and offer a brief description.
@@ -262,3 +263,53 @@ In addition to python libraries the following system packages are required:
 build-essential
 make
 ```
+
+### 4.2 Retry decorator (exponential backoff)
+
+The `rag-core-lib` provides a reusable retry decorator with exponential backoff and rate‑limit awareness for both sync and async functions.
+
+- Module: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
+- Settings: `rag_core_lib.impl.settings.retry_decorator_settings.RetryDecoratorSettings`
+- Works with: synchronous and asynchronous callables
+- Rate-limit aware: optionally inspects HTTP status 429 and headers like `x-ratelimit-reset-requests` / `x-ratelimit-reset-tokens`
+
+Usage example
+
+```python
+from rag_core_lib.impl.utils.retry_decorator import retry_with_backoff
+from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
+
+# Configure via code (env vars also supported, see below)
+settings = RetryDecoratorSettings(
+    max_retries=3,
+    retry_base_delay=0.2,
+)
+
+@retry_with_backoff(settings=settings)
+def fetch_something():
+    return "ok"
+
+@retry_with_backoff(settings=settings)
+async def fetch_async_something():
+    return "ok"
+```
+
+Configuration
+
+- Environment variables (prefix `RETRY_DECORATOR_`):
+  - `RETRY_DECORATOR_MAX_RETRIES` (default: 5)
+  - `RETRY_DECORATOR_RETRY_BASE_DELAY` (default: 0.5)
+  - `RETRY_DECORATOR_RETRY_MAX_DELAY` (default: 600)
+  - `RETRY_DECORATOR_BACKOFF_FACTOR` (default: 2)
+  - `RETRY_DECORATOR_ATTEMPT_CAP` (default: 6)
+  - `RETRY_DECORATOR_JITTER_MIN` (default: 0.05)
+  - `RETRY_DECORATOR_JITTER_MAX` (default: 0.25)
+
+- Helm chart (shared values): set the same keys under `shared.envs.retryDecorator` in [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml) to apply cluster‑wide defaults for backend/admin services.
+
+Advanced
+
+- Customize which exceptions trigger retries via `exceptions` and `rate_limit_exceptions` parameters of `retry_with_backoff()`.
+- Header‑based wait: When rate‑limited, the decorator will honor reset headers if present and add jitter.
+
+For more examples, see tests in [./rag-core-lib/tests/retry_decorator_test.py](./rag-core-lib/tests/retry_decorator_test.py).

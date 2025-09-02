@@ -138,14 +138,9 @@ class DependencyContainer(DeclarativeContainer):
         chunker=summary_text_splitter,
         semaphore=Singleton(AsyncThreadsafeSemaphore, summarizer_settings.maximum_concurrreny),
     )
-    traced_summarizer = Singleton(
-        LangfuseTracedRunnable,
-        inner_chain=summarizer,
-        settings=langfuse_settings,
-    )
 
     summary_enhancer = List(
-        Singleton(PageSummaryEnhancer, traced_summarizer, chunker_settings),
+        Singleton(PageSummaryEnhancer, summarizer, chunker_settings),
     )
     untraced_information_enhancer = Singleton(
         GeneralEnhancer,

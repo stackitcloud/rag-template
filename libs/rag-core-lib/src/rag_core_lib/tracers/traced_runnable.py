@@ -66,11 +66,9 @@ class TracedRunnable(AsyncRunnable[RunnableInput, RunnableOutput], ABC):
         config = ensure_config(config)
         session_id = self._get_session_id(config)
         config_with_tracing = self._add_tracing_callback(config)
-        with self.langfuse_client.start_as_current_span(name=self._inner_chain.__class__.__name__) as span:
-            span.update_trace(session_id=session_id, input=chain_input)
-            output = await self._inner_chain.ainvoke(chain_input, config=config_with_tracing)
-            span.update_trace(output=output)
-            return output
+        with self.langfuse_client.start_as_current_span(name="traced_runnable") as span:
+            span.update_trace(session_id=session_id)
+            return await self._inner_chain.ainvoke(chain_input, config=config_with_tracing)
 
     @abstractmethod
     def _add_tracing_callback(self, config: Optional[RunnableConfig]) -> RunnableConfig: ...

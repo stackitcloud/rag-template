@@ -465,14 +465,14 @@ langfuse:
     web:
       image:
         repository: langfuse/langfuse
-        tag: "3.102.0"
+        tag: "3.88.1"
         pullPolicy: Always
 
     # Worker deployment configuration
     worker:
       image:
         repository: langfuse/langfuse-worker
-        tag: "3.102.0"
+        tag: "3.88.1"
         pullPolicy: Always
       port: 3030
 
@@ -564,7 +564,7 @@ langfuse:
           memory: "1Gi"
 
   # S3/MinIO Configuration (external MinIO)
-  s3:
+  minio:
     deploy: false
     bucket: "langfuse"
     region: "auto"

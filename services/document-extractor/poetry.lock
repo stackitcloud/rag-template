@@ -1054,7 +1054,7 @@ fastapi = "^0.116.0"
 fasttext = {git = "https://github.com/cfculhane/fastText", rev = "4a4451337ae6b476b9c584b97776c8c3eb4b27c5"}
 html5lib = "^1.1"
 langchain-community = "^0.3.23"
-langchain-core = "0.3.72"
+langchain-core = "0.3.74"
 lxml = "^5.4.0"
 markdownify = "^1.1.0"
 numpy = "^2.2.5"
@@ -1072,7 +1072,7 @@ python-multipart = "^0.0.20"
 pyyaml = "^6.0.2"
 requests-oauthlib = "^2.0.0"
 tabulate = "^0.9.0"
-unstructured = {version = "0.18.11", extras = ["docx", "pptx"]}
+unstructured = {version = "0.18.13", extras = ["docx", "pptx"]}
 uvicorn = "^0.35.0"
 wheel = "^0.45.1"
 
@@ -2008,14 +2008,14 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<10"
 
 [[package]]
 name = "langchain-core"
-version = "0.3.72"
+version = "0.3.74"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langchain_core-0.3.72-py3-none-any.whl", hash = "sha256:9fa15d390600eb6b6544397a7aa84be9564939b6adf7a2b091179ea30405b240"},
-    {file = "langchain_core-0.3.72.tar.gz", hash = "sha256:4de3828909b3d7910c313242ab07b241294650f5cb6eac17738dd3638b1cd7de"},
+    {file = "langchain_core-0.3.74-py3-none-any.whl", hash = "sha256:088338b5bc2f6a66892f9afc777992c24ee3188f41cbc603d09181e34a228ce7"},
+    {file = "langchain_core-0.3.74.tar.gz", hash = "sha256:ff604441aeade942fbcc0a3860a592daba7671345230c2078ba2eb5f82b6ba76"},
 ]
 
 [package.dependencies]
@@ -4412,14 +4412,14 @@ files = [
 
 [[package]]
 name = "unstructured"
-version = "0.18.11"
+version = "0.18.13"
 description = "A library that prepares raw documents for downstream ML tasks."
 optional = false
 python-versions = ">=3.10.0"
 groups = ["main"]
 files = [
-    {file = "unstructured-0.18.11-py3-none-any.whl", hash = "sha256:85aec87032177b826ec278e57e3f74ef3a2aa7e887ab137875e572293cf9659b"},
-    {file = "unstructured-0.18.11.tar.gz", hash = "sha256:cf177d2a212a8bcd3a5a6750d8400c079764d30dabdb6605e7ba0a65679e00a0"},
+    {file = "unstructured-0.18.13-py3-none-any.whl", hash = "sha256:cd4e3a9fe456b9e305e1e9669a444498b2b18f1f13d07a449816ff5849ddd998"},
+    {file = "unstructured-0.18.13.tar.gz", hash = "sha256:3ca6034d8647fef5c26b39bacae3d90a5f530f520bfd80f0e964bd5e084a0d50"},
 ]
 
 [package.dependencies]

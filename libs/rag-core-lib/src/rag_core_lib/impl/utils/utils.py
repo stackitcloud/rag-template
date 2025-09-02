@@ -25,6 +25,11 @@ def _to_seconds(v):
         return None
 
 
+def _normalize_dict_items(items: Iterable[Any]) -> dict[str, str]:
+    """Normalize dict items by converting keys and values to a consistent format."""
+    return {str(k).lower(): str(v).lower() for k, v in items if k is not None and v is not None}
+
+
 def _normalize_headers(raw_headers: Any) -> dict[str, str]:
     """Return a lowercased dict[str, str] from httpx.Headers or mapping-like objects."""
     if not raw_headers:
@@ -39,13 +44,8 @@ def _normalize_headers(raw_headers: Any) -> dict[str, str]:
             items = list(dict(raw_headers).items())
         except Exception:
             items = []
-    out: dict[str, str] = {}
-    for k, v in items:
-        try:
-            out[str(k).lower()] = str(v)
-        except Exception:
-            continue
-    return out
+
+    return _normalize_dict_items(items)
 
 
 def status_code_from_exception(exc: BaseException) -> Optional[int]:

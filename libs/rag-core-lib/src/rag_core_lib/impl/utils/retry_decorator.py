@@ -44,21 +44,25 @@ class _RetryEngine:
 
     def decorate(self, fn: Callable[P, R]) -> Callable[P, R]:
         if inspect.iscoroutinefunction(fn):
+            return self._decorate_async(fn)
+        return self._decorate_sync(fn)
 
-            @wraps(fn)
-            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-                for attempt in range(self.cfg.max_retries + 1):
-                    try:
-                        return await fn(*args, **kwargs)
-                    except self.exceptions as exc:  # type: ignore[misc]
-                        wait_time = self._calculate_wait_time(attempt, exc)
-                        if wait_time is None:
-                            raise
-                        await asyncio.sleep(wait_time)
-                raise AssertionError("Retry loop exited unexpectedly.")
+    def _decorate_async(self, fn: Callable[P, R]) -> Callable[P, R]:
+        @wraps(fn)
+        async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            for attempt in range(self.cfg.max_retries + 1):
+                try:
+                    return await fn(*args, **kwargs)
+                except self.exceptions as exc:  # type: ignore[misc]
+                    wait_time = self._calculate_wait_time(attempt, exc)
+                    if wait_time is None:
+                        raise
+                    await asyncio.sleep(wait_time)
+            raise AssertionError("Retry loop exited unexpectedly.")
 
-            return async_wrapper
+        return async_wrapper
 
+    def _decorate_sync(self, fn: Callable[P, R]) -> Callable[P, R]:
         @wraps(fn)
         def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             for attempt in range(self.cfg.max_retries + 1):

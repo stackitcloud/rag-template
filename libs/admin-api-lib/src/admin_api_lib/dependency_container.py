@@ -147,9 +147,14 @@ class DependencyContainer(DeclarativeContainer):
     summary_enhancer = List(
         Singleton(PageSummaryEnhancer, traced_summarizer, chunker_settings),
     )
-    information_enhancer = Singleton(
+    untraced_information_enhancer = Singleton(
         GeneralEnhancer,
         summary_enhancer,
+    )
+    information_enhancer = Singleton(
+        LangfuseTracedRunnable,
+        inner_chain=untraced_information_enhancer,
+        settings=langfuse_settings,
     )
 
     document_deleter = Singleton(

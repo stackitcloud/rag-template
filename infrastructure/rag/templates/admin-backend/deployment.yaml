@@ -13,7 +13,7 @@ spec:
         app: {{ .Values.adminBackend.name }}
     spec:
       securityContext:
-        runAsUser: 65532
+        runAsUser: 10001
         runAsNonRoot: true
       volumes:
         - name: config-volume

@@ -29,7 +29,7 @@ RUN poetry config virtualenvs.create false &&\
 FROM --platform=linux/amd64 python:3.13.7-bookworm
 ARG dev=0
 
-RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}

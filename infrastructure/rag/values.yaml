@@ -1,3 +1,8 @@
+global:
+  security:
+    # -- Allow insecure images to use bitnami legacy repository. Can be set to false if secure images are being used (Paid).
+    allowInsecureImages: true
+
 features:
   ollama:
     enabled: false
@@ -445,44 +450,39 @@ shared:
 
 
 langfuse:
-  # Core Langfuse Configuration
-  langfuse:
-    # Used to hash API keys
-    salt:
-      value: "changeme"
-
-    # Authentication settings
-    features:
-      telemetryEnabled: true
-      signUpDisabled: false
-
-    # Image configuration
+  minio:
     image:
-      tag: "3.88.1"
-      pullPolicy: Always
-
-    # Web deployment configuration
-    web:
+      repository: bitnamilegacy/minio
+    deploy: false
+  valkey:
+    image:
+      repository: bitnamilegacy/valkey
+    deploy: false #<--- keydb is used instead of valkey
+  image:
+    repository: ghcr.io/langfuse/langfuse
+    pullPolicy: Always
+    tag: "3.27.2"
+  postgresql:
+    image:
+      repository: bitnamilegacy/postgresql
+    deploy: true
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+  clickhouse:
+    image:
+      repository: bitnamilegacy/clickhouse
+    zookeeper:
       image:
-        repository: langfuse/langfuse
-        tag: "3.88.1"
-        pullPolicy: Always
+        repository: bitnamilegacy/zookeeper
 
-    # Worker deployment configuration
-    worker:
-      image:
-        repository: langfuse/langfuse-worker
-        tag: "3.88.1"
-        pullPolicy: Always
-      port: 3030
 
-    # NextAuth configuration
+  langfuse:
     nextauth:
       url: http://localhost:3000
-      secret:
-        value: "changeme"
-
-    # Additional environment variables (only for init values)
+      secret: changeme
+    salt: changeme
     additionalEnv:
     - name: LANGFUSE_INIT_ORG_ID
       value: ""
@@ -498,8 +498,33 @@ langfuse:
       value: ""
     - name: LANGFUSE_INIT_USER_PASSWORD
       value: ""
-
-    # Additional init containers
+    # REDIS
+    - name: "REDIS_CONNECTION_STRING"
+      value: "redis://rag-keydb:6379"
+    # CLICKHOUSE
+    - name: "CLICKHOUSE_MIGRATION_URL"
+      value: "clickhouse://rag-clickhouse:9000"
+    - name: "CLICKHOUSE_URL"
+      value: "http://rag-clickhouse:8123"
+    - name: "CLICKHOUSE_USER"
+      value: "default"
+    - name: "CLICKHOUSE_PASSWORD"
+      value: "changeme"
+    # S3 / MinIO
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENABLED"
+      value: "true"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_BUCKET"
+      value: "langfuse"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_REGION"
+      value: "auto"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID"
+      value: "admin"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY"
+      value: "adminpassword"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT"
+      value: "http://rag-minio:9000"
+    - name: "LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE"
+      value: "true"
     extraInitContainers:
     - name: wait-for-postgres
       image: busybox
@@ -514,78 +539,9 @@ langfuse:
       # Define a reasonable timeout in case PostgreSQL fails to come up
       timeoutSeconds: 300
 
-  # PostgreSQL Configuration (use external PostgreSQL)
-  postgresql:
-    deploy: true
-    host: "rag-postgresql"
-    port: 5432
-    auth:
-      username: postgres
-      password: postgres
-      database: langfuse
-
-  # Redis Configuration (external KeyDB)
-  redis:
-    deploy: false
-    host: "rag-keydb"
-    port: 6379
-    auth:
-      username: "default"
-      password: ""
-
-  # ClickHouse Configuration (external ClickHouse)
-  clickhouse:
-    deploy: true
-    host: "rag-clickhouse"
-    httpPort: 8123
-    nativePort: 9000
-    auth:
-      username: "default"
-      password: "changeme"
-    migration:
-      url: "clickhouse://rag-clickhouse:9000"
-      ssl: false
-      autoMigrate: true
-    resources:
-      limits:
-        cpu: "2"
-        memory: "8Gi"
-      requests:
-        cpu: "2"
-        memory: "4Gi"
-
-    zookeeper:
-      resources:
-        limits:
-          cpu: "2"
-          memory: "2Gi"
-        requests:
-          cpu: "1"
-          memory: "1Gi"
-
-  # S3/MinIO Configuration (external MinIO)
-  minio:
-    deploy: false
-    bucket: "langfuse"
-    region: "auto"
-    endpoint: "http://rag-minio:9000"
-    forcePathStyle: true
-    accessKeyId:
-      value: "admin"
-    secretAccessKey:
-      value: "adminpassword"
-    eventUpload:
-      enabled: true
-      bucket: "langfuse"
-      region: "auto"
-      endpoint: "http://rag-minio:9000"
-      forcePathStyle: true
-      accessKeyId:
-        value: "admin"
-      secretAccessKey:
-        value: "adminpassword"
-
 minio:
+  image:
+    repository: bitnamilegacy/minio
   auth:
     ## @param auth.rootUser MinIO&reg; root username
     ##
@@ -602,6 +558,10 @@ minio:
     enabled: false
   mode: standalone
 
+
+
+
+
 ollama:
   image:
     tag: 0.5.1
@@ -617,8 +577,3 @@ ollama:
 qdrant:
   image:
     tag: v1.14.1
-
-keydb:
-  multiMaster: "no"
-  activeReplicas: "no"
-  nodes: 1

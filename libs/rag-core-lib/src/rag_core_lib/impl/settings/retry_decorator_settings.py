@@ -26,10 +26,8 @@ class RetryDecoratorSettings(BaseSettings):
         Maximum jitter to add to wait times.
     """
 
-    # Pydantic v2 settings configuration
     model_config = SettingsConfigDict(env_prefix="RETRY_DECORATOR_", case_sensitive=False)
 
-    # Constrained fields
     max_retries: PositiveInt = Field(
         default=5,
         title="Max Retries",

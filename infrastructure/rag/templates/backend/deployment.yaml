@@ -131,6 +131,8 @@ spec:
               name: {{ template "configmap.fakeEmbedderName" . }}
           - configMapRef:
               name: {{ template "configmap.chatHistoryName" . }}
+          - configMapRef:
+              name: {{ template "configmap.retryDecoratorName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:

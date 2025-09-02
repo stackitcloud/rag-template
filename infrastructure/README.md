@@ -489,7 +489,7 @@ Afterwards, the services are accessible from [http://rag.localhost](http://rag.l
 
 Note: The command above has only been tested on *Ubuntu 22.04 LTS*.
 
-On *Windows* you can adjust the hosts file as described in this DigitalOcean guide on editing the Windows hosts file: [Edit the Windows hosts file](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
+On *Windows* you can adjust the hosts file as described [here](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
 
 ### 2.2 Production Setup Instructions
 
@@ -499,7 +499,7 @@ For deployment of the *NGINX Ingress Controller* and a cert-manager, the followi
 
 [base-setup](server-setup/base-setup/Chart.yaml)
 
-The email in `server-setup/base-setup/templates/cert-issuer.yaml` should be updated from `<replace@me.com>` to a real email address.
+The email [here](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
 
 ## 3. Contributing
 

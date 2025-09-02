@@ -1,3 +1,8 @@
+global:
+  security:
+    # -- Allow insecure images to use bitnami legacy repository. Can be set to false if secure images are being used (Paid).
+    allowInsecureImages: true
+
 features:
   ollama:
     enabled: false
@@ -446,19 +451,33 @@ shared:
 
 langfuse:
   minio:
+    image:
+      repository: bitnamilegacy/minio
     deploy: false
   valkey:
+    image:
+      repository: bitnamilegacy/valkey
     deploy: false #<--- keydb is used instead of valkey
   image:
     repository: ghcr.io/langfuse/langfuse
     pullPolicy: Always
     tag: "3.27.2"
   postgresql:
+    image:
+      repository: bitnamilegacy/postgresql
     deploy: true
     auth:
       username: postgres
       password: postgres
       database: langfuse
+  clickhouse:
+    image:
+      repository: bitnamilegacy/clickhouse
+    zookeeper:
+      image:
+        repository: bitnamilegacy/zookeeper
+
+
   langfuse:
     nextauth:
       url: http://localhost:3000
@@ -521,6 +540,8 @@ langfuse:
       timeoutSeconds: 300
 
 minio:
+  image:
+    repository: bitnamilegacy/minio
   auth:
     ## @param auth.rootUser MinIO&reg; root username
     ##

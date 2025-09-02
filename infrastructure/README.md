@@ -18,6 +18,61 @@ The documentation is structured as follows:
   - [2.2 Production setup instructions](#22-production-setup-instructions)
 - [3. Contributing](#3-contributing)
 
+## Temporary notice: Bitnami Legacy images and insecure images setting
+
+We temporarily switched some dependencies from Bitnami to Bitnami Legacy images and enabled pulling insecure images. This is a short-term workaround.
+
+- What changed
+  - Image repositories for certain dependencies under `langfuse` and `minio` now use `bitnamilegacy/*` (e.g., `bitnamilegacy/minio`, `bitnamilegacy/postgresql`, `bitnamilegacy/clickhouse`, `bitnamilegacy/zookeeper`, `bitnamilegacy/valkey`).
+  - In `rag/values.yaml`, `global.security.allowInsecureImages` is set to `true`.
+
+- Why: Bitnami announced catalog changes where non-hardened, Debian-based images in the free tier are reducing versioned tags in the public catalog and prioritizing latest-only tags, with older/versioned tags migrated to the “Bitnami Legacy” repository (`docker.io/bitnamilegacy`). To maintain reproducibility with pinned versions, we temporarily use the legacy repositories. See:
+  - Bitnami Containers README – Important Notice: Upcoming changes to the Bitnami Catalog: [bitnami/containers](https://github.com/bitnami/containers)
+  - Bitnami Charts README – Important Notice: Upcoming changes to the Bitnami Catalog: [bitnami/charts](https://github.com/bitnami/charts)
+  - Related announcement: [bitnami/containers#83267](https://github.com/bitnami/containers/issues/83267)
+
+- Important: Do not keep this setting for production. Re-enable secure images and switch back to standard Bitnami repositories (or pin by digest) before going live.
+
+Reproducibility and security recommendations:
+
+- In production, pin images by exact version tag.
+- Set `global.security.allowInsecureImages: false` in production environments.
+- Plan to migrate back to the standard Bitnami repositories (or alternative maintained images) once fixed-version tags are reliably available.
+
+How to revert (recommended for production deployments):
+
+1. Disable insecure images in the Helm values
+
+```yaml
+global:
+  security:
+    allowInsecureImages: false
+```
+
+1. Replace legacy repositories with standard Bitnami repositories where used, for example:
+
+```yaml
+minio:
+  image:
+    repository: bitnami/minio
+
+langfuse:
+  postgresql:
+    image:
+      repository: bitnami/postgresql
+  clickhouse:
+    image:
+      repository: bitnami/clickhouse
+    zookeeper:
+      image:
+        repository: bitnami/zookeeper
+  valkey:
+    image:
+      repository: bitnami/valkey
+```
+
+Note: The exact locations may differ if you customized `values.yaml`. Search for `bitnamilegacy/` and replace with the corresponding `bitnami/` image repositories.
+
 ## 1. Components and Configuration Values to Adjust
 
 This directory contains the Helm chart for the following RAG components:
@@ -434,7 +489,7 @@ Afterwards, the services are accessible from [http://rag.localhost](http://rag.l
 
 Note: The command above has only been tested on *Ubuntu 22.04 LTS*.
 
-On *Windows* you can adjust the hosts file as described [here](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
+On *Windows* you can adjust the hosts file as described in this DigitalOcean guide on editing the Windows hosts file: [Edit the Windows hosts file](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
 
 ### 2.2 Production Setup Instructions
 
@@ -444,7 +499,7 @@ For deployment of the *NGINX Ingress Controller* and a cert-manager, the followi
 
 [base-setup](server-setup/base-setup/Chart.yaml)
 
-The email [here](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
+The email in `server-setup/base-setup/templates/cert-issuer.yaml` should be updated from `<replace@me.com>` to a real email address.
 
 ## 3. Contributing
 

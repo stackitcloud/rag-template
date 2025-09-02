@@ -54,6 +54,11 @@ class ConfluenceExtractor(InformationExtractor):
         confluence_loader_parameters = {
             x.key: int(x.value) if x.value.isdigit() else x.value for x in extraction_parameters.kwargs
         }
+        if (
+            not confluence_loader_parameters.get("max_pages")
+            or isinstance(confluence_loader_parameters.get("max_pages"), str)
+        ):
+            confluence_loader_parameters.pop("max_pages")
         # Drop the document_name parameter as it is not used by the ConfluenceLoader
         if "document_name" in confluence_loader_parameters:
             confluence_loader_parameters.pop("document_name", None)

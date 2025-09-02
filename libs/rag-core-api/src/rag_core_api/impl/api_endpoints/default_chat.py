@@ -5,13 +5,13 @@ from langchain_core.runnables import RunnableConfig
 from rag_core_api.api_endpoints.chat import Chat
 from rag_core_api.models.chat_request import ChatRequest
 from rag_core_api.models.chat_response import ChatResponse
-from rag_core_lib.tracers.traced_chain import TracedGraph
+from rag_core_lib.tracers.traced_runnable import TracedRunnable
 
 
 class DefaultChat(Chat):
     """DefaultChat is a class that handles chat interactions using a traced graph."""
 
-    def __init__(self, chat_graph: TracedGraph):
+    def __init__(self, chat_graph: TracedRunnable):
         """
         Initialize the DefaultChat instance.
 

@@ -1,6 +1,5 @@
 """Module for the LangchainSummarizer class."""
 
-import asyncio
 import logging
 import traceback
 from typing import Optional
@@ -27,8 +26,6 @@ class LangchainSummarizer(Summarizer):
     RecursiveCharacterTextSplitter, and AsyncThreadsafeSemaphore. It handles chunking of the input
     document and retries the summarization process if an error occurs.
     """
-
-    RETRY_WAIT_TIME = 10
 
     def __init__(
         self,
@@ -87,12 +84,7 @@ class LangchainSummarizer(Summarizer):
                 except Exception as e:
                     logger.error("Error in summarizing langchain doc: %s %s", e, traceback.format_exc())
                     config["tries_remaining"] = tries_remaining - 1
-                    if "rate limit" in str(e).lower() or "ratelimit" in str(e).lower():
-                        logger.warning(
-                            "Rate limit encountered, waiting %d seconds before retry...", self.RETRY_WAIT_TIME
-                        )
-                        await asyncio.sleep(self.RETRY_WAIT_TIME)
-                    result = await self.ainvoke(query, config)
+                    result = await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
                     # Extract content from AIMessage if it's not already a string
                     content = result.content if hasattr(result, "content") else str(result)
                     outputs.append(content)

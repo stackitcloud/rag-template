@@ -64,6 +64,7 @@ from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
+from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
@@ -86,6 +87,7 @@ class DependencyContainer(DeclarativeContainer):
     key_value_store_settings = KeyValueSettings()
     summarizer_settings = SummarizerSettings()
     source_uploader_settings = SourceUploaderSettings()
+    retry_decorator_settings = RetryDecoratorSettings()
 
     key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)
     file_service = Singleton(S3Service, s3_settings=s3_settings)
@@ -136,7 +138,9 @@ class DependencyContainer(DeclarativeContainer):
         LangchainSummarizer,
         langfuse_manager=langfuse_manager,
         chunker=summary_text_splitter,
-        semaphore=Singleton(AsyncThreadsafeSemaphore, summarizer_settings.maximum_concurrreny),
+        semaphore=Singleton(AsyncThreadsafeSemaphore, summarizer_settings.maximum_concurrency),
+        summarizer_settings=summarizer_settings,
+        retry_decorator_settings=retry_decorator_settings
     )
 
     summary_enhancer = List(

@@ -140,7 +140,7 @@ class DependencyContainer(DeclarativeContainer):
         chunker=summary_text_splitter,
         semaphore=Singleton(AsyncThreadsafeSemaphore, summarizer_settings.maximum_concurrency),
         summarizer_settings=summarizer_settings,
-        retry_decorator_settings=retry_decorator_settings
+        retry_decorator_settings=retry_decorator_settings,
     )
 
     summary_enhancer = List(

@@ -197,6 +197,7 @@ Configuring via environment variables
   - `SUMMARIZER_JITTER_MIN`
   - `SUMMARIZER_JITTER_MAX`
 - Global fallback (prefix `RETRY_DECORATOR_`): see section [4.2](#42-retry-decorator-exponential-backoff) for all keys and defaults.
+- Helm chart: set the same keys under `adminBackend.envs.summarizer` in [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml).
 
 ## 3. Extractor API Lib
 

@@ -1,5 +1,6 @@
 """Module for the DefaultConfluenceExtractor class."""
 
+import logging
 from langchain_community.document_loaders import ConfluenceLoader
 
 from extractor_api_lib.impl.types.extractor_types import ExtractorTypes
@@ -9,6 +10,8 @@ from extractor_api_lib.extractors.information_extractor import InformationExtrac
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ConfluenceExtractor(InformationExtractor):
@@ -54,6 +57,13 @@ class ConfluenceExtractor(InformationExtractor):
         confluence_loader_parameters = {
             x.key: int(x.value) if x.value.isdigit() else x.value for x in extraction_parameters.kwargs
         }
+        if not confluence_loader_parameters.get("max_pages") or isinstance(
+            confluence_loader_parameters.get("max_pages"), str
+        ):
+            logging.warning(
+                "max_pages parameter is not set or invalid discarding it. ConfluenceLoader will use default value."
+            )
+            confluence_loader_parameters.pop("max_pages")
         # Drop the document_name parameter as it is not used by the ConfluenceLoader
         if "document_name" in confluence_loader_parameters:
             confluence_loader_parameters.pop("document_name", None)

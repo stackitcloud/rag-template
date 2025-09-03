@@ -63,6 +63,7 @@ from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
+from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_chain import LangfuseTracedGraph
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
@@ -89,6 +90,7 @@ class DependencyContainer(DeclarativeContainer):
     stackit_embedder_settings = StackitEmbedderSettings()
     chat_history_settings = ChatHistorySettings()
     sparse_embedder_settings = SparseEmbedderSettings()
+    retry_decorator_settings = RetryDecoratorSettings()
     chat_history_config.from_dict(chat_history_settings.model_dump())
 
     class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
@@ -98,7 +100,7 @@ class DependencyContainer(DeclarativeContainer):
         ollama=Singleton(
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
         ),
-        stackit=Singleton(StackitEmbedder, stackit_embedder_settings),
+        stackit=Singleton(StackitEmbedder, stackit_embedder_settings, retry_decorator_settings),
     )
 
     sparse_embedder = Singleton(FastEmbedSparse, **sparse_embedder_settings.model_dump())

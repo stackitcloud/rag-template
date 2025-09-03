@@ -102,7 +102,7 @@ Uploaded documents are required to contain the following metadata:
 
 ### 1.4 Embedder retry behavior
 
-The default STACKIT embedder implementation (`StackitEmbedder`) uses the shared retry decorator with exponential backoff from the core library.
+The default STACKIT embedder implementation (`StackitEmbedder`) uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
 
 - Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
 - Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
@@ -112,8 +112,6 @@ How it resolves settings
 
 - Each retry-related field in `StackitEmbedderSettings` is optional. When a field is provided (not None), it overrides the corresponding value from `RetryDecoratorSettings`.
 - When a field is not provided (None), the embedder falls back to the value from `RetryDecoratorSettings`.
-- Zero values (e.g., 0 or 0.0 where allowed) are honored and do not trigger fallback.
-- The effective retry configuration is computed once per embedder instance at initialization.
 
 Configuring via environment variables
 

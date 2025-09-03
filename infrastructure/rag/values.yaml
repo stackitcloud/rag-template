@@ -216,7 +216,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   service:
     type: ClusterIP
@@ -251,7 +251,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   command:
   - "poetry"
@@ -331,7 +331,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   command:
   - "poetry"
@@ -379,7 +379,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.0.0"
 
   service:
     type: ClusterIP
@@ -452,7 +452,7 @@ langfuse:
   image:
     repository: ghcr.io/langfuse/langfuse
     pullPolicy: Always
-    tag: "3.27.2"
+    tag: "3.88.1"
   postgresql:
     deploy: true
     auth:

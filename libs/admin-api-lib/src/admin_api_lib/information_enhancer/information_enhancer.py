@@ -6,13 +6,13 @@ from typing import Optional
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
 
-from rag_core_lib.chains.async_chain import AsyncChain
+from rag_core_lib.runnables.async_runnable import AsyncRunnable
 
 RetrieverInput = list[Document]
 RetrieverOutput = list[Document]
 
 
-class InformationEnhancer(AsyncChain[RetrieverInput, RetrieverOutput], ABC):
+class InformationEnhancer(AsyncRunnable[RetrieverInput, RetrieverOutput], ABC):
     """The base class for an information enhancer."""
 
     @abstractmethod

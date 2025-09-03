@@ -202,7 +202,7 @@ The extracted information will be summarized using LLM. The summary, as well as 
 
 ### 2.4 Summarizer retry behavior
 
-The default summarizer implementation (`LangchainSummarizer`) now uses the shared retry decorator with exponential backoff from the core library.
+The default summarizer implementation (`LangchainSummarizer`) now uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
 
 - Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
 - Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
@@ -212,8 +212,6 @@ How it resolves settings
 
 - Each field in `SummarizerSettings` is optional. When a field is provided (not None), it overrides the corresponding value from `RetryDecoratorSettings`.
 - When a field is not provided (None), the summarizer falls back to the value from `RetryDecoratorSettings`.
-- Zero values (e.g., 0 or 0.0 where allowed) are honored and do not trigger fallback.
-- The effective retry configuration is computed once per summarizer instance at initialization.
 
 Configuring via environment variables
 

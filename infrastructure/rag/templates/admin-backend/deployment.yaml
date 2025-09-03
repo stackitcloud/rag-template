@@ -106,6 +106,8 @@ spec:
               name: {{ template "configmap.keyValueStoreName" . }}
           - configMapRef:
               name: {{ template "configmap.sourceUploaderName" . }}
+          - configMapRef:
+              name: {{ template "configmap.retryDecoratorName" . }}
           - secretRef:
               name: {{ template "secret.langfuseName" . }}
           - secretRef:

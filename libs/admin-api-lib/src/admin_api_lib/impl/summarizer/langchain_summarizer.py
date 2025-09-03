@@ -86,7 +86,6 @@ class LangchainSummarizer(Summarizer):
         if len(outputs) == 1:
             return outputs[0]
 
-        # Optional single reduce pass (no recursion)
         merged = " ".join(outputs)
         logger.debug(
             "Reduced number of chars from %d to %d",
@@ -142,7 +141,6 @@ class LangchainSummarizer(Summarizer):
         )
 
     def _retry_with_backoff_wrapper(self):
-        # Prefer summarizer-specific overrides; fall back to global retry settings
         return retry_with_backoff(
             settings=self._retry_decorator_settings,
             exceptions=(APIError, RateLimitError, APITimeoutError, APIConnectionError),

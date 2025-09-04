@@ -1,7 +1,7 @@
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: 0.12.1
+  version: 1.5.1
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
   version: 1.12.6
@@ -14,5 +14,5 @@ dependencies:
 - name: ollama
   repository: https://otwld.github.io/ollama-helm/
   version: 1.1.0
-digest: sha256:9c99676d554fe68802c434b3daac2d50778e38d2793d10b84d1f4d6d78f99726
-generated: "2025-07-02T12:36:38.510315+02:00"
+digest: sha256:02781b4c97462f6c600d3fadf7127790482a20e537596fed4722ef912d15ec00
+generated: "2025-09-03T15:42:41.704412+02:00"

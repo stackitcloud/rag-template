@@ -22,7 +22,7 @@ exclude = """
   |  .hg
   |  .mypy_cache
   |  .nox
-  |  .pants.d
+  |  .pants.dgit
   |  .tox
   |  .venv
   |  _build
@@ -51,7 +51,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.2.0"
@@ -86,3 +85,15 @@ httpx = "^0.28.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+[tool.poetry.group.prod.dependencies]
+extractor-api-lib = "==2.0.0"
+
+[tool.poetry.group.prod-test.dependencies]
+extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = false}

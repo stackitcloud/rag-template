@@ -90,4 +90,17 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}
+
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+[tool.poetry.group.prod.dependencies]
+admin-api-lib = "==2.0.3"
+rag-core-lib = "==2.0.0"
+
+[tool.poetry.group.prod-test.dependencies]
+admin-api-lib = {path = "../../libs/admin-api-lib", develop = false}
+rag-core-lib = {path = "../../libs/rag-core-lib", develop = false}

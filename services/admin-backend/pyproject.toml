@@ -51,8 +51,8 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "admin_backend"
-version = "0.0.1"
+name = "admin-backend"
+version = "2.2.1"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and getting particular documents or document lists."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
@@ -90,4 +90,13 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}
+
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+[tool.poetry.group.prod.dependencies]
+admin-api-lib = "==2.2.1"
+rag-core-lib = "==2.2.1"

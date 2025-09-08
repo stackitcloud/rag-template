@@ -12,6 +12,12 @@ env:
 
 jobs:
   changes:
+    if: >-
+      ${{
+        !contains(github.event.pull_request.labels.*.name, 'prepare-release') &&
+        !contains(github.event.pull_request.labels.*.name, 'refresh-locks') &&
+        !contains(github.event.pull_request.labels.*.name, 'chart-bump')
+      }}
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
@@ -81,7 +87,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $IMAGE_NAME --build-arg dev=1 -f services/${{ matrix.service }}/Dockerfile .
+          docker build -t $IMAGE_NAME -f services/${{ matrix.service }}/Dockerfile.dev .
 
       - name: Run linting
         run: |

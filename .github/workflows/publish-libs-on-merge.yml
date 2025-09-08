@@ -1,0 +1,149 @@
+name: publish-libs-on-merge
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+  issues: write
+
+jobs:
+  publish:
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'prepare-release') }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive version from PR title
+        id: ver
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          VERSION=$(echo "$TITLE" | sed -nE 's/.*prepare ([0-9]+\.[0-9]+\.[0-9]+(\.post[0-9]+)?).*/\1/p' || true)
+          if [ -z "$VERSION" ]; then
+            echo "Could not derive version from PR title" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry==2.1.3
+      - name: Configure TestPyPI repository #TODO: should be pypi later.
+        run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+      - name: Build and publish libs to TestPyPI #TODO: if STACKIT org is created, the gha should be authorized, no token necessary anymore!
+        env:
+          POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          for lib in libs/*; do
+            [ -d "$lib" ] || continue
+            echo "Publishing $lib"
+            (cd "$lib" && poetry version "${{ steps.ver.outputs.version }}" && poetry build && poetry publish -r testpypi)
+          done
+  lock-services:
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry==2.1.3
+      - name: Install bump script deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "tomlkit==0.13.3"
+      - name: Update service dependency pins to released version
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          python tools/bump_pyproject_deps.py --version "$VERSION" --bump-service-pins
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Wait for TestPyPI indexing
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          echo "Waiting for TestPyPI to index internal libs for version $VERSION"
+          for name in admin-api-lib extractor-api-lib rag-core-api rag-core-lib; do
+            echo "Checking $name==$VERSION"
+            seen=false
+            for i in $(seq 1 60); do # up to ~5 minutes
+              json_ok=false
+              simple_ok=false
+              if curl -fsSL "https://test.pypi.org/pypi/$name/json" | jq -e --arg v "$VERSION" '.releases[$v] | length > 0' >/dev/null; then
+                json_ok=true
+              fi
+              # Check simple index also, Poetry resolves via /simple
+              if curl -fsSL "https://test.pypi.org/simple/$name/" | grep -q "$VERSION"; then
+                simple_ok=true
+              fi
+              if [ "$json_ok" = true ] && [ "$simple_ok" = true ]; then
+                echo "Found $name==$VERSION on JSON and /simple"
+                seen=true
+                break
+              fi
+              sleep 5
+            done
+            if [ "$seen" != "true" ]; then
+              echo "Error: $name==$VERSION not visible on TestPyPI JSON+simple yet"
+              echo "--- Debug /simple page for $name ---"
+              curl -fsSL "https://test.pypi.org/simple/$name/" || true
+              exit 1
+            fi
+          done
+      - name: Clear poetry caches
+        run: |
+          poetry cache clear --all pypi -n || true
+          poetry cache clear --all testpypi -n || true
+
+      - name: Refresh service lockfiles
+        run: |
+          for svc in services/rag-backend services/admin-backend services/document-extractor services/mcp-server; do
+            if [ -f "$svc/pyproject.toml" ]; then
+              echo "Locking $svc"
+              (
+                cd "$svc"
+                poetry lock -v || (
+                  echo "Lock failed, clearing caches and retrying...";
+                  poetry cache clear --all pypi -n || true;
+                  poetry cache clear --all testpypi -n || true;
+                  sleep 10;
+                  poetry lock -v
+                )
+              )
+            fi
+          done
+      - name: Open PR with updated lockfiles and pins
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/refresh-locks-${{ needs.publish.outputs.version }}-${{ github.run_number }}
+          title: "chore(release): refresh service lockfiles for ${{ needs.publish.outputs.version }}"
+          body: |
+            Refresh service poetry.lock files and dependency pins for version ${{ needs.publish.outputs.version }}.
+          commit-message: "chore(release): refresh service lockfiles and pins"
+          add-paths: |
+            services/**/pyproject.toml
+            services/**/poetry.lock
+          labels: refresh-locks

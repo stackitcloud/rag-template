@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "1.0.1"
+version = "2.2.1"
 description = "The core of the rag-template."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 packages = [{ include = "rag_core_api", from = "src" }]
@@ -59,8 +59,8 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
 
 [tool.flake8]

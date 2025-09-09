@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-lib"
-version = "1.0.1"
+version = "2.2.1"
 description = "The core library for the RAG. It contains shared components and utilities for the RAG libs."
 authors = ["STACKIT GmbH & Co. KG"]
 packages = [{ include = "rag_core_lib", from = "src" }]
@@ -50,8 +50,8 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
 
 [tool.flake8]

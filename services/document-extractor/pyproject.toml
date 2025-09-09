@@ -52,13 +52,16 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.13"
 
-[tool.poetry.group.dev.dependencies]
-flake8 = "^7.2.0"
+[tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"
+coverage = "^7.8.0"
+httpx = "^0.28.1"
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.2.0"
 black = "^25.1.0"
 flake8-black = "^0.3.6"
 flake8-pyproject = "^1.2.3"
-coverage = "^7.8.0"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
 flake8-annotations-complexity = "^0.1.0"
@@ -76,11 +79,12 @@ flake8-simplify = "^0.21.0"
 flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
-[tool.poetry.group.tests.dependencies]
-httpx = "^0.28.1"
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
+extractor-api-lib = { path = "../../libs/extractor-api-lib", develop = true }
 
 [build-system]
 requires = ["poetry-core"]
@@ -93,7 +97,4 @@ url = "https://test.pypi.org/simple/"
 priority = "supplemental"
 
 [tool.poetry.group.prod.dependencies]
-extractor-api-lib = "==2.0.0"
-
-[tool.poetry.group.prod-test.dependencies]
-extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = false}
+extractor-api-lib = "==2.2.1"

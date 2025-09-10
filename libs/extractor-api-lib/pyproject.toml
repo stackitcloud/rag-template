@@ -32,8 +32,8 @@ per-file-ignores = """
   ./src/extractor_api_lib/apis/extractor_api.py: B008,WOT001,
   ./src/extractor_api_lib/impl/extractor_api_impl.py: B008,
   ./src/extractor_api_lib/container.py: CCE002,CCE001,
-  ./src/extractor_api_lib/apis/extractor_api_base.py: WOT001,
-  ./tests/*: S101,E501,
+  ./src/extractor_api_lib/apis/extractor_api_base.py: WOT001,D105,
+  ./tests/*: S101,E501,D105,D100,D102,
 """
 
 [tool.black]

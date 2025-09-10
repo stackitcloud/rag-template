@@ -1,9 +1,12 @@
+"""Module for the SitemapExtractor utility functions."""
+
 from bs4 import BeautifulSoup
 from typing import Any, Union
 
 
 def custom_sitemap_parser_function(content: Union[str, BeautifulSoup]) -> str:
-    """
+    """Parse sitemap content.
+
     Given HTML content (as a string or BeautifulSoup object), return only the
     concatenated text from all <article> elements.
 
@@ -26,8 +29,7 @@ def custom_sitemap_parser_function(content: Union[str, BeautifulSoup]) -> str:
 
 
 def custom_sitemap_metadata_parser_function(meta: dict, _content: Any) -> dict:
-    """
-    Given metadata and HTML content, extract the title from the first article and the first <h1> element
+    """Given metadata and HTML content, extract the title from the first article and the first <h1> element.
 
     Parameters
     ----------

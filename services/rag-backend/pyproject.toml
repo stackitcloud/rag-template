@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "rag-usecase-example"
-version = "0.1.0"
+name = "rag-backend"
+version = "2.2.1"
 description = ""
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 

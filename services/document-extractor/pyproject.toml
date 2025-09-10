@@ -47,9 +47,9 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "pdfextractor_server"
+name = "document-extractor"
 version = "2.2.1"
-description = "Extracts the content of pdf  documents."
+description = "Extracts content from files and sources like Confluence spaces, sitemaps etc."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 

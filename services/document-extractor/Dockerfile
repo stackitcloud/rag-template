@@ -4,6 +4,9 @@ ENV POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
 ENV POETRY_VERSION=2.1.3
 
+# Build argument to control which dependency group to install
+ARG DEPENDENCY_GROUP=prod
+
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        build-essential make ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \
@@ -14,12 +17,16 @@ ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 WORKDIR /app/services/document-extractor
 COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock ./
 
+# Copy the extractor-api-lib dependency (needed for both prod and prod-local)
+COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
+COPY libs/extractor-api-lib/src /app/libs/extractor-api-lib/src
+
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
 
 RUN poetry config virtualenvs.create false \
     && cd /app/services/document-extractor \
-    && poetry install --no-interaction --no-ansi --no-root --with prod
+    && poetry install --no-interaction --no-ansi --no-root --with ${DEPENDENCY_GROUP}
 
 FROM --platform=linux/amd64 python:3.13-bookworm
 
@@ -32,6 +39,20 @@ COPY --from=build /usr/bin/ /usr/bin/
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --from=build /usr/share/tesseract-ocr/5/tessdata /usr/share/tesseract-ocr/5/tessdata
+
+# Copy the library source code to the final stage only for local path dependencies
+ARG DEPENDENCY_GROUP=prod
+COPY --from=build --chown=nonroot:nonroot \
+    /app/libs/extractor-api-lib \
+    /tmp/conditional-libs/extractor-api-lib
+
+# Move libraries to final location only if using prod-local
+RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \
+        mkdir -p /app/libs && \
+        mv /tmp/conditional-libs/* /app/libs/ && \
+        chown -R nonroot:nonroot /app/libs; \
+    fi && \
+    rm -rf /tmp/conditional-libs
 
 WORKDIR /app/services/document-extractor
 

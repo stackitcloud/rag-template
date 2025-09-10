@@ -105,3 +105,8 @@ priority = "supplemental"
 [tool.poetry.group.prod.dependencies]
 rag-core-api = "==2.2.1"
 rag-core-lib = "==2.2.1"
+
+[tool.poetry.group.prod-local.dependencies]
+# Use local path for Tilt/development with production Dockerfile  
+rag-core-api = {path = "../../libs/rag-core-api"}
+rag-core-lib = {path = "../../libs/rag-core-lib"}

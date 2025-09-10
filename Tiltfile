@@ -7,17 +7,33 @@ if os.path.exists(".env"):
     dotenv(fn=".env")
 
 config.define_bool("debug")
+config.define_bool("dev")
 cfg = config.parse()
 backend_debug = cfg.get("debug", False)
+dev_mode = cfg.get("dev", False)
+
+# Print mode information
+if dev_mode:
+    print("🚀 Running in DEVELOPMENT mode (using Dockerfile.dev)")
+    print("   - Live code updates enabled")
+    print("   - Fast iteration optimized builds")
+else:
+    print("🏭 Running in PRODUCTION mode (using Dockerfile)")
+    print("   - Production-optimized builds")
+    print("   - No live updates")
 
 core_library_context = "./libs"
 
 
 def create_linter_command(folder_name, name):
-    # Build with Dockerfile.dev for services, Dockerfile for libs
-    dockerfile = folder_name + ("/Dockerfile" if folder_name == "./libs" else "/Dockerfile.dev")
-    # Only libs use TEST build arg; services use no build args
-    build_args = " --build-arg TEST=1" if folder_name == "./libs" else ""
+    # Build with appropriate Dockerfile based on context
+    if folder_name == "./libs":
+        dockerfile = folder_name + "/Dockerfile"
+        build_args = " --build-arg TEST=0"
+    else:
+        # For services, always use .dev for testing/linting (dev tools needed)
+        dockerfile = folder_name + "/Dockerfile.dev"
+        build_args = ""
     return (
         "docker build -t "
         + name
@@ -31,9 +47,14 @@ def create_linter_command(folder_name, name):
 
 
 def create_test_command(folder_name, name):
-    # Build with Dockerfile.dev for services, Dockerfile for libs
-    dockerfile = folder_name + ("/Dockerfile" if folder_name == "./libs" else "/Dockerfile.dev")
-    build_args = " --build-arg TEST=1" if folder_name == "./libs" else ""
+    # Build with appropriate Dockerfile based on context
+    if folder_name == "./libs":
+        dockerfile = folder_name + "/Dockerfile"
+        build_args = " --build-arg TEST=1"
+    else:
+        # For services, always use .dev for testing/linting (dev tools needed)
+        dockerfile = folder_name + "/Dockerfile.dev"
+        build_args = ""
     return (
         "docker build -t "
         + name
@@ -152,16 +173,15 @@ rag_api_image_name = "rag-backend"
 
 backend_context = "./services/rag-backend"
 rag_api_full_image_name = "%s/%s" % (registry, rag_api_image_name)
-docker_build(
-    rag_api_full_image_name,
-    ".",
-    live_update=[
-        sync(backend_context, "/app/services/rag-backend"),
-        sync(core_library_context+"/rag-core-api", "/app/libs/rag-core-api"),
-        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
-    ],
-    dockerfile=backend_context + "/Dockerfile.dev",
-    ignore=[
+
+# Choose dockerfile based on dev mode
+backend_dockerfile = backend_context + ("/Dockerfile.dev" if dev_mode else "/Dockerfile")
+
+docker_build_config = {
+    "ref": rag_api_full_image_name,
+    "context": ".",
+    "dockerfile": backend_dockerfile,
+    "ignore": [
         "infrastructure/",
         "libs/admin-api-lib/",
         "libs/extractor-api-lib/",
@@ -170,7 +190,22 @@ docker_build(
         "services/mcp-server/",
         "services/frontend/",
     ],
-)
+}
+
+# Add build args and live_update based on dev mode
+if dev_mode:
+    docker_build_config["live_update"] = [
+        sync(backend_context, "/app/services/rag-backend"),
+        sync(core_library_context+"/rag-core-api", "/app/libs/rag-core-api"),
+        sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
+    ]
+else:
+    # Use prod-local for Tilt with production Dockerfile
+    docker_build_config["build_args"] = {
+        "DEPENDENCY_GROUP": "prod-local"
+    }
+
+docker_build(**docker_build_config)
 
 # Add linter trigger
 local_resource(
@@ -199,14 +234,15 @@ mcp_image_name = "mcp-server"
 
 mcp_context = "./services/mcp-server"
 mcp_full_image_name = "%s/%s" % (registry, mcp_image_name)
-docker_build(
-    mcp_full_image_name,
-    ".",
-    live_update=[
-        sync(mcp_context, "/app/services/mcp-server"),
-    ],
-    dockerfile=mcp_context + "/Dockerfile.dev",
-    ignore=[
+
+# Choose dockerfile based on dev mode
+mcp_dockerfile = mcp_context + ("/Dockerfile.dev" if dev_mode else "/Dockerfile")
+
+mcp_docker_build_config = {
+    "ref": mcp_full_image_name,
+    "context": ".",
+    "dockerfile": mcp_dockerfile,
+    "ignore": [
         "infrastructure/",
         "libs/",
         "services/admin-backend/",
@@ -214,7 +250,15 @@ docker_build(
         "services/rag-backend/",
         "services/frontend/",
     ],
-)
+}
+
+# Add live_update only in dev mode
+if dev_mode:
+    mcp_docker_build_config["live_update"] = [
+        sync(mcp_context, "/app/services/mcp-server"),
+    ]
+
+docker_build(**mcp_docker_build_config)
 
 # Add linter trigger
 local_resource(
@@ -236,16 +280,15 @@ admin_api_image_name = "admin-backend"
 
 admin_backend_context = "./services/admin-backend"
 admin_api_full_image_name = "%s/%s" % (registry, admin_api_image_name)
-docker_build(
-    admin_api_full_image_name,
-    ".",
-    live_update=[
-        sync(admin_backend_context, "/app/services/admin-backend"),
-        sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
-        sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
-    ],
-    dockerfile=admin_backend_context + "/Dockerfile.dev",
-    ignore=[
+
+# Choose dockerfile based on dev mode
+admin_dockerfile = admin_backend_context + ("/Dockerfile.dev" if dev_mode else "/Dockerfile")
+
+admin_docker_build_config = {
+    "ref": admin_api_full_image_name,
+    "context": ".",
+    "dockerfile": admin_dockerfile,
+    "ignore": [
         "infrastructure/",
         "libs/rag-core-api/",
         "libs/extractor-api-lib/",
@@ -254,7 +297,22 @@ docker_build(
         "services/mcp-server/",
         "services/frontend/",
     ],
-)
+}
+
+# Add build args and live_update based on dev mode
+if dev_mode:
+    admin_docker_build_config["live_update"] = [
+        sync(admin_backend_context, "/app/services/admin-backend"),
+        sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
+        sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
+    ]
+else:
+    # Use prod-local for Tilt with production Dockerfile
+    admin_docker_build_config["build_args"] = {
+        "DEPENDENCY_GROUP": "prod-local"
+    }
+
+docker_build(**admin_docker_build_config)
 
 # Add linter trigger
 local_resource(
@@ -286,15 +344,15 @@ document_extractor_image_name = "document-extractor"
 
 extractor_context = "./services/document-extractor"
 document_extractor_full_image_name = "%s/%s" % (registry, document_extractor_image_name)
-docker_build(
-    document_extractor_full_image_name,
-    ".",
-    live_update=[
-        sync(extractor_context, "/app/services/document-extractor"),
-        sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
-        ],
-    dockerfile=extractor_context + "/Dockerfile.dev",
-    ignore=[
+
+# Choose dockerfile based on dev mode
+extractor_dockerfile = extractor_context + ("/Dockerfile.dev" if dev_mode else "/Dockerfile")
+
+extractor_docker_build_config = {
+    "ref": document_extractor_full_image_name,
+    "context": ".",
+    "dockerfile": extractor_dockerfile,
+    "ignore": [
         "infrastructure/",
         "libs/rag-core-api/",
         "libs/rag-core-lib/",
@@ -305,7 +363,21 @@ docker_build(
         "services/frontend/",
         "scripts/",
     ],
-)
+}
+
+# Add build args and live_update based on dev mode
+if dev_mode:
+    extractor_docker_build_config["live_update"] = [
+        sync(extractor_context, "/app/services/document-extractor"),
+        sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
+    ]
+else:
+    # Use prod-local for Tilt with production Dockerfile
+    extractor_docker_build_config["build_args"] = {
+        "DEPENDENCY_GROUP": "prod-local"
+    }
+
+docker_build(**extractor_docker_build_config)
 
 # Add linter trigger
 local_resource(

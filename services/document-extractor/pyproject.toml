@@ -95,11 +95,16 @@ extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+# Prefer PyPI, then TestPyPI as fallback for internal libs
 [[tool.poetry.source]]
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
 priority = "supplemental"
 
 [tool.poetry.group.prod.dependencies]
+# Try PyPI first, then TestPyPI automatically due to supplemental priority
 extractor-api-lib = "==2.2.1"
+
+[tool.poetry.group.prod-local.dependencies]
+# Use local path for Tilt/development with production Dockerfile
+extractor-api-lib = {path = "../../libs/extractor-api-lib"}

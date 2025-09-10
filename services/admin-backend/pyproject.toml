@@ -98,6 +98,11 @@ setuptools = "<80.9"
 admin-api-lib = "==2.2.1"
 rag-core-lib = "==2.2.1"
 
+[tool.poetry.group.prod-local.dependencies]
+# Use local path for Tilt/development with production Dockerfile
+admin-api-lib = {path = "../../libs/admin-api-lib"}
+rag-core-lib = {path = "../../libs/rag-core-lib"}
+
 # Prefer PyPI, but allow resolving from TestPyPI for internal libs
 [[tool.poetry.source]]
 name = "testpypi"

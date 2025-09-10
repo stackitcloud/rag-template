@@ -141,8 +141,8 @@ class LangfuseRagasEvaluator(Evaluator):
         try:
             evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
             await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)
-        except Exception as e:
-            logger.error("Failed to evaluate questions: %s", e)
+        except Exception:
+            logger.exception("Failed to evaluate questions")
 
     async def _aauto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
         session_id = str(uuid4())
@@ -166,8 +166,8 @@ class LangfuseRagasEvaluator(Evaluator):
 
             try:
                 response = await self._chat_endpoint.achat(config["metadata"]["session_id"], chat_request)
-            except Exception as e:
-                logger.info("Error while answering question %s: %s", item.input, e)
+            except Exception:
+                logger.exception("Error while answering question %s", item.input)
                 response = None
 
             if response and response.citations:
@@ -219,7 +219,7 @@ class LangfuseRagasEvaluator(Evaluator):
         try:
             item.link(generation, experiment_name)
         except ApiError as e:
-            logger.warning("Failed to link item to generation: %s", e)
+            logger.exception("Failed to link item to generation")
             retries += 1
             if retries > self.MAX_RETRIES:
                 raise e

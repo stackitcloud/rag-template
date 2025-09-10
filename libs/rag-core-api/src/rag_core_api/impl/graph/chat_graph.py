@@ -236,7 +236,7 @@ class DefaultChatGraph(GraphBase):
                 self.FINISH_REASONS: ["NoOrEmptyCollectionError"],
             }
         except Exception as e:
-            logger.error("Error while searching for documents in vector database: %s", e)
+            logger.exception("Error while searching for documents in vector database")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error while searching for documents in vector database: %s" % e,

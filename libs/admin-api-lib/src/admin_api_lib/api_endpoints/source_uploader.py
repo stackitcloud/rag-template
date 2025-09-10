@@ -21,7 +21,7 @@ class SourceUploader(UploaderBase):
         timeout: Optional[float],
     ) -> None:
         """
-        Uploads the parameters for source content extraction.
+        Upload the parameters for source content extraction.
 
         Parameters
         ----------

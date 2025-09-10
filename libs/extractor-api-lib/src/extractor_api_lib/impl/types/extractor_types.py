@@ -1,3 +1,5 @@
+"""Module for the ExtractorTypes enumeration."""
+
 from enum import StrEnum
 
 

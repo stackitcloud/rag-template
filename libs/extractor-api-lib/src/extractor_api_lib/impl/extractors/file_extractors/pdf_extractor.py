@@ -154,7 +154,7 @@ class PDFExtractor(InformationFileExtractor):
                     )
                     pdf_elements += new_pdf_elements
 
-        logger.info(f"Extraction completed. Found {len(pdf_elements)} information pieces.")
+        logger.info("Extraction completed. Found %d information pieces.", len(pdf_elements))
         return pdf_elements
 
     def _is_text_based(self, page: Page) -> bool:
@@ -200,8 +200,8 @@ class PDFExtractor(InformationFileExtractor):
                 table_df = pd.DataFrame(table_data)
                 try:
                     converted_table = self._dataframe_converter.convert(table_df)
-                except TypeError as e:
-                    logger.error(f"Error while converting table to string: {e}")
+                except TypeError:
+                    logger.exception("Error while converting table to string")
                     continue
                 if not converted_table.strip():
                     continue
@@ -215,8 +215,8 @@ class PDFExtractor(InformationFileExtractor):
                         information_id=hash_datetime(),
                     )
                 )
-        except Exception as e:
-            logger.warning(f"Failed to find tables on page {page_index}: {e}")
+        except Exception:
+            logger.exception("Failed to find tables on page %d", page_index)
 
         return table_elements
 
@@ -321,19 +321,19 @@ class PDFExtractor(InformationFileExtractor):
                                     },
                                 )
                             )
-                    except Exception as e:
-                        logger.warning(f"Failed to convert Camelot table {i + 1}: {e}")
+                    except Exception:
+                        logger.exception("Failed to convert Camelot table %d", i + 1)
 
-        except Exception as e:
-            logger.debug(f"Camelot table extraction failed for page {page_index}: {e}")
+        except Exception:
+            logger.exception("Camelot table extraction failed for page %d", page_index)
 
         return table_elements
 
     def _extract_text_from_text_page(self, page: Page) -> str:
         try:
             return page.extract_text() or ""
-        except Exception as e:
-            logger.warning(f"Failed to extract text with pdfplumber: {e}")
+        except Exception:
+            logger.exception("Failed to extract text with pdfplumber")
             return ""
 
     def _extract_content_from_page(

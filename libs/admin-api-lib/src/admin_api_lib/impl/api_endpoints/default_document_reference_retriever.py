@@ -2,7 +2,6 @@
 
 import io
 import logging
-import traceback
 
 from fastapi import HTTPException, Response, status
 
@@ -54,10 +53,8 @@ class DefaultDocumentReferenceRetriever(DocumentReferenceRetriever):
                 self._file_service.download_file(identification, document_buffer)
                 logger.debug("DONE retrieving document with id: %s", identification)
                 document_data = document_buffer.getvalue()
-            except Exception as e:
-                logger.error(
-                    "Error retrieving document with id: %s. Error: %s %s", identification, e, traceback.format_exc()
-                )
+            except Exception:
+                logger.exception("Error retrieving document with id: %s", identification)
                 raise ValueError(f"Document with id '{identification}' not found.")
             finally:
                 document_buffer.close()

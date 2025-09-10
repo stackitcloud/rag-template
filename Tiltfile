@@ -593,8 +593,8 @@ k8s_resource(
 # Frontend test and lint resources (matching GitHub Actions)
 local_resource(
     'Frontend testing',
-    cmd='cd services/frontend && npm run test',
-    deps=['services/frontend/apps', 'services/frontend/libs'],
+    cmd='cd services/frontend && npm install && npm run test',
+    deps=['services/frontend/apps', 'services/frontend/libs', 'services/frontend/package.json', 'services/frontend/package-lock.json'],
     labels=['test'],
     auto_init=False,
     trigger_mode=TRIGGER_MODE_MANUAL,
@@ -603,8 +603,8 @@ local_resource(
 
 local_resource(
     'Frontend linting',
-    cmd='cd services/frontend && npm run eslint',
-    deps=['services/frontend/apps', 'services/frontend/libs'],
+    cmd='cd services/frontend && npm install && npm run eslint',
+    deps=['services/frontend/apps', 'services/frontend/libs', 'services/frontend/package.json', 'services/frontend/package-lock.json'],
     labels=['linting'],
     auto_init=False,
     trigger_mode=TRIGGER_MODE_MANUAL,

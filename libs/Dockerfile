@@ -22,11 +22,11 @@ WORKDIR /app/${DIRECTORY}
 RUN poetry config virtualenvs.create false
 RUN if [ "$TEST" = "1" ]; then \
         rm ../poetry.lock; rm ../pyproject.toml; \
-        poetry install --with dev --no-root; \
+        poetry install --with dev,test; \
         # Install rag-core-lib dependencies if testing libraries that depend on it \
         if [ "${DIRECTORY}" = "admin-api-lib" ] || [ "${DIRECTORY}" = "rag-core-api" ]; then \
-            cd ../rag-core-lib && poetry install --with dev --no-root; \
+            cd ../rag-core-lib && poetry install --with dev,test; \
         fi; \
     else \
-        poetry install; \
+        poetry install --with dev,lint; \
     fi

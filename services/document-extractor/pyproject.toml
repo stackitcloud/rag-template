@@ -12,6 +12,10 @@ docstring-quotes = '"""'
 multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
+per-file-ignores = """
+  ./main.py: D100,
+  ./tests/*: S101,D100,D103,D104
+"""
 
 [tool.black]
 line-length = 120
@@ -44,13 +48,14 @@ max-line-length = 120
 
 [tool.poetry]
 name = "pdfextractor_server"
-version = "0.0.0"
+version = "2.2.1"
 description = "Extracts the content of pdf  documents."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
+setuptools = "<80.9"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"
@@ -84,7 +89,7 @@ flake8-docstrings = "^1.7.0"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"
-extractor-api-lib = { path = "../../libs/extractor-api-lib", develop = true }
+extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 
 [build-system]
 requires = ["poetry-core"]

@@ -303,6 +303,7 @@ docker_build(
         "services/admin-backend/",
         "services/mcp-server/",
         "services/frontend/",
+        "scripts/",
     ],
 )
 

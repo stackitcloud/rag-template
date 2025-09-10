@@ -21,14 +21,13 @@ COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock /app/s
 COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
 COPY libs/rag-core-api/pyproject.toml libs/rag-core-api/poetry.lock /app/libs/rag-core-api/
 
+# Copy minimal lib structure for poetry to recognize local packages
+COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
+COPY libs/rag-core-api/src /app/libs/rag-core-api/src
+
 # Install third-party dependencies (dev extras) without packaging the projects themselves
 RUN poetry config virtualenvs.create false \
-    && cd /app/services/rag-backend && poetry install --no-interaction --no-ansi --no-root --with dev --without prod \
-    && cd /app/libs/rag-core-lib && poetry install --no-interaction --no-ansi --no-root --with dev \
-    && cd /app/libs/rag-core-api && poetry install --no-interaction --no-ansi --no-root --with dev
-
-# Create non-root user
-RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
+    && cd /app/services/rag-backend && poetry install --no-interaction --no-ansi --no-root --with dev --without prod
 
 # Prepare runtime
 WORKDIR /app/services/rag-backend
@@ -38,10 +37,10 @@ RUN mkdir -p log && chmod 700 log \
 # Make sources available (no package install); use PYTHONPATH for local libs
 ENV PYTHONPATH="/app/services/rag-backend/src:/app/libs/rag-core-api/src:/app/libs/rag-core-lib/src"
 
-# Copy sources last for fast rebuilds
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
+
+RUN chown -R nonroot:nonroot /app
 COPY --chown=nonroot:nonroot services/rag-backend /app/services/rag-backend
-COPY --chown=nonroot:nonroot libs/rag-core-lib /app/libs/rag-core-lib
-COPY --chown=nonroot:nonroot libs/rag-core-api /app/libs/rag-core-api
 
 USER nonroot
 

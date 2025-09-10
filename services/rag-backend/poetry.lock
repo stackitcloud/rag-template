@@ -4085,6 +4085,7 @@ qdrant-client = "^1.14.2"
 rag-core-lib = {path = "../rag-core-lib", develop = true}
 ragas = "^0.2.15"
 requests-oauthlib = "^2.0.0"
+setuptools = "<80.9"
 uvicorn = "^0.34.2"
 
 [package.source]
@@ -4114,6 +4115,7 @@ openai = "^1.77.0"
 pydantic = "^2.11.4"
 pydantic-settings = "^2.2.1"
 requests-oauthlib = "^2.0.0"
+setuptools = "<80.9"
 
 [package.source]
 type = "directory"
@@ -4332,14 +4334,14 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "setuptools"
-version = "80.9.0"
+version = "80.8.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
-groups = ["lint"]
+groups = ["main", "dev", "lint", "prod"]
 files = [
-    {file = "setuptools-80.9.0-py3-none-any.whl", hash = "sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"},
-    {file = "setuptools-80.9.0.tar.gz", hash = "sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"},
+    {file = "setuptools-80.8.0-py3-none-any.whl", hash = "sha256:95a60484590d24103af13b686121328cc2736bee85de8936383111e421b9edc0"},
+    {file = "setuptools-80.8.0.tar.gz", hash = "sha256:49f7af965996f26d43c8ae34539c8d99c5042fbff34302ea151eaa9c207cd257"},
 ]
 
 [package.extras]
@@ -5238,4 +5240,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "52f5a7c1792c3872798dd2f6e094215ddcfe366d4f783ce5ad4662790f83cb5e"
+content-hash = "7cc8257292bc0104f07ae5e4a6f9ca551cf51a231bce7cbf972214f4185a63d9"

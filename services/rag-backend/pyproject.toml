@@ -6,6 +6,7 @@ authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 
 [tool.poetry.dependencies]
 python = "^3.13"
+setuptools = "<80.9"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"
@@ -37,8 +38,8 @@ flake8-tidy-imports = "^4.10.0"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"
-rag-core-api = { path = "../../libs/rag-core-api", develop = true }
-rag-core-lib = { path = "../../libs/rag-core-lib", develop = true }
+rag-core-api = {path = "../../libs/rag-core-api", develop = true}
+rag-core-lib = {path = "../../libs/rag-core-lib", develop = true}
 
 [build-system]
 requires = ["poetry-core"]
@@ -60,7 +61,8 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./tests/*: S101,
+  ./main.py: D100,
+  ./tests/*: S101,D100,D103,D104
 """
 
 

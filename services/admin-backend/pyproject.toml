@@ -13,12 +13,8 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./src/admin_backend/impl/prompt_templates/summarize_prompt.py: E501,
-  ./src/admin_backend/apis/admin_api.py: B008,WOT001,
-  ./src/admin_backend/impl/admin_api.py: B008,
-  ./src/admin_backend/dependency_container.py: CCE002,CCE001,
-  ./src/admin_backend/apis/admin_api_base.py: WOT001,
-  ./tests/*: S101,
+  ./main.py: D100,
+  ./tests/*: S101,D100,D103,D104
 """
 
 [tool.black]
@@ -87,8 +83,8 @@ flake8-tidy-imports = "^4.10.0"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"
-admin-api-lib = { path = "../../libs/admin-api-lib", develop = true }
-rag-core-lib = { path = "../../libs/rag-core-lib", develop = true }
+admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}
+rag-core-lib = {path = "../../libs/rag-core-lib", develop = true}
 
 [build-system]
 requires = ["poetry-core"]
@@ -96,6 +92,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
+setuptools = "<80.9"
+
+[tool.poetry.group.prod.dependencies]
+admin-api-lib = "==2.2.1"
+rag-core-lib = "==2.2.1"
 
 # Prefer PyPI, but allow resolving from TestPyPI for internal libs
 [[tool.poetry.source]]
@@ -103,6 +104,3 @@ name = "testpypi"
 url = "https://test.pypi.org/simple/"
 priority = "supplemental"
 
-[tool.poetry.group.prod.dependencies]
-admin-api-lib = "==2.2.1"
-rag-core-lib = "==2.2.1"

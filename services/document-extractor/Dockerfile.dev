@@ -19,13 +19,11 @@ ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock /app/services/document-extractor/
 COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
 
+COPY --chown=nonroot:nonroot libs/extractor-api-lib/src /app/libs/extractor-api-lib/src
+
 # Install third-party deps for service and lib (with dev extras)
 RUN poetry config virtualenvs.create false \
-    && cd /app/services/document-extractor && poetry install --no-interaction --no-ansi --no-root --with dev --without prod \
-    && cd /app/libs/extractor-api-lib && poetry install --no-interaction --no-ansi --no-root --with dev
-
-# Create non-root
-RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
+    && cd /app/services/document-extractor && poetry install --no-interaction --no-ansi --no-root --with dev --without prod
 
 WORKDIR /app/services/document-extractor
 RUN mkdir -p log && chmod 700 log \
@@ -33,10 +31,10 @@ RUN mkdir -p log && chmod 700 log \
 
 ENV PYTHONPATH="/app/services/document-extractor/src:/app/libs/extractor-api-lib/src"
 
-# Copy sources last
+# Create non-root user
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
+
+RUN chown -R nonroot:nonroot /app
 COPY --chown=nonroot:nonroot services/document-extractor /app/services/document-extractor
-COPY --chown=nonroot:nonroot libs/extractor-api-lib /app/libs/extractor-api-lib
 
 USER nonroot
-
-# Entrypoint handled externally

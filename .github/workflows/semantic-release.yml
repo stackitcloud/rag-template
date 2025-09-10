@@ -90,27 +90,21 @@ jobs:
           - name: rag-backend
             dockerfile: services/rag-backend/Dockerfile
             image: rag-backend
-            build-args: "dev=0"
           - name: admin-backend
             dockerfile: services/admin-backend/Dockerfile
             image: admin-backend
-            build-args: "dev=0"
           - name: document-extractor
             dockerfile: services/document-extractor/Dockerfile
             image: document-extractor
-            build-args: "dev=0"
           - name: mcp-server
             dockerfile: services/mcp-server/Dockerfile
             image: mcp-server
-            build-args: "dev=0"
           - name: frontend
             dockerfile: services/frontend/apps/chat-app/Dockerfile
             image: frontend
-            build-args: ""
           - name: admin-frontend
             dockerfile: services/frontend/apps/admin-app/Dockerfile
             image: admin-frontend
-            build-args: ""
     steps:
       - name: debug-job-inputs
         run: |

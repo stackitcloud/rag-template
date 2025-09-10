@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "extractor_api_lib"
-version = "1.0.1"
+version = "2.2.1"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 packages = [{ include = "extractor_api_lib", from = "src" }]
@@ -70,14 +70,13 @@ max-line-length = 120
 python = "^3.13"
 wheel = "^0.45.1"
 botocore = "^1.38.10"
-fasttext = {git = "https://github.com/cfculhane/fastText", rev = "main"}
+fasttext = "^0.9.3"
 pytesseract = "^0.3.10"
 fastapi = "^0.115.12"
 uvicorn = "^0.34.2"
 dependency-injector = "^4.46.0"
 pydantic-settings = "^2.9.1"
 boto3 = "^1.38.10"
-debugpy = "^1.8.14"
 python-multipart = "^0.0.20"
 oauthlib = "^3.2.2"
 requests-oauthlib = "^2.0.0"
@@ -101,11 +100,15 @@ langchain-core = "0.3.63"
 camelot-py = {extras = ["cv"], version = "^1.0.0"}
 fake-useragent = "^2.2.0"
 pypandoc-binary = "^1.15"
+setuptools = "<80.9"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
 pytest-asyncio = "^0.26.0"
 coverage = "^7.8.0"
+httpx = "^0.28.1"
+
+[tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
 flake8-black = "^0.3.6"
 flake8-pyproject = "^1.2.3"
@@ -127,14 +130,14 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
-[tool.poetry.group.tests.dependencies]
-httpx = "^0.28.1"
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
 
 [tool.pytest.ini_options]
-log_cli = 1
+log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = "src"
 testpaths = "src/tests"

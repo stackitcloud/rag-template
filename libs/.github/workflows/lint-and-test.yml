@@ -33,7 +33,7 @@ jobs:
     needs: [SanitizeBranchName]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: stackitcloud/rag-core-library
@@ -59,7 +59,7 @@ jobs:
             service: [ "rag-core-lib", "rag-core-api", "admin-api-lib", "extractor-api-lib" ]
     steps:
         - name: Checkout code
-          uses: actions/checkout@v4
+          uses: actions/checkout@v5
           with:
               token: ${{ secrets.GITHUB_TOKEN }}
               repository: stackitcloud/rag-core-library

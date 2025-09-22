@@ -7,7 +7,7 @@ Welcome to the STACKIT RAG Template! This is a basic example of how to use the R
 
 ## Features 🚀
 
-**Document Management**: Supports PDFs, DOCX, PPTX, XML, and Confluence documents.
+**Document Management**: Supports PDFs, DOCX, PPTX, XML, EPUB documents and websource via confluence as well as sitemaps.
 
 **AI Integration**: Multiple LLM and embedder providers for flexibility.
 

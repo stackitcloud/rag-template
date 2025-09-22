@@ -7,13 +7,13 @@ from typing import Any, Optional
 from langchain_core.runnables import Runnable, RunnableConfig, ensure_config
 from langfuse import get_client
 
-from rag_core_lib.chains.async_chain import AsyncChain
+from rag_core_lib.runnables.async_runnable import AsyncRunnable
 
 RunnableInput = Any
 RunnableOutput = Any
 
 
-class TracedGraph(AsyncChain[RunnableInput, RunnableOutput], ABC):
+class TracedRunnable(AsyncRunnable[RunnableInput, RunnableOutput], ABC):
     """A class to represent a traced graph in an asynchronous chain.
 
     This class is designed to wrap around an inner Runnable chain and add tracing capabilities to it.

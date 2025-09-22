@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
 ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
-ENV POETRY_VERSION=1.8.3
+ENV POETRY_VERSION=2.1.3
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ RUN poetry config virtualenvs.create false &&\
 FROM --platform=linux/amd64 python:3.13-bookworm
 ARG dev=0
 
-RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}

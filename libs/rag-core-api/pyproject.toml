@@ -24,11 +24,7 @@ ragas = "^0.3.0"
 flashrank = "^0.2.10"
 pyyaml = "^6.0.2"
 openai = "^1.77.0"
-<<<<<<< HEAD
-langgraph = "^0.5.0"
-=======
 langgraph = "^0.6.0"
->>>>>>> dev-main
 pillow = "^11.2.1"
 langchain-ollama = "^0.3.2"
 pytest-asyncio = "^0.26.0"

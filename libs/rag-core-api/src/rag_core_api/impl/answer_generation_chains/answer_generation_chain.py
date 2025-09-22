@@ -7,14 +7,14 @@ from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrou
 from langchain_core.output_parsers import StrOutputParser
 
 from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
-from rag_core_lib.chains.async_chain import AsyncChain
+from rag_core_lib.runnables.async_runnable import AsyncRunnable
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 
 RunnableInput = AnswerGraphState
 RunnableOutput = str
 
 
-class AnswerGenerationChain(AsyncChain[RunnableInput, RunnableOutput]):
+class AnswerGenerationChain(AsyncRunnable[RunnableInput, RunnableOutput]):
     """Base class for LLM answer generation chain."""
 
     def __init__(self, langfuse_manager: LangfuseManager):

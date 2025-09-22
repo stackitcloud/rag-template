@@ -1,8 +1,9 @@
+import { settings } from "@shared/settings";
 import { newUid } from "@shared/utils";
 import { marked } from "marked";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
-import { useI18n } from "vue-i18n";
+import { ref } from "vue";
+import { i18n } from "@i18n/chat";
 import {
   ChatDocumentModel,
   mapToChatDocuments,
@@ -12,7 +13,6 @@ import { ChatRequestModel, mapToChatRequestModel } from "../../models/chat-reque
 import { InformationPiece } from "../../models/chat-response.model";
 import { DocumentResponseModel } from "../../models/document-response.model";
 import { ChatAPI } from "../chat.api";
-import { settings } from "@shared/settings";
 
 export const useChatStore = defineStore("chat", () => {
   const conversationId = ref();
@@ -21,12 +21,17 @@ export const useChatStore = defineStore("chat", () => {
   const isLoading = ref(false);
   const hasError = ref(false);
 
-  // Get i18n instance at the top level
-  const { t } = useI18n();
+  // Use the global i18n instance set up in the app
+  const t = i18n.global.t;
 
   const getInitialMessage = () => {
     try {
-      return t("chat.initialMessage", { bot_name: settings.bot.name });
+      const msg = t("chat.initialMessage", { bot_name: settings.bot.name });
+      // Defensive: if interpolation didn't happen for any edge reason, patch it
+      if (typeof msg === 'string' && msg.includes('{bot_name}')) {
+        return msg.replace('{bot_name}', settings.bot.name);
+      }
+      return msg as string;
     } catch (error) {
       console.warn("i18n interpolation failed, using fallback", error);
       return `Hi 👋, I'm your AI Assistant ${settings.bot.name}, here to support you with any questions regarding the provided documents!`;

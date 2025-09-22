@@ -4,6 +4,7 @@ import ChatBubble from "./ChatBubble.vue";
 import { ChatBubbleModel } from "../models/chat-bubble.model";
 import { extractTime } from "@shared/utils";
 import { onUpdated, ref, nextTick, computed } from "vue";
+import { settings } from "@shared/settings";
 import { useI18n } from "vue-i18n";
 const USER_AVATAR = "/assets/user.svg";
 const AI_AVATAR = "/assets/ai-avatar.svg";
@@ -23,7 +24,7 @@ const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
   const avatarSrc = isHuman ? USER_AVATAR : AI_AVATAR;
   const align = isHuman ? "right" : "left";
   const time = message.dateTime ? extractTime(message.dateTime) : undefined;
-  const name = isHuman ? "" : "rag";
+  const name = isHuman ? "" : settings.bot.name;
   const anchorIds = isHuman ? undefined : message.anchorIds;
 
   const mapped: ChatBubbleModel = {

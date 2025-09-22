@@ -14,7 +14,7 @@
 
 ## Introduction
 
-This repository contains the frontend applications built using Vue 3 within an NX monorepo architecture. 
+This repository contains the frontend applications built using Vue 3 within an NX monorepo architecture.
 Seperated in 2 appilcations `chat-app` and `admin-app`
 
 ## How to run it
@@ -54,10 +54,10 @@ npm run test
 - **pinia**: State management
 - **vue-i18n**: Internationalization
 - **vue-router**: Routing
-- **daisyUI**: Tailwind based CSS framework 
-- **heroicons**: Hand-crafted SVG icons (by Tailwind CSS) 
+- **daisyUI**: Tailwind based CSS framework
+- **heroicons**: Hand-crafted SVG icons (by Tailwind CSS)
 - **cypress**: End-to-end testing framework
-- **vite**: Local development server 
+- **vite**: Local development server
 
 ## Folder Structure
 [Simple Nx Monorepo Concept](https://nx.dev/concepts/more-concepts/monorepo-nx-enterprise#scope-where-a-library-lives-who-owns-it)
@@ -80,19 +80,24 @@ To change the theme, open the `tailwind.config.js` file and refer to the availab
 
 ### UI Customization
 - VITE_BOT_NAME = The AI assistant's display name (default: "Knowledge Agent")
-- VITE_UI_LOGO_PATH = Path to the main navigation logo (default: "/assets/navigation-logo.svg")
+- VITE_UI_LOGO_PATH = Common path to the main navigation logo (default: "/assets/navigation-logo.svg"). Used as a fallback for both light/dark.
+- VITE_UI_LOGO_PATH_LIGHT = Path to the logo used in light mode (fallbacks to VITE_UI_LOGO_PATH)
+- VITE_UI_LOGO_PATH_DARK = Path to the logo used in dark mode (fallbacks to VITE_UI_LOGO_PATH)
 - VITE_UI_THEME_DEFAULT = Default theme when user first visits (default: "dark")
 - VITE_UI_THEME_OPTIONS = Available theme options, comma-separated (default: "light,dark")
 
 For detailed UI customization instructions, see [UI Customization Guide](../docs/UI_Customization.md).
 
-> Important: 
+> Important:
 >
-> The environment variables are not used after the docker-image is build. 
-> When using the `Dockerfile` to run the frontend you have to copy the build frontend  from `/app/frontend` to `/usr/share/nginx/html` and run the `/app/env.sh` script. 
->This can be done with the following command:
+> The environment variables are not used after the docker-image is build.
+> When using the `Dockerfile` to run the frontend you have to copy the build frontend from `/app/frontend` to `/usr/share/nginx/html` and run the `/app/env.sh` script.
+>
+> This can be done with the following command:
+>
 > ```bash
->cp -r /app/frontend/. /usr/share/nginx/html
->/bin/sh -c /app/env.sh
->```
->This is a workaround for the inability of *VITE* to use env-vars at runtime.
+> cp -r /app/frontend/. /usr/share/nginx/html
+> /bin/sh -c /app/env.sh
+> ```
+>
+> This is a workaround for the inability of Vite to use env-vars at runtime.

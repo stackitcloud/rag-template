@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:21-slim as builder
+FROM node:24-slim as builder
 
 WORKDIR /usr/src/app
 

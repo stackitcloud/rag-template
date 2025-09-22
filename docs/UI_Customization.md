@@ -18,7 +18,9 @@ All customization is done through environment variables that can be set at build
 | Variable | Description | Default Value | Example |
 |----------|-------------|---------------|---------|
 | `VITE_BOT_NAME` | The AI assistant's display name | "Knowledge Agent" | "DocBot" |
-| `VITE_UI_LOGO_PATH` | Path to the main navigation logo | "/assets/navigation-logo.svg" | "/assets/my-logo.png" |
+| `VITE_UI_LOGO_PATH` | Common path to the main navigation logo (fallback for both light/dark) | "/assets/navigation-logo.svg" | "/assets/my-logo.png" |
+| `VITE_UI_LOGO_PATH_LIGHT` | Path to logo used in light mode (falls back to `VITE_UI_LOGO_PATH`) | — | "/assets/logo-light.svg" |
+| `VITE_UI_LOGO_PATH_DARK` | Path to logo used in dark mode (falls back to `VITE_UI_LOGO_PATH`) | — | "/assets/logo-dark.svg" |
 | `VITE_UI_THEME_DEFAULT` | Default theme when user first visits | "light" | "dark" |
 | `VITE_UI_THEME_OPTIONS` | Available theme options (comma-separated) | "light,dark" | "light,dark,auto" |
 
@@ -27,7 +29,7 @@ All customization is done through environment variables that can be set at build
 The bot name appears in the initial welcome message in the chat interface.
 
 **Default Message:**
-```
+```text
 Hi 👋, I'm your AI Assistant Knowledge Agent, here to support you with any questions regarding the provided documents!
 ```
 
@@ -55,15 +57,20 @@ Hi 👋, I'm your AI Assistant Knowledge Agent, here to support you with any que
 
 ### Logo Customization
 
-The logo appears in the navigation header of both chat and admin applications.
+The logo appears in the navigation header of both chat and admin applications. You can configure separate logos for light and dark themes.
 
-**Setting Custom Logo:**
+**Setting Custom Logos:**
 
-1. **Place your logo file** in the `frontend/apps/[app-name]/public/assets/` directory
-2. **Set the environment variable:**
-   ```bash
-   VITE_UI_LOGO_PATH=/assets/my-company-logo.svg
-   ```
+1. Place your logo files in the `frontend/apps/[app-name]/public/assets/` directory
+2. Set the environment variables:
+  ```bash
+  # Preferred: specify light and dark explicitly
+  VITE_UI_LOGO_PATH_LIGHT=/assets/my-logo-light.svg
+  VITE_UI_LOGO_PATH_DARK=/assets/my-logo-dark.svg
+
+  # Optional: common fallback used when LIGHT/DARK are not set
+  VITE_UI_LOGO_PATH=/assets/my-logo.svg
+  ```
 
 **Logo Requirements:**
 - **Format**: SVG, PNG, or JPG
@@ -71,13 +78,19 @@ The logo appears in the navigation header of both chat and admin applications.
 - **Background**: Transparent recommended for better theme compatibility
 - **Path**: Must be accessible from the public assets directory
 
-**Example:**
-```bash
-# Using a PNG logo
-VITE_UI_LOGO_PATH=/assets/company-logo.png
+**Fallback order:**
 
-# Using an SVG with custom path
-VITE_UI_LOGO_PATH=/assets/branding/main-logo.svg
+- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg`
+- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg`
+
+**Examples:**
+```bash
+# Separate light/dark logos
+VITE_UI_LOGO_PATH_LIGHT=/assets/company-logo-light.svg
+VITE_UI_LOGO_PATH_DARK=/assets/company-logo-dark.svg
+
+# Only a common logo
+VITE_UI_LOGO_PATH=/assets/company-logo.svg
 ```
 
 ### Theme System
@@ -121,7 +134,10 @@ The application supports a flexible theme system with user preference persistenc
    VITE_BOT_NAME=Development Bot
 
    # Logo customization
-   VITE_UI_LOGO_PATH=/assets/dev-logo.svg
+   VITE_UI_LOGO_PATH_LIGHT=/assets/dev-logo-light.svg
+   VITE_UI_LOGO_PATH_DARK=/assets/dev-logo-dark.svg
+   # Optional common fallback
+   # VITE_UI_LOGO_PATH=/assets/dev-logo.svg
 
    # Theme customization
    VITE_UI_THEME_DEFAULT=light
@@ -129,6 +145,7 @@ The application supports a flexible theme system with user preference persistenc
    ```
 
 2. **Start development server:**
+
    ```bash
    npm run chat:serve
    # or
@@ -140,9 +157,11 @@ The application supports a flexible theme system with user preference persistenc
 For Docker deployments, the frontend uses a special script (`env.sh`) to replace environment variables at runtime:
 
 1. **Set environment variables in your container:**
+
    ```dockerfile
    ENV VITE_BOT_NAME="Production Assistant"
-   ENV VITE_UI_LOGO_PATH="/assets/prod-logo.svg"
+   ENV VITE_UI_LOGO_PATH_LIGHT="/assets/prod-logo-light.svg"
+   ENV VITE_UI_LOGO_PATH_DARK="/assets/prod-logo-dark.svg"
    ENV VITE_UI_THEME_DEFAULT="light"
    ```
 
@@ -151,16 +170,19 @@ For Docker deployments, the frontend uses a special script (`env.sh`) to replace
 ### Kubernetes/Helm Deployment
 
 1. **Configure in your Helm values.yaml:**
+
    ```yaml
    frontend:
      env:
        VITE_BOT_NAME: "Enterprise Knowledge Bot"
-       VITE_UI_LOGO_PATH: "/assets/enterprise-logo.svg"
+       VITE_UI_LOGO_PATH_LIGHT: "/assets/enterprise-logo-light.svg"
+       VITE_UI_LOGO_PATH_DARK: "/assets/enterprise-logo-dark.svg"
        VITE_UI_THEME_DEFAULT: "dark"
        VITE_UI_THEME_OPTIONS: "light,dark"
    ```
 
-2. **Or use ConfigMap/Secret:**
+2. **Or use ConfigMap:**
+
    ```yaml
    apiVersion: v1
    kind: ConfigMap
@@ -168,7 +190,8 @@ For Docker deployments, the frontend uses a special script (`env.sh`) to replace
      name: frontend-config
    data:
      VITE_BOT_NAME: "K8s Assistant"
-     VITE_UI_LOGO_PATH: "/assets/k8s-logo.svg"
+     VITE_UI_LOGO_PATH_LIGHT: "/assets/k8s-logo-light.svg"
+     VITE_UI_LOGO_PATH_DARK: "/assets/k8s-logo-dark.svg"
    ```
 
 ## Advanced Customization
@@ -178,6 +201,7 @@ For Docker deployments, the frontend uses a special script (`env.sh`) to replace
 To add custom themes beyond light/dark:
 
 1. **Update the settings configuration:**
+
    ```typescript
    // frontend/libs/shared/settings.ts
    const defaultSettings: AppSettings = {
@@ -191,6 +215,7 @@ To add custom themes beyond light/dark:
    ```
 
 2. **Configure DaisyUI themes** in `tailwind.config.js`:
+
    ```javascript
    module.exports = {
      daisyui: {
@@ -214,6 +239,7 @@ To add custom themes beyond light/dark:
 Bot names and messages support internationalization:
 
 1. **Modify translation files:**
+
    ```json
    // frontend/libs/i18n/chat/en.json
    {
@@ -224,6 +250,7 @@ Bot names and messages support internationalization:
    ```
 
 2. **Add language-specific bot names:**
+
    ```json
    // frontend/libs/i18n/chat/de.json
    {
@@ -236,20 +263,23 @@ Bot names and messages support internationalization:
 ## Troubleshooting
 
 ### Bot Name Not Updating
+
 - **Issue**: Bot name shows as `{bot_name}` instead of actual name
 - **Cause**: Vue computed property not accessed correctly
 - **Solution**: Use `initialMessage.value` instead of `initialMessage` in the store
 
-### Logo Not Loading
+### Logo Not Loading / Wrong for Theme
+
 - **Issue**: Logo doesn't appear or shows broken image
 - **Cause**: Incorrect path or missing asset
 - **Solutions**:
-  - Verify file exists in `public/assets/` directory
-  - Check VITE_UI_LOGO_PATH value
+  - Verify files exist in `public/assets/` directory
+  - Check `VITE_UI_LOGO_PATH_LIGHT` / `VITE_UI_LOGO_PATH_DARK` (or `VITE_UI_LOGO_PATH` fallback)
   - Ensure path starts with `/assets/`
   - Check browser network tab for 404 errors
 
 ### Theme Not Persisting
+
 - **Issue**: Theme resets to default on page refresh
 - **Cause**: localStorage not being saved/loaded correctly
 - **Solutions**:
@@ -258,6 +288,7 @@ Bot names and messages support internationalization:
   - Clear localStorage and try again
 
 ### Environment Variables Not Working in Production
+
 - **Issue**: Customization works in development but not production
 - **Cause**: Vite environment variables are build-time only
 - **Solutions**:
@@ -268,22 +299,29 @@ Bot names and messages support internationalization:
 ## Example Configurations
 
 ### Corporate Deployment
+
 ```bash
 VITE_BOT_NAME="Corporate Knowledge Assistant"
-VITE_UI_LOGO_PATH="/assets/corporate-logo.svg"
+VITE_UI_LOGO_PATH_LIGHT="/assets/corporate-logo-light.svg"
+VITE_UI_LOGO_PATH_DARK="/assets/corporate-logo-dark.svg"
+# Optional common fallback
+# VITE_UI_LOGO_PATH="/assets/corporate-logo.svg"
 VITE_UI_THEME_DEFAULT="light"
 VITE_UI_THEME_OPTIONS="light,dark"
 ```
 
 ### Development Environment
+
 ```bash
 VITE_BOT_NAME="Dev Bot"
-VITE_UI_LOGO_PATH="/assets/dev-logo.png"
+VITE_UI_LOGO_PATH_LIGHT="/assets/dev-logo-light.png"
+VITE_UI_LOGO_PATH_DARK="/assets/dev-logo-dark.png"
 VITE_UI_THEME_DEFAULT="dark"
 VITE_UI_THEME_OPTIONS="light,dark"
 ```
 
 ### Minimal Configuration
+
 ```bash
 VITE_BOT_NAME="Assistant"
 VITE_UI_THEME_DEFAULT="light"

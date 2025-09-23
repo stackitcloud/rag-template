@@ -10,7 +10,7 @@ appVersion: "1.0.0"
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: "0.13.1"
+  version: "0.12.1"
   condition: features.langfuse.enabled
 - name: qdrant
   version: 1.15.3

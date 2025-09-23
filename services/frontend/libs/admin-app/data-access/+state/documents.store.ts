@@ -6,6 +6,7 @@ import {
   UploadedDocument,
   mapToUploadDocument,
 } from "../../models/uploaded-document.model";
+import axios from "axios";
 import { ConfluenceConfig, DocumentAPI, SitemapConfig } from "../document.api";
 
 export const useDocumentsStore = defineStore("chat", () => {
@@ -74,10 +75,10 @@ export const useDocumentsStore = defineStore("chat", () => {
       await DocumentAPI.loadConfluence(config);
       await loadDocuments(); // Refresh the document list after uploading
     } catch (err) {
-      if (err.response && err.response.status === 501) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === 501) {
         error.value = "confluence_not_configured";
         console.error("Confluence loader is not configured.");
-      } else if (err.response && err.response.status === 423) {
+      } else if (axios.isAxiosError(err) && err.response && err.response.status === 423) {
         error.value = "confluence_locked";
         console.error("Confluence loader returned a warning.");
       } else {
@@ -97,10 +98,10 @@ export const useDocumentsStore = defineStore("chat", () => {
       await DocumentAPI.loadSitemap(config);
       await loadDocuments(); // Refresh the document list after uploading
     } catch (err) {
-      if (err.response && err.response.status === 501) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === 501) {
         error.value = "sitemap_not_configured";
         console.error("Sitemap loader is not configured.");
-      } else if (err.response && err.response.status === 423) {
+      } else if (axios.isAxiosError(err) && err.response && err.response.status === 423) {
         error.value = "sitemap_locked";
         console.error("Sitemap loader returned a warning.");
       } else {
@@ -130,6 +131,11 @@ export const useDocumentsStore = defineStore("chat", () => {
 
   const deleteDocument = async (documentId: string) => {
     try {
+      // Prevent deletion if the document is currently processing
+      const doc = allDocuments.value?.find((d) => d.name === documentId);
+      if (doc?.status === "PROCESSING") {
+        return; // No-op while processing
+      }
       await DocumentAPI.deleteDocument(documentId);
       await loadDocuments();
     } catch (err) {

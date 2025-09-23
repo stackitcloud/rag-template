@@ -7,7 +7,7 @@ import {
   CheckCircleIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { DocumentModel } from "../models/document.model";
 
 const showDeleteModal = ref(false);
@@ -16,6 +16,10 @@ const props = defineProps<{
   data: DocumentModel;
   deleteDocument: (documentId: string) => void;
 }>();
+
+// Deletion is not allowed while a document is in PROCESSING state
+const isProcessing = computed(() => props.data.status === "PROCESSING");
+const canDelete = computed(() => !isProcessing.value);
 
 const statusClasses = {
   UPLOADING: "text-blue-500",
@@ -32,6 +36,7 @@ const statusText = {
 };
 
 const confirmDelete = () => {
+  if (!canDelete.value) return; // Guard against accidental triggers
   showDeleteModal.value = true;
 };
 
@@ -91,10 +96,13 @@ const executeDelete = () => {
     <div class="flex items-center">
       <button
         @click="confirmDelete"
-        class="btn btn-sm btn-ghost btn-circle opacity-60 hover:opacity-100"
+        :disabled="!canDelete"
+        :aria-disabled="!canDelete"
+        data-testid="document-delete-btn"
+        class="btn btn-sm btn-ghost btn-circle opacity-60 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Delete document"
       >
-        <TrashIcon class="w-4 h-4 text-error" />
+        <TrashIcon class="w-4 h-4" :class="canDelete ? 'text-error' : 'opacity-40'" />
       </button>
     </div>
   </div>

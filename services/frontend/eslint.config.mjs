@@ -1,13 +1,13 @@
 // Flat ESLint config for Vue 3 + TypeScript (ESLint 9)
 // Aligns with @vue/eslint-config-typescript v14 and Nx linting
 
-import { defineConfig } from 'eslint/config'
 import js from '@eslint/js'
-import pluginVue from 'eslint-plugin-vue'
 import {
   defineConfigWithVueTs,
   vueTsConfigs,
 } from '@vue/eslint-config-typescript'
+import pluginVue from 'eslint-plugin-vue'
+import { defineConfig } from 'eslint/config'
 
 export default defineConfigWithVueTs(
   // Global ignores

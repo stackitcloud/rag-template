@@ -2,9 +2,12 @@
 
 This guide explains how to customize the RAG Template frontend applications, including bot branding, theming, and logo configuration.
 
+Note: In this document, “frontend” refers to the folder at services/frontend in this repository. All links below point to files in that folder or elsewhere in this repo.
+
 ## Overview
 
 The RAG Template frontend supports several customization options:
+
 - **Bot Name**: Customize the AI assistant's name in chat messages
 - **Logo/Branding**: Replace the default logo with your organization's branding
 - **Theme System**: Switch between light and dark modes with user preference persistence
@@ -29,6 +32,7 @@ All customization is done through environment variables that can be set at build
 The bot name appears in the initial welcome message in the chat interface.
 
 **Default Message:**
+
 ```text
 Hi 👋, I'm your AI Assistant Knowledge Agent, here to support you with any questions regarding the provided documents!
 ```
@@ -36,18 +40,21 @@ Hi 👋, I'm your AI Assistant Knowledge Agent, here to support you with any que
 **Setting Custom Bot Name:**
 
 1. **Development Environment:**
+
    ```bash
    # In your .env file
    VITE_BOT_NAME=DocBot
    ```
 
 2. **Docker/Production:**
+
    ```bash
    # Environment variable
    export VITE_BOT_NAME="Your Custom Bot Name"
    ```
 
 3. **Kubernetes/Helm:**
+
    ```yaml
    # In your values.yaml or deployment
    env:
@@ -61,8 +68,13 @@ The logo appears in the navigation header of both chat and admin applications. Y
 
 **Setting Custom Logos:**
 
-1. Place your logo files in the `frontend/apps/[app-name]/public/assets/` directory
-2. Set the environment variables:
+1. Place your logo files in the app assets directory:
+
+- Chat app: services/frontend/apps/chat-app/public/assets/ ([open folder](../services/frontend/apps/chat-app/public/assets))
+- Admin app: services/frontend/apps/admin-app/public/assets/ ([open folder](../services/frontend/apps/admin-app/public/assets))
+
+1. Set the environment variables:
+
   ```bash
   # Preferred: specify light and dark explicitly
   VITE_UI_LOGO_PATH_LIGHT=/assets/my-logo-light.svg
@@ -73,6 +85,7 @@ The logo appears in the navigation header of both chat and admin applications. Y
   ```
 
 **Logo Requirements:**
+
 - **Format**: SVG, PNG, or JPG
 - **Size**: Optimized for 128px width (will be scaled to w-32 class)
 - **Background**: Transparent recommended for better theme compatibility
@@ -80,10 +93,11 @@ The logo appears in the navigation header of both chat and admin applications. Y
 
 **Fallback order:**
 
-- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg`
-- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg`
+- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo.svg))
+- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo.svg))
 
 **Examples:**
+
 ```bash
 # Separate light/dark logos
 VITE_UI_LOGO_PATH_LIGHT=/assets/company-logo-light.svg
@@ -98,18 +112,21 @@ VITE_UI_LOGO_PATH=/assets/company-logo.svg
 The application supports a flexible theme system with user preference persistence.
 
 **Available Themes:**
+
 - `light`: Light mode (default)
 - `dark`: Dark mode
 
 **Theme Configuration:**
 
 1. **Set Default Theme:**
+
    ```bash
    # Users will see dark mode by default
    VITE_UI_THEME_DEFAULT=dark
    ```
 
-2. **Configure Available Options:**
+1. **Configure Available Options:**
+
    ```bash
    # Only allow light mode (remove theme toggle)
    VITE_UI_THEME_OPTIONS=light
@@ -119,6 +136,7 @@ The application supports a flexible theme system with user preference persistenc
    ```
 
 **Theme Behavior:**
+
 - Theme preference is saved in browser's localStorage
 - Theme persists across browser sessions
 - Theme toggle button appears only when multiple options are available
@@ -128,7 +146,8 @@ The application supports a flexible theme system with user preference persistenc
 
 ### Local Development
 
-1. **Create/modify `.env` file in frontend directory:**
+1. **Create/modify `.env` file in frontend directory** (services/frontend/.env):
+
    ```bash
    # Bot customization
    VITE_BOT_NAME=Development Bot
@@ -144,7 +163,7 @@ The application supports a flexible theme system with user preference persistenc
    VITE_UI_THEME_OPTIONS=light,dark
    ```
 
-2. **Start development server:**
+1. **Start development server** (scripts are defined in [services/frontend/package.json](../services/frontend/package.json)):
 
    ```bash
    npm run chat:serve
@@ -154,7 +173,7 @@ The application supports a flexible theme system with user preference persistenc
 
 ### Docker Deployment
 
-For Docker deployments, the frontend uses a special script (`env.sh`) to replace environment variables at runtime:
+For Docker deployments, the frontend uses a special script (services/frontend/env.sh) to replace environment variables at runtime:
 
 1. **Set environment variables in your container:**
 
@@ -165,11 +184,11 @@ For Docker deployments, the frontend uses a special script (`env.sh`) to replace
    ENV VITE_UI_THEME_DEFAULT="light"
    ```
 
-2. **The env.sh script automatically replaces variables** in built JS/CSS files when the container starts.
+1. **The env.sh script automatically replaces variables** in built JS/CSS files when the container starts. See [services/frontend/env.sh](../services/frontend/env.sh).
 
 ### Kubernetes/Helm Deployment
 
-1. **Configure in your Helm values.yaml:**
+1. **Configure in your Helm values.yaml** (example chart values at [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml)):
 
    ```yaml
    frontend:
@@ -200,7 +219,7 @@ For Docker deployments, the frontend uses a special script (`env.sh`) to replace
 
 To add custom themes beyond light/dark:
 
-1. **Update the settings configuration:**
+1. **Update the settings configuration** in [services/frontend/libs/shared/settings.ts](../services/frontend/libs/shared/settings.ts):
 
    ```typescript
    // frontend/libs/shared/settings.ts
@@ -214,7 +233,7 @@ To add custom themes beyond light/dark:
    };
    ```
 
-2. **Configure DaisyUI themes** in `tailwind.config.js`:
+1. **Configure DaisyUI themes** in [services/frontend/tailwind.config.js](../services/frontend/tailwind.config.js):
 
    ```javascript
    module.exports = {
@@ -240,8 +259,8 @@ Bot names and messages support internationalization:
 
 1. **Modify translation files:**
 
-   ```json
-   // frontend/libs/i18n/chat/en.json
+  ```json
+  // services/frontend/libs/i18n/chat/en.json
    {
      "chat": {
        "initialMessage": "Hi 👋, I'm your AI Assistant {bot_name}, here to help!"
@@ -249,16 +268,17 @@ Bot names and messages support internationalization:
    }
    ```
 
-2. **Add language-specific bot names:**
+1. **Add language-specific bot names:**
 
-   ```json
-   // frontend/libs/i18n/chat/de.json
+  ```json
+  // services/frontend/libs/i18n/chat/de.json
    {
      "chat": {
        "initialMessage": "Hallo 👋, ich bin dein KI-Assistent {bot_name}, hier um zu helfen!"
      }
    }
    ```
+  Files: [en.json](../services/frontend/libs/i18n/chat/en.json), [de.json](../services/frontend/libs/i18n/chat/de.json)
 
 ## Troubleshooting
 

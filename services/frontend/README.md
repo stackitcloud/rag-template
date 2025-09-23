@@ -1,4 +1,4 @@
-# rag - Frontend
+# RAG - Frontend
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Seperated in 2 appilcations `chat-app` and `admin-app`
 ## How to run it
 
 ### Prepare
-- Node : Version >18.0.0
+- Node : Version >22.12.0
 - Fomatter : Vue-Official & Basic Ts formatter
 
 Install all dependencies for both apps
@@ -86,7 +86,7 @@ To change the theme, open the `tailwind.config.js` file and refer to the availab
 - VITE_UI_THEME_DEFAULT = Default theme when user first visits (default: "dark")
 - VITE_UI_THEME_OPTIONS = Available theme options, comma-separated (default: "light,dark")
 
-For detailed UI customization instructions, see [UI Customization Guide](../docs/UI_Customization.md).
+For detailed UI customization instructions, see [UI Customization Guide](../../docs/UI_Customization.md).
 
 > Important:
 >

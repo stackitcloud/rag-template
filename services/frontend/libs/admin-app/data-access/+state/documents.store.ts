@@ -1,3 +1,4 @@
+import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { DocumentModel } from "../../models/document.model.ts";
@@ -6,10 +7,15 @@ import {
   UploadedDocument,
   mapToUploadDocument,
 } from "../../models/uploaded-document.model";
-import axios from "axios";
 import { ConfluenceConfig, DocumentAPI, SitemapConfig } from "../document.api";
 
 export const useDocumentsStore = defineStore("chat", () => {
+  // Named HTTP status codes to avoid magic numbers
+  const HTTP_STATUS = {
+    NOT_IMPLEMENTED: 501, // 501 Not Implemented
+    LOCKED: 423, // 423 Locked
+  } as const;
+
   const uploadedDocuments = ref<UploadedDocument[]>([]);
   const allDocuments = ref<DocumentModel[]>();
   const error = ref<ErrorType | null>(null);
@@ -75,10 +81,10 @@ export const useDocumentsStore = defineStore("chat", () => {
       await DocumentAPI.loadConfluence(config);
       await loadDocuments(); // Refresh the document list after uploading
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response && err.response.status === 501) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === HTTP_STATUS.NOT_IMPLEMENTED) {
         error.value = "confluence_not_configured";
         console.error("Confluence loader is not configured.");
-      } else if (axios.isAxiosError(err) && err.response && err.response.status === 423) {
+      } else if (axios.isAxiosError(err) && err.response && err.response.status === HTTP_STATUS.LOCKED) {
         error.value = "confluence_locked";
         console.error("Confluence loader returned a warning.");
       } else {
@@ -98,10 +104,10 @@ export const useDocumentsStore = defineStore("chat", () => {
       await DocumentAPI.loadSitemap(config);
       await loadDocuments(); // Refresh the document list after uploading
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response && err.response.status === 501) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === HTTP_STATUS.NOT_IMPLEMENTED) {
         error.value = "sitemap_not_configured";
         console.error("Sitemap loader is not configured.");
-      } else if (axios.isAxiosError(err) && err.response && err.response.status === 423) {
+      } else if (axios.isAxiosError(err) && err.response && err.response.status === HTTP_STATUS.LOCKED) {
         error.value = "sitemap_locked";
         console.error("Sitemap loader returned a warning.");
       } else {

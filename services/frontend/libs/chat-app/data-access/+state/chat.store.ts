@@ -24,12 +24,16 @@ export const useChatStore = defineStore("chat", () => {
   // Use the global i18n instance set up in the app
   const t = i18n.global.t;
 
+  // Placeholder used in i18n templates when interpolation fails upstream
+  const BOT_NAME_PLACEHOLDER = "{bot_name}";
+
   const getInitialMessage = () => {
     try {
       const msg = t("chat.initialMessage", { bot_name: settings.bot.name });
       // Defensive: if interpolation didn't happen for any edge reason, patch it
-      if (typeof msg === 'string' && msg.includes('{bot_name}')) {
-        return msg.replace('{bot_name}', settings.bot.name);
+      if (typeof msg === 'string' && msg.includes(BOT_NAME_PLACEHOLDER)) {
+        // Replace all occurrences just in case the placeholder appears multiple times
+        return msg.split(BOT_NAME_PLACEHOLDER).join(settings.bot.name);
       }
       return msg as string;
     } catch (error) {

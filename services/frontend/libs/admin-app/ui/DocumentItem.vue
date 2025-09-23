@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import {
-  DocumentIcon,
-  ArrowUpTrayIcon,
   ArrowPathIcon,
-  ExclamationTriangleIcon,
+  ArrowUpTrayIcon,
   CheckCircleIcon,
+  DocumentIcon,
+  ExclamationTriangleIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, ref } from "vue";
@@ -18,7 +18,8 @@ const props = defineProps<{
 }>();
 
 // Deletion is not allowed while a document is in PROCESSING state
-const isProcessing = computed(() => props.data.status === "PROCESSING");
+const PROCESSING_STATE = "PROCESSING";
+const isProcessing = computed(() => props.data.status === PROCESSING_STATE);
 const canDelete = computed(() => !isProcessing.value);
 
 const statusClasses = {

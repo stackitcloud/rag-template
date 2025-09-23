@@ -13,7 +13,7 @@ jobs:
       contents: write # to be able to publish a GitHub release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Setup Node.js

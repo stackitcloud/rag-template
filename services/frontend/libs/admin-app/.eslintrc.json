@@ -1,17 +1,5 @@
 {
-    "extends": [
-        "plugin:vue/vue3-essential",
-        "eslint:recommended",
-        "@vue/eslint-config-typescript",
-        "../../.eslintrc.json"
-    ],
-    "ignorePatterns": ["!**/*"],
-    "overrides": [
-        {
-            "files": ["*.ts", "*.tsx", "*.js", "*.jsx", "*.vue"],
-            "rules": {
-                "vue/multi-word-component-names": "off"
-            }
-        }
-    ]
+  // Legacy .eslintrc disabled in favor of flat config (eslint.config.mjs)
+  "extends": [],
+  "ignorePatterns": ["!**/*"]
 }

@@ -9,7 +9,7 @@
         "lint": {
             "inputs": [
                 "default",
-                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/eslint.config.{js,cjs,mjs,ts,mts,cts}",
                 "{workspaceRoot}/.eslintignore"
             ],
             "cache": true
@@ -28,7 +28,7 @@
             "default",
             "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
             "!{projectRoot}/tsconfig.spec.json",
-            "!{projectRoot}/.eslintrc.json"
+            "!{projectRoot}/eslint.config.{js,cjs,mjs,ts,mts,cts}"
         ],
         "sharedGlobals": []
     }

@@ -50,8 +50,8 @@ module.exports = {
           "primary-content": "#0a1e2d", // Dark text on light background
 
           // Secondary color
-          secondary: "#575756", // Gray-80
-          "secondary-content": "#ffffff",
+          secondary: "#ffffff", // Gray-80
+          "secondary-content": "#575756",
 
           // Spacemint for accent buttons (btn-accent)
           accent: "#00c3cd", // Spacemint

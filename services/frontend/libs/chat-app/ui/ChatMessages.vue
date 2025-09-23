@@ -1,11 +1,11 @@
 <script lang="ts" setup>
+import { settings } from "@shared/settings";
+import { extractTime } from "@shared/utils";
+import { computed, nextTick, onUpdated, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { ChatBubbleModel } from "../models/chat-bubble.model";
 import { ChatMessageModel } from "../models/chat-message.model";
 import ChatBubble from "./ChatBubble.vue";
-import { ChatBubbleModel } from "../models/chat-bubble.model";
-import { extractTime } from "@shared/utils";
-import { onUpdated, ref, nextTick, computed } from "vue";
-import { settings } from "@shared/settings";
-import { useI18n } from "vue-i18n";
 const USER_AVATAR = "/assets/user.svg";
 const AI_AVATAR = "/assets/ai-avatar.svg";
 

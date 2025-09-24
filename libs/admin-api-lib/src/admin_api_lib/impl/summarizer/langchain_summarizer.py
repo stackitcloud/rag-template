@@ -97,43 +97,22 @@ class LangchainSummarizer(Summarizer):
     def _create_retry_decorator_settings(
         self, summarizer_settings: SummarizerSettings, retry_decorator_settings: RetryDecoratorSettings
     ):
-        return RetryDecoratorSettings(
-            max_retries=(
-                summarizer_settings.max_retries
-                if summarizer_settings.max_retries is not None
-                else retry_decorator_settings.max_retries
-            ),
-            retry_base_delay=(
-                summarizer_settings.retry_base_delay
-                if summarizer_settings.retry_base_delay is not None
-                else retry_decorator_settings.retry_base_delay
-            ),
-            retry_max_delay=(
-                summarizer_settings.retry_max_delay
-                if summarizer_settings.retry_max_delay is not None
-                else retry_decorator_settings.retry_max_delay
-            ),
-            backoff_factor=(
-                summarizer_settings.backoff_factor
-                if summarizer_settings.backoff_factor is not None
-                else retry_decorator_settings.backoff_factor
-            ),
-            attempt_cap=(
-                summarizer_settings.attempt_cap
-                if summarizer_settings.attempt_cap is not None
-                else retry_decorator_settings.attempt_cap
-            ),
-            jitter_min=(
-                summarizer_settings.jitter_min
-                if summarizer_settings.jitter_min is not None
-                else retry_decorator_settings.jitter_min
-            ),
-            jitter_max=(
-                summarizer_settings.jitter_max
-                if summarizer_settings.jitter_max is not None
-                else retry_decorator_settings.jitter_max
-            ),
-        )
+        fields = [
+            "max_retries",
+            "retry_base_delay",
+            "retry_max_delay",
+            "backoff_factor",
+            "attempt_cap",
+            "jitter_min",
+            "jitter_max",
+        ]
+        settings_kwargs = {
+            field: getattr(summarizer_settings, field)
+            if getattr(summarizer_settings, field) is not None
+            else getattr(retry_decorator_settings, field)
+            for field in fields
+        }
+        return RetryDecoratorSettings(**settings_kwargs)
 
     def _create_chain(self) -> Runnable:
         return self._langfuse_manager.get_base_prompt(self.__class__.__name__) | self._langfuse_manager.get_base_llm(

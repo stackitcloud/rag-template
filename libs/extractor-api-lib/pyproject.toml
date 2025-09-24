@@ -92,15 +92,27 @@ partial = "^1.0"
 pyyaml = "^6.0.2"
 numpy = "^2.2.5"
 docx2txt = "^0.9"
+<<<<<<< HEAD
 unstructured = {extras = ["docx", "pptx"], version = "0.18.11"}
+=======
+unstructured = {extras = ["docx", "pptx"], version = "0.18.13"}
+>>>>>>> main
 html5lib = "^1.1"
 langchain-community = "^0.3.23"
 atlassian-python-api = "^4.0.3"
 markdownify = "^1.1.0"
+<<<<<<< HEAD
 langchain-core = "0.3.72"
 camelot-py = {extras = ["cv"], version = "^1.0.0"}
 fake-useragent = "^2.2.0"
 pypdfium2 = "4.30.0"
+=======
+langchain-core = "0.3.74"
+camelot-py = {extras = ["cv"], version = "^1.0.0"}
+fake-useragent = "^2.2.0"
+pypdfium2 = "4.30.0"
+pypandoc-binary = "^1.15"
+>>>>>>> main
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

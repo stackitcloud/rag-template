@@ -3,12 +3,21 @@
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Factory, List, Singleton  # noqa: WOT001
 
-from extractor_api_lib.impl.api_endpoints.general_source_extractor import GeneralSourceExtractor
+from extractor_api_lib.impl.api_endpoints.general_file_extractor import (
+    GeneralFileExtractor,
+)
+from extractor_api_lib.impl.api_endpoints.general_source_extractor import (
+    GeneralSourceExtractor,
+)
 from extractor_api_lib.impl.extractors.confluence_extractor import ConfluenceExtractor
-from extractor_api_lib.impl.extractors.file_extractors.ms_docs_extractor import MSDocsExtractor
+from extractor_api_lib.impl.extractors.file_extractors.epub_extractor import (
+    EpubExtractor,
+)
+from extractor_api_lib.impl.extractors.file_extractors.ms_docs_extractor import (
+    MSDocsExtractor,
+)
 from extractor_api_lib.impl.extractors.file_extractors.pdf_extractor import PDFExtractor
 from extractor_api_lib.impl.extractors.file_extractors.xml_extractor import XMLExtractor
-from extractor_api_lib.impl.api_endpoints.general_file_extractor import GeneralFileExtractor
 from extractor_api_lib.impl.extractors.sitemap_extractor import SitemapExtractor
 from extractor_api_lib.impl.file_services.s3_service import S3Service
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
@@ -17,7 +26,12 @@ from extractor_api_lib.impl.mapper.confluence_langchain_document2information_pie
 from extractor_api_lib.impl.mapper.internal2external_information_piece import (
     Internal2ExternalInformationPiece,
 )
-from extractor_api_lib.impl.mapper.sitemap_document2information_piece import SitemapLangchainDocument2InformationPiece
+from extractor_api_lib.impl.mapper.langchain_document2information_piece import (
+    LangchainDocument2InformationPiece,
+)
+from extractor_api_lib.impl.mapper.sitemap_document2information_piece import (
+    SitemapLangchainDocument2InformationPiece,
+)
 from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.settings.s3_settings import S3Settings
 from extractor_api_lib.impl.table_converter.dataframe2markdown import DataFrame2Markdown
@@ -44,12 +58,15 @@ class DependencyContainer(DeclarativeContainer):
     xml_extractor = Singleton(XMLExtractor, file_service)
 
     intern2external = Singleton(Internal2ExternalInformationPiece)
-    langchain_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
+    confluence_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
+    langchain_document2information_piece = Singleton(LangchainDocument2InformationPiece)
     sitemap_document2information_piece = Singleton(SitemapLangchainDocument2InformationPiece)
-    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor)
+    epub_extractor = Singleton(EpubExtractor, file_service, langchain_document2information_piece)
+
+    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor, epub_extractor)
 
     general_file_extractor = Singleton(GeneralFileExtractor, file_service, file_extractors, intern2external)
-    confluence_extractor = Singleton(ConfluenceExtractor, mapper=langchain_document2information_piece)
+    confluence_extractor = Singleton(ConfluenceExtractor, mapper=confluence_document2information_piece)
 
     sitemap_extractor = Singleton(
         SitemapExtractor,

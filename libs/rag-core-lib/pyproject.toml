@@ -21,7 +21,11 @@ requests-oauthlib = "^2.0.0"
 langfuse = "3.2.1"
 deprecated = "^1.2.18"
 openai = "^1.77.0"
+<<<<<<< HEAD
 langchain-core = "0.3.72"
+=======
+langchain-core = "0.3.74"
+>>>>>>> main
 langchain-openai = "^0.3.27"
 
 

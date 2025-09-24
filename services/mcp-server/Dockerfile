@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 FROM --platform=linux/amd64 python:3.13.5-bookworm AS build
+=======
+FROM --platform=linux/amd64 python:3.13.7-bookworm AS build
+>>>>>>> main
 
 ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
-ENV POETRY_VERSION=1.8.3
+ENV POETRY_VERSION=2.1.3
 
 WORKDIR /app
 
@@ -26,10 +30,14 @@ RUN poetry config virtualenvs.create false &&\
     poetry install --no-interaction --no-ansi --no-root; \
     fi
 
+<<<<<<< HEAD
 FROM --platform=linux/amd64 python:3.13.5-bookworm
+=======
+FROM --platform=linux/amd64 python:3.13.7-bookworm
+>>>>>>> main
 ARG dev=0
 
-RUN adduser --disabled-password --gecos "" --uid 65532 nonroot
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}

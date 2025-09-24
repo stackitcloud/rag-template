@@ -43,7 +43,12 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint"
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/chat-app/**/*.{ts,tsx,js,jsx,vue,d.ts}"
+        ]
+      }
     }
   },
   "tags": []

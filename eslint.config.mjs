@@ -1,12 +1,6 @@
-// Root ESLint flat config delegating to services/frontend
-// Ensures Nx executions from repo root pick up the frontend flat config.
-import { defineConfig } from 'eslint/config'
+// Root ESLint flat config
+// Delegate to the frontend flat config by re-exporting it directly so Nx (running from repo root)
+// picks up the correct Vue + TypeScript parsers and rules.
 import frontendConfig from './services/frontend/eslint.config.mjs'
 
-export default defineConfig([
-  {
-    name: 'frontend/delegate',
-    basePath: 'services/frontend',
-    extends: frontendConfig,
-  },
-])
+export default frontendConfig

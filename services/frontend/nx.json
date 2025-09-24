@@ -9,8 +9,7 @@
         "lint": {
             "inputs": [
                 "default",
-                "{workspaceRoot}/eslint.config.{js,cjs,mjs,ts,mts,cts}",
-                "{workspaceRoot}/.eslintignore"
+                "{workspaceRoot}/eslint.config.{js,cjs,mjs,ts,mts,cts}"
             ],
             "cache": true
         },

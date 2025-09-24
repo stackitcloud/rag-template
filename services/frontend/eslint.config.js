@@ -1,4 +1,3 @@
-// Bridge file so tools that look specifically for eslint.config.js can load the flat config.
-// Re-export the existing ESM flat config from eslint.config.mjs
-import config from './eslint.config.mjs'
-export default config
+// Bridge file for tooling that expects eslint.config.js.
+// Use CommonJS to avoid requiring package.json { type: 'module' } in Node/vite contexts.
+module.exports = require('./eslint.config.mjs').default

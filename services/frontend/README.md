@@ -20,6 +20,7 @@ Seperated in 2 appilcations `chat-app` and `admin-app`
 ## How to run it
 
 ### Prepare
+
 - Node : Version >22.12.0
 - Fomatter : Vue-Official & Basic Ts formatter
 
@@ -38,6 +39,16 @@ npx nx serve chat-app:serve
 
 // runs the admin app on http://localhost:4300
 npx nx serve admin-app:serve
+```
+
+### Live updates with Tilt
+
+When running via Tilt, the frontend containers use Nginx and Tilt syncs the built assets (Vite `dist/`) directly into `/usr/share/nginx/html` inside the pod. For live updates while editing code, run a build in watch mode and Tilt will sync changes automatically:
+
+```bash
+# From services/frontend
+npx nx run admin-app:build --watch
+npx nx run chat-app:build --watch
 ```
 
 ### Test

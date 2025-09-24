@@ -1,43 +1,6 @@
 {
-    "root": true,
-    "ignorePatterns": ["**/*"],
-    "plugins": ["@nx"],
-    "overrides": [
-        {
-            "files": ["*.ts", "*.tsx", "*.js", "*.jsx", "*.vue"],
-            "rules": {
-                "@nx/enforce-module-boundaries": [
-                    "error",
-                    {
-                        "enforceBuildableLibDependency": true,
-                        "allow": [],
-                        "depConstraints": [
-                            {
-                                "sourceTag": "*",
-                                "onlyDependOnLibsWithTags": ["*"]
-                            }
-                        ]
-                    }
-                ]
-            }
-        },
-        {
-            "files": ["*.ts", "*.tsx"],
-            "extends": ["plugin:@nx/typescript"],
-            "rules": {}
-        },
-        {
-            "files": ["*.js", "*.jsx"],
-            "extends": ["plugin:@nx/javascript"],
-            "rules": {}
-        },
-        {
-            "files": ["*.vue"],
-            "extends": [
-                "plugin:vue/vue3-essential",
-                "@vue/eslint-config-typescript"
-            ],
-            "rules": {}
-        }
-    ]
+  // Legacy .eslintrc placeholder — actual config is in eslint.config.mjs (ESLint 9 flat config)
+  "root": true,
+  // Do NOT ignore everything; let flat config handle files
+  "ignorePatterns": []
 }

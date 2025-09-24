@@ -13,7 +13,7 @@ dependencies:
   version: "0.12.1"
   condition: features.langfuse.enabled
 - name: qdrant
-  version: 1.15.3
+  version: 1.15.4
   repository: "https://qdrant.github.io/qdrant-helm"
   condition: features.qdrant.enabled
 - name: minio

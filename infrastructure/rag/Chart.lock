@@ -7,12 +7,12 @@ dependencies:
   version: 1.15.4
 - name: minio
   repository: https://charts.bitnami.com/bitnami
-  version: 15.0.3
+  version: 15.0.7
 - name: keydb
   repository: https://enapter.github.io/charts/
   version: 0.48.0
 - name: ollama
   repository: https://otwld.github.io/ollama-helm/
-  version: 1.1.0
-digest: sha256:5332f282c85a863009068f6554ff10134929b1134b1b655afb52cf5b7951b52d
-generated: "2025-09-24T09:18:47.34553+02:00"
+  version: 1.27.0
+digest: sha256:2cb5beb7d39b2ecc3081a80e8bcbdcebf083b155b6099cfefc3c3c590aa0df74
+generated: "2025-09-02T11:38:41.209463+02:00"

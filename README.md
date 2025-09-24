@@ -108,7 +108,7 @@ The frontend provides user-friendly interfaces for both chat and document manage
 - **Chat App**: Interface for interacting with the RAG system
 - **Admin App**: Interface for managing documents and system configuration
 
-For further information, please consult the [Frontend README](./services/frontend/README.md).
+For further information, please consult the [Frontend README](./services/frontend/README.md). For branding, theming, and logo configuration, see the [UI Customization Guide](./docs/UI_Customization.md).
 
 #### 1.1.6 Infrastructure
 
@@ -237,6 +237,8 @@ Environment variables are loaded from `.env` file in the root of this git-reposi
 The *Tilt* UI is available at [http://localhost:10350/](http://localhost:10350/)
 
 If you want to access *Qdrant* etc. just click the resource in the UI. In the upper corner will be the link, to access the resource.
+
+>  📝 NOTE: For frontend live updates with Tilt see [Frontend live updates with Tilt](./services/frontend/README.md#live-updates-with-tilt)
 
 To enable debugging, start tilt with the following command:
 

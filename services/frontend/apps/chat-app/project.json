@@ -11,7 +11,8 @@
       ],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/chat-app"
+        "outputPath": "dist/apps/chat-app",
+        "configFile": "apps/chat-app/vite.config.mts"
       },
       "configurations": {
         "development": {
@@ -26,7 +27,8 @@
       "executor": "@nx/vite:dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "chat-app:build"
+        "buildTarget": "chat-app:build",
+        "configFile": "apps/chat-app/vite.config.mts"
       },
       "configurations": {
         "development": {
@@ -41,7 +43,12 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint"
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/chat-app/**/*.{ts,tsx,js,jsx,vue,d.ts}"
+        ]
+      }
     }
   },
   "tags": []

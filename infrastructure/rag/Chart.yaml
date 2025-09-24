@@ -18,14 +18,15 @@ dependencies:
   condition: features.qdrant.enabled
 - name: minio
   repository: https://charts.bitnami.com/bitnami
-  version: "15.0.3"
+  version: "15.0.7"
   condition: features.minio.enabled
 - name: keydb
+  alias: keydb
   repository: https://enapter.github.io/charts/
   version: "0.48.0"
   condition: features.keydb.enabled
 - name: ollama
   alias: ollama
-  version: 1.1.0
+  version: 1.27.0
   repository: https://otwld.github.io/ollama-helm/
   condition: features.ollama.enabled

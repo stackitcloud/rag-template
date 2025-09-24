@@ -555,4 +555,4 @@ ollama:
 
 qdrant:
   image:
-    tag: v1.14.2
+    tag: v1.15.4

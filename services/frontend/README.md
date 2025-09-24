@@ -20,6 +20,7 @@ Seperated in 2 appilcations `chat-app` and `admin-app`
 ## How to run it
 
 ### Prepare
+
 - Node : Version >22.12.0
 - Fomatter : Vue-Official & Basic Ts formatter
 
@@ -48,13 +49,6 @@ When running via Tilt, the frontend containers use Nginx and Tilt syncs the buil
 # From services/frontend
 npx nx run admin-app:build --watch
 npx nx run chat-app:build --watch
-```
-
-If you prefer a one-off build:
-
-```bash
-npm run admin:build
-npm run chat:build
 ```
 
 ### Test

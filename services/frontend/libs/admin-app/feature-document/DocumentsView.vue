@@ -8,7 +8,7 @@ import { DocumentModel } from "../models/document.model";
 
 const { t } = useI18n();
 const documentStore = useDocumentsStore();
-const allDocuments = computed((): DocumentModel[] => documentStore.allDocuments);
+const allDocuments = computed((): DocumentModel[] => documentStore.allDocuments ?? []);
 
 watch(allDocuments, (newDocs, oldDocs) => {
   if (oldDocs && newDocs && newDocs.some((doc: DocumentModel) => doc.status === "UPLOADING" || doc.status === "PROCESSING")) {

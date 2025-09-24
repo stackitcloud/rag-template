@@ -12,7 +12,7 @@ export interface ConfluenceConfig {
   spaceKey: string;
   token: string;
   url: string;
-    maxPages?: number;
+  maxPages?: number;
   name: string;
 }
 

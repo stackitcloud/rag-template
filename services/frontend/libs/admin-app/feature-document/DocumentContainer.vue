@@ -8,8 +8,8 @@
         import { DocumentModel } from '../models/document.model.ts';
 
         const { t } = useI18n();
-    const store = useDocumentsStore();
-    const documents = computed<DocumentModel[]>(() => store.allDocuments ?? []);
+        const store = useDocumentsStore();
+        const documents = computed<DocumentModel[]>(() => store.allDocuments ?? []);
 
         const deleteDocument = (documentId: string) => {
             store.deleteDocument(documentId);

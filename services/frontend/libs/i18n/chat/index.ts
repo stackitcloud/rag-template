@@ -7,12 +7,14 @@ const defaultLocale = 'en';
 export type T = ReturnType<typeof useI18n>['t'];
 
 const getUserPreferredLocale = () => {
-  const browserLocale = navigator.language;
+  const browserLocale = navigator.language?.split('-')[0] || defaultLocale;
   return supportedLocales.includes(browserLocale) ? browserLocale : defaultLocale;
 }
 
 export const i18n = createI18n({
+  legacy: false, // use composer API
+  globalInjection: true,
   locale: getUserPreferredLocale(),
   messages: { 'de': de, 'en': en },
-  fallbackLocale: defaultLocale
+  fallbackLocale: defaultLocale,
 });

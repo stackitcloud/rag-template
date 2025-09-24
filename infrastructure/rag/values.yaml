@@ -1,3 +1,8 @@
+global:
+  security:
+    # -- Allow insecure images to use bitnami legacy repository. Can be set to false if secure images are being used (Paid).
+    allowInsecureImages: true
+
 features:
   ollama:
     enabled: false
@@ -70,7 +75,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "latest"
+      tag: "v2.2.2"
 
   name: backend
   replicaCount: 1
@@ -78,7 +83,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -216,7 +221,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   service:
     type: ClusterIP
@@ -251,7 +256,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -331,7 +336,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -379,7 +384,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   service:
     type: ClusterIP
@@ -454,19 +459,33 @@ shared:
 
 langfuse:
   minio:
+    image:
+      repository: bitnamilegacy/minio
     deploy: false
   valkey:
+    image:
+      repository: bitnamilegacy/valkey
     deploy: false #<--- keydb is used instead of valkey
   image:
     repository: ghcr.io/langfuse/langfuse
     pullPolicy: Always
     tag: "3.27.2"
   postgresql:
+    image:
+      repository: bitnamilegacy/postgresql
     deploy: true
     auth:
       username: postgres
       password: postgres
       database: langfuse
+  clickhouse:
+    image:
+      repository: bitnamilegacy/clickhouse
+    zookeeper:
+      image:
+        repository: bitnamilegacy/zookeeper
+
+
   langfuse:
     nextauth:
       url: http://localhost:3000
@@ -529,6 +548,8 @@ langfuse:
       timeoutSeconds: 300
 
 minio:
+  image:
+    repository: bitnamilegacy/minio
   auth:
     ## @param auth.rootUser MinIO&reg; root username
     ##
@@ -563,4 +584,4 @@ ollama:
 
 qdrant:
   image:
-    tag: v1.14.1
+    tag: v1.15.4

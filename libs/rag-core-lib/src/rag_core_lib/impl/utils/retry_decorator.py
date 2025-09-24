@@ -98,7 +98,7 @@ class _RetryEngine:
             self.cfg.retry_max_delay,
         )
 
-    def _calculate_wait_time(self, attempt: int, exc: BaseException) -> float | None:
+    def _calculate_wait_time(self, attempt: int, exc: BaseException) -> Optional[float]:
         """Return wait seconds or None to re-raise."""
         total_attempts = self.cfg.max_retries + 1
         if attempt == self.cfg.max_retries:

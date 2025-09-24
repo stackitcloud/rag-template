@@ -296,31 +296,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-<<<<<<< HEAD
-version = "1.39.17"
-=======
 version = "1.40.21"
->>>>>>> main
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "boto3-1.39.17-py3-none-any.whl", hash = "sha256:6af9f7d6db7b5e72d6869ae22ebad1b0c6602591af2ef5d914b331a055953df5"},
-    {file = "boto3-1.39.17.tar.gz", hash = "sha256:a6904a40b1c61f6a1766574b3155ec75a6020399fb570be2b51bf93a2c0a2b3d"},
-]
-
-[package.dependencies]
-botocore = ">=1.39.17,<1.40.0"
-=======
     {file = "boto3-1.40.21-py3-none-any.whl", hash = "sha256:3772fb828864d3b7046c8bdf2f4860aaca4a79f25b7b060206c6a5f4944ea7f9"},
     {file = "boto3-1.40.21.tar.gz", hash = "sha256:876ccc0b25517b992bd27976282510773a11ebc771aa5b836a238ea426c82187"},
 ]
 
 [package.dependencies]
 botocore = ">=1.40.21,<1.41.0"
->>>>>>> main
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -329,23 +316,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-<<<<<<< HEAD
-version = "1.39.17"
-=======
 version = "1.40.21"
->>>>>>> main
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "botocore-1.39.17-py3-none-any.whl", hash = "sha256:41db169e919f821b3ef684794c5e67dd7bb1f5ab905d33729b1d8c27fafe8004"},
-    {file = "botocore-1.39.17.tar.gz", hash = "sha256:1a1f0b29dab5d1b10d16f14423c16ac0a3043272f579e9ab0d757753ee9a7d2b"},
-=======
     {file = "botocore-1.40.21-py3-none-any.whl", hash = "sha256:574ecf9b68c1721650024a27e00e0080b6f141c281ebfce49e0d302969270ef4"},
     {file = "botocore-1.40.21.tar.gz", hash = "sha256:f77e9c199df0252b14ea739a9ac99723940f6bde90f4c2e7802701553a62827b"},
->>>>>>> main
 ]
 
 [package.dependencies]
@@ -716,44 +694,12 @@ typing-inspect = ">=0.4.0,<1"
 
 [[package]]
 name = "debugpy"
-<<<<<<< HEAD
-version = "1.8.15"
-=======
 version = "1.8.16"
->>>>>>> main
 description = "An implementation of the Debug Adapter Protocol for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-<<<<<<< HEAD
-    {file = "debugpy-1.8.15-cp310-cp310-macosx_14_0_x86_64.whl", hash = "sha256:e9a8125c85172e3ec30985012e7a81ea5e70bbb836637f8a4104f454f9b06c97"},
-    {file = "debugpy-1.8.15-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7fd0b6b5eccaa745c214fd240ea82f46049d99ef74b185a3517dad3ea1ec55d9"},
-    {file = "debugpy-1.8.15-cp310-cp310-win32.whl", hash = "sha256:8181cce4d344010f6bfe94a531c351a46a96b0f7987750932b2908e7a1e14a55"},
-    {file = "debugpy-1.8.15-cp310-cp310-win_amd64.whl", hash = "sha256:af2dcae4e4cd6e8b35f982ccab29fe65f7e8766e10720a717bc80c464584ee21"},
-    {file = "debugpy-1.8.15-cp311-cp311-macosx_14_0_universal2.whl", hash = "sha256:babc4fb1962dd6a37e94d611280e3d0d11a1f5e6c72ac9b3d87a08212c4b6dd3"},
-    {file = "debugpy-1.8.15-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f778e68f2986a58479d0ac4f643e0b8c82fdd97c2e200d4d61e7c2d13838eb53"},
-    {file = "debugpy-1.8.15-cp311-cp311-win32.whl", hash = "sha256:f9d1b5abd75cd965e2deabb1a06b0e93a1546f31f9f621d2705e78104377c702"},
-    {file = "debugpy-1.8.15-cp311-cp311-win_amd64.whl", hash = "sha256:62954fb904bec463e2b5a415777f6d1926c97febb08ef1694da0e5d1463c5c3b"},
-    {file = "debugpy-1.8.15-cp312-cp312-macosx_14_0_universal2.whl", hash = "sha256:3dcc7225cb317469721ab5136cda9ff9c8b6e6fb43e87c9e15d5b108b99d01ba"},
-    {file = "debugpy-1.8.15-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:047a493ca93c85ccede1dbbaf4e66816794bdc214213dde41a9a61e42d27f8fc"},
-    {file = "debugpy-1.8.15-cp312-cp312-win32.whl", hash = "sha256:b08e9b0bc260cf324c890626961dad4ffd973f7568fbf57feb3c3a65ab6b6327"},
-    {file = "debugpy-1.8.15-cp312-cp312-win_amd64.whl", hash = "sha256:e2a4fe357c92334272eb2845fcfcdbec3ef9f22c16cf613c388ac0887aed15fa"},
-    {file = "debugpy-1.8.15-cp313-cp313-macosx_14_0_universal2.whl", hash = "sha256:f5e01291ad7d6649aed5773256c5bba7a1a556196300232de1474c3c372592bf"},
-    {file = "debugpy-1.8.15-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:94dc0f0d00e528d915e0ce1c78e771475b2335b376c49afcc7382ee0b146bab6"},
-    {file = "debugpy-1.8.15-cp313-cp313-win32.whl", hash = "sha256:fcf0748d4f6e25f89dc5e013d1129ca6f26ad4da405e0723a4f704583896a709"},
-    {file = "debugpy-1.8.15-cp313-cp313-win_amd64.whl", hash = "sha256:73c943776cb83e36baf95e8f7f8da765896fd94b05991e7bc162456d25500683"},
-    {file = "debugpy-1.8.15-cp38-cp38-macosx_14_0_x86_64.whl", hash = "sha256:054cd4935bd2e4964dfe1aeee4d6bca89d0c833366776fc35387f8a2f517dd00"},
-    {file = "debugpy-1.8.15-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:21c4288e662997df3176c4b9d93ee1393913fbaf320732be332d538000c53208"},
-    {file = "debugpy-1.8.15-cp38-cp38-win32.whl", hash = "sha256:aaa8ce6a37d764f93fe583d7c6ca58eb7550b36941387483db113125f122bb0d"},
-    {file = "debugpy-1.8.15-cp38-cp38-win_amd64.whl", hash = "sha256:71cdf7f676af78e70f005c7fad2ef9da0edc2a24befbf3ab146a51f0d58048c2"},
-    {file = "debugpy-1.8.15-cp39-cp39-macosx_14_0_x86_64.whl", hash = "sha256:085b6d0adb3eb457c2823ac497a0690b10a99eff8b01c01a041e84579f114b56"},
-    {file = "debugpy-1.8.15-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cd546a405381d17527814852642df0a74b7da8acc20ae5f3cfad0b7c86419511"},
-    {file = "debugpy-1.8.15-cp39-cp39-win32.whl", hash = "sha256:ae0d445fe11ff4351428e6c2389e904e1cdcb4a47785da5a5ec4af6c5b95fce5"},
-    {file = "debugpy-1.8.15-cp39-cp39-win_amd64.whl", hash = "sha256:de7db80189ca97ab4b10a87e4039cfe4dd7ddfccc8f33b5ae40fcd33792fc67a"},
-    {file = "debugpy-1.8.15-py2.py3-none-any.whl", hash = "sha256:bce2e6c5ff4f2e00b98d45e7e01a49c7b489ff6df5f12d881c67d2f1ac635f3d"},
-    {file = "debugpy-1.8.15.tar.gz", hash = "sha256:58d7a20b7773ab5ee6bdfb2e6cf622fdf1e40c9d5aef2857d85391526719ac00"},
-=======
     {file = "debugpy-1.8.16-cp310-cp310-macosx_14_0_x86_64.whl", hash = "sha256:2a3958fb9c2f40ed8ea48a0d34895b461de57a1f9862e7478716c35d76f56c65"},
     {file = "debugpy-1.8.16-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e5ca7314042e8a614cc2574cd71f6ccd7e13a9708ce3c6d8436959eae56f2378"},
     {file = "debugpy-1.8.16-cp310-cp310-win32.whl", hash = "sha256:8624a6111dc312ed8c363347a0b59c5acc6210d897e41a7c069de3c53235c9a6"},
@@ -780,7 +726,6 @@ files = [
     {file = "debugpy-1.8.16-cp39-cp39-win_amd64.whl", hash = "sha256:c2c47c2e52b40449552843b913786499efcc3dbc21d6c49287d939cd0dbc49fd"},
     {file = "debugpy-1.8.16-py2.py3-none-any.whl", hash = "sha256:19c9521962475b87da6f673514f7fd610328757ec993bf7ec0d8c96f9a325f9e"},
     {file = "debugpy-1.8.16.tar.gz", hash = "sha256:31e69a1feb1cf6b51efbed3f6c9b0ef03bc46ff050679c4be7ea6d2e23540870"},
->>>>>>> main
 ]
 
 [[package]]
@@ -1946,23 +1891,14 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<10"
 
 [[package]]
 name = "langchain-core"
-<<<<<<< HEAD
-version = "0.3.72"
-=======
 version = "0.3.74"
->>>>>>> main
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "langchain_core-0.3.72-py3-none-any.whl", hash = "sha256:9fa15d390600eb6b6544397a7aa84be9564939b6adf7a2b091179ea30405b240"},
-    {file = "langchain_core-0.3.72.tar.gz", hash = "sha256:4de3828909b3d7910c313242ab07b241294650f5cb6eac17738dd3638b1cd7de"},
-=======
     {file = "langchain_core-0.3.74-py3-none-any.whl", hash = "sha256:088338b5bc2f6a66892f9afc777992c24ee3188f41cbc603d09181e34a228ce7"},
     {file = "langchain_core-0.3.74.tar.gz", hash = "sha256:ff604441aeade942fbcc0a3860a592daba7671345230c2078ba2eb5f82b6ba76"},
->>>>>>> main
 ]
 
 [package.dependencies]
@@ -3244,11 +3180,7 @@ deprecated = "^1.2.18"
 flashrank = "^0.2.10"
 langchain = "^0.3.25"
 langchain-community = "0.3.27"
-<<<<<<< HEAD
-langchain-core = "0.3.72"
-=======
 langchain-core = "0.3.74"
->>>>>>> main
 langchain-openai = "^0.3.27"
 langfuse = "3.2.1"
 oauthlib = "^3.2.2"

@@ -709,44 +709,12 @@ vision = ["Pillow (>=9.4.0)"]
 
 [[package]]
 name = "debugpy"
-<<<<<<< HEAD
-version = "1.8.15"
-=======
 version = "1.8.16"
->>>>>>> main
 description = "An implementation of the Debug Adapter Protocol for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-<<<<<<< HEAD
-    {file = "debugpy-1.8.15-cp310-cp310-macosx_14_0_x86_64.whl", hash = "sha256:e9a8125c85172e3ec30985012e7a81ea5e70bbb836637f8a4104f454f9b06c97"},
-    {file = "debugpy-1.8.15-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7fd0b6b5eccaa745c214fd240ea82f46049d99ef74b185a3517dad3ea1ec55d9"},
-    {file = "debugpy-1.8.15-cp310-cp310-win32.whl", hash = "sha256:8181cce4d344010f6bfe94a531c351a46a96b0f7987750932b2908e7a1e14a55"},
-    {file = "debugpy-1.8.15-cp310-cp310-win_amd64.whl", hash = "sha256:af2dcae4e4cd6e8b35f982ccab29fe65f7e8766e10720a717bc80c464584ee21"},
-    {file = "debugpy-1.8.15-cp311-cp311-macosx_14_0_universal2.whl", hash = "sha256:babc4fb1962dd6a37e94d611280e3d0d11a1f5e6c72ac9b3d87a08212c4b6dd3"},
-    {file = "debugpy-1.8.15-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f778e68f2986a58479d0ac4f643e0b8c82fdd97c2e200d4d61e7c2d13838eb53"},
-    {file = "debugpy-1.8.15-cp311-cp311-win32.whl", hash = "sha256:f9d1b5abd75cd965e2deabb1a06b0e93a1546f31f9f621d2705e78104377c702"},
-    {file = "debugpy-1.8.15-cp311-cp311-win_amd64.whl", hash = "sha256:62954fb904bec463e2b5a415777f6d1926c97febb08ef1694da0e5d1463c5c3b"},
-    {file = "debugpy-1.8.15-cp312-cp312-macosx_14_0_universal2.whl", hash = "sha256:3dcc7225cb317469721ab5136cda9ff9c8b6e6fb43e87c9e15d5b108b99d01ba"},
-    {file = "debugpy-1.8.15-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:047a493ca93c85ccede1dbbaf4e66816794bdc214213dde41a9a61e42d27f8fc"},
-    {file = "debugpy-1.8.15-cp312-cp312-win32.whl", hash = "sha256:b08e9b0bc260cf324c890626961dad4ffd973f7568fbf57feb3c3a65ab6b6327"},
-    {file = "debugpy-1.8.15-cp312-cp312-win_amd64.whl", hash = "sha256:e2a4fe357c92334272eb2845fcfcdbec3ef9f22c16cf613c388ac0887aed15fa"},
-    {file = "debugpy-1.8.15-cp313-cp313-macosx_14_0_universal2.whl", hash = "sha256:f5e01291ad7d6649aed5773256c5bba7a1a556196300232de1474c3c372592bf"},
-    {file = "debugpy-1.8.15-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:94dc0f0d00e528d915e0ce1c78e771475b2335b376c49afcc7382ee0b146bab6"},
-    {file = "debugpy-1.8.15-cp313-cp313-win32.whl", hash = "sha256:fcf0748d4f6e25f89dc5e013d1129ca6f26ad4da405e0723a4f704583896a709"},
-    {file = "debugpy-1.8.15-cp313-cp313-win_amd64.whl", hash = "sha256:73c943776cb83e36baf95e8f7f8da765896fd94b05991e7bc162456d25500683"},
-    {file = "debugpy-1.8.15-cp38-cp38-macosx_14_0_x86_64.whl", hash = "sha256:054cd4935bd2e4964dfe1aeee4d6bca89d0c833366776fc35387f8a2f517dd00"},
-    {file = "debugpy-1.8.15-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:21c4288e662997df3176c4b9d93ee1393913fbaf320732be332d538000c53208"},
-    {file = "debugpy-1.8.15-cp38-cp38-win32.whl", hash = "sha256:aaa8ce6a37d764f93fe583d7c6ca58eb7550b36941387483db113125f122bb0d"},
-    {file = "debugpy-1.8.15-cp38-cp38-win_amd64.whl", hash = "sha256:71cdf7f676af78e70f005c7fad2ef9da0edc2a24befbf3ab146a51f0d58048c2"},
-    {file = "debugpy-1.8.15-cp39-cp39-macosx_14_0_x86_64.whl", hash = "sha256:085b6d0adb3eb457c2823ac497a0690b10a99eff8b01c01a041e84579f114b56"},
-    {file = "debugpy-1.8.15-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cd546a405381d17527814852642df0a74b7da8acc20ae5f3cfad0b7c86419511"},
-    {file = "debugpy-1.8.15-cp39-cp39-win32.whl", hash = "sha256:ae0d445fe11ff4351428e6c2389e904e1cdcb4a47785da5a5ec4af6c5b95fce5"},
-    {file = "debugpy-1.8.15-cp39-cp39-win_amd64.whl", hash = "sha256:de7db80189ca97ab4b10a87e4039cfe4dd7ddfccc8f33b5ae40fcd33792fc67a"},
-    {file = "debugpy-1.8.15-py2.py3-none-any.whl", hash = "sha256:bce2e6c5ff4f2e00b98d45e7e01a49c7b489ff6df5f12d881c67d2f1ac635f3d"},
-    {file = "debugpy-1.8.15.tar.gz", hash = "sha256:58d7a20b7773ab5ee6bdfb2e6cf622fdf1e40c9d5aef2857d85391526719ac00"},
-=======
     {file = "debugpy-1.8.16-cp310-cp310-macosx_14_0_x86_64.whl", hash = "sha256:2a3958fb9c2f40ed8ea48a0d34895b461de57a1f9862e7478716c35d76f56c65"},
     {file = "debugpy-1.8.16-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e5ca7314042e8a614cc2574cd71f6ccd7e13a9708ce3c6d8436959eae56f2378"},
     {file = "debugpy-1.8.16-cp310-cp310-win32.whl", hash = "sha256:8624a6111dc312ed8c363347a0b59c5acc6210d897e41a7c069de3c53235c9a6"},
@@ -773,7 +741,6 @@ files = [
     {file = "debugpy-1.8.16-cp39-cp39-win_amd64.whl", hash = "sha256:c2c47c2e52b40449552843b913786499efcc3dbc21d6c49287d939cd0dbc49fd"},
     {file = "debugpy-1.8.16-py2.py3-none-any.whl", hash = "sha256:19c9521962475b87da6f673514f7fd610328757ec993bf7ec0d8c96f9a325f9e"},
     {file = "debugpy-1.8.16.tar.gz", hash = "sha256:31e69a1feb1cf6b51efbed3f6c9b0ef03bc46ff050679c4be7ea6d2e23540870"},
->>>>>>> main
 ]
 
 [[package]]
@@ -2142,23 +2109,14 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<10"
 
 [[package]]
 name = "langchain-core"
-<<<<<<< HEAD
-version = "0.3.72"
-=======
 version = "0.3.74"
->>>>>>> main
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "langchain_core-0.3.72-py3-none-any.whl", hash = "sha256:9fa15d390600eb6b6544397a7aa84be9564939b6adf7a2b091179ea30405b240"},
-    {file = "langchain_core-0.3.72.tar.gz", hash = "sha256:4de3828909b3d7910c313242ab07b241294650f5cb6eac17738dd3638b1cd7de"},
-=======
     {file = "langchain_core-0.3.74-py3-none-any.whl", hash = "sha256:088338b5bc2f6a66892f9afc777992c24ee3188f41cbc603d09181e34a228ce7"},
     {file = "langchain_core-0.3.74.tar.gz", hash = "sha256:ff604441aeade942fbcc0a3860a592daba7671345230c2078ba2eb5f82b6ba76"},
->>>>>>> main
 ]
 
 [package.dependencies]
@@ -2172,25 +2130,12 @@ typing-extensions = ">=4.7"
 
 [[package]]
 name = "langchain-ollama"
-<<<<<<< HEAD
-version = "0.3.6"
-=======
 version = "0.3.7"
->>>>>>> main
 description = "An integration package connecting Ollama and LangChain"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "langchain_ollama-0.3.6-py3-none-any.whl", hash = "sha256:b339bd3fcf913b8d606ad426ef39e7122695532507fcd85aa96271b3f33dc3df"},
-    {file = "langchain_ollama-0.3.6.tar.gz", hash = "sha256:4270c4b30b3f3d10850cb9a1183b8c77d616195e0d9717ac745ef7f7f6cc2b6e"},
-]
-
-[package.dependencies]
-langchain-core = ">=0.3.70,<1.0.0"
-ollama = ">=0.5.1,<1.0.0"
-=======
     {file = "langchain_ollama-0.3.7-py3-none-any.whl", hash = "sha256:845192a75a1671bd36bc8c54baae2e929c3b1b0e3c8c618438df20354b0231de"},
     {file = "langchain_ollama-0.3.7.tar.gz", hash = "sha256:9deeca09a44fb8c5a46b1e43d670a7301f1d1e73196fa9191a89f9883217903b"},
 ]
@@ -2198,7 +2143,6 @@ ollama = ">=0.5.1,<1.0.0"
 [package.dependencies]
 langchain-core = ">=0.3.74,<1.0.0"
 ollama = ">=0.5.3,<1.0.0"
->>>>>>> main
 
 [[package]]
 name = "langchain-openai"
@@ -2296,35 +2240,21 @@ openai = ["openai (>=0.27.8)"]
 
 [[package]]
 name = "langgraph"
-<<<<<<< HEAD
-version = "0.5.4"
-=======
 version = "0.6.6"
->>>>>>> main
 description = "Building stateful, multi-actor applications with LLMs"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "langgraph-0.5.4-py3-none-any.whl", hash = "sha256:7122840225623e081be24ac30a691a24e5dac4c0361f593208f912838192d7f6"},
-    {file = "langgraph-0.5.4.tar.gz", hash = "sha256:ab8f6b7b9c50fd2ae35a2efb072fbbfe79500dfc18071ac4ba6f5de5fa181931"},
-=======
     {file = "langgraph-0.6.6-py3-none-any.whl", hash = "sha256:a2283a5236abba6c8307c1a485c04e8a0f0ffa2be770878782a7bf2deb8d7954"},
     {file = "langgraph-0.6.6.tar.gz", hash = "sha256:e7d3cefacf356f8c01721b166b67b3bf581659d5361a3530f59ecd9b8448eca7"},
->>>>>>> main
 ]
 
 [package.dependencies]
 langchain-core = ">=0.1"
 langgraph-checkpoint = ">=2.1.0,<3.0.0"
-<<<<<<< HEAD
-langgraph-prebuilt = ">=0.5.0,<0.6.0"
-langgraph-sdk = ">=0.1.42,<0.2.0"
-=======
 langgraph-prebuilt = ">=0.6.0,<0.7.0"
 langgraph-sdk = ">=0.2.2,<0.3.0"
->>>>>>> main
 pydantic = ">=2.7.4"
 xxhash = ">=3.5.0"
 
@@ -2980,23 +2910,14 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-<<<<<<< HEAD
-version = "1.98.0"
-=======
 version = "1.102.0"
->>>>>>> main
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "openai-1.98.0-py3-none-any.whl", hash = "sha256:b99b794ef92196829120e2df37647722104772d2a74d08305df9ced5f26eae34"},
-    {file = "openai-1.98.0.tar.gz", hash = "sha256:3ee0fcc50ae95267fd22bd1ad095ba5402098f3df2162592e68109999f685427"},
-=======
     {file = "openai-1.102.0-py3-none-any.whl", hash = "sha256:d751a7e95e222b5325306362ad02a7aa96e1fab3ed05b5888ce1c7ca63451345"},
     {file = "openai-1.102.0.tar.gz", hash = "sha256:2e0153bcd64a6523071e90211cbfca1f2bbc5ceedd0993ba932a5869f93b7fc9"},
->>>>>>> main
 ]
 
 [package.dependencies]
@@ -4273,23 +4194,14 @@ files = [
 
 [[package]]
 name = "qdrant-client"
-<<<<<<< HEAD
-version = "1.15.0"
-=======
 version = "1.15.1"
->>>>>>> main
 description = "Client library for the Qdrant vector search engine"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "qdrant_client-1.15.0-py3-none-any.whl", hash = "sha256:f18bb311543de7e256ffa831be0d8a9d0729aaf549db7bcf95a5d356b48143f2"},
-    {file = "qdrant_client-1.15.0.tar.gz", hash = "sha256:475433b0acec51b66a132e91b631abe922accc64744bbb3180a04fe1fe889843"},
-=======
     {file = "qdrant_client-1.15.1-py3-none-any.whl", hash = "sha256:2b975099b378382f6ca1cfb43f0d59e541be6e16a5892f282a4b8de7eff5cb63"},
     {file = "qdrant_client-1.15.1.tar.gz", hash = "sha256:631f1f3caebfad0fd0c1fba98f41be81d9962b7bf3ca653bed3b727c0e0cbe0e"},
->>>>>>> main
 ]
 
 [package.dependencies]
@@ -4320,11 +4232,7 @@ deprecated = "^1.2.18"
 flashrank = "^0.2.10"
 langchain = "^0.3.25"
 langchain-community = "0.3.27"
-<<<<<<< HEAD
-langchain-core = "0.3.72"
-=======
 langchain-core = "0.3.74"
->>>>>>> main
 langchain-openai = "^0.3.27"
 langfuse = "3.2.1"
 oauthlib = "^3.2.2"
@@ -4339,24 +4247,14 @@ url = "../rag-core-lib"
 
 [[package]]
 name = "ragas"
-<<<<<<< HEAD
-version = "0.3.0"
-description = ""
-=======
 version = "0.3.2"
 description = "Evaluation framework for RAG and LLM applications"
->>>>>>> main
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-<<<<<<< HEAD
-    {file = "ragas-0.3.0-py3-none-any.whl", hash = "sha256:9e7bdbcf79c939d695ec10dbb7d587971f489145e0f18d33f40df085116c1c79"},
-    {file = "ragas-0.3.0.tar.gz", hash = "sha256:d45f174c665a544b5749d3b2034a207d79ff001fe57fc81f0cd425004b4906a2"},
-=======
     {file = "ragas-0.3.2-py3-none-any.whl", hash = "sha256:ccf4447fdc6daf69b5fafb26d8baa5095e4194a4dc87091b2a118f68322e7f1b"},
     {file = "ragas-0.3.2.tar.gz", hash = "sha256:a800a5326f0d5bfa086cf8832d4b1031e4b21ff063f83d7d9388ee36e1a93fe6"},
->>>>>>> main
 ]
 
 [package.dependencies]
@@ -4380,18 +4278,11 @@ tqdm = "*"
 typer = "*"
 
 [package.extras]
-<<<<<<< HEAD
-all = ["datacompy", "llama_index", "nltk", "pandas", "r2r", "ragas-experimental", "rapidfuzz", "rouge_score", "sentence-transformers", "transformers"]
-dev = ["black[jupyter]", "datacompy", "fastembed", "graphene", "haystack-ai", "llama_index", "nbmake", "nltk", "notebook", "pandas", "pyright", "pytest", "pytest-asyncio", "pytest-xdist[psutil]", "r2r", "rapidfuzz", "rich", "rouge_score", "ruff", "sacrebleu", "sentence-transformers", "sphinx-autobuild", "transformers"]
-docs = ["mkdocs (>=1.6.1)", "mkdocs-autorefs", "mkdocs-gen-files", "mkdocs-git-committers-plugin-2", "mkdocs-git-revision-date-localized-plugin", "mkdocs-glightbox", "mkdocs-literate-nav", "mkdocs-material", "mkdocs-material[imaging]", "mkdocs-section-index", "mkdocstrings[python]"]
-experimental = ["ragas-experimental"]
-=======
 ai-frameworks = ["haystack-ai"]
 all = ["datacompy", "llama_index", "nltk", "pandas", "r2r", "rapidfuzz", "rouge_score", "sacrebleu", "sentence-transformers", "transformers"]
 examples = ["openai (>=1.0.0)"]
 gdrive = ["google-api-python-client (>=2.178.0)", "google-auth (>=2.40.3)", "google-auth-oauthlib (>=1.2.2)"]
 tracing = ["langfuse (>=3.2.4)", "mlflow (>=3.1.4)"]
->>>>>>> main
 
 [[package]]
 name = "regex"
@@ -5510,8 +5401,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-<<<<<<< HEAD
-content-hash = "1c49359178486f63e748bba5277d02a858e5a484d30b3745ccaeb89d43f09b73"
-=======
 content-hash = "45f8fec18cfbc7ca45912290de3d0353093811274e7b7adca3c9e7e8fa8a638e"
->>>>>>> main

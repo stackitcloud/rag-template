@@ -13,11 +13,7 @@ dependencies:
   version: "0.13.1"
   condition: features.langfuse.enabled
 - name: qdrant
-<<<<<<< HEAD
-  version: 1.15.0
-=======
   version: 1.15.3
->>>>>>> main
   repository: "https://qdrant.github.io/qdrant-helm"
   condition: features.qdrant.enabled
 - name: minio
@@ -31,10 +27,6 @@ dependencies:
   condition: features.keydb.enabled
 - name: ollama
   alias: ollama
-<<<<<<< HEAD
-  version: 1.24.0
-=======
   version: 1.27.0
->>>>>>> main
   repository: https://otwld.github.io/ollama-helm/
   condition: features.ollama.enabled

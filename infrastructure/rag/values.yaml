@@ -75,11 +75,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-<<<<<<< HEAD
-      tag: "v2.1.0"
-=======
       tag: "v2.2.2"
->>>>>>> main
 
   name: backend
   replicaCount: 1
@@ -87,11 +83,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-<<<<<<< HEAD
-    tag: "v2.1.0"
-=======
     tag: "v2.2.2"
->>>>>>> main
 
   command:
   - "poetry"
@@ -229,11 +221,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-<<<<<<< HEAD
-    tag: "v2.1.0"
-=======
     tag: "v2.2.2"
->>>>>>> main
 
   service:
     type: ClusterIP
@@ -268,11 +256,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-<<<<<<< HEAD
-    tag: "v2.1.0"
-=======
     tag: "v2.2.2"
->>>>>>> main
 
   command:
   - "poetry"
@@ -352,11 +336,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-<<<<<<< HEAD
-    tag: "v2.1.0"
-=======
     tag: "v2.2.2"
->>>>>>> main
 
   command:
   - "poetry"
@@ -404,11 +384,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-<<<<<<< HEAD
-    tag: "v2.1.0"
-=======
     tag: "v2.2.2"
->>>>>>> main
 
   service:
     type: ClusterIP

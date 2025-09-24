@@ -238,6 +238,8 @@ The *Tilt* UI is available at [http://localhost:10350/](http://localhost:10350/)
 
 If you want to access *Qdrant* etc. just click the resource in the UI. In the upper corner will be the link, to access the resource.
 
+>  📝 NOTE: For frontend live updates with Tilt see [Frontend live updates with Tilt](./services/frontend/README.md#live-updates-with-tilt)
+
 To enable debugging, start tilt with the following command:
 
 ```shell

@@ -40,6 +40,23 @@ npx nx serve chat-app:serve
 npx nx serve admin-app:serve
 ```
 
+### Live updates with Tilt
+
+When running via Tilt, the frontend containers use Nginx and Tilt syncs the built assets (Vite `dist/`) directly into `/usr/share/nginx/html` inside the pod. For live updates while editing code, run a build in watch mode and Tilt will sync changes automatically:
+
+```bash
+# From services/frontend
+npx nx run admin-app:build --watch
+npx nx run chat-app:build --watch
+```
+
+If you prefer a one-off build:
+
+```bash
+npm run admin:build
+npm run chat:build
+```
+
 ### Test
 
 To run unit test, you can run this command at the root of your workspace.

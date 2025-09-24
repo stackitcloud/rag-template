@@ -1,4 +1,4 @@
-"""Module contains settings regarding the STACKIT vLLM."""
+"""Module contains settings for the retry decorator."""
 
 from pydantic import Field, PositiveInt, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict

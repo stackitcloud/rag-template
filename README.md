@@ -108,7 +108,7 @@ The frontend provides user-friendly interfaces for both chat and document manage
 - **Chat App**: Interface for interacting with the RAG system
 - **Admin App**: Interface for managing documents and system configuration
 
-For further information, please consult the [Frontend README](./services/frontend/README.md).
+For further information, please consult the [Frontend README](./services/frontend/README.md). For branding, theming, and logo configuration, see the [UI Customization Guide](./docs/UI_Customization.md).
 
 #### 1.1.6 Infrastructure
 

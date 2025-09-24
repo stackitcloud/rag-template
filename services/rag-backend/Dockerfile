@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
 ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
-ENV POETRY_VERSION=1.8.3
+ENV POETRY_VERSION=2.1.3
 
 WORKDIR /app
 

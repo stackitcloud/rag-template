@@ -4,7 +4,7 @@ dependencies:
   version: 0.12.1
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
-  version: 1.15.3
+  version: 1.15.4
 - name: minio
   repository: https://charts.bitnami.com/bitnami
   version: 15.0.7

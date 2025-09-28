@@ -27,7 +27,7 @@
         "@tailwindcss/typography": "^0.5.15"
     },
     "devDependencies": {
-        "@intlify/unplugin-vue-i18n": "^2.0.0",
+        "@intlify/unplugin-vue-i18n": "^11.0.0",
         "@nx/cypress": "^18.0.4",
         "@nx/eslint": "^18.0.4",
         "@nx/eslint-plugin": "^18.0.4",

@@ -8,6 +8,7 @@ It consists of the following python packages:
   - [1.1 Requirements](#11-requirements)
   - [1.2 Endpoints](#12-endpoints)
   - [1.3 Replaceable parts](#13-replaceable-parts)
+  - [1.4 Embedder retry behavior](#14-embedder-retry-behavior)
 - [`2. Admin API lib`](#2-admin-api-lib)
   - [2.1 Requirements](#21-requirements)
   - [2.2 Endpoints](#22-endpoints)
@@ -98,6 +99,32 @@ Uploaded documents are required to contain the following metadata:
 | evaluator | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | The evaulator used in the evaluate endpoint. |
 | chat_endpoint | [`rag_core_api.api_endpoints.chat.Chat`](./rag-core-api/src/rag_core_api/api_endpoints/chat.py) | [`rag_core_api.impl.api_endpoints.default_chat.DefaultChat`](./rag-core-api/src/rag_core_api/impl/api_endpoints/default_chat.py) | Implementation of the chat endpoint. Default implementation just calls the *traced_chat_graph* |
 | ragas_llm | `langchain_core.language_models.chat_models.BaseChatModel` | `langchain_openai.ChatOpenAI` or `langchain_ollama.ChatOllama` | The LLM used for the ragas evaluation. |
+
+### 1.4 Embedder retry behavior
+
+The default STACKIT embedder implementation (`StackitEmbedder`) uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
+
+- Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
+- Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
+- Per-embedder overrides: [`StackitEmbedderSettings`](./rag-core-api/src/rag_core_api/impl/settings/stackit_embedder_settings.py)
+
+How it resolves settings
+
+- Each retry-related field in `StackitEmbedderSettings` is optional. When a field is provided (not None), it overrides the corresponding value from `RetryDecoratorSettings`.
+- When a field is not provided (None), the embedder falls back to the value from `RetryDecoratorSettings`.
+
+Configuring via environment variables
+
+- Embedder-specific (prefix `STACKIT_EMBEDDER_`):
+  - `STACKIT_EMBEDDER_MAX_RETRIES`
+  - `STACKIT_EMBEDDER_RETRY_BASE_DELAY`
+  - `STACKIT_EMBEDDER_RETRY_MAX_DELAY`
+  - `STACKIT_EMBEDDER_BACKOFF_FACTOR`
+  - `STACKIT_EMBEDDER_ATTEMPT_CAP`
+  - `STACKIT_EMBEDDER_JITTER_MIN`
+  - `STACKIT_EMBEDDER_JITTER_MAX`
+- Global fallback (prefix `RETRY_DECORATOR_`): see section [4.2](#42-retry-decorator-exponential-backoff) for all keys and defaults.
+- Helm chart: set the same keys under `backend.envs.stackitEmbedder` in [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml).
 
 ## 2. Admin API Lib
 

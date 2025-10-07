@@ -19,7 +19,7 @@ ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock /app/services/document-extractor/
 COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
 
-COPY --chown=nonroot:nonroot libs/extractor-api-lib/src /app/libs/extractor-api-lib/src
+COPY libs/extractor-api-lib/src ./libs/extractor-api-lib/src
 
 # Install third-party deps for service and lib (with dev extras)
 RUN poetry config virtualenvs.create false \

@@ -18,13 +18,6 @@ kubectl wait --for=condition=ready node --all --timeout=120s || {
   echo "WARNING: Some nodes did not reach Ready state within timeout." >&2
 }
 
-# Install / upgrade official ingress-nginx Helm chart (not Bitnami). User requested:
-# helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-#   --repo https://kubernetes.github.io/ingress-nginx \
-#   --namespace ingress-nginx --create-namespace \
-#   --version 4.13.3 \
-#   --set controller.image.tag=v1.13.3
-
 INGRESS_REPO_NAME="ingress-nginx"
 INGRESS_REPO_URL="https://kubernetes.github.io/ingress-nginx"
 INGRESS_NAMESPACE="ingress-nginx"

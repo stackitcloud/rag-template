@@ -12,7 +12,7 @@ export interface ConfluenceConfig {
   spaceKey: string;
   token: string;
   url: string;
-  maxPages: number;
+  maxPages?: number;
   name: string;
 }
 
@@ -59,8 +59,11 @@ export class DocumentAPI {
                 { key: 'url', value: config.url },
                 { key: 'token', value: config.token },
                 { key: 'space_key', value: config.spaceKey },
-                { key: 'max_pages', value: String(config.maxPages) }
-            ];
+            ] as { key: string; value: string }[];
+
+            if (typeof config.maxPages === 'number') {
+                payload.push({ key: 'max_pages', value: String(config.maxPages) });
+            }
             // include required query parameters
             await axios.post<void>('/upload_source', payload, {
                 params: { source_type: 'confluence', name: config.name }

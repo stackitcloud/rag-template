@@ -9,7 +9,7 @@
 
         const { t } = useI18n();
         const store = useDocumentsStore();
-        const documents: DocumentModel[] = computed(() => store.allDocuments);
+        const documents = computed<DocumentModel[]>(() => store.allDocuments ?? []);
 
         const deleteDocument = (documentId: string) => {
             store.deleteDocument(documentId);

@@ -1,3 +1,8 @@
+global:
+  security:
+    # -- Allow insecure images to use bitnami legacy repository. Can be set to false if secure images are being used (Paid).
+    allowInsecureImages: true
+
 features:
   ollama:
     enabled: false
@@ -70,7 +75,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "latest"
+      tag: "v2.2.2"
 
   name: backend
   replicaCount: 1
@@ -78,7 +83,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -216,7 +221,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   service:
     type: ClusterIP
@@ -251,7 +256,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -331,7 +336,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -379,7 +384,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   service:
     type: ClusterIP
@@ -581,6 +586,8 @@ langfuse:
         value: "adminpassword"
 
 minio:
+  image:
+    repository: bitnamilegacy/minio
   auth:
     ## @param auth.rootUser MinIO&reg; root username
     ##
@@ -599,7 +606,7 @@ minio:
 
 ollama:
   image:
-    tag: 0.5.1
+    tag: 0.12.3
   ollama:
     models:
       pull:
@@ -611,7 +618,7 @@ ollama:
 
 qdrant:
   image:
-    tag: v1.14.1
+    tag: v1.15.4
 
 keydb:
   multiMaster: "no"

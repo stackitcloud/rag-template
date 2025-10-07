@@ -1,12 +1,17 @@
 {
     "name": "lib-chat",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "libs/lib-chat",
+    "sourceRoot": "libs/chat-app",
     "projectType": "library",
     "tags": [],
     "targets": {
         "lint": {
-            "executor": "@nx/eslint:lint"
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/chat-app/**/*.{ts,tsx,js,jsx,vue,d.ts}"
+                ]
+            }
         }
     }
 }

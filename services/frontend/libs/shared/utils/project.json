@@ -19,7 +19,10 @@
             }
         },
         "test": {
-            "executor": "@nx/vite:test"
+            "executor": "@nx/vite:test",
+            "options": {
+                "configFile": "libs/shared/utils/vite.config.mts"
+            }
         }
     },
     "tags": []

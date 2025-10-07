@@ -165,8 +165,7 @@ docker_build(
     dockerfile=backend_context + "/Dockerfile",
     ignore=[
         "infrastructure/",
-        "services/frontend/.nx/",
-        "services/frontend/tmp/",
+        "services/frontend/",
     ],
 )
 
@@ -209,8 +208,7 @@ docker_build(
     dockerfile=mcp_context + "/Dockerfile",
     ignore=[
         "infrastructure/",
-        "services/frontend/.nx/",
-        "services/frontend/tmp/",
+        "services/frontend/",
     ],
 )
 
@@ -246,7 +244,7 @@ docker_build(
         sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=["infrastructure/","services/frontend/"],
 )
 
 # Add linter trigger
@@ -290,7 +288,7 @@ docker_build(
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=["infrastructure/","services/frontend/"],
 )
 
 # Add linter trigger
@@ -331,7 +329,7 @@ docker_build(
         sync("./services/frontend/dist/apps/chat-app", "/usr/share/nginx/html"),
         sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
     ],
-    ignore=["infrastructure/"],
+    ignore=["infrastructure/", "services/frontend/.nx/", "services/frontend/tmp/", "services/frontend/node_modules/"],
 )
 
 ########################################################################################################################
@@ -349,7 +347,7 @@ docker_build(
         sync("./services/frontend/dist/apps/admin-app", "/usr/share/nginx/html"),
         sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
     ],
-    ignore=["infrastructure/"],
+    ignore=["infrastructure/", "services/frontend/.nx/", "services/frontend/tmp/", "services/frontend/node_modules/"],
 )
 
 

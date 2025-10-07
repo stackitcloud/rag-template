@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.11.7-bookworm AS build
+FROM --platform=linux/amd64 python:3.13.7-bookworm AS build
 
 ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
@@ -21,7 +21,7 @@ RUN mkdir -p log && chmod 700 log \
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root
 
-FROM --platform=linux/amd64 python:3.11.7-bookworm
+FROM --platform=linux/amd64 python:3.13.7-bookworm
 
 WORKDIR /app/services/mcp-server
 

@@ -1,3 +1,8 @@
+global:
+  security:
+    # -- Allow insecure images to use bitnami legacy repository. Can be set to false if secure images are being used (Paid).
+    allowInsecureImages: true
+
 features:
   ollama:
     enabled: false
@@ -70,7 +75,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "latest"
+      tag: "v2.2.2"
 
   name: backend
   replicaCount: 1
@@ -78,7 +83,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -216,7 +221,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   service:
     type: ClusterIP
@@ -251,7 +256,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -331,7 +336,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   command:
   - "poetry"
@@ -379,7 +384,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "latest"
+    tag: "v2.2.2"
 
   service:
     type: ClusterIP
@@ -445,25 +450,39 @@ shared:
 
 
 langfuse:
-  minio:
-    deploy: false
-  valkey:
-    deploy: false #<--- keydb is used instead of valkey
-  image:
-    repository: ghcr.io/langfuse/langfuse
-    pullPolicy: Always
-    tag: "3.27.2"
-  postgresql:
-    deploy: true
-    auth:
-      username: postgres
-      password: postgres
-      database: langfuse
+  # Core Langfuse Configuration
   langfuse:
+    # Used to hash API keys
+    salt:
+      value: "changeme"
+
+    # Authentication settings
+    features:
+      telemetryEnabled: true
+      signUpDisabled: false
+
+    # Web deployment configuration
+    web:
+      image:
+        repository: langfuse/langfuse
+        tag: "3.106.3"
+        pullPolicy: Always
+
+    # Worker deployment configuration
+    worker:
+      image:
+        repository: langfuse/langfuse-worker
+        tag: "3.106.3"
+        pullPolicy: Always
+      port: 3030
+
+    # NextAuth configuration
     nextauth:
       url: http://localhost:3000
-      secret: changeme
-    salt: changeme
+      secret:
+        value: "changeme"
+
+    # Additional environment variables (only for init values)
     additionalEnv:
     - name: LANGFUSE_INIT_ORG_ID
       value: ""
@@ -479,33 +498,8 @@ langfuse:
       value: ""
     - name: LANGFUSE_INIT_USER_PASSWORD
       value: ""
-    # REDIS
-    - name: "REDIS_CONNECTION_STRING"
-      value: "redis://rag-keydb:6379"
-    # CLICKHOUSE
-    - name: "CLICKHOUSE_MIGRATION_URL"
-      value: "clickhouse://rag-clickhouse:9000"
-    - name: "CLICKHOUSE_URL"
-      value: "http://rag-clickhouse:8123"
-    - name: "CLICKHOUSE_USER"
-      value: "default"
-    - name: "CLICKHOUSE_PASSWORD"
-      value: "changeme"
-    # S3 / MinIO
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENABLED"
-      value: "true"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_BUCKET"
-      value: "langfuse"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_REGION"
-      value: "auto"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID"
-      value: "admin"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY"
-      value: "adminpassword"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT"
-      value: "http://rag-minio:9000"
-    - name: "LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE"
-      value: "true"
+
+    # Additional init containers
     extraInitContainers:
     - name: wait-for-postgres
       image: busybox
@@ -520,7 +514,80 @@ langfuse:
       # Define a reasonable timeout in case PostgreSQL fails to come up
       timeoutSeconds: 300
 
+  # PostgreSQL Configuration (use external PostgreSQL)
+  postgresql:
+    deploy: true
+    host: "rag-postgresql"
+    port: 5432
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+
+  # Redis Configuration (external KeyDB)
+  redis:
+    deploy: false
+    host: "rag-keydb"
+    port: 6379
+    auth:
+      username: "default"
+      password: ""
+
+  # ClickHouse Configuration (external ClickHouse)
+  clickhouse:
+    deploy: true
+    host: "rag-clickhouse"
+    httpPort: 8123
+    nativePort: 9000
+    auth:
+      username: "default"
+      password: "changeme"
+    migration:
+      url: "clickhouse://rag-clickhouse:9000"
+      ssl: false
+      autoMigrate: true
+    resources:
+      limits:
+        cpu: "2"
+        memory: "8Gi"
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+
+    zookeeper:
+      resources:
+        limits:
+          cpu: "2"
+          memory: "2Gi"
+        requests:
+          cpu: "1"
+          memory: "1Gi"
+
+  # S3/MinIO Configuration (external MinIO)
+  s3:
+    deploy: false
+    bucket: "langfuse"
+    region: "auto"
+    endpoint: "http://rag-minio:9000"
+    forcePathStyle: true
+    accessKeyId:
+      value: "admin"
+    secretAccessKey:
+      value: "adminpassword"
+    eventUpload:
+      enabled: true
+      bucket: "langfuse"
+      region: "auto"
+      endpoint: "http://rag-minio:9000"
+      forcePathStyle: true
+      accessKeyId:
+        value: "admin"
+      secretAccessKey:
+        value: "adminpassword"
+
 minio:
+  image:
+    repository: bitnamilegacy/minio
   auth:
     ## @param auth.rootUser MinIO&reg; root username
     ##
@@ -537,13 +604,9 @@ minio:
     enabled: false
   mode: standalone
 
-
-
-
-
 ollama:
   image:
-    tag: 0.5.1
+    tag: 0.12.3
   ollama:
     models:
       pull:
@@ -555,4 +618,9 @@ ollama:
 
 qdrant:
   image:
-    tag: v1.14.1
+    tag: v1.15.4
+
+keydb:
+  multiMaster: "no"
+  activeReplicas: "no"
+  nodes: 1

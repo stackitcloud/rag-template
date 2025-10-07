@@ -56,15 +56,15 @@ RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \
 
 WORKDIR /app/services/document-extractor
 
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
+ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
+
+COPY --chown=nonroot:nonroot services/document-extractor .
+COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log
+
 # cleanup
 RUN apt-get clean autoclean && apt-get autoremove --yes \
     && while read -r shell; do rm -f "$shell"; done < /etc/shells || true \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
 
-ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
-
 USER nonroot
-
-COPY --chown=nonroot:nonroot services/document-extractor .
-COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log

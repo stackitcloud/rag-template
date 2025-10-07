@@ -26,7 +26,7 @@ exclude = """
   |  .hg
   |  .mypy_cache
   |  .nox
-  |  .pants.dgit
+  |  .pants.d
   |  .tox
   |  .venv
   |  _build

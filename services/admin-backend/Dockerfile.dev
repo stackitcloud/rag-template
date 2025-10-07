@@ -32,7 +32,7 @@ WORKDIR /app/services/admin-backend
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/admin-backend/log/logfile.log && chmod 600 /app/services/admin-backend/log/logfile.log
 
-ENV PYTHONPATH="/app/services/admin-backend/src:/app/libs/rag-core-api/src:/app/libs/rag-core-lib/src"
+ENV PYTHONPATH="/app/services/admin-backend/src:/app/libs/rag-core-lib/src"
 
 # Create non-root user
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot

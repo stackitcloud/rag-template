@@ -1,7 +1,6 @@
 """Class to handle I/O with S3 storage."""
 
 import logging
-import traceback
 from pathlib import Path
 from typing import BinaryIO
 
@@ -125,7 +124,7 @@ class S3Service(FileService):
         try:
             file_name = f"/{file_name}" if not file_name.startswith("/") else file_name
             self._s3_client.delete_object(Bucket=self._s3_settings.bucket, Key=file_name)
-            logger.info(f"File {file_name} successfully deleted.")
-        except Exception as e:
-            logger.error("Error deleting file %s: %s %s" % (file_name, e, traceback.format_exc()))
+            logger.info("File %s successfully deleted.", file_name)
+        except Exception:
+            logger.exception("Error deleting file %s", file_name)
             raise

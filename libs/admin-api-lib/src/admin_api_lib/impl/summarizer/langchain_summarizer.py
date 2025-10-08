@@ -1,7 +1,6 @@
 """Module for the LangchainSummarizer class."""
 
 import logging
-import traceback
 from typing import Optional
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -66,7 +65,7 @@ class LangchainSummarizer(Summarizer):
         assert query, "Query is empty: %s" % query  # noqa S101
         config = ensure_config(config)
         tries_remaining = config.get("configurable", {}).get("tries_remaining", 3)
-        logger.debug("Tries remaining %d" % tries_remaining)
+        logger.debug("Tries remaining %d", tries_remaining)
 
         if tries_remaining < 0:
             raise Exception("Summary creation failed.")
@@ -81,8 +80,8 @@ class LangchainSummarizer(Summarizer):
                     # Extract content from AIMessage if it's not already a string
                     content = result.content if hasattr(result, "content") else str(result)
                     outputs.append(content)
-                except Exception as e:
-                    logger.error("Error in summarizing langchain doc: %s %s", e, traceback.format_exc())
+                except Exception:
+                    logger.exception("Error in summarizing langchain doc")
                     config["tries_remaining"] = tries_remaining - 1
                     result = await self._create_chain().ainvoke({"text": langchain_document.page_content}, config)
                     # Extract content from AIMessage if it's not already a string
@@ -93,8 +92,9 @@ class LangchainSummarizer(Summarizer):
             return outputs[0]
         summary = " ".join(outputs)
         logger.debug(
-            "Reduced number of chars from %d to %d"
-            % (len("".join([x.page_content for x in langchain_documents])), len(summary))
+            "Reduced number of chars from %d to %d",
+            len("".join([x.page_content for x in langchain_documents])),
+            len(summary),
         )
         return await self.ainvoke(summary, config)
 

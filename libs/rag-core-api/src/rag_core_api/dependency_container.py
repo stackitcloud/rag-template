@@ -166,6 +166,7 @@ class DependencyContainer(DeclarativeContainer):
         CompositeRetriever,
         List(image_retriever, table_retriever, text_retriever, summary_retriever),
         reranker,
+        retriever_settings.total_k,
     )
 
     information_piece_mapper = Singleton(InformationPieceMapper)

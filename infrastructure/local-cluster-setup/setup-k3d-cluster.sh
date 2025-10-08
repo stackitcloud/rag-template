@@ -7,10 +7,22 @@ CLUSTER_NAME="rag"
 K3D_CONFIG_FILE="k3d-cluster-config.yaml"
 
 echo "Creating k3d cluster '${CLUSTER_NAME}' (if it does not already exist)..."
-if k3d cluster list | awk '{print $1}' | grep -qx "${CLUSTER_NAME}"; then
-  echo "Cluster '${CLUSTER_NAME}' already exists. Skipping create."
+cluster_exists=false
+if command -v jq >/dev/null 2>&1; then
+    if k3d cluster list -o json 2>/dev/null | jq -e --arg name "$CLUSTER_NAME" 'map(select(.name==$name)) | length > 0' >/dev/null; then
+        cluster_exists=true
+    fi
 else
-  k3d cluster create "${CLUSTER_NAME}" --config "${K3D_CONFIG_FILE}" --k3s-arg "--disable=traefik@server:*"
+    # Fallback without jq (less robust)
+    if k3d cluster list --no-headers 2>/dev/null | awk '{print $1}' | grep -qx "${CLUSTER_NAME}"; then
+        cluster_exists=true
+    fi
+fi
+
+if [ "${cluster_exists}" = true ]; then
+    echo "Cluster '${CLUSTER_NAME}' already exists. Skipping create."
+else
+    k3d cluster create "${CLUSTER_NAME}" --config "${K3D_CONFIG_FILE}" --k3s-arg "--disable=traefik@server:*"
 fi
 
 echo "Waiting for all nodes to become Ready..."
@@ -24,8 +36,6 @@ INGRESS_NAMESPACE="ingress-nginx"
 INGRESS_RELEASE="ingress-nginx"
 INGRESS_CHART="ingress-nginx/ingress-nginx"
 INGRESS_CHART_VERSION="${INGRESS_CHART_VERSION:-4.13.3}"
-INGRESS_CONTROLLER_IMAGE_TAG="${INGRESS_CONTROLLER_IMAGE_TAG:-v1.13.3}"
-
 if ! helm repo list | awk '{print $1}' | grep -qx "$INGRESS_REPO_NAME"; then
   echo "Adding Helm repository $INGRESS_REPO_NAME ($INGRESS_REPO_URL)..."
   helm repo add "$INGRESS_REPO_NAME" "$INGRESS_REPO_URL"
@@ -35,13 +45,11 @@ fi
 echo "Updating Helm repository $INGRESS_REPO_NAME..."
 helm repo update "$INGRESS_REPO_NAME"
 
-echo "Installing / upgrading '$INGRESS_RELEASE' chart version ${INGRESS_CHART_VERSION} with controller.image.tag=${INGRESS_CONTROLLER_IMAGE_TAG}"
+echo "Installing / upgrading '$INGRESS_RELEASE' chart version ${INGRESS_CHART_VERSION}"
 helm upgrade --install "$INGRESS_RELEASE" "$INGRESS_CHART" \
   --namespace "$INGRESS_NAMESPACE" \
   --create-namespace \
-  --version "$INGRESS_CHART_VERSION" \
-  --set controller.image.tag="$INGRESS_CONTROLLER_IMAGE_TAG"
-
+  --version "$INGRESS_CHART_VERSION"
 echo "Waiting for ingress controller deployment rollout..."
 if kubectl rollout status deployment/${INGRESS_RELEASE}-controller -n "$INGRESS_NAMESPACE" --timeout=180s; then
   echo "Ingress controller successfully rolled out."

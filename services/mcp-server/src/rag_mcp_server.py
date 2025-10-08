@@ -1,3 +1,5 @@
+"""Module for configuring and initializing the MCP server."""
+
 import logging
 
 from fastmcp import FastMCP
@@ -34,11 +36,25 @@ class RagMcpServer:
 
     def run(self):
         """Run the MCP server with specified transport."""
-        logger.info(f"Starting FastMCP Server on {self.TRANSPORT}://{self._settings.host}:{self._settings.port}")
+        logger.info("Starting FastMCP Server on %s://%s:%s", self.TRANSPORT, self._settings.host, self._settings.port)
         self._server.run(transport=self.TRANSPORT, host=self._settings.host, port=self._settings.port)
 
     @extensible_docstring("chat_simple")
     async def chat_simple(self, session_id: str, message: str) -> str:
+        """Handle a simple chat request.
+
+        Parameters
+        ----------
+        session_id : str
+            The ID of the user session.
+        message : str
+            The user message to process.
+
+        Returns
+        -------
+        str
+            The response from the chat model.
+        """
         chat_request = ChatRequest(message=message)
         response = await self._handle_chat(session_id, chat_request)
         return response.answer
@@ -47,6 +63,22 @@ class RagMcpServer:
     async def chat_with_history(
         self, session_id: str, message: str, history: list[dict[str, str]] = None
     ) -> dict[str, Any]:
+        """Handle a chat request with history.
+
+        Parameters
+        ----------
+        session_id : str
+            The ID of the user session.
+        message : str
+            The user message to process.
+        history : list[dict[str, str]], optional
+            The chat history to include in the request.
+
+        Returns
+        -------
+        dict[str, Any]
+            The response from the chat model.
+        """
         # Build chat history if provided
         chat_history = None
         if history:
@@ -80,5 +112,5 @@ class RagMcpServer:
             return self._api_client.chat(session_id, chat_request)
 
         except Exception as e:
-            logger.error(f"Error in chat request: {str(e)}")
+            logger.exception("Error in chat request")
             raise Exception(f"Failed to process chat request: {str(e)}")

@@ -48,11 +48,11 @@ class DefaultInformationPiecesRemover(InformationPieceRemover):
             metadata = {}
             for key_value_pair in delete_request.metadata:
                 metadata["metadata." + key_value_pair.key] = json.loads(key_value_pair.value)
-        except Exception as e:
-            logger.error("Error while parsing metadata: %s", e)
+        except Exception:
+            logger.exception("Error while parsing metadata.")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Error while parsing metadata: %s" % e,
+                detail="Error while parsing metadata.",
             )
         if not metadata:
             raise HTTPException(
@@ -61,8 +61,8 @@ class DefaultInformationPiecesRemover(InformationPieceRemover):
             )
         try:
             self._vector_database.delete(metadata)
-        except Exception as e:
-            logger.error("Error while deleting from vector db: %s", e)
+        except Exception:
+            logger.exception("Error while deleting from vector db.")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Error while deleting %s from vector db" % delete_request.metadata,

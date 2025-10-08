@@ -34,6 +34,7 @@ class ConfluenceExtractor(InformationExtractor):
 
     @property
     def extractor_type(self) -> ExtractorTypes:
+        """The type of the extractor."""
         return ExtractorTypes.CONFLUENCE
 
     async def aextract_content(

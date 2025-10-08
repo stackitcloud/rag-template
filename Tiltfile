@@ -148,7 +148,7 @@ local_resource(
 IGNORE_BASE = [
     "infrastructure/",
     "services/frontend/",
-],
+]
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
 registry = "ghcr.io/stackitcloud/rag-template"

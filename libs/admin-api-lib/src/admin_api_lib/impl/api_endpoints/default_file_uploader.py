@@ -1,6 +1,7 @@
+"""Module for the default file uploader implementation."""
+
 import logging
 from pathlib import Path
-import traceback
 import urllib
 import tempfile
 import asyncio
@@ -78,7 +79,7 @@ class DefaultFileUploader(FileUploader):
         file: UploadFile,
     ) -> None:
         """
-        Uploads a source file for content extraction.
+        Upload a source file for content extraction.
 
         Parameters
         ----------
@@ -109,7 +110,7 @@ class DefaultFileUploader(FileUploader):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         except Exception as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
-            logger.error("Error while uploading %s = %s", source_name, str(e))
+            logger.exception("Error while uploading %s", source_name)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     def _log_task_exception(self, task: asyncio.Task) -> None:
@@ -124,19 +125,16 @@ class DefaultFileUploader(FileUploader):
         if task.done() and not task.cancelled():
             try:
                 task.result()  # This will raise the exception if one occurred
-            except Exception as e:
-                logger.error("Background task failed with exception: %s", str(e))
-                logger.debug("Background task exception traceback: %s", traceback.format_exc())
+            except Exception:
+                logger.exception("Background task failed with exception.")
 
     def _prune_background_tasks(self) -> None:
-        """
-        Remove completed background tasks from the list.
-        """
+        """Remove completed background tasks from the list."""
         self._background_tasks = [task for task in self._background_tasks if not task.done()]
 
     def _check_if_already_in_processing(self, source_name: str) -> None:
         """
-        Checks if the source is already in processing state.
+        Check if the source is already in processing state.
 
         Parameters
         ----------
@@ -196,9 +194,9 @@ class DefaultFileUploader(FileUploader):
             await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
             self._key_value_store.upsert(source_name, Status.READY)
             logger.info("Source uploaded successfully: %s", source_name)
-        except Exception as e:
+        except Exception:
             self._key_value_store.upsert(source_name, Status.ERROR)
-            logger.error("Error while uploading %s = %s", source_name, str(e))
+            logger.exception("Error while uploading %s", source_name)
 
     def _add_file_url(self, file_name: str, base_url: str, chunked_documents: list[Document]):
         document_url = f"{base_url.rstrip('/')}/document_reference/{urllib.parse.quote_plus(file_name)}"
@@ -229,6 +227,6 @@ class DefaultFileUploader(FileUploader):
 
                 self._file_service.upload_file(Path(temp_file_path), filename)
                 return filename
-        except Exception as e:
-            logger.error("Error during document saving: %s %s", e, traceback.format_exc())
+        except Exception:
+            logger.exception("Error during document saving")
             self._key_value_store.upsert(source_name, Status.ERROR)

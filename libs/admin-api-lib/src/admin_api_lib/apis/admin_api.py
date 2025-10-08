@@ -149,7 +149,7 @@ async def upload_file(
     request: Request,
 ) -> None:
     """
-    Uploads user selected sources.
+    Upload user selected sources.
 
     Parameters
     ----------
@@ -181,7 +181,7 @@ async def upload_source(
     key_value_pair: List[KeyValuePair] = Body(None, description="The key-value pairs for the source"),
 ) -> None:
     """
-    Uploads user selected sources.
+    Upload user selected sources.
 
     Parameters
     ----------

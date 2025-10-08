@@ -292,7 +292,6 @@ This subsection covers data collection procedures.
     @pytest.mark.integration
     def test_extract_text_from_scanned_page(self, pdf_extractor, test_pdf_files):
         """Test text extraction from scanned pages using OCR with real PDF."""
-
         # Use the actual scanned test PDF
         scanned_pdf_path = test_pdf_files["scanned"]
 
@@ -551,8 +550,8 @@ More content here."""
             text_count = sum(1 for elem in result if elem.type == ContentType.TEXT)
             table_count = sum(1 for elem in result if elem.type == ContentType.TABLE)
 
-            logger.info(f"  Text elements: {text_count}")
-            logger.info(f"  Table elements: {table_count}")
+            logger.info("  Text elements: %d", text_count)
+            logger.info("  Table elements: %d", table_count)
 
             # Verify metadata completeness
             for i, element in enumerate(result):

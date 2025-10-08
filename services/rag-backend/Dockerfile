@@ -44,15 +44,8 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 
-# cleanup
-RUN apt-get clean autoclean && apt-get autoremove --yes \
-    && while read -r shell; do rm -f "$shell"; done < /etc/shells || true \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
-
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
-
-USER nonroot
 
 COPY --chown=nonroot:nonroot services/rag-backend .
 # Preserve log directory from build stage
@@ -74,3 +67,10 @@ RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \
         chown -R nonroot:nonroot /app/libs; \
     fi && \
     rm -rf /tmp/conditional-libs
+
+# cleanup
+RUN apt-get clean autoclean && apt-get autoremove --yes \
+    && while read -r shell; do rm -f "$shell"; done < /etc/shells || true \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
+
+USER nonroot

@@ -7,14 +7,12 @@ import os
 from asyncio import gather
 from datetime import datetime
 from json import JSONDecodeError
-from time import sleep
 from uuid import uuid4
 
 import ragas
 from datasets import Dataset
 from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
-from langfuse.api.core.api_error import ApiError
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse._client.datasets import DatasetClient
 from ragas.llms import LangchainLLMWrapper
@@ -141,8 +139,8 @@ class LangfuseRagasEvaluator(Evaluator):
         try:
             evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
             await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)
-        except Exception as e:
-            logger.error("Failed to evaluate questions: %s", e)
+        except Exception:
+            logger.exception("Failed to evaluate questions.")
 
     async def _aauto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
         session_id = str(uuid4())
@@ -164,67 +162,61 @@ class LangfuseRagasEvaluator(Evaluator):
         async with self._semaphore:
             chat_request = ChatRequest(message=item.input)
 
-            try:
-                response = await self._chat_endpoint.achat(config["metadata"]["session_id"], chat_request)
-            except Exception as e:
-                logger.info("Error while answering question %s: %s", item.input, e)
-                response = None
-
-            if response and response.citations:
-                output = {"answer": response.answer, "documents": [x.page_content for x in response.citations]}
-            else:
-                output = {"answer": None, "documents": None}
-
-            langfuse_generation = self._langfuse.generation(
-                name=self._settings.evaluation_dataset_name,
-                input=item.input,
-                output=output,
-                start_time=generation_time,
-                end_time=datetime.now(),
-            )
-            self._link_item2generation(item, langfuse_generation, experiment_name)
-
-            if not (response and response.citations):
-                for metric in self.METRICS:
-                    langfuse_generation.score(
-                        name=metric.name,
-                        value=self.DEFAULT_SCORE_VALUE,
-                    )
-                return
-
-            eval_data = Dataset.from_dict(
-                {
-                    "question": [item.input],
-                    "answer": [output["answer"]],
-                    "contexts": [output["documents"]],
-                    "ground_truth": [item.expected_output],
+            # Use item.run context manager for trace
+            with item.run(
+                run_name=experiment_name,
+                run_metadata={"model": self._settings.model},
+                run_description=f"Evaluation run for {experiment_name}",
+            ) as root_span:
+                # Use langfuse.start_as_current_generation for generation
+                try:
+                    response = await self._chat_endpoint.achat(config["metadata"]["session_id"], chat_request)
+                except Exception:
+                    logger.info("Error while answering question %s.", item.input, exc_info=True)
+                    response = None
+                output = {
+                    "answer": response.answer if response else None,
+                    "documents": (
+                        [x.page_content for x in response.citations] if response and response.citations else None
+                    ),
                 }
-            )
+                with self._langfuse.start_as_current_generation(
+                    name="rag-eval-llm-call",
+                    input={"question": item.input, "context": output["documents"]},
+                    metadata={"item_id": item.id, "run": experiment_name},
+                    model=self._settings.model,
+                ) as generation:
 
-            result = ragas.evaluate(
-                eval_data,
-                metrics=self.METRICS,
-                llm=self._llm_wrapped,
-                embeddings=self._embedder,
-            )
-            for metric, score in result.scores[0].items():
-                if math.isnan(score):
-                    score = self.DEFAULT_SCORE_VALUE
-                langfuse_generation.score(
-                    name=metric,
-                    value=score,
-                )
+                    generation.update(output=output["answer"])
+                    generation.update_trace(
+                        input={"question": item.input, "context": output["documents"]},
+                        metadata={"item_id": item.id, "run": experiment_name},
+                        output=output["answer"],
+                    )
 
-    def _link_item2generation(self, item, generation, experiment_name, retries: int = 0):
-        try:
-            item.link(generation, experiment_name)
-        except ApiError as e:
-            logger.warning("Failed to link item to generation: %s", e)
-            retries += 1
-            if retries > self.MAX_RETRIES:
-                raise e
-            sleep(1)
-            self._link_item2generation(item, generation, experiment_name, retries)
+                # Ragas metrics
+                if response and response.citations:
+                    eval_data = Dataset.from_dict(
+                        {
+                            "question": [item.input],
+                            "answer": [output["answer"]],
+                            "contexts": [output["documents"]],
+                            "ground_truth": [item.expected_output],
+                        }
+                    )
+                    result = ragas.evaluate(
+                        eval_data,
+                        metrics=self.METRICS,
+                        llm=self._llm_wrapped,
+                        embeddings=self._embedder,
+                    )
+                    for metric, score in result.scores[0].items():
+                        if math.isnan(score):
+                            score = self.DEFAULT_SCORE_VALUE
+                        root_span.score_trace(name=metric, value=score)
+                else:
+                    for metric in self.METRICS:
+                        root_span.score_trace(name=metric.name, value=self.DEFAULT_SCORE_VALUE)
 
     def _get_dataset(self, dataset_name: str) -> DatasetClient:
         dataset = None
@@ -240,7 +232,7 @@ class LangfuseRagasEvaluator(Evaluator):
         return dataset
 
     def _create_dataset(self, dataset_name: str = None):
-        self._langfuse.create_dataset(dataset_name)
+        self._langfuse.create_dataset(name=dataset_name)
 
         data = self._load_dataset_items()
         self._store_items_in_dataset(data, dataset_name)

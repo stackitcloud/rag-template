@@ -11,7 +11,8 @@
       ],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/admin-app"
+        "outputPath": "dist/apps/admin-app",
+        "configFile": "apps/admin-app/vite.config.mts"
       },
       "configurations": {
         "development": {
@@ -26,7 +27,8 @@
       "executor": "@nx/vite:dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "admin-app:build"
+        "buildTarget": "admin-app:build",
+        "configFile": "apps/admin-app/vite.config.mts"
       },
       "configurations": {
         "development": {
@@ -41,7 +43,12 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint"
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/admin-app/**/*.{ts,tsx,js,jsx,vue,d.ts}"
+        ]
+      }
     }
   },
   "tags": []

@@ -1,3 +1,5 @@
+"""Module for the default source uploader implementation."""
+
 import logging
 import asyncio
 from threading import Thread
@@ -28,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class DefaultSourceUploader(SourceUploader):
+    """The DefaultSourceUploader is responsible for uploading source files for content extraction."""
 
     def __init__(
         self,
@@ -78,7 +81,7 @@ class DefaultSourceUploader(SourceUploader):
         kwargs: list[KeyValuePair],
     ) -> None:
         """
-        Uploads the parameters for source content extraction.
+        Upload the parameters for source content extraction.
 
         Parameters
         ----------
@@ -95,7 +98,6 @@ class DefaultSourceUploader(SourceUploader):
         -------
         None
         """
-
         self._prune_background_threads()
 
         source_name = f"{source_type}:{sanitize_document_name(name)}"
@@ -111,12 +113,12 @@ class DefaultSourceUploader(SourceUploader):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         except Exception as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
-            logger.error("Error while uploading %s = %s", source_name, str(e))
+            logger.exception("Error while uploading %s", source_name)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     def _check_if_already_in_processing(self, source_name: str) -> None:
         """
-        Checks if the source is already in processing state.
+        Check if the source is already in processing state.
 
         Parameters
         ----------
@@ -150,7 +152,7 @@ class DefaultSourceUploader(SourceUploader):
             logger.error("Upload of %s timed out after %s seconds", source_name, timeout)
             self._key_value_store.upsert(source_name, Status.ERROR)
         except Exception:
-            logger.error("Error while uploading %s", source_name)
+            logger.exception("Error while uploading %s", source_name)
             self._key_value_store.upsert(source_name, Status.ERROR)
         finally:
             loop.close()
@@ -197,6 +199,6 @@ class DefaultSourceUploader(SourceUploader):
             await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
             self._key_value_store.upsert(source_name, Status.READY)
             logger.info("Source uploaded successfully: %s", source_name)
-        except Exception as e:
+        except Exception:
             self._key_value_store.upsert(source_name, Status.ERROR)
-            logger.error("Error while uploading %s = %s", source_name, str(e))
+            logger.exception("Error while uploading %s", source_name)

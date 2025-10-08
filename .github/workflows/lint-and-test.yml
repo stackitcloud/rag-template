@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '24'
   PYTHON_VERSION: '3.13'
 
 jobs:

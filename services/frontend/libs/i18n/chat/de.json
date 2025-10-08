@@ -1,6 +1,6 @@
 {
   "chat": {
-    "initialMessage": "Hi 👋, ich bin dein KI-Assistent und und hier, um dich bei allen Fragen zu den bereitgestellten Dokumenten zu unterstützen!",
+    "initialMessage": "Hi 👋, ich bin dein KI-Assistent {bot_name} und hier, um dich bei allen Fragen zu den bereitgestellten Dokumenten zu unterstützen!",
     "send": "Senden",
     "justAsk": "Frag mich einfach...",
     "sources": "Quellen",

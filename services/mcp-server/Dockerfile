@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.11.7-bookworm AS build
+FROM --platform=linux/amd64 python:3.13.7-bookworm AS build
 
 ENV POETRY_VIRTUALENVS_PATH=/app/services/mcp-server/.venv
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
@@ -21,7 +21,7 @@ RUN mkdir -p log && chmod 700 log \
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root
 
-FROM --platform=linux/amd64 python:3.11.7-bookworm
+FROM --platform=linux/amd64 python:3.13.7-bookworm
 
 WORKDIR /app/services/mcp-server
 
@@ -33,20 +33,20 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 
-# cleanup
-RUN apt-get clean autoclean && apt-get autoremove --yes \
-    && while read -r shell; do rm -f "$shell"; done < /etc/shells || true \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
-
 ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
 
-USER nonroot
 COPY --from=build --chown=nonroot:nonroot  /app/services/mcp-server/log /app/services/mcp-server/log
 COPY --chown=nonroot:nonroot services/mcp-server/src ./src
 COPY --chown=nonroot:nonroot services/mcp-server/tests ./tests
 COPY --chown=nonroot:nonroot services/mcp-server/pyproject.toml services/mcp-server/poetry.lock ./
 COPY --chown=nonroot:nonroot services/mcp-server/Makefile ./
 
+# cleanup
+RUN apt-get clean autoclean && apt-get autoremove --yes \
+    && while read -r shell; do rm -f "$shell"; done < /etc/shells || true \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
+
+USER nonroot
 
 CMD [ "poetry", "run", "python", "src/main.py" ]

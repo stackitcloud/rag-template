@@ -75,9 +75,4 @@ class RetryDecoratorSettings(BaseSettings):
         # Ensure jitter_max >= jitter_min
         if self.jitter_max < self.jitter_min:
             raise ValueError("jitter_max must be >= jitter_min")
-        # Ensure retry_max_delay is meaningful vs base
-        if self.retry_max_delay <= 0:
-            raise ValueError("retry_max_delay must be > 0")
-        if self.backoff_factor < 1:
-            raise ValueError("backoff_factor must be >= 1")
         return self

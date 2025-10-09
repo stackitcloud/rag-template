@@ -169,6 +169,7 @@ def retry_with_backoff(
     )
     return engine.decorate
 
+
 def create_retry_decorator_settings(
     ai_settings: BaseSettings, retry_decorator_settings: RetryDecoratorSettings
 ) -> RetryDecoratorSettings:
@@ -198,9 +199,11 @@ def create_retry_decorator_settings(
         "jitter_max",
     ]
     settings_kwargs = {
-        field: getattr(ai_settings, field)
-        if getattr(ai_settings, field) is not None
-        else getattr(retry_decorator_settings, field)
+        field: (
+            getattr(ai_settings, field)
+            if getattr(ai_settings, field) is not None
+            else getattr(retry_decorator_settings, field)
+        )
         for field in fields
     }
     return RetryDecoratorSettings(**settings_kwargs)

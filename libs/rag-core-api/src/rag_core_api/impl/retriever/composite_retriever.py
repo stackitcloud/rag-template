@@ -226,7 +226,9 @@ class CompositeRetriever(Retriever):
             documents = documents[: self._total_retrieved_k_documents]
         return documents
 
-    async def _arerank_pruning(self, documents: list[Document], retriever_input: dict, config: Optional[RunnableConfig] = None) -> list[Document]:
+    async def _arerank_pruning(
+        self, documents: list[Document], retriever_input: dict, config: Optional[RunnableConfig] = None
+    ) -> list[Document]:
         """Prune documents by reranker.
 
         Parameters
@@ -243,7 +245,11 @@ class CompositeRetriever(Retriever):
         list[Document]
             The pruned list of documents.
         """
-        if self._reranker_k_documents is not None and len(documents) > self._reranker_k_documents and self._reranker_enabled:
+        if (
+            self._reranker_k_documents is not None
+            and len(documents) > self._reranker_k_documents
+            and self._reranker_enabled
+        ):
             # Only invoke reranker if there are more docs than it will output OR if score missing.
             try:
                 documents = await self._reranker.ainvoke((documents, retriever_input), config=config)

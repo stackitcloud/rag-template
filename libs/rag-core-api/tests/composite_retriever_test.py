@@ -24,7 +24,9 @@ from mocks.mock_retriever_quark import MockRetrieverQuark
 from mocks.mock_reranker import MockReranker
 
 
-def _mk_doc(id: str, score: float | None = None, type: ContentType = ContentType.TEXT, related: Iterable[str] | None = None):
+def _mk_doc(
+    id: str, score: float | None = None, type: ContentType = ContentType.TEXT, related: Iterable[str] | None = None
+):
     meta = {"id": id, "type": type.value}
     if score is not None:
         meta["score"] = score
@@ -60,7 +62,6 @@ def test_use_summaries_only_summary_no_related():
     assert results == []
 
 
-
 def test_remove_duplicates_preserves_first_occurrence():
     d1a = _mk_doc("a")
     d1b = _mk_doc("a")  # duplicate id
@@ -74,7 +75,9 @@ def test_remove_duplicates_preserves_first_occurrence():
 def test_early_pruning_sorts_by_score_when_all_have_score():
     docs = [_mk_doc("a", score=0.7), _mk_doc("b", score=0.9), _mk_doc("c", score=0.8)]
     retriever = MockRetrieverQuark(docs)
-    cr = CompositeRetriever(retrievers=[retriever], reranker=None, reranker_enabled=False, total_retrieved_k_documents=2)
+    cr = CompositeRetriever(
+        retrievers=[retriever], reranker=None, reranker_enabled=False, total_retrieved_k_documents=2
+    )
     pruned = cr._early_pruning(docs.copy())
     # Expect top two by score descending: b (0.9), c (0.8)
     assert [d.metadata["id"] for d in pruned] == ["b", "c"]
@@ -83,7 +86,9 @@ def test_early_pruning_sorts_by_score_when_all_have_score():
 def test_early_pruning_preserves_order_without_scores():
     docs = [_mk_doc("a"), _mk_doc("b"), _mk_doc("c")]  # no scores
     retriever = MockRetrieverQuark(docs)
-    cr = CompositeRetriever(retrievers=[retriever], reranker=None, reranker_enabled=False, total_retrieved_k_documents=2)
+    cr = CompositeRetriever(
+        retrievers=[retriever], reranker=None, reranker_enabled=False, total_retrieved_k_documents=2
+    )
     pruned = cr._early_pruning(docs.copy())
     assert [d.metadata["id"] for d in pruned] == ["a", "b"]
 

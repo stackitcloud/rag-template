@@ -126,7 +126,9 @@ class DependencyContainer(DeclarativeContainer):
         vectorstore=vectorstore,
     )
 
-    flashrank_reranker = Singleton(FlashrankRerank, top_n=reranker_settings.k_documents, score_threshold=reranker_settings.min_relevance_score)
+    flashrank_reranker = Singleton(
+        FlashrankRerank, top_n=reranker_settings.k_documents, score_threshold=reranker_settings.min_relevance_score
+    )
     reranker = Singleton(FlashrankReranker, flashrank_reranker)
 
     information_pieces_uploader = Singleton(DefaultInformationPiecesUploader, vector_database)

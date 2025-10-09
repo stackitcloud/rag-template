@@ -4,6 +4,7 @@ Provides only the methods required by the CompositeRetriever unit tests:
 - get_documents_by_ids: Used during summary expansion
 - asearch: (async) provided as a defensive stub
 """
+
 from typing import Dict, List
 from langchain_core.documents import Document
 

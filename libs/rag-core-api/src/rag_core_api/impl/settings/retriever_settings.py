@@ -55,7 +55,7 @@ class RetrieverSettings(BaseSettings):
         default=10,
         validation_alias=AliasChoices(
             "TOTAL_K_DOCUMENTS",  # canonical -> RETRIEVER_TOTAL_K_DOCUMENTS
-            "TOTAL_K",            # legacy -> RETRIEVER_TOTAL_K
+            "TOTAL_K",  # legacy -> RETRIEVER_TOTAL_K
             "OVERALL_K_DOCUMENTS",  # legacy -> RETRIEVER_OVERALL_K_DOCUMENTS
         ),
     )

@@ -1,4 +1,5 @@
 """Mock reranker used by CompositeRetriever unit tests."""
+
 from langchain_core.documents import Document
 
 __all__ = ["MockReranker"]

@@ -8,9 +8,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from langchain_core.runnables import Runnable, RunnableConfig, ensure_config
 from openai import APIConnectionError, APIError, APITimeoutError, RateLimitError
-from openai import APIConnectionError, APIError, APITimeoutError, RateLimitError
 
-from admin_api_lib.impl.settings.summarizer_settings import SummarizerSettings
 from admin_api_lib.impl.settings.summarizer_settings import SummarizerSettings
 from admin_api_lib.summarizer.summarizer import (
     Summarizer,
@@ -18,7 +16,6 @@ from admin_api_lib.summarizer.summarizer import (
     SummarizerOutput,
 )
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
-from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 from rag_core_lib.impl.utils.retry_decorator import create_retry_decorator_settings, retry_with_backoff
@@ -45,9 +42,7 @@ class LangchainSummarizer(Summarizer):
         self._chunker = chunker
         self._langfuse_manager = langfuse_manager
         self._semaphore = semaphore
-        self._retry_decorator_settings = create_retry_decorator_settings(
-            summarizer_settings, retry_decorator_settings
-        )
+        self._retry_decorator_settings = create_retry_decorator_settings(summarizer_settings, retry_decorator_settings)
 
     async def ainvoke(self, query: SummarizerInput, config: Optional[RunnableConfig] = None) -> SummarizerOutput:
         """

@@ -530,8 +530,6 @@ langfuse:
     # if authentication is enabled in redis
     # - name: REDIS_CONNECTION_STRING
     #   value: "redis://default:changeme@rag-valkey:6379"
-    # - name: LANGFUSE_REDIS_URL
-    #   value: "redis://default:changeme@rag-valkey:6379"
 
     # Additional init containers
     extraInitContainers:

@@ -14,15 +14,13 @@ const props = defineProps<{
     documents: Array<ChatDocumentModel>
 }>()
 
-const groupedDocuments = computed((): ChatDocumentItemModel[] => {
-    const documents = props.documents.map((document) => mapToDocumentItem(document));
-    const grouped = documents.reduce(
-        (reduced: any, element: ChatDocumentItemModel) => {
-            reduced[element.title] = reduced[element.title] || [];
-            reduced[element.title].push(element);
-            return reduced;
-        }, Object.create(null));
-    return grouped;
+const groupedDocuments = computed((): Record<string, ChatDocumentItemModel[]> => {
+    const items = props.documents.map((document) => mapToDocumentItem(document));
+    return items.reduce((acc: Record<string, ChatDocumentItemModel[]>, element: ChatDocumentItemModel) => {
+        if (!acc[element.title]) acc[element.title] = [];
+        acc[element.title].push(element);
+        return acc;
+    }, {});
 });
 </script>
 <template>

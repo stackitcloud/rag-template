@@ -10,6 +10,8 @@ export default defineConfig(({ mode }) => {
   const envs = loadEnv(mode, CWD);
   return {
     ...envs,
+    // Ensure Vite uses the app directory as root
+    root: fileURLToPath(new URL('./', import.meta.url)),
     cacheDir: '../../node_modules/.vite/chat-app',
     server: {
       port: 4200,
@@ -19,6 +21,12 @@ export default defineConfig(({ mode }) => {
         allow: [
           '../../libs/i18n'
         ],
+      },
+    },
+    build: {
+      rollupOptions: {
+        // Explicit entry to resolve index.html correctly when building via Nx
+        input: fileURLToPath(new URL('./index.html', import.meta.url)),
       },
     },
     plugins: [

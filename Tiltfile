@@ -145,6 +145,11 @@ local_resource(
 ################################## build backend_rag image and do live update ##########################################
 ########################################################################################################################
 
+IGNORE_BASE = [
+    "infrastructure/",
+    "services/frontend/",
+]
+
 # NOTE: full image names should match the one in the helm chart values.yaml!
 registry = "ghcr.io/stackitcloud/rag-template"
 rag_api_image_name = "rag-backend"
@@ -163,11 +168,7 @@ docker_build(
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
-    ignore=[
-        "infrastructure/",
-        "services/frontend/.nx/",
-        "services/frontend/tmp/",
-    ],
+    ignore=IGNORE_BASE
 )
 
 # Add linter trigger
@@ -207,11 +208,7 @@ docker_build(
         sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
-    ignore=[
-        "infrastructure/",
-        "services/frontend/.nx/",
-        "services/frontend/tmp/",
-    ],
+    ignore=IGNORE_BASE,
 )
 
 # Add linter trigger
@@ -246,7 +243,7 @@ docker_build(
         sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=IGNORE_BASE,
 )
 
 # Add linter trigger
@@ -290,7 +287,7 @@ docker_build(
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=IGNORE_BASE,
 )
 
 # Add linter trigger
@@ -331,7 +328,12 @@ docker_build(
         sync("./services/frontend/dist/apps/chat-app", "/usr/share/nginx/html"),
         sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
     ],
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "services/frontend/.nx/",
+        "services/frontend/tmp/",
+        "services/frontend/node_modules/",
+    ],
 )
 
 ########################################################################################################################
@@ -349,7 +351,12 @@ docker_build(
         sync("./services/frontend/dist/apps/admin-app", "/usr/share/nginx/html"),
         sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
     ],
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "services/frontend/.nx/",
+        "services/frontend/tmp/",
+        "services/frontend/node_modules/",
+    ],
 )
 
 

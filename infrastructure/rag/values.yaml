@@ -197,6 +197,14 @@ backend:
     stackitEmbedder:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
       STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+      # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
+      STACKIT_EMBEDDER_MAX_RETRIES: "5"
+      STACKIT_EMBEDDER_RETRY_BASE_DELAY: "0.5"
+      STACKIT_EMBEDDER_RETRY_MAX_DELAY: "600"
+      STACKIT_EMBEDDER_BACKOFF_FACTOR: "2"
+      STACKIT_EMBEDDER_ATTEMPT_CAP: "6"
+      STACKIT_EMBEDDER_JITTER_MIN: "0.05"
+      STACKIT_EMBEDDER_JITTER_MAX: "0.25"
     ollama:
       OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
       OLLAMA_BASE_URL: "http://rag-ollama:11434"
@@ -319,6 +327,7 @@ adminBackend:
     summarizer:
       SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
       SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
+      # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
       SUMMARIZER_MAX_RETRIES: "5"
       SUMMARIZER_RETRY_BASE_DELAY: "0.5"
       SUMMARIZER_RETRY_MAX_DELAY: "600"

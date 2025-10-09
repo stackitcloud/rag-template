@@ -10,6 +10,10 @@
 {{- printf "%s-usecase-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "configmap.retryDecoratorName" -}}
+{{- printf "%s-retry-decorator-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "secret.usecaseName" -}}
 {{- printf "%s-usecase-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

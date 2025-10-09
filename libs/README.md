@@ -8,16 +8,19 @@ It consists of the following python packages:
   - [1.1 Requirements](#11-requirements)
   - [1.2 Endpoints](#12-endpoints)
   - [1.3 Replaceable parts](#13-replaceable-parts)
+  - [1.4 Embedder retry behavior](#14-embedder-retry-behavior)
 - [`2. Admin API lib`](#2-admin-api-lib)
   - [2.1 Requirements](#21-requirements)
   - [2.2 Endpoints](#22-endpoints)
   - [2.3 Replaceable parts](#23-replaceable-parts)
+  - [2.4 Summarizer retry behavior](#24-summarizer-retry-behavior)
 - [`3. Extractor API lib`](#3-extractor-api-lib)
   - [3.1 Requirements](#31-requirements)
   - [3.2 Endpoints](#32-endpoints)
   - [3.3 Replaceable parts](#33-replaceable-parts)
 - [`4. RAG Core lib`](#4-rag-core-lib)
   - [4.1 Requirements](#41-requirements)
+  - [4.2 Retry decorator (exponential backoff)](#42-retry-decorator-exponential-backoff)
 
 With the exception of the `RAG Core lib` all of these packages contain an API definition and are easy to adjust for your specific use case.
 Each of the packages defines the replaceable parts([1.3 Replaceable Parts](#13-replaceable-parts), [2.3 Replaceable Parts](#23-replaceable-parts), [3.3 Replaceable Parts](#33-replaceable-parts)), expected types and offer a brief description.
@@ -70,6 +73,7 @@ By default `OpenAI` is used by the evaluation. If you want to use the same LLM-c
 Endpoint to remove documents from the vector database.
 
 #### `/information_pieces/upload`
+
 Endpoint to upload documents into the vector database. These documents need to have been parsed. For simplicity, a LangChain Documents like format is used.
 Uploaded documents are required to contain the following metadata:
 
@@ -93,8 +97,34 @@ Uploaded documents are required to contain the following metadata:
 | chat_graph | [`rag_core_api.graph.graph_base.GraphBase`](./rag-core-api/src/rag_core_api/graph/graph_base.py) | [`rag_core_api.impl.graph.chat_graph.DefaultChatGraph`](./rag-core-api/src/rag_core_api/impl/graph/chat_graph.py) | Langgraph graph that contains the entire logic for question answering. |
 | traced_chat_graph | [`rag_core_lib.chains.async_chain.AsyncChain[Any, Any]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) | Wraps around the *chat_graph* and add langfuse tracing. |
 | evaluator | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | The evaulator used in the evaluate endpoint. |
-| chat_endpoint | [ `rag_core_api.api_endpoints.chat.Chat`](./rag-core-api/src/rag_core_api/api_endpoints/chat.py) | [`rag_core_api.impl.api_endpoints.default_chat.DefaultChat`](./rag-core-api/src/rag_core_api/impl/api_endpoints/default_chat.py) | Implementation of the chat endpoint. Default implementation just calls the *traced_chat_graph* |
+| chat_endpoint | [`rag_core_api.api_endpoints.chat.Chat`](./rag-core-api/src/rag_core_api/api_endpoints/chat.py) | [`rag_core_api.impl.api_endpoints.default_chat.DefaultChat`](./rag-core-api/src/rag_core_api/impl/api_endpoints/default_chat.py) | Implementation of the chat endpoint. Default implementation just calls the *traced_chat_graph* |
 | ragas_llm | `langchain_core.language_models.chat_models.BaseChatModel` | `langchain_openai.ChatOpenAI` or `langchain_ollama.ChatOllama` | The LLM used for the ragas evaluation. |
+
+### 1.4 Embedder retry behavior
+
+The default STACKIT embedder implementation (`StackitEmbedder`) uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
+
+- Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
+- Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
+- Per-embedder overrides: [`StackitEmbedderSettings`](./rag-core-api/src/rag_core_api/impl/settings/stackit_embedder_settings.py)
+
+How it resolves settings
+
+- Each retry-related field in `StackitEmbedderSettings` is optional. When a field is provided (not None), it overrides the corresponding value from `RetryDecoratorSettings`.
+- When a field is not provided (None), the embedder falls back to the value from `RetryDecoratorSettings`.
+
+Configuring via environment variables
+
+- Embedder-specific (prefix `STACKIT_EMBEDDER_`):
+  - `STACKIT_EMBEDDER_MAX_RETRIES`
+  - `STACKIT_EMBEDDER_RETRY_BASE_DELAY`
+  - `STACKIT_EMBEDDER_RETRY_MAX_DELAY`
+  - `STACKIT_EMBEDDER_BACKOFF_FACTOR`
+  - `STACKIT_EMBEDDER_ATTEMPT_CAP`
+  - `STACKIT_EMBEDDER_JITTER_MIN`
+  - `STACKIT_EMBEDDER_JITTER_MAX`
+- Global fallback (prefix `RETRY_DECORATOR_`): see section [4.2](#42-retry-decorator-exponential-backoff) for all keys and defaults.
+- Helm chart: set the same keys under `backend.envs.stackitEmbedder` in [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml).
 
 ## 2. Admin API Lib
 
@@ -114,7 +144,7 @@ The following endpoints are provided by the *admin-api-lib*:
 All required python libraries can be found in the [pyproject.toml](./admin-api-lib/pyproject.toml) file.
 In addition to python libraries, the following system packages are required:
 
-```
+```shell
 build-essential
 make
 ```
@@ -156,10 +186,10 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | key_value_store | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | Is used for storing the available sources and their current state. |
 | chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) | Used for splitting the documents in managable chunks. |
 | document_extractor | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | Needs to be replaced if adjustments to the `extractor-api` is made. |
-| rag_api | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | Needs to be replaced if changes to the `/information_pieces/remove` or `/information_pieces/upload` of the [`rag-core-api`](#rag-core-api) are made. |
+| rag_api | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | Needs to be replaced if changes to the `/information_pieces/remove` or `/information_pieces/upload` of the [`rag-core-api`](#1-rag-core-api) are made. |
 | summarizer_prompt | `str` | [`admin_api_lib.prompt_templates.summarize_prompt.SUMMARIZE_PROMPT`](./admin-api-lib/src/admin_api_lib/prompt_templates/summarize_prompt.py) | The prompt used of the summarization. |
 | langfuse_manager | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | Retrieves additional settings, as well as the prompt from langfuse if available. |
-| summarizer |  [`admin_api_lib.summarizer.summarizer.Summarizer`](./admin-api-lib/src/admin_api_lib/summarizer/summarizer.py) | [`admin_api_lib.impl.summarizer.langchain_summarizer.LangchainSummarizer`](./admin-api-lib/src/admin_api_lib/impl/summarizer/langchain_summarizer.py) | Creates the summaries. |
+| summarizer |  [`admin_api_lib.summarizer.summarizer.Summarizer`](./admin-api-lib/src/admin_api_lib/summarizer/summarizer.py) | [`admin_api_lib.impl.summarizer.langchain_summarizer.LangchainSummarizer`](./admin-api-lib/src/admin_api_lib/impl/summarizer/langchain_summarizer.py) | Creates the summaries. Uses the shared retry decorator with optional per-summarizer overrides (see 2.4). |
 | untraced_information_enhancer |[`admin_api_lib.information_enhancer.information_enhancer.InformationEnhancer`](./admin-api-lib/src/admin_api_lib/information_enhancer/information_enhancer.py) | [`admin_api_lib.impl.information_enhancer.general_enhancer.GeneralEnhancer`](./admin-api-lib/src/admin_api_lib/impl/information_enhancer/general_enhancer.py) |  Uses the *summarizer* to enhance the extracted documents. |
 | information_enhancer |  [`rag_core_lib.chains.async_chain.AsyncChain[Any, Any]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) |Wraps around the *untraced_information_enhancer* and adds langfuse tracing. |
 | document_deleter |[`admin_api_lib.api_endpoints.document_deleter.DocumentDeleter`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_deleter.py) | [`admin_api_lib.impl.api_endpoints.default_document_deleter.DefaultDocumentDeleter`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_deleter.py) |  Handles deletion of sources. |
@@ -167,6 +197,32 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | source_uploader | [`admin_api_lib.api_endpoints.source_uploader.SourceUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/source_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_source_uploader.DefaultSourceUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_source_uploader.py)| Handles data loading and extraction from various non-file sources. |
 | document_reference_retriever | [`admin_api_lib.api_endpoints.document_reference_retriever.DocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_reference_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_document_reference_retriever.DefaultDocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_reference_retriever.py) | Handles return of files from connected storage. |
 | file_uploader | [`admin_api_lib.api_endpoints.file_uploader.FileUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/file_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_file_uploader.DefaultFileUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_file_uploader.py) | Handles upload and extraction of files. |
+
+### 2.4 Summarizer retry behavior
+
+The default summarizer implementation (`LangchainSummarizer`) now uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
+
+- Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
+- Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
+- Per-summarizer overrides: [`SummarizerSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/summarizer_settings.py)
+
+How it resolves settings
+
+- Each field in `SummarizerSettings` is optional. When a field is provided (not None), it overrides the corresponding value from `RetryDecoratorSettings`.
+- When a field is not provided (None), the summarizer falls back to the value from `RetryDecoratorSettings`.
+
+Configuring via environment variables
+
+- Summarizer-specific (prefix `SUMMARIZER_`):
+  - `SUMMARIZER_MAX_RETRIES`
+  - `SUMMARIZER_RETRY_BASE_DELAY`
+  - `SUMMARIZER_RETRY_MAX_DELAY`
+  - `SUMMARIZER_BACKOFF_FACTOR`
+  - `SUMMARIZER_ATTEMPT_CAP`
+  - `SUMMARIZER_JITTER_MIN`
+  - `SUMMARIZER_JITTER_MAX`
+- Global fallback (prefix `RETRY_DECORATOR_`): see section [4.2](#42-retry-decorator-exponential-backoff) for all keys and defaults.
+- Helm chart: set the same keys under `adminBackend.envs.summarizer` in [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml).
 
 ## 3. Extractor API Lib
 
@@ -196,6 +252,7 @@ tesseract-ocr-eng
 ### 3.2 Endpoints
 
 #### `/extract_from_file`
+
 This endpoint will extract the information from PDF,PTTX,WORD,XML files.
 It will load the files from the connected storage.
 The following types of information will be extracted:
@@ -214,6 +271,7 @@ The following types of information can be extracted:
 - `IMAGE`: image found in the document
 
 For sitemap sources, additional parameters can be provided, e.g.:
+
 - `web_path`: The URL of the XML sitemap to crawl
 - `filter_urls`: JSON array of URL patterns to filter pages (optional)
 - `header_template`: JSON object for custom HTTP headers (optional)
@@ -262,3 +320,53 @@ In addition to python libraries the following system packages are required:
 build-essential
 make
 ```
+
+### 4.2 Retry decorator (exponential backoff)
+
+The `rag-core-lib` provides a reusable retry decorator with exponential backoff and rate‑limit awareness for both sync and async functions.
+
+- Module: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
+- Settings: `rag_core_lib.impl.settings.retry_decorator_settings.RetryDecoratorSettings`
+- Works with: synchronous and asynchronous callables
+- Rate-limit aware: optionally inspects HTTP status 429 and headers like `x-ratelimit-reset-requests` / `x-ratelimit-reset-tokens`
+
+Usage example
+
+```python
+from rag_core_lib.impl.utils.retry_decorator import retry_with_backoff
+from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
+
+# Configure via code (env vars also supported, see below)
+settings = RetryDecoratorSettings(
+    max_retries=3,
+    retry_base_delay=0.2,
+)
+
+@retry_with_backoff(settings=settings)
+def fetch_something():
+    return "ok"
+
+@retry_with_backoff(settings=settings)
+async def fetch_async_something():
+    return "ok"
+```
+
+Configuration
+
+- Environment variables (prefix `RETRY_DECORATOR_`):
+  - `RETRY_DECORATOR_MAX_RETRIES` (default: 5)
+  - `RETRY_DECORATOR_RETRY_BASE_DELAY` (default: 0.5)
+  - `RETRY_DECORATOR_RETRY_MAX_DELAY` (default: 600)
+  - `RETRY_DECORATOR_BACKOFF_FACTOR` (default: 2)
+  - `RETRY_DECORATOR_ATTEMPT_CAP` (default: 6)
+  - `RETRY_DECORATOR_JITTER_MIN` (default: 0.05)
+  - `RETRY_DECORATOR_JITTER_MAX` (default: 0.25)
+
+- Helm chart (shared values): set the same keys under `shared.envs.retryDecorator` in [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml) to apply cluster‑wide defaults for backend/admin services.
+
+Advanced
+
+- Customize which exceptions trigger retries via `exceptions` and `rate_limit_exceptions` parameters of `retry_with_backoff()`.
+- Header‑based wait: When rate‑limited, the decorator will honor reset headers if present and add jitter.
+
+For more examples, see tests in [./rag-core-lib/tests/retry_decorator_test.py](./rag-core-lib/tests/retry_decorator_test.py).

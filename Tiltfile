@@ -163,7 +163,11 @@ docker_build(
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "services/frontend/.nx/",
+        "services/frontend/tmp/",
+    ],
 )
 
 # Add linter trigger
@@ -203,7 +207,11 @@ docker_build(
         sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
-    ignore=["infrastructure/"],
+    ignore=[
+        "infrastructure/",
+        "services/frontend/.nx/",
+        "services/frontend/tmp/",
+    ],
 )
 
 # Add linter trigger
@@ -317,7 +325,12 @@ docker_build(
     frontend_image_name,
     ".",
     dockerfile="./services/frontend/apps/chat-app/Dockerfile",
-    live_update=[sync("./services/frontend", "/usr/src/app")],
+    # Sync only built assets into the writable Nginx html volume.
+    # Avoid syncing sources/.nx into read-only paths in the runtime image.
+    live_update=[
+        sync("./services/frontend/dist/apps/chat-app", "/usr/share/nginx/html"),
+        sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
+    ],
     ignore=["infrastructure/"],
 )
 
@@ -331,7 +344,11 @@ docker_build(
     adminfrontend_image_name,
     ".",
     dockerfile="services/frontend/apps/admin-app/Dockerfile",
-    live_update=[sync("./services/frontend", "/usr/src/app")],
+    # Sync only built assets into the writable Nginx html volume.
+    live_update=[
+        sync("./services/frontend/dist/apps/admin-app", "/usr/share/nginx/html"),
+        sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
+    ],
     ignore=["infrastructure/"],
 )
 

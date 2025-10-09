@@ -8,6 +8,8 @@ import time
 from functools import wraps
 from typing import Callable, Optional, ParamSpec, TypeVar
 
+from pydantic_settings import BaseSettings
+
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.utils.utils import (
     headers_from_exception,
@@ -166,3 +168,39 @@ def retry_with_backoff(
         logger=logger,
     )
     return engine.decorate
+
+def create_retry_decorator_settings(
+    ai_settings: BaseSettings, retry_decorator_settings: RetryDecoratorSettings
+) -> RetryDecoratorSettings:
+    """Create retry decorator settings based on AI and default settings.
+
+    If the corresponding field in ai_settings is not set, the value from retry_decorator_settings will be used.
+
+    Parameters
+    ----------
+    ai_settings : BaseSettings
+        Those are the AI settings, e.g. Embeddings, Summarizers etc.
+    retry_decorator_settings : RetryDecoratorSettings
+        Those are the default retry settings.
+
+    Returns
+    -------
+    RetryDecoratorSettings
+        The combined retry settings.
+    """
+    fields = [
+        "max_retries",
+        "retry_base_delay",
+        "retry_max_delay",
+        "backoff_factor",
+        "attempt_cap",
+        "jitter_min",
+        "jitter_max",
+    ]
+    settings_kwargs = {
+        field: getattr(ai_settings, field)
+        if getattr(ai_settings, field) is not None
+        else getattr(retry_decorator_settings, field)
+        for field in fields
+    }
+    return RetryDecoratorSettings(**settings_kwargs)

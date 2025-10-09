@@ -7,7 +7,7 @@ from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
 import logging
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
-from rag_core_lib.impl.utils.retry_decorator import retry_with_backoff
+from rag_core_lib.impl.utils.retry_decorator import create_retry_decorator_settings, retry_with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class StackitEmbedder(Embedder, Embeddings):
             base_url=stackit_embedder_settings.base_url,
         )
         self._settings = stackit_embedder_settings
-        self._retry_decorator_settings = self._create_retry_decorator_settings(
+        self._retry_decorator_settings = create_retry_decorator_settings(
             stackit_embedder_settings, retry_decorator_settings
         )
 
@@ -91,43 +91,6 @@ class StackitEmbedder(Embedder, Embeddings):
             return embeddings if embeddings else []
         logger.warning("No embeddings found for query: %s", text)
         return embeddings_list
-
-    def _create_retry_decorator_settings(
-        self,
-        stackit_settings: StackitEmbedderSettings,
-        retry_defaults: RetryDecoratorSettings,
-    ) -> RetryDecoratorSettings:
-        # Prefer values from StackitEmbedderSettings when provided;
-        # otherwise fall back to RetryDecoratorSettings defaults
-        return RetryDecoratorSettings(
-            max_retries=(
-                stackit_settings.max_retries if stackit_settings.max_retries is not None else retry_defaults.max_retries
-            ),
-            retry_base_delay=(
-                stackit_settings.retry_base_delay
-                if stackit_settings.retry_base_delay is not None
-                else retry_defaults.retry_base_delay
-            ),
-            retry_max_delay=(
-                stackit_settings.retry_max_delay
-                if stackit_settings.retry_max_delay is not None
-                else retry_defaults.retry_max_delay
-            ),
-            backoff_factor=(
-                stackit_settings.backoff_factor
-                if stackit_settings.backoff_factor is not None
-                else retry_defaults.backoff_factor
-            ),
-            attempt_cap=(
-                stackit_settings.attempt_cap if stackit_settings.attempt_cap is not None else retry_defaults.attempt_cap
-            ),
-            jitter_min=(
-                stackit_settings.jitter_min if stackit_settings.jitter_min is not None else retry_defaults.jitter_min
-            ),
-            jitter_max=(
-                stackit_settings.jitter_max if stackit_settings.jitter_max is not None else retry_defaults.jitter_max
-            ),
-        )
 
     def _retry_with_backoff_wrapper(self):
         return retry_with_backoff(

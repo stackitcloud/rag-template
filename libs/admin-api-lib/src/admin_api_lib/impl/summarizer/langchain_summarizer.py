@@ -21,8 +21,7 @@ from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-from rag_core_lib.impl.utils.retry_decorator import retry_with_backoff
-from rag_core_lib.impl.utils.retry_decorator import retry_with_backoff
+from rag_core_lib.impl.utils.retry_decorator import create_retry_decorator_settings, retry_with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +45,7 @@ class LangchainSummarizer(Summarizer):
         self._chunker = chunker
         self._langfuse_manager = langfuse_manager
         self._semaphore = semaphore
-        self._retry_decorator_settings = self._create_retry_decorator_settings(
-            summarizer_settings, retry_decorator_settings
-        )
-        self._retry_decorator_settings = self._create_retry_decorator_settings(
+        self._retry_decorator_settings = create_retry_decorator_settings(
             summarizer_settings, retry_decorator_settings
         )
 
@@ -107,26 +103,6 @@ class LangchainSummarizer(Summarizer):
             len(merged),
         )
         return await self._summarize_chunk(merged, config)
-
-    def _create_retry_decorator_settings(
-        self, summarizer_settings: SummarizerSettings, retry_decorator_settings: RetryDecoratorSettings
-    ):
-        fields = [
-            "max_retries",
-            "retry_base_delay",
-            "retry_max_delay",
-            "backoff_factor",
-            "attempt_cap",
-            "jitter_min",
-            "jitter_max",
-        ]
-        settings_kwargs = {
-            field: getattr(summarizer_settings, field)
-            if getattr(summarizer_settings, field) is not None
-            else getattr(retry_decorator_settings, field)
-            for field in fields
-        }
-        return RetryDecoratorSettings(**settings_kwargs)
 
     def _create_chain(self) -> Runnable:
         return self._langfuse_manager.get_base_prompt(self.__class__.__name__) | self._langfuse_manager.get_base_llm(

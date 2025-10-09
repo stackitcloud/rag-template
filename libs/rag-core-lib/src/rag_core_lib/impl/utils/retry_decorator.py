@@ -206,4 +206,6 @@ def create_retry_decorator_settings(
         )
         for field in fields
     }
+    if settings_kwargs["jitter_max"] < settings_kwargs["jitter_min"]:
+        raise ValueError("jitter_max must be >= jitter_min")
     return RetryDecoratorSettings(**settings_kwargs)

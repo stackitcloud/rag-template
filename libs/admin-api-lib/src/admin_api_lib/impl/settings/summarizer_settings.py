@@ -79,7 +79,8 @@ class SummarizerSettings(BaseSettings):
 
     @model_validator(mode="after")
     def _check_relations(self) -> "SummarizerSettings":
-        # Ensure jitter_max >= jitter_min
+        if not self.jitter_min or not self.jitter_max:
+            return self
         if self.jitter_max < self.jitter_min:
             raise ValueError("jitter_max must be >= jitter_min")
         return self

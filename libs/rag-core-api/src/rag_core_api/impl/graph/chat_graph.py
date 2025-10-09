@@ -254,6 +254,13 @@ class DefaultChatGraph(GraphBase):
             if document.metadata.get("type", ContentType.SUMMARY.value) != ContentType.SUMMARY.value
         ]
 
+        # If only summaries were retrieved (no concrete underlying documents), treat as "no documents"
+        if not information_pieces:
+            return {
+                self.ERROR_MESSAGES_KEY: [self._error_messages.no_documents_message],
+                self.FINISH_REASONS: ["No documents found"],
+            }
+
         response["information_pieces"] = information_pieces
         response["langchain_documents"] = retrieved_documents
 

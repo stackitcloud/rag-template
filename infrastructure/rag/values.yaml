@@ -166,7 +166,8 @@ backend:
     retriever:
       RETRIEVER_THRESHOLD: 0.3
       RETRIEVER_K_DOCUMENTS: 10
-      RETRIEVER_TOTAL_K: 7
+      # Canonical global cap across all retrievers. Replaces legacy RETRIEVER_TOTAL_K / RETRIEVER_OVERALL_K_DOCUMENTS
+      RETRIEVER_TOTAL_K_DOCUMENTS: 20
       RETRIEVER_SUMMARY_THRESHOLD: 0.3
       RETRIEVER_SUMMARY_K_DOCUMENTS: 10
       RETRIEVER_TABLE_THRESHOLD: 0.3
@@ -211,6 +212,7 @@ backend:
     reranker:
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
+      RERANKER_ENABLED: true
     chatHistory:
       CHAT_HISTORY_LIMIT: 4
       CHAT_HISTORY_REVERSE: true

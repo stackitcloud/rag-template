@@ -39,7 +39,7 @@ class FileStatusKeyValueStore:
         settings : KeyValueSettings
             The settings object containing the host and port information for the Redis connection.
         """
-        self._redis = Redis(host=settings.host, port=settings.port, decode_responses=True)
+        self._redis = Redis(host=settings.host, port=settings.port, decode_responses=True, username=settings.username, password=settings.password)
 
     @staticmethod
     def _to_str(file_name: str, file_status: Status) -> str:

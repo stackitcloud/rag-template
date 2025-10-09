@@ -80,18 +80,12 @@ class LangchainSummarizer(Summarizer):
         # Fan out with concurrency, bounded by your semaphore inside _summarize_chunk
         tasks = [asyncio.create_task(self._summarize_chunk(doc.page_content, config)) for doc in langchain_documents]
         outputs = await asyncio.gather(*tasks)
-        logger.debug("Summarizing %d chunk(s)...", len(langchain_documents))
-
-        # Fan out with concurrency, bounded by your semaphore inside _summarize_chunk
-        tasks = [asyncio.create_task(self._summarize_chunk(doc.page_content, config)) for doc in langchain_documents]
-        outputs = await asyncio.gather(*tasks)
 
         if len(outputs) == 1:
             return outputs[0]
 
         merged = " ".join(outputs)
 
-        merged = " ".join(outputs)
         logger.debug(
             "Reduced number of chars from %d to %d",
             len("".join([x.page_content for x in langchain_documents])),

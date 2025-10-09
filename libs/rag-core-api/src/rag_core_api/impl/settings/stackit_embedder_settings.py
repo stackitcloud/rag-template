@@ -1,8 +1,8 @@
 """Module contains settings regarding the stackit embedder."""
 
 from typing import Optional
-from pydantic import Field, PositiveInt
-from pydantic_settings import BaseSettings
+from pydantic import Field, PositiveInt, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class StackitEmbedderSettings(BaseSettings):
@@ -34,11 +34,7 @@ class StackitEmbedderSettings(BaseSettings):
         Maximum jitter in seconds.
     """
 
-    class Config:
-        """Config class for reading Fields from env."""
-
-        env_prefix = "STACKIT_EMBEDDER_"
-        case_sensitive = False
+    model_config = SettingsConfigDict(env_prefix="STACKIT_EMBEDDER_", case_sensitive=False)
 
     model: str = Field(default="intfloat/e5-mistral-7b-instruct")
     base_url: str = Field(default="https://e629124b-accc-4e25-a1cc-dc57ac741e1d.model-serving.eu01.onstackit.cloud/v1")
@@ -84,3 +80,10 @@ class StackitEmbedderSettings(BaseSettings):
         title="Jitter Max (s)",
         description="Maximum jitter in seconds.",
     )
+
+    @model_validator(mode="after")
+    def _check_relations(self) -> "StackitEmbedderSettings":
+        # Ensure jitter_max >= jitter_min
+        if self.jitter_max < self.jitter_min:
+            raise ValueError("jitter_max must be >= jitter_min")
+        return self

@@ -1,8 +1,8 @@
 """Contains settings for summarizer."""
 
 from typing import Optional
-from pydantic import Field, PositiveInt
-from pydantic_settings import BaseSettings
+from pydantic import Field, PositiveInt, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class SummarizerSettings(BaseSettings):
@@ -31,11 +31,7 @@ class SummarizerSettings(BaseSettings):
         Maximum jitter in seconds.
     """
 
-    class Config:
-        """Config class for reading Fields from env."""
-
-        env_prefix = "SUMMARIZER_"
-        case_sensitive = False
+    model_config = SettingsConfigDict(env_prefix="SUMMARIZER_", case_sensitive=False)
 
     maximum_input_size: int = Field(default=8000)
     maximum_concurrency: int = Field(default=10)
@@ -80,3 +76,10 @@ class SummarizerSettings(BaseSettings):
         title="Jitter Max (s)",
         description="Maximum jitter in seconds.",
     )
+
+    @model_validator(mode="after")
+    def _check_relations(self) -> "SummarizerSettings":
+        # Ensure jitter_max >= jitter_min
+        if self.jitter_max < self.jitter_min:
+            raise ValueError("jitter_max must be >= jitter_min")
+        return self

@@ -32,7 +32,7 @@ langchain-community = "0.3.27"
 fastembed = "^0.7.0"
 langdetect = "^1.0.9"
 langfuse = "3.3.4"
-
+langchain-text-splitters = ">=0.3.9"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"

@@ -14,7 +14,7 @@ features:
     enabled: true
   frontend:
     enabled: true
-  keydb:
+  valkey:
     enabled: true
   mcp:
     enabled: true
@@ -323,6 +323,11 @@ adminBackend:
   minio:
     enabled: true
 
+  secrets:
+    keyvalue:
+      username: "default"
+      password: "changeme"
+
   envs:
     summarizer:
       SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
@@ -342,7 +347,7 @@ adminBackend:
       CHUNKER_OVERLAP: 300
     keyValueStore:
       USECASE_KEYVALUE_PORT: 6379
-      USECASE_KEYVALUE_HOST: "rag-keydb"
+      USECASE_KEYVALUE_HOST: "rag-valkey"
     sourceUploader:
       SOURCE_UPLOADER_TIMEOUT: 3600
 
@@ -522,6 +527,9 @@ langfuse:
       value: ""
     - name: LANGFUSE_INIT_USER_PASSWORD
       value: ""
+    # if authentication is enabled in redis
+    # - name: REDIS_CONNECTION_STRING
+    #   value: "redis://default:changeme@rag-valkey:6379"
 
     # Additional init containers
     extraInitContainers:
@@ -548,13 +556,13 @@ langfuse:
       password: postgres
       database: langfuse
 
-  # Redis Configuration (external KeyDB)
+  # Redis Configuration (external ValKey or managed Redis (recommended for production))
   redis:
     deploy: false
-    host: "rag-keydb"
+    host: "rag-valkey"
     port: 6379
     auth:
-      username: "default"
+      username: ""
       password: ""
 
   # ClickHouse Configuration (external ClickHouse)
@@ -644,7 +652,8 @@ qdrant:
   image:
     tag: v1.15.4
 
-keydb:
-  multiMaster: "no"
-  activeReplicas: "no"
-  nodes: 1
+
+valkey:
+  #acl by default disabled. can be enabled.
+  dataStorage:
+    enabled: true

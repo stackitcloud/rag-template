@@ -116,6 +116,8 @@ spec:
               name: {{ template "secret.s3Name" . }}
           - secretRef:
               name: {{ template "secret.stackitVllmName" . }}
+          - secretRef:
+              name: {{ template "secret.keyvalName" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.adminBackend.pythonPathEnv.PYTHONPATH }}

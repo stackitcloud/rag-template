@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { RouterView } from "vue-router";
-import { LogoContainer, NavigationContainer } from "@shared/ui";
+import { NavigationContainer } from "@shared/ui";
 import { useI18n } from "vue-i18n";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
 

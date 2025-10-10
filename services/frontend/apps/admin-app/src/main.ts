@@ -4,7 +4,7 @@ import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
 import { routes } from './routes';
-import '../../../libs/ui-styles/src/tailwind.css';
+import '@shared/style';
 
 export async function setupApp() {
   const router = createRouter({

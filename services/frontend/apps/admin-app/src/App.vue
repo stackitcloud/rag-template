@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { RouterView } from "vue-router";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
 import { NavigationContainer } from "@shared/ui";
 import { useI18n } from "vue-i18n";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
+import { RouterView } from "vue-router";
 
 const { t } = useI18n();
 const chatURL = import.meta.env.VITE_CHAT_URL;

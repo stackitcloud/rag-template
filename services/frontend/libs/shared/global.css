@@ -1,6 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "@tailwindcss/typography";
+@source "../../apps/**/src/**/*.{vue,js,ts}";
+@source "../../apps/**/index.html";
+@source "../../libs/**/*.{vue,js,ts}";
 
 html,
 body,

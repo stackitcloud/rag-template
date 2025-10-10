@@ -1,9 +1,10 @@
-import App from './App.vue';
 import { i18n } from '@i18n/admin';
-import { routes } from './routes';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import App from './App.vue';
+import { routes } from './routes';
+import '../../../libs/ui-styles/src/tailwind.css';
 
 export async function setupApp() {
   const router = createRouter({

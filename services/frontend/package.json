@@ -30,7 +30,7 @@
     "devDependencies": {
         "esbuild": "^0.25.10",
         "@eslint/js": "^9.36.0",
-        "@intlify/unplugin-vue-i18n": "^6.0.0",
+        "@intlify/unplugin-vue-i18n": "^11.0.0",
         "@nrwl/eslint-plugin-nx": "^19.8.14",
         "@nx/cypress": "^18.0.4",
         "@nx/eslint": "^19.8.14",

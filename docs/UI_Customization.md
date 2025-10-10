@@ -8,9 +8,9 @@ Note: In this document, “frontend” refers to the folder at services/frontend
 
 The RAG Template frontend supports several customization options:
 
-- **Bot Name**: Customize the AI assistant's name in chat messages
-- **Logo/Branding**: Replace the default logo with your organization's branding
-- **Theme System**: Switch between light and dark modes with user preference persistence
+- **Bot name** and **initial message**
+- **Logos** for light and dark mode
+- **Brand colors and themes** (Tailwind v4 + daisyUI v5)
 
 ## Configuration Options
 
@@ -107,40 +107,26 @@ VITE_UI_LOGO_PATH_DARK=/assets/company-logo-dark.svg
 VITE_UI_LOGO_PATH=/assets/company-logo.svg
 ```
 
-### Theme System
+### Theme System (Tailwind v4 + daisyUI v5)
 
-The application supports a flexible theme system with user preference persistence.
+The frontend uses Tailwind v4 with daisyUI v5. In the following, we describe how to customize the theme using central CSS (recommended for brand colors shared by both apps):
 
-**Available Themes:**
+- File: `services/frontend/libs/ui-styles/src/tailwind.css`
+- This file loads Tailwind v4 and defines daisyUI themes via CSS `@plugin` blocks.
+- Update semantic tokens under the `@plugin "daisyui/theme"` blocks:
 
-- `light`: Light mode (default)
-- `dark`: Dark mode
+```css
+--color-primary: #a90303;            /* CTA/buttons */
+--color-primary-content: #ffffff;    /* readable text on primary */
+--color-base-100: #ffffff;           /* page background */
+--color-base-200: #EDEDED;           /* cards */
+```
 
-**Theme Configuration:**
+Theme behavior:
 
-1. **Set Default Theme:**
-
-   ```bash
-   # Users will see dark mode by default
-   VITE_UI_THEME_DEFAULT=dark
-   ```
-
-1. **Configure Available Options:**
-
-   ```bash
-   # Only allow light mode (remove theme toggle)
-   VITE_UI_THEME_OPTIONS=light
-
-   # Support both themes (default)
-   VITE_UI_THEME_OPTIONS=light,dark
-   ```
-
-**Theme Behavior:**
-
-- Theme preference is saved in browser's localStorage
-- Theme persists across browser sessions
-- Theme toggle button appears only when multiple options are available
-- Manual theme switching overrides the default setting
+- Default theme and options are set by env vars: `VITE_UI_THEME_DEFAULT`, `VITE_UI_THEME_OPTIONS`
+- The selected theme is stored in `localStorage` under `app-theme`
+- Theme switching updates `html[data-theme]` so daisyUI variables apply
 
 ## Development Setup
 
@@ -217,7 +203,7 @@ For Docker deployments, the frontend uses a special script (services/frontend/en
 
 ### Adding Custom Themes
 
-To add custom themes beyond light/dark:
+To add themes beyond light/dark, update both the settings and the theme source:
 
 1. **Update the settings configuration** in [services/frontend/libs/shared/settings.ts](../services/frontend/libs/shared/settings.ts):
 
@@ -227,31 +213,24 @@ To add custom themes beyond light/dark:
      ui: {
        theme: {
          default: "light",
-         options: ["light", "dark", "custom"], // Add your theme
+         options: ["light", "dark", "brand-red"], // Add your theme
        },
      },
    };
    ```
 
-1. **Configure DaisyUI themes** in [services/frontend/tailwind.config.js](../services/frontend/tailwind.config.js):
+2. Define the theme either e.g. in CSS (recommended for shared branding):
 
-   ```javascript
-   module.exports = {
-     daisyui: {
-       themes: [
-         "light",
-         "dark",
-         {
-           custom: {
-             "primary": "#your-color",
-             "secondary": "#your-color",
-             // ... more theme colors
-           }
-         }
-       ],
-     },
-   };
-   ```
+CSS (Tailwind v4):
+
+```css
+@plugin "daisyui/theme" {
+  name: "brand-red";
+  --color-primary: #a90303;
+  --color-primary-content: #ffffff;
+  /* ... other tokens ... */
+}
+```
 
 ### Internationalization
 

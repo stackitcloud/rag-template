@@ -35,7 +35,7 @@ from admin_api_lib.impl.information_enhancer.general_enhancer import GeneralEnha
 from admin_api_lib.impl.information_enhancer.page_summary_enhancer import (
     PageSummaryEnhancer,
 )
-from admin_api_lib.impl.key_db.file_status_key_value_store import (
+from admin_api_lib.impl.key_value_store.file_status_key_value_store import (
     FileStatusKeyValueStore,
 )
 from admin_api_lib.impl.mapper.informationpiece2document import (

@@ -1,5 +1,6 @@
 """Contains settings regarding the key values store."""
 
+from typing import Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -24,3 +25,5 @@ class KeyValueSettings(BaseSettings):
 
     host: str = Field()
     port: int = Field()
+    username: Optional[str] = Field(default=None)
+    password: Optional[str] = Field(default=None)

@@ -15,6 +15,10 @@
 {{- printf "%s-stackit-vllm-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "secret.keyvalName" -}}
+{{- printf "%s-keyval-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 # configmaps
 {{- define "configmap.s3Name" -}}
 {{- printf "%s-s3-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}

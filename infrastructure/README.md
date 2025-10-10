@@ -8,7 +8,7 @@ The documentation is structured as follows:
 - [1. Components and Configuration Values to Adjust](#1-components-and-configuration-values-to-adjust)
   - [1.1 Langfuse](#11-langfuse)
   - [1.2 Qdrant](#12-qdrant)
-  - [1.3 KeyDB](#13-keydb)
+  - [1.3 Valkey](#13-valkey)
   - [1.4 Frontend](#14-frontend)
   - [1.5 Backend](#15-backend)
   - [1.6 MCP Server](#16-mcp-server)
@@ -79,7 +79,7 @@ This directory contains the Helm chart for the following RAG components:
 
 - [Langfuse](https://langfuse.com/) (dependency)
 - [Qdrant](https://qdrant.tech/) (dependency)
-- [KeyDB](https://docs.keydb.dev/) (dependency)
+- [Valkey](https://valkey.io/) (dependency)
 - Frontend
 - Backend
 - MCP Server
@@ -101,7 +101,7 @@ features:
     enabled: true
   frontend:
     enabled: true
-  keydb:
+  valkey:
     enabled: true
   mcp:
     enabled: true
@@ -201,14 +201,14 @@ qdrant:
   replicaCount: 3
 ```
 
-### 1.3 KeyDB
+### 1.3 Valkey
 
-The usage of the KeyDB is **only recommended for development** purposes. KeyDB is used as alternative to Redis to store the state of each uploaded document. The Admin Backend uses the key-value-pairs of the KeyDB to keep track of the current state of the RAG sources. Note, sources include documents as well as non-document sources like confluence.
+KeyDB has been replaced by Valkey due to incompatibilities with Langfuse. Valkey is a Redis-compatible key-value store and is used as the in-cluster default for development to store the state of uploaded documents and non-document sources (e.g., Confluence). The Admin Backend uses these key-value pairs to track the current state of RAG sources. Langfuse also utilizes Valkey.
 
 In **production**, the usage of a fully-managed Redis instance (e.g. provided by STACKIT) is recommended. The following parameters need to be adjusted in the `values.yaml` file:
 
 ```yaml
-# For production: Use external Redis instead of KeyDB
+# For production: Use managed Redis (or external Valkey) instead of the in-cluster Valkey
 adminBackend:
   envs:
     keyValueStore:
@@ -216,12 +216,12 @@ adminBackend:
       USECASE_KEYVALUE_PORT: 6379
 
 features:
-  keydb:
-    enabled: false # Disable KeyDB for production
+  valkey:
+    enabled: false # Disable in-cluster Valkey for production
 
 langfuse:
   valkey:
-    deploy: false # Use Redis instead of KeyDB
+    deploy: false # Use managed Redis instead of in-cluster Valkey
   langfuse:
     additionalEnv:
     - name: REDIS_CONNECTION_STRING
@@ -499,7 +499,7 @@ For deployment of the *NGINX Ingress Controller* and a cert-manager, the followi
 
 [base-setup](server-setup/base-setup/Chart.yaml)
 
-The email [here](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
+Update the email in the cert issuer template: [server-setup/base-setup/templates/cert-issuer.yaml](server-setup/base-setup/templates/cert-issuer.yaml) — replace `<replace@me.com>` with a real email address.
 
 ## 3. Contributing
 

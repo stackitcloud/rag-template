@@ -221,7 +221,7 @@ This can be done with the following command from the root of the git-repository:
 cd infrastructure/rag;helm dependency update; cd ../..
 ```
 
-> 📝 NOTE: The configuration of the `Tiltfile` requires `features.frontend.enabled=true`, `features.keydb.enabled=true`, `features.langfuse.enabled=true` and `features.qdrant.enabled=true`.
+> 📝 NOTE: The configuration of the `Tiltfile` requires `features.frontend.enabled=true`, `features.valkey.enabled=true`, `features.langfuse.enabled=true` and `features.qdrant.enabled=true`.
 
 After the initial build of the helm chart *Tilt* is able to update the files.
 

@@ -28,7 +28,6 @@
         "vue-router": "^4.2.5"
     },
     "devDependencies": {
-        "esbuild": "^0.25.10",
         "@eslint/js": "^9.36.0",
         "@intlify/unplugin-vue-i18n": "^11.0.0",
         "@nrwl/eslint-plugin-nx": "^19.8.14",
@@ -41,6 +40,7 @@
         "@nx/web": "21.6.3",
         "@nx/workspace": "^21.0.0",
         "@rushstack/eslint-patch": "^1.2.0",
+        "@tailwindcss/postcss": "^4.1.14",
         "@tsconfig/node21": "^21.0.1",
         "@types/jsdom": "^27.0.0",
         "@types/node": "^22.0.0",
@@ -54,6 +54,7 @@
         "axios": "^1.9.0",
         "cypress": "^13.0.0",
         "daisyui": "^5.0.0",
+        "esbuild": "^0.25.10",
         "eslint": "^9.36.0",
         "eslint-plugin-cypress": "5.2.0",
         "eslint-plugin-import": "2.32.0",

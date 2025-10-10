@@ -71,7 +71,7 @@
         "vite-tsconfig-paths": "~5.1.0",
         "vitest": "^3.2.4",
         "vue-eslint-parser": "^10",
-        "vue-tsc": "^2.0.0"
+        "vue-tsc": "^3.0.0"
     },
     "engines": {
         "npm": ">=8.6.0",

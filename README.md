@@ -1,3 +1,6 @@
+![Project banner](.github/images/stackit-logo-light.svg#gh-light-mode-only)
+![Project banner](.github/images/stackit-logo-dark.svg#gh-dark-mode-only)
+
 # RAG Template
 
 Welcome to the STACKIT RAG Template! This is a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./services/rag-backend/main.py), [container.py](./services/rag-backend/container.py) and [chat_endpoint.py](./services/rag-backend/chat_endpoint.py)).

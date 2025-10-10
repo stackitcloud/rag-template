@@ -58,7 +58,7 @@
         "eslint-plugin-cypress": "2.15.2",
         "eslint-plugin-import": "2.32.0",
         "eslint-plugin-vue": "^10",
-        "globals": "^15",
+        "globals": "^16.0.0",
         "jiti": "^1",
         "jsdom": "^24.0.0",
         "marked": "^12.0.1",

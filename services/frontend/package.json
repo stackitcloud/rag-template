@@ -60,7 +60,7 @@
         "eslint-plugin-import": "2.32.0",
         "eslint-plugin-vue": "^10",
         "globals": "^16.0.0",
-        "jiti": "^1",
+        "jiti": "^2.0.0",
         "jsdom": "^27.0.0",
         "marked": "^16.0.0",
         "nx": "21.6.3",

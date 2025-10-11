@@ -20,6 +20,7 @@ export const useChatStore = defineStore("chat", () => {
   const chatDocuments = ref<ChatDocumentModel[]>([]);
   const isLoading = ref(false);
   const hasError = ref(false);
+  const initialAdded = ref(false);
 
   // Use the global i18n instance set up in the app
   const t = i18n.global.t;
@@ -122,13 +123,33 @@ export const useChatStore = defineStore("chat", () => {
   };
 
   const initiateConversation = (id: string) => {
+    if (!conversationId.value) {
+      conversationId.value = id;
+    }
+    if (!initialAdded.value && chatHistory.value.length === 0) {
+      chatHistory.value.push({
+        id: newUid(),
+        text: getInitialMessage(),
+        role: "assistant",
+        skipAPI: true,
+      });
+      initialAdded.value = true;
+    }
+  };
+
+  const resetConversation = (id: string) => {
     conversationId.value = id;
+    chatHistory.value = [];
+    chatDocuments.value = [];
+    initialAdded.value = false;
+    // push exactly one initial message
     chatHistory.value.push({
       id: newUid(),
       text: getInitialMessage(),
       role: "assistant",
       skipAPI: true,
     });
+    initialAdded.value = true;
   };
 
   return {
@@ -139,5 +160,6 @@ export const useChatStore = defineStore("chat", () => {
     conversationId,
     callInference,
     initiateConversation,
+    resetConversation,
   };
 });

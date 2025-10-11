@@ -2,7 +2,7 @@ import de from './de.json';
 import en from './en.json';
 import { createI18n, type useI18n } from 'vue-i18n';
 const supportedLocales = ['en', 'de'];
-const defaultLocale = 'en';
+const defaultLocale = 'de';
 
 export type T = ReturnType<typeof useI18n>['t'];
 
@@ -14,7 +14,8 @@ const getUserPreferredLocale = () => {
 export const i18n = createI18n({
   legacy: false, // use composer API
   globalInjection: true,
-  locale: getUserPreferredLocale(),
+  // Force German UI by default
+  locale: 'de',
   messages: { 'de': de, 'en': en },
   fallbackLocale: defaultLocale,
 });

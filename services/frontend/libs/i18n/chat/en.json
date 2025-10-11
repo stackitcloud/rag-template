@@ -4,7 +4,10 @@
     "send": "Send",
     "justAsk": "How can i help you?",
     "sources": "Sources",
-    "documents": "Manage documents",
+  "documents": "Manage documents",
+  "addressDocuments": "Address documents",
+  "noAddressDocs": "No address documents linked.",
+  "backToSearch": "Back to search",
     "noSourcesHint": "Source document references will show up here.",
     "error": {
       "requestError": "An error occurred during the request. Please try again."

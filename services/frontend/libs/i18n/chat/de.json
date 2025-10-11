@@ -4,7 +4,10 @@
     "send": "Senden",
     "justAsk": "Frag mich einfach...",
     "sources": "Quellen",
-    "documents": "Dokumente verwalten",
+  "documents": "Dokumente verwalten",
+  "addressDocuments": "Adressbezogene Dokumente",
+  "noAddressDocs": "Keine adressbezogenen Dokumente verknüpft.",
+  "backToSearch": "Zurück zur Suche",
     "noSourcesHint": "Quelldokumente werden hier referenziert.",
     "error": {
       "requestError": "Fehler bei der Anfrage. Bitte versuche es erneut."

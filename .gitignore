@@ -1,3 +1,4 @@
+*.pdf
 *.tgz
 */Chart.lock
 helm-chart/charts/admin-backend-0.0.1.tgz

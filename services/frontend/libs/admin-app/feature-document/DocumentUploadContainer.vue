@@ -12,7 +12,7 @@ const isDragOver = ref(false);
 const fileInputRef = ref<HTMLInputElement>();
 const uploadedDocuments = computed((): UploadedDocument[] => store.uploadedDocuments);
 const isInvalidFileType = ref(false);
-const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml'];
+const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml', 'text/markdown'];
 const uploadMethod = ref<'file' | 'confluence' | 'sitemap'>('file');
 
 
@@ -32,7 +32,16 @@ const sitemapHeaderTemplate = ref('');
 const error = computed(() => store.error);
 
 const uploadDocuments = (files: File[]) => {
-    if (files.some(file => !allowedFileTypes.includes(file.type))) {
+    // Allow files where the MIME type is in the allowed list or the extension is .md
+    const invalid = files.some((file) => {
+        if (allowedFileTypes.includes(file.type)) return false;
+        // some browsers return an empty string for plain .md files - check extension
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        if (ext === 'md') return false;
+        return true;
+    });
+
+    if (invalid) {
         isInvalidFileType.value = true;
         return;
     }
@@ -165,7 +174,7 @@ const getErrorMessage = (errorType: string) => {
                     <button class="btn btn-sm mt-4 btn-accent" @click="fileInputRef!.click()">{{ t('documents.select')
                         }}</button>
                 </div>
-                <input ref="fileInputRef" type="file" multiple accept=".pdf,.docx,.pptx,.xml" @change="onFileInputChange"
+                <input ref="fileInputRef" type="file" multiple accept=".pdf,.docx,.pptx,.xml,.md" @change="onFileInputChange"
                     class="hidden" />
             </div>
 

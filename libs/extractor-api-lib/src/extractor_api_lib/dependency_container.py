@@ -18,6 +18,7 @@ from extractor_api_lib.impl.extractors.file_extractors.ms_docs_extractor import 
 )
 from extractor_api_lib.impl.extractors.file_extractors.pdf_extractor import PDFExtractor
 from extractor_api_lib.impl.extractors.file_extractors.xml_extractor import XMLExtractor
+from extractor_api_lib.impl.extractors.file_extractors.markdown_extractor import MarkdownExtractor
 from extractor_api_lib.impl.extractors.sitemap_extractor import SitemapExtractor
 from extractor_api_lib.impl.file_services.s3_service import S3Service
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
@@ -62,8 +63,9 @@ class DependencyContainer(DeclarativeContainer):
     langchain_document2information_piece = Singleton(LangchainDocument2InformationPiece)
     sitemap_document2information_piece = Singleton(SitemapLangchainDocument2InformationPiece)
     epub_extractor = Singleton(EpubExtractor, file_service, langchain_document2information_piece)
+    markdown_extractor = Singleton(MarkdownExtractor, file_service)
 
-    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor, epub_extractor)
+    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor, epub_extractor, markdown_extractor)
 
     general_file_extractor = Singleton(GeneralFileExtractor, file_service, file_extractors, intern2external)
     confluence_extractor = Singleton(ConfluenceExtractor, mapper=confluence_document2information_piece)

@@ -12,3 +12,4 @@ class FileType(StrEnum):
     PPTX = "PPTX"
     XML = "XML"
     EPUB = "EPUB"
+    MD = "MD"

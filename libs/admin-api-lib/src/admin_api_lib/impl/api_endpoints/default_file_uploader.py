@@ -210,6 +210,8 @@ class DefaultFileUploader(FileUploader):
                     "chunk": idx,
                     "chunk_length": len(chunk.page_content),
                     "document_url": document_url,
+                    # store the original filename for filtering
+                    "file_name": file_name,
                 }
             )
 

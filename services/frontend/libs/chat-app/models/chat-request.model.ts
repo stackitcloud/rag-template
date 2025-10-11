@@ -2,13 +2,24 @@ import { ChatHistoryMessage } from "./chat-history-message.model";
 import { ChatHistory } from "./chat-history.model";
 import { ChatMessageModel } from "./chat-message.model";
 
+export interface DocumentFiltersModel {
+    bebauungsplan?: string[];
+    lbo?: string[];
+}
+
 export interface ChatRequestModel {
     session_id: string;
     message: string;
     history: ChatHistory;
+    filters?: DocumentFiltersModel;
 }
 
-export const mapToChatRequestModel = (session_id: string, message: string, historyList: ChatMessageModel[]): ChatRequestModel => ({
+export const mapToChatRequestModel = (
+    session_id: string,
+    message: string,
+    historyList: ChatMessageModel[],
+    filters?: DocumentFiltersModel
+): ChatRequestModel => ({
     session_id,
     message,
     history: {
@@ -16,5 +27,6 @@ export const mapToChatRequestModel = (session_id: string, message: string, histo
             role: o.role,
             message: o.text
         } as ChatHistoryMessage))
-    }
+    },
+    ...(filters ? { filters } : {})
 });

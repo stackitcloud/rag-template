@@ -47,6 +47,7 @@ function applyAddressFromRoute() {
   const addr = (route.query.addr as string) || "";
   if (!addr) {
     selectedAddress.value = null;
+    chatStore.setDocumentFilters(undefined);
     return;
   }
   const selected: AddressData | undefined = addresses.find(
@@ -54,11 +55,33 @@ function applyAddressFromRoute() {
   );
   if (!selected) {
     selectedAddress.value = null;
+    chatStore.setDocumentFilters(undefined);
     return;
   }
   // Start a fresh conversation each time address changes
   chatStore.resetConversation(newUid());
   selectedAddress.value = selected;
+
+  // Build filters from filenames for bebauungsplan (plan + festsetzungen) and lbo
+  const toFileName = (url?: string) => (url ? url.split("/").pop() || url : undefined);
+  const sanitize = (name?: string) => {
+    if (!name) return undefined;
+    const map: Record<string, string> = { "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss" };
+    let n = name;
+    for (const [k, v] of Object.entries(map)) n = n.split(k).join(v);
+    // keep only [A-Za-z0-9_.]
+    n = n.normalize("NFKD").split("").filter(ch => /[A-Za-z0-9_.]/.test(ch)).join("");
+    return n;
+  };
+  const bebauungsplan: string[] = [];
+  const planFile = sanitize(toFileName(selected.plan));
+  const festFile = sanitize(toFileName(selected.festsetzungen));
+  if (selected.planStatus === 'available') {
+    if (planFile) bebauungsplan.push(planFile);
+    if (festFile) bebauungsplan.push(festFile);
+  }
+  const lbo = [sanitize(toFileName(selected.lbo))].filter(Boolean) as string[];
+  chatStore.setDocumentFilters({ bebauungsplan, lbo });
 }
 
 onMounted(async () => {
@@ -85,7 +108,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     data-testid="chat-view"
-    class="md:container md:mx-auto h-full p-4 flex flex-col gap-4"
+    class="md:container md:mx-auto h-full min-h-0 p-4 flex flex-col gap-4"
   >
     <!-- Address documents and info block under the header -->
     <div v-if="selectedAddress" class="w-full bg-base-200 rounded-lg border px-4 py-3">
@@ -140,9 +163,9 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div class="flex gap-4 flex-1">
-      <div class="flex-initial md:w-8/12 flex flex-col overflow-hidden px-4">
-      <div class="flex-1 mb-4 overflow-hidden">
+    <div class="flex gap-4 flex-1 min-h-0">
+      <div class="flex-1 md:w-8/12 flex flex-col overflow-hidden px-4 min-h-0">
+      <div class="flex-1 mb-4 overflow-hidden min-h-0">
         <ChatMessages
           :messages="chatStore.chatHistory"
           :is-loading="chatStore.isLoading"
@@ -151,7 +174,7 @@ onBeforeUnmount(() => {
       <ChatInput :is-disabled="chatStore.isLoading" />
       <ChatDisclaimer class="mt-2 mx-1" />
     </div>
-      <div class="flex-1 md:w-4/12 overflow-hidden flex flex-col gap-4">
+      <div class="flex-1 md:w-4/12 overflow-hidden flex flex-col gap-4 min-h-0">
         <ChatDocumentContainer :documents="chatStore.chatDocuments" />
       </div>
     </div>

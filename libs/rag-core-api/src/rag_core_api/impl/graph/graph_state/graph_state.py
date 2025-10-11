@@ -4,7 +4,7 @@ import operator
 from typing import Annotated
 
 from langchain_core.documents import Document
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from rag_core_api.models.chat_response import ChatResponse
 from rag_core_api.models.information_piece import InformationPiece
@@ -33,6 +33,12 @@ class AnswerGraphState(TypedDict):
         The chat response object, if available (default None).
     additional_info : dict | None
         Any additional information (default None).
+    filters : dict | None
+        Optional filters controlling retrieval (e.g., filenames per group).
+    retry_retrieve : bool | None
+        Internal flag to trigger a second retrieval run (e.g., switch to LBO).
+    skip_evaluate : bool | None
+        If True, skip the evaluation step after generation and end the graph.
     error_messages : list[str]
         A list of error messages encountered.
     finish_reasons : list[str]
@@ -48,6 +54,9 @@ class AnswerGraphState(TypedDict):
     answer_text: str | None
     response: ChatResponse | None
     additional_info: dict | None
+    filters: dict | None
+    retry_retrieve: NotRequired[bool]
+    skip_evaluate: NotRequired[bool]
     error_messages: Annotated[list[str], operator.add]
     finish_reasons: Annotated[list[str], operator.add]
 
@@ -64,6 +73,7 @@ class AnswerGraphState(TypedDict):
         answer_text=None,
         response=None,
         additional_info=None,
+        filters=None,
         language="en",
     ) -> "AnswerGraphState":
         """
@@ -110,6 +120,9 @@ class AnswerGraphState(TypedDict):
             answer_text=answer_text,
             response=response,
             additional_info=additional_info,
+            filters=filters,
+            retry_retrieve=False,
+            skip_evaluate=False,
             error_messages=error_messages,
             finish_reasons=finish_reasons,
             language=language,

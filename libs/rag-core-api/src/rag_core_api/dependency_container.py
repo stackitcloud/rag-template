@@ -19,6 +19,7 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.answer_generation_chains.evaluation_chain import EvaluationChain
 from rag_core_api.impl.api_endpoints.default_chat import DefaultChat
 from rag_core_api.impl.api_endpoints.default_information_pieces_remover import (
     DefaultInformationPiecesRemover,
@@ -57,6 +58,7 @@ from rag_core_api.prompt_templates.answer_generation_prompt import (
 from rag_core_api.prompt_templates.question_rephrasing_prompt import (
     QUESTION_REPHRASING_PROMPT,
 )
+from rag_core_api.prompt_templates.evaluation_prompt import EVALUATION_PROMPT
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import chat_model_provider
@@ -66,6 +68,7 @@ from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSett
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_runnable import LangfuseTracedRunnable
+import os
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
 
@@ -180,6 +183,7 @@ class DependencyContainer(DeclarativeContainer):
 
     prompt = ANSWER_GENERATION_PROMPT
     rephrasing_prompt = QUESTION_REPHRASING_PROMPT
+    evaluation_prompt = EVALUATION_PROMPT
 
     langfuse = Singleton(
         Langfuse,
@@ -194,6 +198,7 @@ class DependencyContainer(DeclarativeContainer):
         managed_prompts={
             AnswerGenerationChain.__name__: prompt,
             RephrasingChain.__name__: rephrasing_prompt,
+            EvaluationChain.__name__: evaluation_prompt,
         },
         llm=large_language_model,
     )
@@ -208,24 +213,31 @@ class DependencyContainer(DeclarativeContainer):
         langfuse_manager=langfuse_manager,
     )
 
+    evaluation_chain = Singleton(
+        EvaluationChain,
+        langfuse_manager=langfuse_manager,
+    )
+
     chat_graph = Singleton(
         DefaultChatGraph,
         composed_retriever=composed_retriever,
         rephrasing_chain=rephrasing_chain,
+        evaluation_chain=evaluation_chain,
         mapper=information_piece_mapper,
         answer_generation_chain=answer_generation_chain,
         error_messages=error_messages,
         chat_history_settings=chat_history_settings,
     )
 
-    # wrap graph in tracer
+    # wrap graph in tracer (optionally)
     traced_chat_graph = Singleton(
         LangfuseTracedRunnable,
         inner_chain=chat_graph,
         settings=langfuse_settings,
     )
 
-    chat_endpoint = Singleton(DefaultChat, traced_chat_graph)
+    use_tracer = os.getenv("LANGFUSE_DISABLE_CALLBACKS", "1") != "1"
+    chat_endpoint = Singleton(DefaultChat, traced_chat_graph if use_tracer else chat_graph)
 
     ragas_llm = (
         Singleton(

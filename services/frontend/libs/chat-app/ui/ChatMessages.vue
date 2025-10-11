@@ -74,7 +74,7 @@ onUpdated(async () => {
 });
 </script>
 <template>
-  <div class="h-full bg-base-100 rounded-box p-2">
+  <div class="h-full min-h-0 bg-base-100 rounded-box p-2">
     <div
       class="overflow-y-auto overflow-x-hidden h-full p-2 md:p-4 overscroll-contain"
       ref="chatContainer"

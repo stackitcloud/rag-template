@@ -95,8 +95,9 @@ class RetrieverQuark(Retriever):
         """
         config = ensure_config(config)
         self.verify_readiness()
-        if self.TYPE_KEY not in config["metadata"]["filter_kwargs"].keys():
-            config["metadata"]["filter_kwargs"] = config["metadata"]["filter_kwargs"] | self._filter_kwargs
+        # Ensure type filter is present, but allow additional filters like file_name to pass through
+        if self.TYPE_KEY not in config["metadata"].get("filter_kwargs", {}).keys():
+            config["metadata"]["filter_kwargs"] = {**config["metadata"].get("filter_kwargs", {}), **self._filter_kwargs}
         return await self._vector_database.asearch(
             query=retriever_input,
             search_kwargs=self._search_kwargs,

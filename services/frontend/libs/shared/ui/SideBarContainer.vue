@@ -8,14 +8,14 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="h-full bg-base-100 flex flex-col border-l-2 p-2 md:p-2">
+  <div class="h-full min-h-0 bg-base-100 flex flex-col border-l-2 p-2 md:p-2">
     <div class="flex items-center mb-6 mt-2 px-2">
       <DocumentDuplicateIcon class="w-7 h-7" />
       <h1 class="ml-2 text-xl font-medium flex-1">{{ props.header }}</h1>
       <h1 class="ml-2">{{ props.count }}</h1>
     </div>
 
-    <div class="overflow-y-auto overflow-x-hidden rounded-box flex-1" id="sidebarContainer">
+    <div class="overflow-y-auto overflow-x-hidden rounded-box flex-1 min-h-0" id="sidebarContainer">
       <slot></slot>
     </div>
   </div>

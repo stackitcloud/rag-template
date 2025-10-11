@@ -87,7 +87,16 @@ class CompositeRetriever(Retriever):
         if config is None:
             config = RunnableConfig(metadata={"filter_kwargs": {}})
         for retriever in self._retrievers:
-            tmp_config = deepcopy(config)
+            # Avoid deepcopy(config) because some callback managers (e.g., Langfuse) are not deepcopy-safe.
+            # We only need a per-retriever metadata copy so each retriever can set its own TYPE filter.
+            tmp_config: RunnableConfig = RunnableConfig(**config)
+            tmp_meta = dict(tmp_config.get("metadata") or {})
+            # Ensure filter_kwargs is a shallow copy and remove any pre-set TYPE to let the retriever set its own
+            filter_kwargs = dict(tmp_meta.get("filter_kwargs") or {})
+            if "type" in filter_kwargs:
+                filter_kwargs.pop("type", None)
+            tmp_meta["filter_kwargs"] = filter_kwargs
+            tmp_config["metadata"] = tmp_meta
             results += await retriever.ainvoke(retriever_input, config=tmp_config)
 
         # remove summaries

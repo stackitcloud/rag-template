@@ -9,7 +9,7 @@ import {
     mapToChatDocuments,
 } from "../../models/chat-document.model";
 import { ChatMessageModel } from "../../models/chat-message.model";
-import { ChatRequestModel, mapToChatRequestModel } from "../../models/chat-request.model";
+import { ChatRequestModel, DocumentFiltersModel, mapToChatRequestModel } from "../../models/chat-request.model";
 import { InformationPiece } from "../../models/chat-response.model";
 import { DocumentResponseModel } from "../../models/document-response.model";
 import { ChatAPI } from "../chat.api";
@@ -21,6 +21,7 @@ export const useChatStore = defineStore("chat", () => {
   const isLoading = ref(false);
   const hasError = ref(false);
   const initialAdded = ref(false);
+  const documentFilters = ref<DocumentFiltersModel | undefined>(undefined);
 
   // Use the global i18n instance set up in the app
   const t = i18n.global.t;
@@ -69,6 +70,7 @@ export const useChatStore = defineStore("chat", () => {
       conversationId.value,
       prompt,
       cleanedHistory,
+      documentFilters.value,
     );
     return requestMessages;
   }
@@ -142,6 +144,7 @@ export const useChatStore = defineStore("chat", () => {
     chatHistory.value = [];
     chatDocuments.value = [];
     initialAdded.value = false;
+    // Keep filters across resets so subsequent messages are still scoped to selected address
     // push exactly one initial message
     chatHistory.value.push({
       id: newUid(),
@@ -150,6 +153,10 @@ export const useChatStore = defineStore("chat", () => {
       skipAPI: true,
     });
     initialAdded.value = true;
+  };
+
+  const setDocumentFilters = (filters?: DocumentFiltersModel) => {
+    documentFilters.value = filters;
   };
 
   return {
@@ -161,5 +168,6 @@ export const useChatStore = defineStore("chat", () => {
     callInference,
     initiateConversation,
     resetConversation,
+    setDocumentFilters,
   };
 });

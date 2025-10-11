@@ -73,12 +73,16 @@ class QdrantDatabase(VectorDatabase):
             return search_kwargs
 
         # Convert dict filter to Qdrant filter format
-        qdrant_filter = models.Filter(
-            must=[
-                models.FieldCondition(key="metadata." + key, match=models.MatchValue(value=value))
-                for key, value in filter_kwargs.items()
-            ]
-        )
+        conditions = []
+        for key, value in filter_kwargs.items():
+            match = (
+                models.MatchAny(any=value)
+                if isinstance(value, list)
+                else models.MatchValue(value=value)
+            )
+            conditions.append(models.FieldCondition(key="metadata." + key, match=match))
+
+        qdrant_filter = models.Filter(must=conditions)
 
         return {**search_kwargs, "filter": qdrant_filter}
 

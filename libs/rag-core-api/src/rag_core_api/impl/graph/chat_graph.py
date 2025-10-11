@@ -3,6 +3,7 @@
 import io
 import logging
 from enum import StrEnum
+import unicodedata
 from functools import partial
 from pathlib import Path
 from time import time
@@ -20,6 +21,7 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.answer_generation_chains.evaluation_chain import EvaluationChain
 from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 from rag_core_api.impl.retriever.no_or_empty_collection_error import (
     NoOrEmptyCollectionError,
@@ -57,6 +59,7 @@ class GraphNodeNames(StrEnum):
     REPHRASE = "rephrase"
     RETRIEVE = "retrieve"
     GENERATE = "generate"
+    EVALUATE = "evaluate"
     ERROR_NODE = "error_node"
 
 
@@ -72,6 +75,7 @@ class DefaultChatGraph(GraphBase):
         answer_generation_chain: AnswerGenerationChain,
         rephrasing_chain: RephrasingChain,
         composed_retriever: Retriever,
+        evaluation_chain: EvaluationChain,
         mapper: InformationPieceMapper,
         error_messages: ErrorMessages,
         chat_history_settings: ChatHistorySettings,
@@ -100,6 +104,7 @@ class DefaultChatGraph(GraphBase):
         self._mapper = mapper
         self._chat_history_settings = chat_history_settings
         self._rephrasing_chain = rephrasing_chain
+        self._evaluation_chain = evaluation_chain
         self._error_messages = error_messages
         self._rephrase_node_builder = partial(self._rephrase_node)
         self._generate_node_builder = partial(self._generate_node)
@@ -152,6 +157,7 @@ class DefaultChatGraph(GraphBase):
             finish_reasons=[],
             information_pieces=[],
             langchain_documents=[],
+            filters=(graph_input.filters.to_dict() if getattr(graph_input, "filters", None) else None),
         )
 
         logger.info(
@@ -159,6 +165,11 @@ class DefaultChatGraph(GraphBase):
             state["question"],
         )
 
+        # Ensure config has metadata container
+        if config is None:
+            config = RunnableConfig(metadata={})
+        elif config.get("metadata") is None:
+            config["metadata"] = {}
         response_state = await self._graph.ainvoke(input=state, config=config)
 
         logger.info("GENERATED answer: %s", response_state["response"].answer)
@@ -198,6 +209,22 @@ class DefaultChatGraph(GraphBase):
     #########
     # nodes #
     #########
+    @staticmethod
+    def _sanitize_document_name(document_name: str) -> str:
+        """Sanitize a document name to match ingestion rules.
+
+        Applies the same normalization as the admin uploader:
+        - transliterate ä->ae, ö->oe, ü->ue, ß->ss
+        - keep only alphanumeric characters, underscores, and periods
+        """
+        translit = {"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"}
+        for char, replacement in translit.items():
+            document_name = document_name.replace(char, replacement)
+        document_name = "".join(
+            c for c in unicodedata.normalize("NFKD", document_name) if c.isalnum() or c in {"_", "."}
+        )
+        return document_name
+
     async def _determine_language_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         question = state["question"]
         question_language = langdetect.detect(question)
@@ -226,9 +253,59 @@ class DefaultChatGraph(GraphBase):
         )
         return {"answer_text": answer_text, "response": chat_response}
 
-    async def _retrieve_node(self, state: dict) -> dict:
+    async def _evaluate_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
+        """LLM-based helpfulness check. Decides whether to accept the answer or re-retrieve from LBO.
+
+        Input to the evaluator includes: question, answer, rephrased_question and a short context summary.
+        """
+        evaluator_input = {
+            "question": state.get("question", ""),
+            "rephrased_question": state.get("rephrased_question", ""),
+            "answer": state.get("answer_text", ""),
+            # Keep the evaluator prompt lean: feed the first 3 snippet heads
+            "context": "\n\n".join([doc.page_content[:500] for doc in state.get("langchain_documents", [])][:3]),
+            "instruction": (
+                "Bewerte, ob die Antwort hilfreich ist, um die Nutzerfrage zu beantworten. "
+                "Antworte ausschließlich mit 'yes' oder 'no'."
+            ),
+        }
+        helpful = await self._evaluation_chain.ainvoke(evaluator_input, config=config)
+
+        update: dict[str, Any] = {"additional_info": {"helpful": bool(helpful)}}
+        if not helpful and state.get("filters") and state["filters"].get("lbo"):
+            # Switch active filter to LBO for the next retrieval round
+            new_filters = dict(state["filters"])  # shallow copy
+            new_filters["active_files"] = state["filters"]["lbo"]
+            update["filters"] = new_filters
+            # Overwrite retrieval artifacts to avoid aggregating B-Plan and LBO sources
+            update["information_pieces"] = []
+            update["langchain_documents"] = []
+        return update
+
+    async def _retrieve_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         try:
-            retrieved_documents = await self._composite_retriever.ainvoke(retriever_input=state["rephrased_question"])
+            # Apply filters if present: prefer bebauungsplan list by default; can switch to lbo on retry
+            metadata_filters = {}
+            if state.get("filters") and isinstance(state["filters"], dict):
+                # This node will respect filters passed within config.metadata.filter_kwargs as 'file_name'
+                # We map group list to a generic 'file_name' filter here if present
+                filenames = state["filters"].get("active_files") or state["filters"].get("bebauungsplan")
+                if filenames:
+                    if isinstance(filenames, list):
+                        sanitized = [self._sanitize_document_name(f) for f in filenames]
+                    else:
+                        sanitized = [self._sanitize_document_name(filenames)]
+                    metadata_filters["file_name"] = sanitized
+
+            effective_config = config or RunnableConfig(metadata={})
+            meta = effective_config.get("metadata", {})
+            current_filters = meta.get("filter_kwargs", {})
+            meta["filter_kwargs"] = {**current_filters, **metadata_filters}
+            effective_config["metadata"] = meta
+
+            retrieved_documents = await self._composite_retriever.ainvoke(
+                retriever_input=state["rephrased_question"], config=effective_config
+            )
         except NoOrEmptyCollectionError:
             logger.warning("No or empty collection encountered.")
             return {
@@ -244,8 +321,23 @@ class DefaultChatGraph(GraphBase):
 
         response = {}
         if not retrieved_documents:
+            # If this is the first run and LBO filters are available, schedule a retry with LBO
+            filters: dict | None = state.get("filters") if isinstance(state.get("filters"), dict) else None
+            already_retried = bool(state.get("retry_retrieve"))
+            lbo_files = (filters or {}).get("lbo") if filters else None
+            if (not already_retried) and lbo_files:
+                new_filters = dict(filters)
+                new_filters["active_files"] = lbo_files
+                response["filters"] = new_filters
+                response["retry_retrieve"] = True
+                # Clear artifacts to ensure a clean second pass
+                response["information_pieces"] = []
+                response["langchain_documents"] = []
+                return response
+            # Otherwise, fail to error node and clear retry flag
             response[self.ERROR_MESSAGES_KEY] = [self._error_messages.no_documents_message]
             response[self.FINISH_REASONS] = ["No documents found"]
+            response["retry_retrieve"] = False
             return response
 
         information_pieces = [
@@ -254,8 +346,16 @@ class DefaultChatGraph(GraphBase):
             if document.metadata.get("type", ContentType.SUMMARY.value) != ContentType.SUMMARY.value
         ]
 
+        # Replace instead of aggregate to avoid mixing first and second pass results
         response["information_pieces"] = information_pieces
         response["langchain_documents"] = retrieved_documents
+        # Ensure any previous retry flag is cleared after a successful retrieval
+        if state.get("retry_retrieve"):
+            response["retry_retrieve"] = False
+            # Mark that this was a second pass; skip evaluation and end after generation
+            response["skip_evaluate"] = True
+        else:
+            response["skip_evaluate"] = False
 
         return response
 
@@ -270,6 +370,9 @@ class DefaultChatGraph(GraphBase):
     def _docs_retrieved_edge(self, state: dict) -> str:
         if state["information_pieces"]:
             return GraphNodeNames.GENERATE
+        # If a retry has been scheduled (switch to LBO), loop back to RETRIEVE once
+        if state.get("retry_retrieve"):
+            return GraphNodeNames.RETRIEVE
         return GraphNodeNames.ERROR_NODE
 
     def _add_nodes(self):
@@ -277,6 +380,7 @@ class DefaultChatGraph(GraphBase):
         self._state_graph.add_node(GraphNodeNames.REPHRASE, self._rephrase_node_builder)
         self._state_graph.add_node(GraphNodeNames.RETRIEVE, self._retrieve_node)
         self._state_graph.add_node(GraphNodeNames.GENERATE, self._generate_node_builder)
+        self._state_graph.add_node(GraphNodeNames.EVALUATE, self._evaluate_node)
         self._state_graph.add_node(GraphNodeNames.ERROR_NODE, self._error_node)
 
     def _wire_graph(self):
@@ -286,7 +390,22 @@ class DefaultChatGraph(GraphBase):
             [GraphNodeNames.REPHRASE, GraphNodeNames.DETERMINE_LANGUAGE], GraphNodeNames.RETRIEVE
         )
         self._state_graph.add_conditional_edges(
-            GraphNodeNames.RETRIEVE, self._docs_retrieved_edge, [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE]
+            GraphNodeNames.RETRIEVE,
+            self._docs_retrieved_edge,
+            [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE, GraphNodeNames.RETRIEVE],
         )
-        self._state_graph.add_edge(GraphNodeNames.GENERATE, END)
+        # After generation, evaluate; if unhelpful, switch filters to LBO and re-retrieve+generate
+        def evaluate_edge(state: dict) -> str:
+            helpful = state.get("additional_info", {}).get("helpful", True)
+            return END if helpful else GraphNodeNames.RETRIEVE
+
+        # If we marked to skip evaluation (successful second pass), end after GENERATE; otherwise go to EVALUATE
+        def after_generate_edge(state: dict) -> str:
+            return END if state.get("skip_evaluate") else GraphNodeNames.EVALUATE
+
+        self._state_graph.add_conditional_edges(
+            GraphNodeNames.GENERATE, after_generate_edge, [END, GraphNodeNames.EVALUATE]
+        )
+        self._state_graph.add_conditional_edges(GraphNodeNames.EVALUATE, evaluate_edge, [END, GraphNodeNames.RETRIEVE])
         self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)
+        # END wiring complete

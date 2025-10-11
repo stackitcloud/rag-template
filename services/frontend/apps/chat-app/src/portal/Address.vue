@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { searchAddresses, type AddressData } from '@shared/portal-address';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { searchAddresses, type AddressData } from '@shared/portal-address';
 
 const route = useRoute();
 const router = useRouter();
@@ -65,5 +65,5 @@ watch(
       </template>
     </div>
   </div>
-  
+
 </template>

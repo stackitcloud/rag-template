@@ -1,15 +1,14 @@
 <script lang="ts" setup>
-import { RouterView } from "vue-router";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
 import { NavigationContainer } from "@shared/ui";
 import { useI18n } from "vue-i18n";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
-import { RouterLink } from "vue-router";
+import { RouterLink, RouterView } from "vue-router";
 
 const { t } = useI18n();
 const adminURL = import.meta.env.VITE_ADMIN_URL;
 
-import { onMounted } from "vue";
 import { useThemeStore } from "@shared/store/theme.store";
+import { onMounted } from "vue";
 onMounted(() => {
   // Initialize theme
   const themeStore = useThemeStore();

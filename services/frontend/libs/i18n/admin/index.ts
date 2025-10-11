@@ -1,6 +1,6 @@
+import { createI18n, type useI18n } from 'vue-i18n';
 import de from './de.json';
 import en from './en.json';
-import { createI18n, type useI18n } from 'vue-i18n';
 const supportedLocales = ['en', 'de'];
 const defaultLocale = 'de';
 

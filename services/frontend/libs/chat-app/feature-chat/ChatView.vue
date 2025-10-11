@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import ChatInput from "./ChatInput.vue";
-import ChatMessages from "../ui/ChatMessages.vue";
-import ChatDisclaimer from "./ChatDisclaimer.vue";
+import { addresses, type AddressData } from "@shared/portal-address";
+import { newUid } from "@shared/utils";
+import { onBeforeUnmount, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useChatStore } from "../data-access/+state/chat.store";
 import ChatDocumentContainer from "../ui/ChatDocumentContainer.vue";
-import { onMounted, onBeforeUnmount, watch } from "vue";
-import { newUid } from "@shared/utils";
-import { useRoute } from "vue-router";
-import { addresses, type AddressData } from "@shared/portal-address";
+import ChatMessages from "../ui/ChatMessages.vue";
+import ChatDisclaimer from "./ChatDisclaimer.vue";
+import ChatInput from "./ChatInput.vue";
 // import { marked } from "marked"; // not needed for address docs list
 
 const chatStore = useChatStore();

@@ -1,12 +1,12 @@
+import { i18n } from "@i18n/chat";
 import { settings } from "@shared/settings";
 import { newUid } from "@shared/utils";
 import { marked } from "marked";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { i18n } from "@i18n/chat";
 import {
-  ChatDocumentModel,
-  mapToChatDocuments,
+    ChatDocumentModel,
+    mapToChatDocuments,
 } from "../../models/chat-document.model";
 import { ChatMessageModel } from "../../models/chat-message.model";
 import { ChatRequestModel, mapToChatRequestModel } from "../../models/chat-request.model";

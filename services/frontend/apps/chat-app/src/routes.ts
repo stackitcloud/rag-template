@@ -1,7 +1,7 @@
 import { ChatView } from '@chat';
 import type { RouteRecordRaw } from 'vue-router';
-import Home from './portal/Home.vue';
 import Address from './portal/Address.vue';
+import Home from './portal/Home.vue';
 
 export const routes: RouteRecordRaw[] = [
   {

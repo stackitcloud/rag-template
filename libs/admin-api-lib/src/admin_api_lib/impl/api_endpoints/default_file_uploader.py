@@ -5,6 +5,7 @@ import urllib
 import tempfile
 import asyncio
 from contextlib import suppress
+from uuid import uuid4
 
 from fastapi import UploadFile, status, HTTPException
 from langchain_core.documents import Document
@@ -181,6 +182,11 @@ class DefaultFileUploader(FileUploader):
             # Run blocking chunker call in thread pool to avoid blocking event loop
             chunked_documents = await asyncio.to_thread(self._chunker.chunk, documents)
 
+            # Ensure each chunk has a unique, stable ID before enhancement to avoid later collisions
+            for doc in chunked_documents:
+                # Always set/override an id; downstream logic uses this for de-duplication
+                doc.metadata["id"] = uuid4().hex
+
             enhanced_documents = await self._information_enhancer.ainvoke(chunked_documents)
             self._add_file_url(file_name, base_url, enhanced_documents)
             # Ensure metadata.file_name is a sanitized stem (without extension) for filtering
@@ -188,6 +194,8 @@ class DefaultFileUploader(FileUploader):
             for doc in enhanced_documents:
                 # some enhancers might re-add full file name; enforce stem here
                 doc.metadata["file_name"] = sanitized_stem
+                # Guarantee a unique id survives enhancement
+                doc.metadata.setdefault("id", uuid4().hex)
 
             rag_information_pieces = [
                 self._information_mapper.document2rag_information_piece(doc) for doc in enhanced_documents

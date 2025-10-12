@@ -3,7 +3,7 @@
 from extractor_api_lib.mapper.source_langchain_document2information_piece import (
     SourceLangchainDocument2InformationPiece,
 )
-from extractor_api_lib.impl.utils.utils import sanitize_file_name
+from extractor_api_lib.impl.utils.utils import sanitize_file_name, hash_datetime
 
 
 class ConfluenceLangchainDocument2InformationPiece(SourceLangchainDocument2InformationPiece):
@@ -38,4 +38,6 @@ class ConfluenceLangchainDocument2InformationPiece(SourceLangchainDocument2Infor
             metadata[self.DOCUMENT_KEY] = document_name
             metadata["file_name"] = sanitize_file_name(document_name, strip_extension=True)
             metadata[self.USE_CASE_RELATED_KEY] = []
+            # Ensure an id exists for downstream references
+            metadata.setdefault("id", hash_datetime())
         return metadata

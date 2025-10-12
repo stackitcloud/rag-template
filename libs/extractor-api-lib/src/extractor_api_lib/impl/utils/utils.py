@@ -1,25 +1,23 @@
 """Module containing utility functions for the extractor API library."""
 
-import datetime
 import unicodedata
 from hashlib import sha256
+from uuid import uuid4
 
 
 def hash_datetime() -> str:
     """
-    Generate a SHA-256 hash of the current datetime.
+    Generate a unique identifier string.
 
-    This function takes the current datetime, converts it to an ISO formatted string,
-    encodes it to bytes, and then generates a SHA-256 hash of those bytes and returns
-    a hexadecimal string representation of the hash.
+    Historically this returned a hash of the current datetime which could collide
+    under high throughput. For robustness, it now returns a UUID4 hex string.
 
     Returns
     -------
     str
-        A hexadecimal string representing the SHA-256 hash of the current datetime.
+        A random UUID4 string (hex) suitable for use as a unique ID.
     """
-    now_bytes = datetime.datetime.now().isoformat().encode()
-    return sha256(now_bytes).hexdigest()
+    return uuid4().hex
 
 
 def sanitize_file_name(name: str, *, strip_extension: bool = True) -> str:

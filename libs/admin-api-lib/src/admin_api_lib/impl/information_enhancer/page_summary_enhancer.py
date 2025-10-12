@@ -1,7 +1,7 @@
 """Module for enhancing the summary of pages by grouping information by page and summarizing each page."""
 
 from asyncio import gather
-from hashlib import sha256
+from uuid import uuid4
 from typing import Optional
 
 from langchain_core.documents import Document
@@ -31,7 +31,8 @@ class PageSummaryEnhancer(SummaryEnhancer):
         full_page_content = " ".join([piece.page_content for piece in page_pieces])
         summary = await self._summarizer.ainvoke(full_page_content, config)
         meta = {key: value for key, value in page_pieces[0].metadata.items() if key != self.BASE64_IMAGE_KEY}
-        meta["id"] = sha256(str.encode(full_page_content)).hexdigest()
+        # Assign a fresh unique id for the generated summary to prevent cross-page collisions
+        meta["id"] = uuid4().hex
         meta["related"] = meta["related"] + [piece.metadata["id"] for piece in page_pieces]
         meta["type"] = ContentType.SUMMARY.value
 

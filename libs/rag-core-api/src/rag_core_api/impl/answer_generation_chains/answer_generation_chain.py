@@ -29,7 +29,60 @@ class AnswerGenerationChain(AsyncRunnable[RunnableInput, RunnableOutput]):
 
     @staticmethod
     def _format_docs(docs: list[Document]) -> str:
-        return "\n\n".join(doc.page_content for doc in docs)
+        """Format retrieved documents into a source-aware context string.
+
+        Groups snippets by their source so the LLM can prioritize Bebauungspläne over LBO.
+        Heuristics (case-insensitive) based on metadata fields "document_url" or "document":
+        - contains "bebauungsplan" -> category "BPLAN" (Bebauungsplan)
+        - contains "festsetzung" and "bebauungsplan" -> category "BPLAN_FESTSETZUNGEN"
+        - contains "lbo" or "landesbauordnung" -> category "LBO"
+        - otherwise -> category "OTHER"
+
+        Each entry includes a short "Quelle" (source) hint with the best available name.
+        """
+
+        def classify(doc: Document) -> tuple[str, str]:
+            meta = getattr(doc, "metadata", {}) or {}
+            url = str(meta.get("document_url", ""))
+            name = str(meta.get("document", ""))
+            hint_source = name or url
+            low = f"{url} {name}".lower()
+            if "bebauungsplan" in low and "festsetzung" in low:
+                return ("BPLAN_FESTSETZUNGEN", hint_source)
+            if "bebauungsplan" in low:
+                return ("BPLAN", hint_source)
+            if "landesbauordnung" in low or " lbo" in low or "/lbo/" in low or low.endswith("lbo.pdf"):
+                return ("LBO", hint_source)
+            return ("OTHER", hint_source)
+
+        buckets: dict[str, list[tuple[str, Document]]] = {
+            "BPLAN_FESTSETZUNGEN": [],
+            "BPLAN": [],
+            "LBO": [],
+            "OTHER": [],
+        }
+        for d in docs:
+            category, hint = classify(d)
+            buckets.setdefault(category, []).append((hint, d))
+
+        # Preserve original retrieval order within each bucket
+        sections: list[str] = []
+
+        def render_section(title: str, entries: list[tuple[str, Document]]):
+            if not entries:
+                return
+            sections.append(f"[{title}]")
+            for hint, doc in entries:
+                prefix = f"Quelle: {hint}" if hint else "Quelle: unbekannt"
+                sections.append(f"- {prefix}\n{doc.page_content}")
+
+        # Order: Festsetzungen (B-Plan) -> B-Plan -> LBO -> Other
+        render_section("Bebauungsplan – Festsetzungen", buckets.get("BPLAN_FESTSETZUNGEN", []))
+        render_section("Bebauungsplan (lokal)", buckets.get("BPLAN", []))
+        render_section("Landesbauordnung (LBO)", buckets.get("LBO", []))
+        render_section("Weitere Quellen", buckets.get("OTHER", []))
+
+        return "\n\n---\n\n".join(sections) if sections else ""
 
     async def ainvoke(
         self, chain_input: RunnableInput, config: Optional[RunnableConfig] = None, **kwargs: Any

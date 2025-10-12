@@ -1,6 +1,6 @@
 """Module for the SitemapLangchainDocument2InformationPiece class."""
 
-from extractor_api_lib.impl.utils.utils import hash_datetime
+from extractor_api_lib.impl.utils.utils import hash_datetime, sanitize_file_name
 from extractor_api_lib.mapper.source_langchain_document2information_piece import (
     SourceLangchainDocument2InformationPiece,
 )
@@ -40,6 +40,7 @@ class SitemapLangchainDocument2InformationPiece(SourceLangchainDocument2Informat
 
             metadata[self.USER_CASE_PAGE_KEY] = page_title
             metadata[self.DOCUMENT_KEY] = document_name
+            metadata["file_name"] = sanitize_file_name(document_name, strip_extension=True)
             metadata[self.USE_CASE_RELATED_KEY] = []
             metadata[self.ID_KEY] = hash_datetime()
         return metadata

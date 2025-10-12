@@ -13,7 +13,7 @@ from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
-from extractor_api_lib.impl.utils.utils import hash_datetime
+from extractor_api_lib.impl.utils.utils import hash_datetime, sanitize_file_name
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 
 logger = logging.getLogger(__name__)
@@ -102,6 +102,7 @@ class XMLExtractor(InformationFileExtractor):
     ) -> InternalInformationPiece:
         metadata = {
             "document": document_name,
+            "file_name": sanitize_file_name(document_name, strip_extension=True),
             "id": hash_datetime(),
             "related": [],
         }

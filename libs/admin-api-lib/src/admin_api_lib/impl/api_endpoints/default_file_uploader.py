@@ -20,7 +20,7 @@ from admin_api_lib.chunker.chunker import Chunker
 from admin_api_lib.models.status import Status
 from admin_api_lib.impl.key_value_store.file_status_key_value_store import FileStatusKeyValueStore
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
-from admin_api_lib.utils.utils import sanitize_document_name
+from admin_api_lib.utils.utils import sanitize_document_name, sanitize_file_stem
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +183,11 @@ class DefaultFileUploader(FileUploader):
 
             enhanced_documents = await self._information_enhancer.ainvoke(chunked_documents)
             self._add_file_url(file_name, base_url, enhanced_documents)
+            # Ensure metadata.file_name is a sanitized stem (without extension) for filtering
+            sanitized_stem = sanitize_file_stem(    file_name)
+            for doc in enhanced_documents:
+                # some enhancers might re-add full file name; enforce stem here
+                doc.metadata["file_name"] = sanitized_stem
 
             rag_information_pieces = [
                 self._information_mapper.document2rag_information_piece(doc) for doc in enhanced_documents

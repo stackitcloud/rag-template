@@ -4,9 +4,10 @@ from langchain.prompts import ChatPromptTemplate
 EVALUATION_PROMPT = ChatPromptTemplate.from_messages([
     (
         "system",
-        "You evaluate whether an assistant's answer is helpful for a user's question given a short context.\n"
-        "Return ONLY a valid JSON object with a single field: {\"helpful\": boolean}.\n"
-        "Do not include any extra text, code fences, or explanations.",
+        "You evaluate whether the answer is helpful for a user's question, given a short context."
+        " Consider that for German planning law, local Bebauungsplan (B‑Plan) stipulations have priority over the"
+        " state building code (LBO) within the plan area. Return ONLY a valid JSON object with a single field:"
+        " {\"helpful\": boolean}. Do not include any extra text, code fences, or explanations.",
     ),
     (
         "user",

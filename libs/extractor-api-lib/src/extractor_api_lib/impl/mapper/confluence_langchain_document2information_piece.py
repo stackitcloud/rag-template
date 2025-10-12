@@ -3,6 +3,7 @@
 from extractor_api_lib.mapper.source_langchain_document2information_piece import (
     SourceLangchainDocument2InformationPiece,
 )
+from extractor_api_lib.impl.utils.utils import sanitize_file_name
 
 
 class ConfluenceLangchainDocument2InformationPiece(SourceLangchainDocument2InformationPiece):
@@ -35,5 +36,6 @@ class ConfluenceLangchainDocument2InformationPiece(SourceLangchainDocument2Infor
 
             metadata[self.USER_CASE_PAGE_KEY] = page_title
             metadata[self.DOCUMENT_KEY] = document_name
+            metadata["file_name"] = sanitize_file_name(document_name, strip_extension=True)
             metadata[self.USE_CASE_RELATED_KEY] = []
         return metadata

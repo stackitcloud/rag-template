@@ -225,6 +225,22 @@ class DefaultChatGraph(GraphBase):
         )
         return document_name
 
+    @staticmethod
+    def _is_bebauungsplan(doc: Any) -> bool:
+        """Detect whether a retrieved document belongs to a local Bebauungsplan.
+
+        Heuristics: checks metadata fields like 'document_url' or 'document' for substrings
+        typical of Bebauungspläne (e.g., '/bebauungsplan/' or case-insensitive 'bebauungsplan').
+        """
+        try:
+            meta = getattr(doc, "metadata", {}) or {}
+            url = str(meta.get("document_url", ""))
+            name = str(meta.get("document", ""))
+            joined = f"{url} {name}".lower()
+            return "bebauungsplan" in joined
+        except Exception:
+            return False
+
     async def _determine_language_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         question = state["question"]
         question_language = langdetect.detect(question)
@@ -232,13 +248,8 @@ class DefaultChatGraph(GraphBase):
         return {"language": question_language}
 
     async def _rephrase_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
-        rephrased_question = await self._rephrasing_chain.ainvoke(chain_input=state, config=config)
-        # Ensure rephrased_question is a string
-        if hasattr(rephrased_question, "content"):
-            rephrased_question = rephrased_question.content
-        elif not isinstance(rephrased_question, str):
-            rephrased_question = str(rephrased_question)
-        return {"rephrased_question": rephrased_question}
+        # Keep rephrased question identical for now; language is added to state in determine-language node
+        return {"rephrased_question": state["question"]}
 
     async def _generate_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         answer_text = await self._answer_generation_chain.ainvoke(state, config)
@@ -272,36 +283,71 @@ class DefaultChatGraph(GraphBase):
         helpful = await self._evaluation_chain.ainvoke(evaluator_input, config=config)
 
         update: dict[str, Any] = {"additional_info": {"helpful": bool(helpful)}}
-        if not helpful and state.get("filters") and state["filters"].get("lbo"):
-            # Switch active filter to LBO for the next retrieval round
-            new_filters = dict(state["filters"])  # shallow copy
-            new_filters["active_files"] = state["filters"]["lbo"]
-            update["filters"] = new_filters
-            # Overwrite retrieval artifacts to avoid aggregating B-Plan and LBO sources
-            update["information_pieces"] = []
-            update["langchain_documents"] = []
+        # If the answer is not helpful, create a concise, proper fallback answer for B-Plan questions
+        if not helpful:
+            language = state.get("language", "de")
+            question = state.get("question", "")
+            # Small, safe fallback tailored to Bebauungspläne/Festsetzungen
+            if language.startswith("de"):
+                fallback = (
+                    "Ich konnte aus dem bereitgestellten Kontext keine verlässliche Antwort ableiten. "
+                    "Für Fragen zu Bebauungsplänen (B-Plan) und deren Festsetzungen gilt: Innerhalb des Plangebiets "
+                    "haben die textlichen und zeichnerischen Festsetzungen des B-Plans Vorrang; die Landesbauordnung (LBO) "
+                    "gilt subsidiär, soweit der B‑Plan nichts Abweichendes bestimmt. Bitte geben Sie – wenn möglich – eine konkrete "
+                    "Bezeichnung des Bebauungsplans (z. B. Plan‑Name/Nummer) oder Adresse/Flurstück an. Typische Festsetzungen sind u. a.: "
+                    "Bauweise/GRZ/GFZ, Baugrenzen/Baulinien, Dachform/Dachneigung, Nutzung und textliche Festsetzungen."
+                )
+            else:
+                fallback = (
+                    "I couldn't derive a reliable answer from the provided context. For German local development plans (Bebauungsplan), "
+                    "the plan’s textual and graphical stipulations have priority within the plan area; the state building code (LBO) applies "
+                    "only where the plan is silent. Please provide the exact plan name/ID or an address/parcel if possible. Typical stipulations "
+                    "include e.g. building type, site coverage (GRZ), floor area ratio (GFZ), building lines, roof form/slope, usage, and textual rules."
+                )
+            chat_response = ChatResponse(
+                answer=fallback,
+                citations=state.get("information_pieces", []) or [],
+                finish_reason="unhelpful_answer_fallback",
+            )
+            update["answer_text"] = fallback
+            update["response"] = chat_response
         return update
 
     async def _retrieve_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         try:
-            # Apply filters if present: prefer bebauungsplan list by default; can switch to lbo on retry
-            metadata_filters = {}
-            if state.get("filters") and isinstance(state["filters"], dict):
-                # This node will respect filters passed within config.metadata.filter_kwargs as 'file_name'
-                # We map group list to a generic 'file_name' filter here if present
-                filenames = state["filters"].get("active_files") or state["filters"].get("bebauungsplan")
-                if filenames:
-                    if isinstance(filenames, list):
-                        sanitized = [self._sanitize_document_name(f) for f in filenames]
-                    else:
-                        sanitized = [self._sanitize_document_name(filenames)]
-                    metadata_filters["file_name"] = sanitized
-
+            # Retrieve across all documents; if client provided filters, map to file_name stem list
             effective_config = config or RunnableConfig(metadata={})
-            meta = effective_config.get("metadata", {})
-            current_filters = meta.get("filter_kwargs", {})
-            meta["filter_kwargs"] = {**current_filters, **metadata_filters}
-            effective_config["metadata"] = meta
+            if effective_config.get("metadata") is None:
+                effective_config["metadata"] = {}
+            # Ensure filter_kwargs exists and set file_name list if provided via filters
+            filter_kwargs = dict(effective_config["metadata"].get("filter_kwargs", {}))
+            try:
+                # Accept both bebauungsplan and lbo lists from state["filters"]
+                filters = state.get("filters") or {}
+                # The client is expected to pass sanitized stems or raw names; we will re-sanitize on the DB side.
+                # Here we only pass through as 'file_name' to be matched.
+                active_list = []
+                if isinstance(filters, dict):
+                    for key in ("active_files", "bebauungsplan", "lbo"):
+                        vals = filters.get(key)
+                        if vals:
+                            if isinstance(vals, list):
+                                active_list.extend(vals)
+                            else:
+                                active_list.append(vals)
+                if active_list:
+                    # Only pass sanitized stems (without extension)
+                    stems = []
+                    for v in active_list:
+                        base = str(v).rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+                        sanitized = self._sanitize_document_name(base)
+                        stem = sanitized[: sanitized.rfind(".")] if "." in sanitized else sanitized
+                        stems.append(stem)
+                    if stems:
+                        filter_kwargs["file_name"] = stems
+            except Exception:
+                pass
+            effective_config["metadata"]["filter_kwargs"] = filter_kwargs
 
             retrieved_documents = await self._composite_retriever.ainvoke(
                 retriever_input=state["rephrased_question"], config=effective_config
@@ -321,24 +367,12 @@ class DefaultChatGraph(GraphBase):
 
         response = {}
         if not retrieved_documents:
-            # If this is the first run and LBO filters are available, schedule a retry with LBO
-            filters: dict | None = state.get("filters") if isinstance(state.get("filters"), dict) else None
-            already_retried = bool(state.get("retry_retrieve"))
-            lbo_files = (filters or {}).get("lbo") if filters else None
-            if (not already_retried) and lbo_files:
-                new_filters = dict(filters)
-                new_filters["active_files"] = lbo_files
-                response["filters"] = new_filters
-                response["retry_retrieve"] = True
-                # Clear artifacts to ensure a clean second pass
-                response["information_pieces"] = []
-                response["langchain_documents"] = []
-                return response
-            # Otherwise, fail to error node and clear retry flag
             response[self.ERROR_MESSAGES_KEY] = [self._error_messages.no_documents_message]
             response[self.FINISH_REASONS] = ["No documents found"]
-            response["retry_retrieve"] = False
             return response
+
+    # Prioritize Bebauungsplan documents while preserving internal relevance order (stable sort)
+        retrieved_documents = sorted(retrieved_documents, key=lambda d: 0 if self._is_bebauungsplan(d) else 1)
 
         information_pieces = [
             self._mapper.langchain_document2information_piece(document)
@@ -346,16 +380,10 @@ class DefaultChatGraph(GraphBase):
             if document.metadata.get("type", ContentType.SUMMARY.value) != ContentType.SUMMARY.value
         ]
 
-        # Replace instead of aggregate to avoid mixing first and second pass results
+        # Replace instead of aggregate
         response["information_pieces"] = information_pieces
         response["langchain_documents"] = retrieved_documents
-        # Ensure any previous retry flag is cleared after a successful retrieval
-        if state.get("retry_retrieve"):
-            response["retry_retrieve"] = False
-            # Mark that this was a second pass; skip evaluation and end after generation
-            response["skip_evaluate"] = True
-        else:
-            response["skip_evaluate"] = False
+        response["skip_evaluate"] = False
 
         return response
 
@@ -370,9 +398,6 @@ class DefaultChatGraph(GraphBase):
     def _docs_retrieved_edge(self, state: dict) -> str:
         if state["information_pieces"]:
             return GraphNodeNames.GENERATE
-        # If a retry has been scheduled (switch to LBO), loop back to RETRIEVE once
-        if state.get("retry_retrieve"):
-            return GraphNodeNames.RETRIEVE
         return GraphNodeNames.ERROR_NODE
 
     def _add_nodes(self):
@@ -392,20 +417,19 @@ class DefaultChatGraph(GraphBase):
         self._state_graph.add_conditional_edges(
             GraphNodeNames.RETRIEVE,
             self._docs_retrieved_edge,
-            [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE, GraphNodeNames.RETRIEVE],
+            [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE],
         )
-        # After generation, evaluate; if unhelpful, switch filters to LBO and re-retrieve+generate
+        # After generation, always evaluate; on unhelpful answer we generate a proper fallback and end
         def evaluate_edge(state: dict) -> str:
-            helpful = state.get("additional_info", {}).get("helpful", True)
-            return END if helpful else GraphNodeNames.RETRIEVE
+            return END
 
-        # If we marked to skip evaluation (successful second pass), end after GENERATE; otherwise go to EVALUATE
+        # If we marked to skip evaluation (not used anymore), end after GENERATE; otherwise go to EVALUATE
         def after_generate_edge(state: dict) -> str:
             return END if state.get("skip_evaluate") else GraphNodeNames.EVALUATE
 
         self._state_graph.add_conditional_edges(
             GraphNodeNames.GENERATE, after_generate_edge, [END, GraphNodeNames.EVALUATE]
         )
-        self._state_graph.add_conditional_edges(GraphNodeNames.EVALUATE, evaluate_edge, [END, GraphNodeNames.RETRIEVE])
+        self._state_graph.add_conditional_edges(GraphNodeNames.EVALUATE, evaluate_edge, [END])
         self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)
         # END wiring complete

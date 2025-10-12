@@ -30,3 +30,17 @@ def sanitize_document_name(document_name: str) -> str:
         document_name = document_name.replace(char, replacement)
     document_name = "".join(e for e in unicodedata.normalize("NFKD", document_name) if e.isalnum() or e in {"_", "."})
     return document_name
+
+
+def sanitize_file_stem(file_name: str) -> str:
+    """Return a sanitized filename without its extension.
+
+    Applies the same normalization as sanitize_document_name and then strips
+    the last extension (after the final dot). If no dot is present, returns
+    the sanitized string as-is.
+    """
+    sanitized = sanitize_document_name(file_name)
+    base = sanitized.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+    if "." in base:
+        return base[: base.rfind(".")]
+    return base

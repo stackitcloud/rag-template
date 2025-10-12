@@ -68,21 +68,65 @@ class QdrantDatabase(VectorDatabase):
 
     @staticmethod
     def _search_kwargs_builder(search_kwargs: dict, filter_kwargs: dict):
-        """Build search kwargs with proper Qdrant filter format."""
+        """Build search kwargs with proper Qdrant filter format.
+
+        Special behavior for key 'file_name':
+        - Treat provided values as stems (without extension) or raw filenames.
+        - Match if either metadata.file_name or metadata.document equals any candidate.
+          Candidates include the raw values and common extension variants.
+        """
         if not filter_kwargs:
             return search_kwargs
 
-        # Convert dict filter to Qdrant filter format
-        conditions = []
-        for key, value in filter_kwargs.items():
-            match = (
-                models.MatchAny(any=value)
-                if isinstance(value, list)
-                else models.MatchValue(value=value)
-            )
-            conditions.append(models.FieldCondition(key="metadata." + key, match=match))
+        must_conditions: list[models.FieldCondition] = []
+        should_conditions: list[models.FieldCondition] = []
 
-        qdrant_filter = models.Filter(must=conditions)
+        # Common extensions we support in ingestion
+        EXTENSIONS = [".pdf", ".md", ".xml", ".docx", ".pptx", ".epub"]
+
+        for key, value in filter_kwargs.items():
+            if key == "file_name":
+                # Normalize to list
+                values = value if isinstance(value, list) else [value]
+                file_name_candidates: set[str] = set()
+                document_candidates: set[str] = set()
+
+                for v in values:
+                    s = str(v)
+                    base = s.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+                    has_dot = "." in base
+                    stem = base[: base.rfind(".")] if has_dot else base
+                    # Candidates for metadata.file_name: allow both stem and stem with common extensions
+                    file_name_candidates.add(stem)
+                    for ext in EXTENSIONS:
+                        file_name_candidates.add(stem + ext)
+                    # Candidates for metadata.document: allow base, stem, and stem with common extensions
+                    document_candidates.add(base)
+                    document_candidates.add(stem)
+                    for ext in EXTENSIONS:
+                        document_candidates.add(stem + ext)
+
+                if file_name_candidates:
+                    should_conditions.append(
+                        models.FieldCondition(
+                            key="metadata.file_name",
+                            match=models.MatchAny(any=sorted(file_name_candidates)),
+                        )
+                    )
+                if document_candidates:
+                    should_conditions.append(
+                        models.FieldCondition(
+                            key="metadata.document",
+                            match=models.MatchAny(any=sorted(document_candidates)),
+                        )
+                    )
+            else:
+                # Default exact match behavior
+                field_key = "metadata." + key
+                match = models.MatchAny(any=value) if isinstance(value, list) else models.MatchValue(value=value)
+                must_conditions.append(models.FieldCondition(key=field_key, match=match))
+
+        qdrant_filter = models.Filter(must=must_conditions, should=should_conditions if should_conditions else None)
 
         return {**search_kwargs, "filter": qdrant_filter}
 

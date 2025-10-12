@@ -28,7 +28,9 @@ Sicherheits- und Qualitätsregeln:
         HumanMessagePromptTemplate.from_template(
             """Question: {question}
 ChatHistory: {history}
-Context: {context}"""
+Context aus den Festsetzungen des Bebauungsplans: {context}
+Context aus der Landesbauordnung: {lbo_context}
+"""
         ),
     ]
 )

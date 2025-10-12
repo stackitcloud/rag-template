@@ -169,7 +169,7 @@ class DependencyContainer(DeclarativeContainer):
 
     composed_retriever = Singleton(
         CompositeRetriever,
-        List(image_retriever, table_retriever, text_retriever, summary_retriever),
+        List(table_retriever, text_retriever),
         reranker,
     )
 

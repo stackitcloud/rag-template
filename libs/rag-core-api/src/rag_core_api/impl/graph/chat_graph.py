@@ -371,7 +371,7 @@ class DefaultChatGraph(GraphBase):
             response[self.FINISH_REASONS] = ["No documents found"]
             return response
 
-    # Prioritize Bebauungsplan documents while preserving internal relevance order (stable sort)
+        # Prioritize Bebauungsplan documents while preserving internal relevance order (stable sort)
         retrieved_documents = sorted(retrieved_documents, key=lambda d: 0 if self._is_bebauungsplan(d) else 1)
 
         information_pieces = [

@@ -27,6 +27,6 @@ dependencies:
   condition: features.keydb.enabled
 - name: ollama
   alias: ollama
-  version: 1.30.0
+  version: 1.31.0
   repository: https://otwld.github.io/ollama-helm/
   condition: features.ollama.enabled

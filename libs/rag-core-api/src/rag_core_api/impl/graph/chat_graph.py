@@ -371,8 +371,23 @@ class DefaultChatGraph(GraphBase):
             response[self.FINISH_REASONS] = ["No documents found"]
             return response
 
-        # Prioritize Bebauungsplan documents while preserving internal relevance order (stable sort)
-        retrieved_documents = sorted(retrieved_documents, key=lambda d: 0 if self._is_bebauungsplan(d) else 1)
+        # Classify into Bebauungsplan vs. LBO/other and keep order within each class
+        def is_lbo(doc: Any) -> bool:
+            try:
+                meta = getattr(doc, "metadata", {}) or {}
+                url = str(meta.get("document_url", ""))
+                name = str(meta.get("document", ""))
+                joined = f"{url} {name}".lower()
+                return ("landesbauordnung" in joined) or (" lbo" in joined) or ("/lbo/" in joined) or joined.endswith("lbo.pdf")
+            except Exception:
+                return False
+
+        bplan_docs = [d for d in retrieved_documents if self._is_bebauungsplan(d)]
+        lbo_docs = [d for d in retrieved_documents if is_lbo(d)]
+        other_docs = [d for d in retrieved_documents if d not in bplan_docs and d not in lbo_docs]
+
+        # Prioritize for downstream consumers that still look at langchain_documents
+        retrieved_documents = [*bplan_docs, *lbo_docs, *other_docs]
 
         information_pieces = [
             self._mapper.langchain_document2information_piece(document)
@@ -383,6 +398,8 @@ class DefaultChatGraph(GraphBase):
         # Replace instead of aggregate
         response["information_pieces"] = information_pieces
         response["langchain_documents"] = retrieved_documents
+        response["bplan_documents"] = bplan_docs
+        response["lbo_documents"] = lbo_docs
         response["skip_evaluate"] = False
 
         return response

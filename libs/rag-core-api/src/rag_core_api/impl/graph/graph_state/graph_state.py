@@ -35,6 +35,10 @@ class AnswerGraphState(TypedDict):
         Any additional information (default None).
     filters : dict | None
         Optional filters controlling retrieval (e.g., filenames per group).
+    bplan_documents : list[Document] | None
+        Optional: Documents classified as belonging to a Bebauungsplan (B‑Plan).
+    lbo_documents : list[Document] | None
+        Optional: Documents classified as belonging to the Landesbauordnung (LBO).
     retry_retrieve : bool | None
         Internal flag to trigger a second retrieval run (e.g., switch to LBO).
     skip_evaluate : bool | None
@@ -55,6 +59,8 @@ class AnswerGraphState(TypedDict):
     response: ChatResponse | None
     additional_info: dict | None
     filters: dict | None
+    bplan_documents: NotRequired[list[Document]]
+    lbo_documents: NotRequired[list[Document]]
     retry_retrieve: NotRequired[bool]
     skip_evaluate: NotRequired[bool]
     error_messages: Annotated[list[str], operator.add]

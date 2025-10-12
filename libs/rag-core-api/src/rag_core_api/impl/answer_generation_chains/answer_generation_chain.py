@@ -28,18 +28,8 @@ class AnswerGenerationChain(AsyncRunnable[RunnableInput, RunnableOutput]):
         self._langfuse_manager = langfuse_manager
 
     @staticmethod
-    def _format_docs(docs: list[Document]) -> str:
-        """Format retrieved documents into a source-aware context string.
-
-        Groups snippets by their source so the LLM can prioritize Bebauungspläne over LBO.
-        Heuristics (case-insensitive) based on metadata fields "document_url" or "document":
-        - contains "bebauungsplan" -> category "BPLAN" (Bebauungsplan)
-        - contains "festsetzung" and "bebauungsplan" -> category "BPLAN_FESTSETZUNGEN"
-        - contains "lbo" or "landesbauordnung" -> category "LBO"
-        - otherwise -> category "OTHER"
-
-        Each entry includes a short "Quelle" (source) hint with the best available name.
-        """
+    def _format_buckets(docs: list[Document]) -> dict[str, list[tuple[str, Document]]]:
+        """Classify documents into buckets for B‑Plan, Festsetzungen, LBO and Other."""
 
         def classify(doc: Document) -> tuple[str, str]:
             meta = getattr(doc, "metadata", {}) or {}
@@ -64,8 +54,11 @@ class AnswerGenerationChain(AsyncRunnable[RunnableInput, RunnableOutput]):
         for d in docs:
             category, hint = classify(d)
             buckets.setdefault(category, []).append((hint, d))
+        return buckets
 
-        # Preserve original retrieval order within each bucket
+    @staticmethod
+    def _render_sections(buckets: dict[str, list[tuple[str, Document]]]) -> str:
+        """Render a full context string with sections in priority order."""
         sections: list[str] = []
 
         def render_section(title: str, entries: list[tuple[str, Document]]):
@@ -83,6 +76,20 @@ class AnswerGenerationChain(AsyncRunnable[RunnableInput, RunnableOutput]):
         render_section("Weitere Quellen", buckets.get("OTHER", []))
 
         return "\n\n---\n\n".join(sections) if sections else ""
+
+    @staticmethod
+    def _render_lbo_only(docs: list[Document]) -> str:
+        """Render a context string that contains only LBO documents, grouped per source."""
+        # Reuse the bucketizer and only render the LBO bucket
+        buckets = AnswerGenerationChain._format_buckets(docs)
+        lbo_entries = buckets.get("LBO", [])
+        if not lbo_entries:
+            return ""
+        lines: list[str] = ["[Landesbauordnung (LBO)]"]
+        for hint, doc in lbo_entries:
+            prefix = f"Quelle: {hint}" if hint else "Quelle: unbekannt"
+            lines.append(f"- {prefix}\n{doc.page_content}")
+        return "\n\n".join(lines)
 
     async def ainvoke(
         self, chain_input: RunnableInput, config: Optional[RunnableConfig] = None, **kwargs: Any
@@ -113,7 +120,29 @@ class AnswerGenerationChain(AsyncRunnable[RunnableInput, RunnableOutput]):
 
     def _create_chain(self) -> Runnable:
         return (
-            RunnablePassthrough.assign(context=(lambda x: self._format_docs(x["langchain_documents"])))
+            RunnablePassthrough.assign(
+                context=(
+                    lambda x: self._render_sections(
+                        self._format_buckets(
+                            # Prefer bplan_documents if present for ordering; fall back to full docs
+                            (x.get("bplan_documents") or []) + (x.get("lbo_documents") or []) + [
+                                d for d in x["langchain_documents"] if d not in (x.get("bplan_documents") or []) and d not in (x.get("lbo_documents") or [])
+                            ]
+                        )
+                    )
+                ),
+                lbo_context=(
+                    lambda x: self._render_lbo_only(
+                        # Use lbo_documents if present; otherwise filter from all
+                        (x.get("lbo_documents") or [
+                            d for d in x["langchain_documents"]
+                            if (str((getattr(d, "metadata", {}) or {}).get("document_url", "")) + " " + str((getattr(d, "metadata", {}) or {}).get("document", ""))).lower().find("landesbauordnung") != -1
+                            or (" lbo" in (str((getattr(d, "metadata", {}) or {}).get("document_url", "")).lower() + " " + str((getattr(d, "metadata", {}) or {}).get("document", "")).lower()))
+                            or ("/lbo/" in (str((getattr(d, "metadata", {}) or {}).get("document_url", "")).lower() + " " + str((getattr(d, "metadata", {}) or {}).get("document", "")).lower()))
+                        ])
+                    )
+                ),
+            )
             | self._langfuse_manager.get_base_prompt(self.__class__.__name__)
             | self._langfuse_manager.get_base_llm(self.__class__.__name__)
             | StrOutputParser()

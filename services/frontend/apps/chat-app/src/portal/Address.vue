@@ -45,8 +45,8 @@ watch(
   <div class="min-h-screen bg-base-100 py-8">
     <div class="max-w-2xl mx-auto bg-base-200 shadow rounded-box p-8">
       <template v-if="hasNoMatches">
-        <p class="text-error mb-4">Keine passende Adresse gefunden für "{{ query }}". Bitte überprüfen Sie die Eingabe oder versuchen Sie eine andere Adresse.</p>
-        <RouterLink :to="{ name: 'portal-home' }" class="link link-primary">Zurück zur Suche</RouterLink>
+  <p class="text-error mb-4">Keine passende Adresse gefunden für "{{ query }}". Bitte überprüfen Sie die Eingabe oder versuchen Sie eine andere Adresse.</p>
+  <RouterLink :to="{ name: 'portal-home' }" class="link link-accent">Zurück zur Suche</RouterLink>
       </template>
       <template v-else-if="hasOneMatch">
         <p>Weiterleitung…</p>
@@ -56,12 +56,12 @@ watch(
         <p class="opacity-80 mb-6">Wählen Sie die passende Adresse aus, um die relevanten Dokumente und den Chatbot zu öffnen.</p>
         <ul class="space-y-2 mb-6">
           <li v-for="m in matches" :key="m.original">
-            <button @click="selectAddress(m.original)" class="btn btn-outline btn-primary w-full justify-start">
+            <button @click="selectAddress(m.original)" class="btn btn-outline btn-accent w-full justify-start">
               {{ m.original }}
             </button>
           </li>
         </ul>
-        <RouterLink :to="{ name: 'portal-home' }" class="link link-primary">Zurück zur Suche</RouterLink>
+        <RouterLink :to="{ name: 'portal-home' }" class="link link-accent">Zurück zur Suche</RouterLink>
       </template>
     </div>
   </div>

@@ -222,7 +222,6 @@ class DependencyContainer(DeclarativeContainer):
         DefaultChatGraph,
         composed_retriever=composed_retriever,
         rephrasing_chain=rephrasing_chain,
-        evaluation_chain=evaluation_chain,
         mapper=information_piece_mapper,
         answer_generation_chain=answer_generation_chain,
         error_messages=error_messages,

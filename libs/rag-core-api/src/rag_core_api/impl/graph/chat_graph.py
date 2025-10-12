@@ -21,7 +21,6 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
-from rag_core_api.impl.answer_generation_chains.evaluation_chain import EvaluationChain
 from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 from rag_core_api.impl.retriever.no_or_empty_collection_error import (
     NoOrEmptyCollectionError,
@@ -59,7 +58,6 @@ class GraphNodeNames(StrEnum):
     REPHRASE = "rephrase"
     RETRIEVE = "retrieve"
     GENERATE = "generate"
-    EVALUATE = "evaluate"
     ERROR_NODE = "error_node"
 
 
@@ -75,7 +73,6 @@ class DefaultChatGraph(GraphBase):
         answer_generation_chain: AnswerGenerationChain,
         rephrasing_chain: RephrasingChain,
         composed_retriever: Retriever,
-        evaluation_chain: EvaluationChain,
         mapper: InformationPieceMapper,
         error_messages: ErrorMessages,
         chat_history_settings: ChatHistorySettings,
@@ -104,7 +101,6 @@ class DefaultChatGraph(GraphBase):
         self._mapper = mapper
         self._chat_history_settings = chat_history_settings
         self._rephrasing_chain = rephrasing_chain
-        self._evaluation_chain = evaluation_chain
         self._error_messages = error_messages
         self._rephrase_node_builder = partial(self._rephrase_node)
         self._generate_node_builder = partial(self._generate_node)
@@ -264,55 +260,6 @@ class DefaultChatGraph(GraphBase):
         )
         return {"answer_text": answer_text, "response": chat_response}
 
-    async def _evaluate_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
-        """LLM-based helpfulness check. Decides whether to accept the answer or re-retrieve from LBO.
-
-        Input to the evaluator includes: question, answer, rephrased_question and a short context summary.
-        """
-        evaluator_input = {
-            "question": state.get("question", ""),
-            "rephrased_question": state.get("rephrased_question", ""),
-            "answer": state.get("answer_text", ""),
-            # Keep the evaluator prompt lean: feed the first 3 snippet heads
-            "context": "\n\n".join([doc.page_content[:500] for doc in state.get("langchain_documents", [])][:3]),
-            "instruction": (
-                "Bewerte, ob die Antwort hilfreich ist, um die Nutzerfrage zu beantworten. "
-                "Antworte ausschließlich mit 'yes' oder 'no'."
-            ),
-        }
-        helpful = await self._evaluation_chain.ainvoke(evaluator_input, config=config)
-
-        update: dict[str, Any] = {"additional_info": {"helpful": bool(helpful)}}
-        # If the answer is not helpful, create a concise, proper fallback answer for B-Plan questions
-        if not helpful:
-            language = state.get("language", "de")
-            question = state.get("question", "")
-            # Small, safe fallback tailored to Bebauungspläne/Festsetzungen
-            if language.startswith("de"):
-                fallback = (
-                    "Ich konnte aus dem bereitgestellten Kontext keine verlässliche Antwort ableiten. "
-                    "Für Fragen zu Bebauungsplänen (B-Plan) und deren Festsetzungen gilt: Innerhalb des Plangebiets "
-                    "haben die textlichen und zeichnerischen Festsetzungen des B-Plans Vorrang; die Landesbauordnung (LBO) "
-                    "gilt subsidiär, soweit der B‑Plan nichts Abweichendes bestimmt. Bitte geben Sie – wenn möglich – eine konkrete "
-                    "Bezeichnung des Bebauungsplans (z. B. Plan‑Name/Nummer) oder Adresse/Flurstück an. Typische Festsetzungen sind u. a.: "
-                    "Bauweise/GRZ/GFZ, Baugrenzen/Baulinien, Dachform/Dachneigung, Nutzung und textliche Festsetzungen."
-                )
-            else:
-                fallback = (
-                    "I couldn't derive a reliable answer from the provided context. For German local development plans (Bebauungsplan), "
-                    "the plan’s textual and graphical stipulations have priority within the plan area; the state building code (LBO) applies "
-                    "only where the plan is silent. Please provide the exact plan name/ID or an address/parcel if possible. Typical stipulations "
-                    "include e.g. building type, site coverage (GRZ), floor area ratio (GFZ), building lines, roof form/slope, usage, and textual rules."
-                )
-            chat_response = ChatResponse(
-                answer=fallback,
-                citations=state.get("information_pieces", []) or [],
-                finish_reason="unhelpful_answer_fallback",
-            )
-            update["answer_text"] = fallback
-            update["response"] = chat_response
-        return update
-
     async def _retrieve_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         try:
             # Retrieve across all documents; if client provided filters, map to file_name stem list
@@ -400,7 +347,6 @@ class DefaultChatGraph(GraphBase):
         response["langchain_documents"] = retrieved_documents
         response["bplan_documents"] = bplan_docs
         response["lbo_documents"] = lbo_docs
-        response["skip_evaluate"] = False
 
         return response
 
@@ -422,7 +368,6 @@ class DefaultChatGraph(GraphBase):
         self._state_graph.add_node(GraphNodeNames.REPHRASE, self._rephrase_node_builder)
         self._state_graph.add_node(GraphNodeNames.RETRIEVE, self._retrieve_node)
         self._state_graph.add_node(GraphNodeNames.GENERATE, self._generate_node_builder)
-        self._state_graph.add_node(GraphNodeNames.EVALUATE, self._evaluate_node)
         self._state_graph.add_node(GraphNodeNames.ERROR_NODE, self._error_node)
 
     def _wire_graph(self):
@@ -436,17 +381,7 @@ class DefaultChatGraph(GraphBase):
             self._docs_retrieved_edge,
             [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE],
         )
-        # After generation, always evaluate; on unhelpful answer we generate a proper fallback and end
-        def evaluate_edge(state: dict) -> str:
-            return END
-
-        # If we marked to skip evaluation (not used anymore), end after GENERATE; otherwise go to EVALUATE
-        def after_generate_edge(state: dict) -> str:
-            return END if state.get("skip_evaluate") else GraphNodeNames.EVALUATE
-
-        self._state_graph.add_conditional_edges(
-            GraphNodeNames.GENERATE, after_generate_edge, [END, GraphNodeNames.EVALUATE]
-        )
-        self._state_graph.add_conditional_edges(GraphNodeNames.EVALUATE, evaluate_edge, [END])
+        # After generation, end the graph
+        self._state_graph.add_edge(GraphNodeNames.GENERATE, END)
         self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)
         # END wiring complete

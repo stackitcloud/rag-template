@@ -34,7 +34,9 @@ def mock_environment_variables() -> None:
 
     os.environ["RETRIEVER_THRESHOLD"] = "0.0"
     os.environ["RETRIEVER_K_DOCUMENTS"] = "10"
-    os.environ["RETRIEVER_TOTAL_K"] = "10"
+    # Canonical global cap env. Legacy aliases RETRIEVER_TOTAL_K and RETRIEVER_OVERALL_K_DOCUMENTS
+    # are intentionally not set here to exercise primary path.
+    os.environ["RETRIEVER_TOTAL_K_DOCUMENTS"] = "10"
     os.environ["RETRIEVER_TABLE_THRESHOLD"] = "0.0"
     os.environ["RETRIEVER_TABLE_K_DOCUMENTS"] = "10"
     os.environ["RETRIEVER_SUMMARY_THRESHOLD"] = "0.0"

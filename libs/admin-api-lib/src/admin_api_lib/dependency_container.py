@@ -2,13 +2,10 @@
 
 from admin_api_lib.impl.api_endpoints.default_file_uploader import DefaultFileUploader
 from dependency_injector.containers import DeclarativeContainer
-from dependency_injector.providers import (  # noqa: WOT001
-    Configuration,
-    List,
-    Selector,
-    Singleton,
-)
+from dependency_injector.providers import Configuration, List, Selector, Singleton
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_core.embeddings.fake import FakeEmbeddings
 from langfuse import Langfuse
 
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import (
@@ -29,6 +26,7 @@ from admin_api_lib.impl.api_endpoints.default_document_reference_retriever impor
 from admin_api_lib.impl.api_endpoints.default_documents_status_retriever import (
     DefaultDocumentsStatusRetriever,
 )
+from admin_api_lib.impl.chunker.semantic_text_chunker import SemanticTextChunker
 from admin_api_lib.impl.chunker.text_chunker import TextChunker
 from admin_api_lib.impl.file_services.s3_service import S3Service
 from admin_api_lib.impl.information_enhancer.general_enhancer import GeneralEnhancer
@@ -59,16 +57,25 @@ from admin_api_lib.rag_backend_client.openapi_client.api_client import (
 from admin_api_lib.rag_backend_client.openapi_client.configuration import (
     Configuration as RagConfiguration,
 )
+from rag_core_lib.impl.embeddings.langchain_community_embedder import (
+    LangchainCommunityEmbedder,
+)
+from rag_core_lib.impl.embeddings.stackit_embedder import StackitEmbedder
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import chat_model_provider
+from rag_core_lib.impl.settings.embedder_class_type_settings import (
+    EmbedderClassTypeSettings,
+)
+from rag_core_lib.impl.settings.fake_embedder_settings import FakeEmbedderSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
+from rag_core_lib.impl.settings.ollama_embedder_settings import OllamaEmbedderSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
+from rag_core_lib.impl.settings.stackit_embedder_settings import StackitEmbedderSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_runnable import LangfuseTracedRunnable
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-
 
 class DependencyContainer(DeclarativeContainer):
     """Dependency injection container for managing application dependencies."""
@@ -78,6 +85,10 @@ class DependencyContainer(DeclarativeContainer):
     # Settings
     s3_settings = S3Settings()
     chunker_settings = ChunkerSettings()
+    chunker_embedder_type_settings = EmbedderClassTypeSettings()
+    stackit_chunker_embedder_settings = StackitEmbedderSettings()
+    ollama_chunker_embedder_settings = OllamaEmbedderSettings()
+    fake_chunker_embedder_settings = FakeEmbedderSettings()
     ollama_settings = OllamaSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()
@@ -96,7 +107,40 @@ class DependencyContainer(DeclarativeContainer):
         chunk_size=chunker_settings.max_size, chunk_overlap=chunker_settings.overlap
     )
 
-    chunker = Singleton(TextChunker, text_splitter)
+    semantic_chunker_embeddings = Selector(
+        chunker_embedder_type_settings.embedder_type,
+        stackit=Singleton(
+            StackitEmbedder,
+            stackit_chunker_embedder_settings,
+            retry_decorator_settings,
+        ),
+        ollama=Singleton(
+            LangchainCommunityEmbedder,
+            embedder=Singleton(
+                OllamaEmbeddings,
+                model=ollama_chunker_embedder_settings.model,
+                base_url=ollama_chunker_embedder_settings.base_url,
+            ),
+        ),
+        fake=Singleton(FakeEmbeddings, size=fake_chunker_embedder_settings.size),
+    )
+
+    semantic_chunker = Singleton(
+        SemanticTextChunker,
+        embeddings=semantic_chunker_embeddings,
+        breakpoint_threshold_type=chunker_settings.semantic_breakpoint_threshold_type,
+        breakpoint_threshold=chunker_settings.semantic_breakpoint_threshold,
+        buffer_size=chunker_settings.semantic_buffer_size,
+        min_chunk_size=chunker_settings.semantic_min_chunk_size,
+        max_chunk_size=chunker_settings.semantic_max_chunk_size,
+        trim_chunks=chunker_settings.semantic_trim_chunks,
+    )
+
+    chunker = Selector(
+        chunker_settings.mode,
+        recursive=Singleton(TextChunker, text_splitter),
+        semantic=semantic_chunker,
+    )
     extractor_api_configuration = Singleton(ExtractorConfiguration, host=document_extractor_settings.host)
     document_extractor_api_client = Singleton(ApiClient, extractor_api_configuration)
     document_extractor = Singleton(ExtractorApi, document_extractor_api_client)

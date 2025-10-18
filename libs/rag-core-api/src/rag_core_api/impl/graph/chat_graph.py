@@ -205,12 +205,14 @@ class DefaultChatGraph(GraphBase):
         return {"language": question_language}
 
     async def _rephrase_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
+        if not state.get("history"):
+            return {"rephrased_question": state["question"]}
         rephrased_question = await self._rephrasing_chain.ainvoke(chain_input=state, config=config)
         # Ensure rephrased_question is a string
-        if hasattr(rephrased_question, "content"):
-            rephrased_question = rephrased_question.content
-        elif not isinstance(rephrased_question, str):
-            rephrased_question = str(rephrased_question)
+        rephrased_question = getattr(rephrased_question, "content", rephrased_question)
+        rephrased_question = rephrased_question.strip() if isinstance(rephrased_question, str) else str(rephrased_question).strip()
+        if not rephrased_question:
+            rephrased_question = state["question"]
         return {"rephrased_question": rephrased_question}
 
     async def _generate_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
@@ -228,7 +230,8 @@ class DefaultChatGraph(GraphBase):
 
     async def _retrieve_node(self, state: dict) -> dict:
         try:
-            retrieved_documents = await self._composite_retriever.ainvoke(retriever_input=state["rephrased_question"])
+            question = state.get("rephrased_question") or state["question"]
+            retrieved_documents = await self._composite_retriever.ainvoke(retriever_input=question)
         except NoOrEmptyCollectionError:
             logger.warning("No or empty collection encountered.")
             return {
@@ -280,11 +283,9 @@ class DefaultChatGraph(GraphBase):
         self._state_graph.add_node(GraphNodeNames.ERROR_NODE, self._error_node)
 
     def _wire_graph(self):
-        self._state_graph.add_edge(START, GraphNodeNames.REPHRASE)
         self._state_graph.add_edge(START, GraphNodeNames.DETERMINE_LANGUAGE)
-        self._state_graph.add_edge(
-            [GraphNodeNames.REPHRASE, GraphNodeNames.DETERMINE_LANGUAGE], GraphNodeNames.RETRIEVE
-        )
+        self._state_graph.add_edge(GraphNodeNames.DETERMINE_LANGUAGE, GraphNodeNames.REPHRASE)
+        self._state_graph.add_edge(GraphNodeNames.REPHRASE, GraphNodeNames.RETRIEVE)
         self._state_graph.add_conditional_edges(
             GraphNodeNames.RETRIEVE, self._docs_retrieved_edge, [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE]
         )

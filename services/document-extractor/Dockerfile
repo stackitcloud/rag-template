@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.13-bookworm AS build
+FROM --platform=linux/amd64 python:3.14-bookworm AS build
 
 ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv
@@ -30,7 +30,7 @@ RUN poetry config virtualenvs.create false &&\
         poetry install --no-interaction --no-ansi --no-root; \
     fi
 
-FROM --platform=linux/amd64 python:3.13-bookworm
+FROM --platform=linux/amd64 python:3.14-bookworm
 ARG dev=0
 
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot

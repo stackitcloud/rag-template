@@ -13,6 +13,26 @@ backend_debug = cfg.get("debug", False)
 core_library_context = "./libs"
 
 
+def libs_ignore_except(include_libs):
+    """Return a list of paths to ignore for docker builds under the project root.
+
+    include_libs: list of folder names under ./libs that should NOT be ignored.
+    All other folders under ./libs will be ignored to avoid triggering rebuilds when
+    unrelated libraries change.
+    """
+    all_libs = [
+        "admin-api-lib",
+        "extractor-api-lib",
+        "rag-core-api",
+        "rag-core-lib",
+    ]
+    ignore = []
+    for lib in all_libs:
+        if lib not in include_libs:
+            ignore.append("libs/%s/" % lib)
+    return ignore
+
+
 def create_linter_command(folder_name, name):
     # Use TEST=1 for libs Dockerfile, dev=1 for service Dockerfiles
     build_arg = "TEST=1" if folder_name == "./libs" else "dev=1"
@@ -145,9 +165,41 @@ local_resource(
 ################################## build backend_rag image and do live update ##########################################
 ########################################################################################################################
 
+# Base ignore patterns applied to docker_builds that reference IGNORE_BASE.
+# These are files and directories that should not trigger rebuilds: build artifacts,
+# Python caches, test caches, virtualenvs, node_modules, and other OS/tooling files.
 IGNORE_BASE = [
+    # project directories we don't want to include in build context
     "infrastructure/",
     "services/frontend/",
+    # Python caches and bytecode
+    "**/__pycache__/",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/*.py[co]",
+    ".pytest_cache/",
+    "**/.pytest_cache/",
+    ".mypy_cache/",
+    # virtualenvs / local python envs
+    ".venv/",
+    "venv/",
+    "env/",
+    # build artifacts
+    "build/",
+    "dist/",
+    "*.egg-info/",
+    # tooling caches
+    "node_modules/",
+    "**/node_modules/",
+    "services/frontend/node_modules/",
+    # OS / editor files
+    ".DS_Store",
+    "*.swp",
+    "*.swo",
+    # pytest / test caches inside libs
+    "**/.pytest_cache/",
+    # nix / package manager locks and temp files (optional)
+    "**/.cache/",
 ]
 
 # NOTE: full image names should match the one in the helm chart values.yaml!
@@ -168,7 +220,7 @@ docker_build(
         sync(core_library_context+"/rag-core-lib", "/app/libs/rag-core-lib"),
     ],
     dockerfile=backend_context + "/Dockerfile",
-    ignore=IGNORE_BASE
+    ignore=IGNORE_BASE + libs_ignore_except(["rag-core-api", "rag-core-lib"])
 )
 
 # Add linter trigger
@@ -208,7 +260,7 @@ docker_build(
         sync(mcp_context, "/app/services/mcp-server"),
     ],
     dockerfile=mcp_context + "/Dockerfile",
-    ignore=IGNORE_BASE,
+    ignore=IGNORE_BASE + libs_ignore_except([]),
 )
 
 # Add linter trigger
@@ -239,11 +291,13 @@ docker_build(
     },
     live_update=[
         sync(admin_backend_context, "/app/services/admin-backend"),
-        sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
-        sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
+    sync(core_library_context + "/rag-core-lib", "/app/libs/rag-core-lib"),
+    sync(core_library_context + "/admin-api-lib", "/app/libs/admin-api-lib"),
     ],
     dockerfile=admin_backend_context + "/Dockerfile",
-    ignore=IGNORE_BASE,
+    # Ignore rag-core-api for this build context so changes in that library
+    # don't trigger admin-backend rebuilds (admin-backend doesn't COPY rag-core-api)
+    ignore=IGNORE_BASE + libs_ignore_except(["rag-core-lib", "admin-api-lib"]),
 )
 
 # Add linter trigger
@@ -287,7 +341,7 @@ docker_build(
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
         ],
     dockerfile=extractor_context + "/Dockerfile",
-    ignore=IGNORE_BASE,
+    ignore=IGNORE_BASE + libs_ignore_except(["extractor-api-lib"]),
 )
 
 # Add linter trigger
@@ -329,10 +383,35 @@ docker_build(
         sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
     ],
     ignore=[
+        # exclude non-frontend areas
+        "libs/",
+        "services/admin-backend/",
+        "services/rag-backend/",
+        "services/document-extractor/",
+        "services/mcp-server/",
         "infrastructure/",
+        "tools/",
+        "docs/",
+        ".github/",
+        ".vscode/",
+        # caches/artifacts
+        "**/__pycache__/",
+        "**/.pytest_cache/",
+        ".mypy_cache/",
+        ".venv/",
+        "venv/",
+        "env/",
+        "build/",
+        "dist/",
+        "*.egg-info/",
+        # frontend-specific caches
         "services/frontend/.nx/",
         "services/frontend/tmp/",
         "services/frontend/node_modules/",
+        # OS/editor files
+        ".DS_Store",
+        "*.swp",
+        "*.swo",
     ],
 )
 
@@ -352,10 +431,35 @@ docker_build(
         sync("./services/frontend/dist/libs", "/usr/share/nginx/html/libs"),
     ],
     ignore=[
+        # exclude non-frontend areas
+        "libs/",
+        "services/admin-backend/",
+        "services/rag-backend/",
+        "services/document-extractor/",
+        "services/mcp-server/",
         "infrastructure/",
+        "tools/",
+        "docs/",
+        ".github/",
+        ".vscode/",
+        # caches/artifacts
+        "**/__pycache__/",
+        "**/.pytest_cache/",
+        ".mypy_cache/",
+        ".venv/",
+        "venv/",
+        "env/",
+        "build/",
+        "dist/",
+        "*.egg-info/",
+        # frontend-specific caches
         "services/frontend/.nx/",
         "services/frontend/tmp/",
         "services/frontend/node_modules/",
+        # OS/editor files
+        ".DS_Store",
+        "*.swp",
+        "*.swo",
     ],
 )
 

@@ -1,8 +1,12 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
 ARG dev=0
-ENV POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv
-ENV POETRY_VERSION=2.1.3
+ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH \
+    POETRY_VERSION=2.1.3
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make \
@@ -23,7 +27,8 @@ COPY services/document-extractor/pyproject.toml services/document-extractor/poet
 RUN mkdir log && chmod 700 log
 RUN touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
 
-RUN poetry config virtualenvs.create false &&\
+# Cache bust with dev arg so dev dependencies install when dev=1
+RUN echo "CACHE_BUST_DEV=$dev" && poetry config virtualenvs.create false &&\
     if [ "$dev" = "1" ]; then \
         poetry install --no-interaction --no-ansi --no-root --with dev; \
     else \
@@ -35,7 +40,7 @@ ARG dev=0
 
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
-ENV POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv
+ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
 COPY --from=build  --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/ /usr/bin/
@@ -50,6 +55,12 @@ WORKDIR /app/services/document-extractor
 COPY --chown=nonroot:nonroot services/document-extractor .
 
 
+# Ensure poetry reuses existing virtualenv when running as nonroot
+ENV POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH
+
 # cleanup
 RUN apt-get clean autoclean
 RUN apt-get autoremove --yes
@@ -58,13 +69,11 @@ RUN if [ "$dev" = "0" ]; then \
         while read -r shell; do rm -f "$shell"; done < /etc/shells; \
         rm -rf /var/lib/{apt,dpkg,cache,log}/ \
     else \
-        echo "POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv" >> /etc/environment;\
-        export POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv;\
+        echo "POETRY_VIRTUALENVS_PATH=/opt/.venv" >> /etc/environment;\
+        export POETRY_VIRTUALENVS_PATH=/opt/.venv;\
         export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
     fi
 
 
 USER nonroot
 COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log
-
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"

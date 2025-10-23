@@ -20,6 +20,7 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.answer_generation_chains.language_detection_chain import LanguageDetectionChain
 from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 from rag_core_api.impl.retriever.no_or_empty_collection_error import (
     NoOrEmptyCollectionError,
@@ -71,6 +72,7 @@ class DefaultChatGraph(GraphBase):
         self,
         answer_generation_chain: AnswerGenerationChain,
         rephrasing_chain: RephrasingChain,
+        language_detection_chain: LanguageDetectionChain,
         composed_retriever: Retriever,
         mapper: InformationPieceMapper,
         error_messages: ErrorMessages,
@@ -100,6 +102,7 @@ class DefaultChatGraph(GraphBase):
         self._mapper = mapper
         self._chat_history_settings = chat_history_settings
         self._rephrasing_chain = rephrasing_chain
+        self._language_detection_chain = language_detection_chain
         self._error_messages = error_messages
         self._rephrase_node_builder = partial(self._rephrase_node)
         self._generate_node_builder = partial(self._generate_node)
@@ -200,7 +203,14 @@ class DefaultChatGraph(GraphBase):
     #########
     async def _determine_language_node(self, state: dict, config: Optional[RunnableConfig] = None) -> dict:
         question = state["question"]
-        question_language = langdetect.detect(question)
+        # Prefer the LLM-based language detection; fallback to langdetect if needed inside the chain.
+        try:
+            question_language = await self._language_detection_chain.ainvoke(state, config=config)
+        except Exception:
+            try:
+                question_language = langdetect.detect(question)
+            except Exception:
+                question_language = "en"
         logger.debug('Detected langauge for question "%s": %s', question, question_language)
         return {"language": question_language}
 

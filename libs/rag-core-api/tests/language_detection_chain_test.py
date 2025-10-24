@@ -16,6 +16,7 @@ from mocks import MockLangfuseManager
 
 @pytest.mark.asyncio
 async def test_language_detection_returns_iso_code_json():
+    """LLM returns strict JSON; chain extracts two-letter ISO code."""
     llm = FakeListLLM(responses=['{"language": "de"}'])
     mock_langfuse = MagicMock()
     manager = MockLangfuseManager(
@@ -40,8 +41,9 @@ async def test_language_detection_returns_iso_code_json():
 
 @pytest.mark.asyncio
 async def test_language_detection_fallback_to_en_on_garbage():
+    """Non-JSON response triggers fallback to 'en'."""
     # LLM returns non-JSON, the chain should fall back to 'en'
-    llm = FakeListLLM(responses=['I think it is German'])
+    llm = FakeListLLM(responses=["I think it is German"])
     mock_langfuse = MagicMock()
     manager = MockLangfuseManager(
         langfuse=mock_langfuse,
@@ -65,6 +67,7 @@ async def test_language_detection_fallback_to_en_on_garbage():
 
 @pytest.mark.asyncio
 async def test_language_detection_accepts_code_fenced_json():
+    """Code-fenced JSON is parsed after stripping fences."""
     llm = FakeListLLM(responses=['```json\n{"language": "fr"}\n```'])
     mock_langfuse = MagicMock()
     manager = MockLangfuseManager(
@@ -89,6 +92,7 @@ async def test_language_detection_accepts_code_fenced_json():
 
 @pytest.mark.asyncio
 async def test_language_detection_accepts_locale_variant_and_normalizes():
+    """Locale variants like de-DE normalize to base code 'de'."""
     llm = FakeListLLM(responses=['{"language": "de-DE"}'])
     mock_langfuse = MagicMock()
     manager = MockLangfuseManager(
@@ -113,6 +117,7 @@ async def test_language_detection_accepts_locale_variant_and_normalizes():
 
 @pytest.mark.asyncio
 async def test_language_detection_handles_single_quoted_jsonish():
+    """Single-quoted JSON-ish text is handled via regex fallback."""
     llm = FakeListLLM(responses=["{'language': 'es'}"])
     mock_langfuse = MagicMock()
     manager = MockLangfuseManager(
@@ -137,6 +142,7 @@ async def test_language_detection_handles_single_quoted_jsonish():
 
 @pytest.mark.asyncio
 async def test_language_detection_handles_loose_kv_format():
+    """Loose key-value format like language: "it" is parsed."""
     llm = FakeListLLM(responses=['language: "it"'])
     mock_langfuse = MagicMock()
     manager = MockLangfuseManager(

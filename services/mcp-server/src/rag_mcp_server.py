@@ -34,7 +34,12 @@ class RagMcpServer:
 
     def run(self):
         """Run the MCP server with specified transport."""
-        logger.info(f"Starting FastMCP Server on {self.TRANSPORT}://{self._settings.host}:{self._settings.port}")
+        logger.info(
+            "Starting FastMCP Server on %s://%s:%s",
+            self.TRANSPORT,
+            self._settings.host,
+            self._settings.port,
+        )
         self._server.run(transport=self.TRANSPORT, host=self._settings.host, port=self._settings.port)
 
     @extensible_docstring("chat_simple")
@@ -80,5 +85,5 @@ class RagMcpServer:
             return self._api_client.chat(session_id, chat_request)
 
         except Exception as e:
-            logger.error(f"Error in chat request: {str(e)}")
+            logger.exception("Error in chat request")
             raise Exception(f"Failed to process chat request: {str(e)}")

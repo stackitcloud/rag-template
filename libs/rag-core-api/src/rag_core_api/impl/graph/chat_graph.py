@@ -220,7 +220,9 @@ class DefaultChatGraph(GraphBase):
         rephrased_question = await self._rephrasing_chain.ainvoke(chain_input=state, config=config)
         # Ensure rephrased_question is a string
         rephrased_question = getattr(rephrased_question, "content", rephrased_question)
-        rephrased_question = rephrased_question.strip() if isinstance(rephrased_question, str) else str(rephrased_question).strip()
+        rephrased_question = (
+            rephrased_question.strip() if isinstance(rephrased_question, str) else str(rephrased_question).strip()
+        )
         if not rephrased_question:
             rephrased_question = state["question"]
         return {"rephrased_question": rephrased_question}
@@ -249,7 +251,7 @@ class DefaultChatGraph(GraphBase):
                 self.FINISH_REASONS: ["NoOrEmptyCollectionError"],
             }
         except Exception as e:
-            logger.error("Error while searching for documents in vector database: %s", e)
+            logger.exception("Error while searching for documents in vector database.")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error while searching for documents in vector database: %s" % e,

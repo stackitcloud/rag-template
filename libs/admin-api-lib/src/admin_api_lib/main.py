@@ -11,7 +11,6 @@ from fastapi import FastAPI
 from admin_api_lib.apis.admin_api import router
 from admin_api_lib.dependency_container import DependencyContainer
 from admin_api_lib.impl import admin_api
-from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
 
 with open("/config/logging.yaml", "r") as stream:
     config = yaml.safe_load(stream)
@@ -23,12 +22,12 @@ app = FastAPI(
         admin frontend and the admin backend in the rag project.",
     version="1.0.0",
 )
-container = DependencyContainer()
-container.class_selector_config.from_dict(RAGClassTypeSettings().model_dump())
 
-app.container = container
-container.wire(modules=[admin_api])
 app.include_router(router)
+
+container = DependencyContainer()
+container.wire(modules=[admin_api])
+app.container = container
 
 
 def register_dependency_container(new_container: Container):

@@ -13,7 +13,8 @@ It consists of the following python packages:
   - [2.1 Requirements](#21-requirements)
   - [2.2 Endpoints](#22-endpoints)
   - [2.3 Replaceable parts](#23-replaceable-parts)
-  - [2.4 Summarizer retry behavior](#24-summarizer-retry-behavior)
+  - [2.4 Chunker configuration](#24-chunker-configuration-multiple-chunkers)
+  - [2.5 Summarizer retry behavior](#25-summarizer-retry-behavior)
 - [`3. Extractor API lib`](#3-extractor-api-lib)
   - [3.1 Requirements](#31-requirements)
   - [3.2 Endpoints](#32-endpoints)
@@ -108,7 +109,7 @@ The default STACKIT embedder implementation (`StackitEmbedder`) uses the shared 
 
 - Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
 - Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
-- Per-embedder overrides: [`StackitEmbedderSettings`](./rag-core-api/src/rag_core_api/impl/settings/stackit_embedder_settings.py)
+- Per-embedder overrides: [`StackitEmbedderSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/stackit_embedder_settings.py)
 
 How it resolves settings
 
@@ -186,12 +187,12 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | file_service | [`admin_api_lib.file_services.file_service.FileService`](./admin-api-lib/src/admin_api_lib/file_services/file_service.py) | [`admin_api_lib.impl.file_services.s3_service.S3Service`](./admin-api-lib/src/admin_api_lib/impl/file_services/s3_service.py) | Handles operations on the connected storage. |
 | large_language_model | `langchain_core.language_models.llms.BaseLLM` | `langchain_community.llms.vllm.VLLMOpenAI` or `langchain_community.llms.Ollama` | The LLm that is used for all LLM tasks. The default depends on the value of `rag_core_lib.impl.settings.rag_class_types_settings.RAGClassTypeSettings.llm_type` |
 | key_value_store | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | Is used for storing the available sources and their current state. |
-| chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) | Used for splitting the documents in managable chunks. |
+| chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) or [`admin_api_lib.impl.chunker.semantic_text_chunker.SemanticTextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/semantic_text_chunker.py) | Splits documents into chunks. Select implementation via `CHUNKER_MODE` (`recursive` or `semantic`). |
 | document_extractor | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | Needs to be replaced if adjustments to the `extractor-api` is made. |
 | rag_api | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | Needs to be replaced if changes to the `/information_pieces/remove` or `/information_pieces/upload` of the [`rag-core-api`](#1-rag-core-api) are made. |
 | summarizer_prompt | `str` | [`admin_api_lib.prompt_templates.summarize_prompt.SUMMARIZE_PROMPT`](./admin-api-lib/src/admin_api_lib/prompt_templates/summarize_prompt.py) | The prompt used of the summarization. |
 | langfuse_manager | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | Retrieves additional settings, as well as the prompt from langfuse if available. |
-| summarizer |  [`admin_api_lib.summarizer.summarizer.Summarizer`](./admin-api-lib/src/admin_api_lib/summarizer/summarizer.py) | [`admin_api_lib.impl.summarizer.langchain_summarizer.LangchainSummarizer`](./admin-api-lib/src/admin_api_lib/impl/summarizer/langchain_summarizer.py) | Creates the summaries. Uses the shared retry decorator with optional per-summarizer overrides (see 2.4). |
+| summarizer |  [`admin_api_lib.summarizer.summarizer.Summarizer`](./admin-api-lib/src/admin_api_lib/summarizer/summarizer.py) | [`admin_api_lib.impl.summarizer.langchain_summarizer.LangchainSummarizer`](./admin-api-lib/src/admin_api_lib/impl/summarizer/langchain_summarizer.py) | Creates the summaries. Uses the shared retry decorator with optional per-summarizer overrides (see 2.5). |
 | untraced_information_enhancer |[`admin_api_lib.information_enhancer.information_enhancer.InformationEnhancer`](./admin-api-lib/src/admin_api_lib/information_enhancer/information_enhancer.py) | [`admin_api_lib.impl.information_enhancer.general_enhancer.GeneralEnhancer`](./admin-api-lib/src/admin_api_lib/impl/information_enhancer/general_enhancer.py) |  Uses the *summarizer* to enhance the extracted documents. |
 | information_enhancer |  [`rag_core_lib.chains.runnables.AsyncRunnable[Any, Any]`](./rag-core-lib/src/rag_core_lib/runnables/async_runnable.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) |Wraps around the *untraced_information_enhancer* and adds langfuse tracing. |
 | document_deleter |[`admin_api_lib.api_endpoints.document_deleter.DocumentDeleter`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_deleter.py) | [`admin_api_lib.impl.api_endpoints.default_document_deleter.DefaultDocumentDeleter`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_deleter.py) |  Handles deletion of sources. |
@@ -200,7 +201,57 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | document_reference_retriever | [`admin_api_lib.api_endpoints.document_reference_retriever.DocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_reference_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_document_reference_retriever.DefaultDocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_reference_retriever.py) | Handles return of files from connected storage. |
 | file_uploader | [`admin_api_lib.api_endpoints.file_uploader.FileUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/file_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_file_uploader.DefaultFileUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_file_uploader.py) | Handles upload and extraction of files. |
 
-### 2.4 Summarizer retry behavior
+### 2.4 Chunker configuration (multiple chunkers)
+
+The default dependency container now exposes two chunking strategies via [`ChunkerSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/chunker_settings.py):
+
+- `recursive` (default) wraps LangChain's `RecursiveCharacterTextSplitter`.
+- `semantic` wraps LangChain's `SemanticChunker` and requires an embeddings backend.
+
+You can switch between them and fine-tune their behaviour through environment variables:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `CHUNKER_MAX_SIZE` | Maximum character count per recursive chunk. | `1000` |
+| `CHUNKER_OVERLAP` | Character overlap between recursive chunks. | `100` |
+| `CHUNKER_SEMANTIC_BREAKPOINT_THRESHOLD_TYPE` | Breakpoint heuristic (`percentile`, `standard_deviation`, `interquartile`). | `percentile` |
+| `CHUNKER_SEMANTIC_BREAKPOINT_THRESHOLD` | Threshold associated with the selected heuristic. | `95.0` |
+| `CHUNKER_SEMANTIC_BUFFER_SIZE` | Context buffer that is kept on both sides of a semantic breakpoint. | `1` |
+| `CHUNKER_SEMANTIC_MIN_CHUNK_SIZE` | Minimum size for semantic chunks. | `200` |
+| `CHUNKER_SEMANTIC_MAX_CHUNK_SIZE` | Optional maximum size for semantic chunks (`None` when omitted). | `1200` |
+| `CHUNKER_SEMANTIC_TRIM_CHUNKS` | Whether to strip whitespace around semantic chunks. | `true` |
+
+> 📌 The recursive chunker only uses the `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` knobs. The remaining keys are ignored unless `CHUNKER_MODE=semantic`.
+
+Behavior details
+
+- Recursive chunker enforces `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` only.
+- Semantic chunker uses embeddings to detect semantic breakpoints and can also enforce `min`/`max` sizes:
+  - Oversized chunks are re-split with `RecursiveCharacterTextSplitter` (auto-provisioned when `max > min`).
+  - Trailing undersized chunks are rebalanced using sentence-aware splitting (NLTK Punkt when available, regex fallback otherwise) to avoid tiny tails while respecting `[min, max]`.
+
+#### Embeddings backend for semantic chunking
+
+When `CHUNKER_MODE` is set to `semantic`, the dependency container selects embeddings using [`EmbedderClassTypeSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/embedder_class_type_settings.py). Configure the backend via:
+
+- `EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE`: choose one of `stackit`, `ollama`, or `fake`.
+
+Backend-specific options:
+
+- **STACKIT embeddings** (production default)
+  - `STACKIT_EMBEDDER_MODEL`
+  - `STACKIT_EMBEDDER_BASE_URL`
+  - `STACKIT_EMBEDDER_API_KEY` *(required)*
+  - Optional retry overrides: `STACKIT_EMBEDDER_MAX_RETRIES`, `STACKIT_EMBEDDER_RETRY_BASE_DELAY`, `STACKIT_EMBEDDER_RETRY_MAX_DELAY`, `STACKIT_EMBEDDER_BACKOFF_FACTOR`, `STACKIT_EMBEDDER_ATTEMPT_CAP`, `STACKIT_EMBEDDER_JITTER_MIN`, `STACKIT_EMBEDDER_JITTER_MAX`
+- **Ollama embeddings** (self-hosted)
+  - `OLLAMA_EMBEDDER_MODEL`
+  - `OLLAMA_EMBEDDER_BASE_URL`
+- **Fake embeddings** (testing)
+  - `FAKE_EMBEDDER_SIZE`
+
+In the Helm chart set `CHUNKER_*` keys under `adminBackend.envs.chunker`. The admin deployment reuses the embedder config maps from the backend release, so adjust `backend.envs.embedderClassTypes`, `backend.envs.stackitEmbedder`, `backend.envs.ollamaEmbedder`, or `backend.envs.fakeEmbedder` accordingly when switching embeddings for semantic chunking.
+
+### 2.5 Summarizer retry behavior
 
 The default summarizer implementation (`LangchainSummarizer`) now uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
 

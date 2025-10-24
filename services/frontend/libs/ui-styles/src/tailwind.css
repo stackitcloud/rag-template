@@ -1,0 +1,146 @@
+/* -----------------------------------------------------------
+   Central Tailwind v4 + daisyUI v5 config for the whole monorepo
+   - Tailwind v4 is configured in CSS (not tailwind.config.js)
+   - daisyUI v5 themes + tokens are defined here with readable CSS variables
+   Docs: Tailwind v4 CSS-first config, @source, Vite plugin; daisyUI v5 themes/variables
+   ----------------------------------------------------------- */
+
+/* Load Tailwind v4 (this replaces @tailwind base/components/utilities) */
+@import "tailwindcss" source(none);
+/* ^ source(none) disables auto scanning so we can be explicit below. Useful in monorepos. */
+
+/* Tell Tailwind **exactly** where to scan for class names in this workspace */
+@source "../../../apps/chat-app/src";
+@source "../../../apps/admin-app/src";
+@source "../../"; /* all libs under services/frontend/libs */
+
+/* Load plugins the v4 way (from CSS) */
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  /* Enable built-in themes; make light default and dark follow OS preference */
+  themes: light --default, dark --prefersdark;
+  /* Scope theme variables to <html> */
+  root: "html";
+  /* Silence daisyUI logs in dev console */
+  logs: false;
+}
+
+/* ===========================================================
+   THEME: LIGHT
+   Tip: These semantic tokens power utilities like:
+     bg-primary, text-primary, border-primary, btn-primary, etc.
+   See: daisyUI “Colors”, “Utilities & variables”, “Themes”
+   =========================================================== */
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+
+  /* --- BRAND / ACTION COLORS ---------------------------------
+     Used by: .btn-primary, .bg-primary, .text-primary, borders, etc.
+     Primary = main brand/action color for CTAs & highlights.
+     Primary-content = text/icon color that sits on top of Primary.
+  ---------------------------------------------------------------- */
+  --color-primary: #f8f9fa;            /* primary brand/CTA (red) */
+  --color-primary-content: #0a1e2d;    /* readable text on primary */
+
+  /* Secondary = supporting brand color (chips, subtle accents) */
+  --color-secondary: #ffffff;          /* secondary brand shade */
+  --color-secondary-content: #575756;  /* text on secondary */
+
+  /* Accent = special emphasis (FABs, badges, links you want to pop) */
+  --color-accent: #00c3cd;             /* spacemint accent */
+  --color-accent-content: #ffffff;     /* text on accent */
+
+  /* --- NEUTRALS -------------------------------------------------
+     Neutral = unsaturated UI bits (dividers, cards, muted buttons)
+  ---------------------------------------------------------------- */
+  --color-neutral: #b2b2b2;            /* neutral surfaces/controls */
+  --color-neutral-content: #0a1e2d;    /* text/icons on neutral */
+
+  /* --- BASE / SURFACES ------------------------------------------
+     Base tokens define background “levels” and default text:
+       base-100  = page/background (blank surfaces)
+       base-200  = slightly raised surfaces (cards/containers)
+       base-300  = higher elevation (borders/dividers)
+       base-content = default text color on base-* backgrounds
+     Used by: bg-base-100/200/300, text-base-content, etc.
+  ---------------------------------------------------------------- */
+  --color-base-100: #ffffff;           /* page background */
+  --color-base-200: #f7f7f7;           /* cards/secondary surfaces */
+  --color-base-300: #dadada;           /* borders/dividers/elevations */
+  --color-base-content: #333333;       /* default text on base-* */
+
+  /* --- FEEDBACK / STATUS ---------------------------------------
+     Used by: bg-info/success/warning/error, alert components, badges
+     “*-content” is the on-color text/icon for readability.
+  ---------------------------------------------------------------- */
+  --color-info: #00c3cd;               /* info: tips, non-blocking hints */
+  --color-success: #00c387;            /* success: confirmations */
+  --color-warning: #fafc00;            /* warning: cautions */
+  --color-error: #ff0555;              /* error: failures/validation */
+
+  /* (Optional) You can add variables like --scrollbar-track / thumb
+     and reference them in your own CSS if you need custom scrollbars. */
+}
+
+/* ===========================================================
+   THEME: DARK
+   Mirrors light theme semantics, tuned for dark surfaces.
+   Note: <html> will automatically use this when OS is in dark mode
+   because we set --prefersdark on the dark theme above.
+   =========================================================== */
+@plugin "daisyui/theme" {
+  name: "dark";
+  prefersdark: true;
+
+  /* Brand/action colors still drive .btn-primary, bg-primary, etc. */
+  --color-primary: #0a1e2d;            /* primary brand (dark mode) */
+  --color-primary-content: #ffffff;    /* readable text on primary */
+
+  --color-secondary: #575756;          /* secondary brand */
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #00c3cd;             /* accent pop */
+  --color-accent-content: #ffffff;
+
+  /* Neutral tones for outlines, subtle fills, components */
+  --color-neutral: #B2B2B2;
+  --color-neutral-content: #ffffff;
+
+  /* Dark surfaces: page & elevations */
+  --color-base-100: #1e1e1e;           /* main background */
+  --color-base-200: #2d2d2d;           /* cards/containers */
+  --color-base-300: #3d3d3d;           /* borders/dividers */
+  --color-base-content: #f5f5f5;       /* default body text */
+
+  /* Status colors stay consistent across modes */
+  --color-info: #00c3cd;
+  --color-success: #00c387;
+  --color-warning: #fafc00;
+  --color-error: #ff0555;
+}
+
+/* ===========================================================
+   SAFELIST (v4 way)
+   If you generate classes dynamically (from JSON/DB), list them here
+   so Tailwind includes them even if they’re not found in source files.
+   =========================================================== */
+@source inline("
+  w-32 w-40 h-5 w-5 flex flex-1 items-center gap-2 p-4
+  md:container md:mx-auto
+  btn btn-primary btn-circle btn-ghost
+  bg-primary hover:bg-white/20 hover:bg-base-300
+");
+
+/* ===========================================================
+   HOW TO USE (quick cheatsheet)
+   - Buttons:      btn btn-primary         (uses --color-primary)
+   - Surfaces:     bg-base-100             (page background)
+                   bg-base-200/300         (cards/elevations)
+                   text-base-content       (default text on base-*)
+   - Brand text:   text-primary            (headlines/links you want to brand)
+   - Status:       bg-success / text-error / border-warning
+   - Dark mode:    automatic via prefers-color-scheme; to force:
+                     <html data-theme="light"> or data-theme="dark"
+   References: daisyUI Colors & Themes docs; Utilities & variables
+   =========================================================== */

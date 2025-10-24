@@ -41,8 +41,10 @@ from settings.fake_llm_settings import FakeLlmSettings
 from rag_core_api.impl.settings.error_messages import ErrorMessages
 from rag_core_api.prompt_templates.answer_generation_prompt import ANSWER_GENERATION_PROMPT
 from rag_core_api.prompt_templates.question_rephrasing_prompt import QUESTION_REPHRASING_PROMPT
+from rag_core_api.prompt_templates.language_detection_prompt import LANGUAGE_DETECTION_PROMPT
 from rag_core_api.impl.answer_generation_chains.answer_generation_chain import AnswerGenerationChain
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.answer_generation_chains.language_detection_chain import LanguageDetectionChain
 
 
 @pytest_asyncio.fixture
@@ -76,6 +78,7 @@ async def adjusted_app() -> AsyncGenerator[FastAPI, None]:
             managed_prompts={
                 AnswerGenerationChain.__name__: ANSWER_GENERATION_PROMPT,
                 RephrasingChain.__name__: QUESTION_REPHRASING_PROMPT,
+                LanguageDetectionChain.__name__: LANGUAGE_DETECTION_PROMPT,
             },
             llm=app.container.large_language_model,
         )

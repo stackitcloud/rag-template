@@ -1,7 +1,6 @@
 """Class to handle I/O with S3 storage."""
 
 import logging
-import traceback
 from pathlib import Path
 from typing import BinaryIO
 

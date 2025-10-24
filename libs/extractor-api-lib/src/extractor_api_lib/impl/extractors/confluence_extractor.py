@@ -54,9 +54,24 @@ class ConfluenceExtractor(InformationExtractor):
             A list of information pieces extracted from Confluence.
         """
         # Convert list of key value pairs to dict
-        confluence_loader_parameters = {
-            x.key: int(x.value) if x.value.isdigit() else x.value for x in extraction_parameters.kwargs
-        }
+        confluence_loader_parameters = {}
+        for key_value in extraction_parameters.kwargs or []:
+            if key_value is None or key_value.key is None:
+                continue
+
+            value = key_value.value
+            if isinstance(value, str):
+                value = value.strip()
+                if not value and key_value.key in {"space_key", "cql"}:
+                    # Skip empty optional parameters
+                    continue
+                if value.isdigit():
+                    value = int(value)
+
+            confluence_loader_parameters[key_value.key] = value
+
+        if "cql" not in confluence_loader_parameters and "space_key" not in confluence_loader_parameters:
+            raise ValueError("Either 'space_key' or 'cql' must be provided for Confluence extraction.")
         if not confluence_loader_parameters.get("max_pages") or isinstance(
             confluence_loader_parameters.get("max_pages"), str
         ):

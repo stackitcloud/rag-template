@@ -151,3 +151,47 @@ components:
                     title: type
                     description: Extractortype
                     type: string
+        confluence_parameters:
+            title: ConfluenceParameters
+            description: Parameters required to connect to and extract content from Confluence.
+            required:
+                - url
+                - token
+                - document_name
+            type: object
+            properties:
+                url:
+                    description: url of the confluence space.
+                    type: string
+                token:
+                    description: api key to access confluence.
+                    type: string
+                space_key:
+                    description: the space key of the confluence pages.
+                    type: string
+                cql:
+                    description: Optional Confluence Query Language (CQL) expression used to filter pages.
+                    type: string
+                include_attachments:
+                    description: >-
+                        whether to include file attachments (e.g., images, documents) in the parsed content. Default is `false`.
+                    type: boolean
+                    default: false
+                keep_markdown_format:
+                    description: whether to preserve markdown formatting in the output. Default is `true`.
+                    type: boolean
+                    default: true
+                keep_newlines:
+                    description: >-
+                        whether to retain newline characters in the output for better readability. Default is `true`.
+                    type: boolean
+                    default: true
+                document_name:
+                    description: >-
+                        The name that will be used to store the confluence db in the key value db and the vectordatabase (metadata.document).
+                    type: string
+                confluence_kwargs:
+                    description: Additional kwargs like verify_ssl
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/key_value_pair'

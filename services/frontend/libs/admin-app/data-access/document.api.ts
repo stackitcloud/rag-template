@@ -9,7 +9,8 @@ axios.defaults.auth = {
 
 // confluence configuration interface
 export interface ConfluenceConfig {
-  spaceKey: string;
+  spaceKey?: string;
+  cql?: string;
   token: string;
   url: string;
   maxPages?: number;
@@ -55,11 +56,20 @@ export class DocumentAPI {
     static async loadConfluence(config: ConfluenceConfig): Promise<void> {
         try {
             // convert config to list of key/value items for backend
-            const payload = [
-                { key: 'url', value: config.url },
+            const payload: { key: string; value: string }[] = [
+                { key: 'url', value: config.url.trim() },
                 { key: 'token', value: config.token },
-                { key: 'space_key', value: config.spaceKey },
-            ] as { key: string; value: string }[];
+            ];
+
+            const spaceKey = config.spaceKey?.trim();
+            if (spaceKey) {
+                payload.push({ key: 'space_key', value: spaceKey });
+            }
+
+            const cql = config.cql?.trim();
+            if (cql) {
+                payload.push({ key: 'cql', value: cql });
+            }
 
             if (typeof config.maxPages === 'number') {
                 payload.push({ key: 'max_pages', value: String(config.maxPages) });

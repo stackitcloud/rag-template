@@ -551,8 +551,8 @@ More content here."""
             text_count = sum(1 for elem in result if elem.type == ContentType.TEXT)
             table_count = sum(1 for elem in result if elem.type == ContentType.TABLE)
 
-            logger.info(f"  Text elements: {text_count}")
-            logger.info(f"  Table elements: {table_count}")
+            logger.info("  Text elements: %d", text_count)
+            logger.info("  Table elements: %d", table_count)
 
             # Verify metadata completeness
             for i, element in enumerate(result):

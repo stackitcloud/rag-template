@@ -154,7 +154,6 @@ class PDFExtractor(InformationFileExtractor):
                     )
                     pdf_elements += new_pdf_elements
 
-            
             logger.info("Extraction completed. Found %d information pieces.", len(pdf_elements))
             return pdf_elements
 

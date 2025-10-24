@@ -13,7 +13,7 @@ It consists of the following python packages:
   - [2.1 Requirements](#21-requirements)
   - [2.2 Endpoints](#22-endpoints)
   - [2.3 Replaceable parts](#23-replaceable-parts)
-  - [2.4 Chunker configuration](#24-chunker-configuration)
+  - [2.4 Chunker configuration](#24-chunker-configuration-multiple-chunkers)
   - [2.5 Summarizer retry behavior](#25-summarizer-retry-behavior)
 - [`3. Extractor API lib`](#3-extractor-api-lib)
   - [3.1 Requirements](#31-requirements)
@@ -187,7 +187,7 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | file_service | [`admin_api_lib.file_services.file_service.FileService`](./admin-api-lib/src/admin_api_lib/file_services/file_service.py) | [`admin_api_lib.impl.file_services.s3_service.S3Service`](./admin-api-lib/src/admin_api_lib/impl/file_services/s3_service.py) | Handles operations on the connected storage. |
 | large_language_model | `langchain_core.language_models.llms.BaseLLM` | `langchain_community.llms.vllm.VLLMOpenAI` or `langchain_community.llms.Ollama` | The LLm that is used for all LLM tasks. The default depends on the value of `rag_core_lib.impl.settings.rag_class_types_settings.RAGClassTypeSettings.llm_type` |
 | key_value_store | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | Is used for storing the available sources and their current state. |
-| chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) | Used for splitting the documents in managable chunks. |
+| chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) or [`admin_api_lib.impl.chunker.semantic_text_chunker.SemanticTextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/semantic_text_chunker.py) | Splits documents into chunks. Select implementation via `CHUNKER_MODE` (`recursive` or `semantic`). |
 | document_extractor | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | Needs to be replaced if adjustments to the `extractor-api` is made. |
 | rag_api | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | Needs to be replaced if changes to the `/information_pieces/remove` or `/information_pieces/upload` of the [`rag-core-api`](#1-rag-core-api) are made. |
 | summarizer_prompt | `str` | [`admin_api_lib.prompt_templates.summarize_prompt.SUMMARIZE_PROMPT`](./admin-api-lib/src/admin_api_lib/prompt_templates/summarize_prompt.py) | The prompt used of the summarization. |
@@ -201,9 +201,9 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | document_reference_retriever | [`admin_api_lib.api_endpoints.document_reference_retriever.DocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_reference_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_document_reference_retriever.DefaultDocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_reference_retriever.py) | Handles return of files from connected storage. |
 | file_uploader | [`admin_api_lib.api_endpoints.file_uploader.FileUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/file_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_file_uploader.DefaultFileUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_file_uploader.py) | Handles upload and extraction of files. |
 
-### 2.4 Chunker configuration
+### 2.4 Chunker configuration (multiple chunkers)
 
-The default dependency container exposes two chunking strategies via [`ChunkerSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/chunker_settings.py):
+The default dependency container now exposes two chunking strategies via [`ChunkerSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/chunker_settings.py):
 
 - `recursive` (default) wraps LangChain's `RecursiveCharacterTextSplitter`.
 - `semantic` wraps LangChain's `SemanticChunker` and requires an embeddings backend.
@@ -212,7 +212,6 @@ You can switch between them and fine-tune their behaviour through environment va
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `CHUNKER_MODE` | Selects the implementation (`recursive` or `semantic`). | `recursive` |
 | `CHUNKER_MAX_SIZE` | Maximum character count per recursive chunk. | `1000` |
 | `CHUNKER_OVERLAP` | Character overlap between recursive chunks. | `100` |
 | `CHUNKER_SEMANTIC_BREAKPOINT_THRESHOLD_TYPE` | Breakpoint heuristic (`percentile`, `standard_deviation`, `interquartile`). | `percentile` |
@@ -223,6 +222,13 @@ You can switch between them and fine-tune their behaviour through environment va
 | `CHUNKER_SEMANTIC_TRIM_CHUNKS` | Whether to strip whitespace around semantic chunks. | `true` |
 
 > 📌 The recursive chunker only uses the `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` knobs. The remaining keys are ignored unless `CHUNKER_MODE=semantic`.
+
+Behavior details
+
+- Recursive chunker enforces `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` only.
+- Semantic chunker uses embeddings to detect semantic breakpoints and can also enforce `min`/`max` sizes:
+  - Oversized chunks are re-split with `RecursiveCharacterTextSplitter` (auto-provisioned when `max > min`).
+  - Trailing undersized chunks are rebalanced using sentence-aware splitting (NLTK Punkt when available, regex fallback otherwise) to avoid tiny tails while respecting `[min, max]`.
 
 #### Embeddings backend for semantic chunking
 

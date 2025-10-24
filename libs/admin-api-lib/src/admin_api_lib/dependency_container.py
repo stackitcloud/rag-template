@@ -5,7 +5,6 @@ from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Configuration, List, Selector, Singleton
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OllamaEmbeddings
-from langchain_core.embeddings.fake import FakeEmbeddings
 from langfuse import Langfuse
 
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import (
@@ -39,6 +38,7 @@ from admin_api_lib.impl.key_db.file_status_key_value_store import (
 from admin_api_lib.impl.mapper.informationpiece2document import (
     InformationPiece2Document,
 )
+from admin_api_lib.impl.settings.chunker_class_type_settings import ChunkerClassTypeSettings
 from admin_api_lib.impl.settings.chunker_settings import ChunkerSettings
 from admin_api_lib.impl.settings.document_extractor_settings import (
     DocumentExtractorSettings,
@@ -77,10 +77,12 @@ from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_runnable import LangfuseTracedRunnable
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
 
+
 class DependencyContainer(DeclarativeContainer):
     """Dependency injection container for managing application dependencies."""
 
     class_selector_config = Configuration()
+    chunker_selector_config = Configuration()
 
     # Settings
     s3_settings = S3Settings()
@@ -99,6 +101,10 @@ class DependencyContainer(DeclarativeContainer):
     summarizer_settings = SummarizerSettings()
     source_uploader_settings = SourceUploaderSettings()
     retry_decorator_settings = RetryDecoratorSettings()
+    chunker_type_settings = ChunkerClassTypeSettings()
+
+    class_selector_config.from_dict(rag_class_type_settings.model_dump() | chunker_embedder_type_settings.model_dump())
+    chunker_selector_config.from_dict(chunker_type_settings.model_dump())
 
     key_value_store = Singleton(FileStatusKeyValueStore, key_value_store_settings)
     file_service = Singleton(S3Service, s3_settings=s3_settings)
@@ -108,7 +114,7 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     semantic_chunker_embeddings = Selector(
-        chunker_embedder_type_settings.embedder_type,
+        class_selector_config.embedder_type,
         stackit=Singleton(
             StackitEmbedder,
             stackit_chunker_embedder_settings,
@@ -122,22 +128,22 @@ class DependencyContainer(DeclarativeContainer):
                 base_url=ollama_chunker_embedder_settings.base_url,
             ),
         ),
-        fake=Singleton(FakeEmbeddings, size=fake_chunker_embedder_settings.size),
     )
 
     semantic_chunker = Singleton(
         SemanticTextChunker,
         embeddings=semantic_chunker_embeddings,
-        breakpoint_threshold_type=chunker_settings.semantic_breakpoint_threshold_type,
-        breakpoint_threshold=chunker_settings.semantic_breakpoint_threshold,
-        buffer_size=chunker_settings.semantic_buffer_size,
-        min_chunk_size=chunker_settings.semantic_min_chunk_size,
-        max_chunk_size=chunker_settings.semantic_max_chunk_size,
-        trim_chunks=chunker_settings.semantic_trim_chunks,
+        breakpoint_threshold_type=chunker_settings.breakpoint_threshold_type,
+        breakpoint_threshold_amount=chunker_settings.breakpoint_threshold_amount,
+        buffer_size=chunker_settings.buffer_size,
+        min_chunk_size=chunker_settings.min_size,
+        max_chunk_size=chunker_settings.max_size,
+        recursive_text_splitter=text_splitter,
+        overlap=chunker_settings.overlap,
     )
 
     chunker = Selector(
-        chunker_settings.mode,
+        chunker_selector_config.chunker_type,
         recursive=Singleton(TextChunker, text_splitter),
         semantic=semantic_chunker,
     )

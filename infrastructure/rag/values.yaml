@@ -338,6 +338,9 @@ adminBackend:
     ragapi:
       RAG_API_HOST: "http://backend:8080"
     chunker:
+      # Select which chunker implementation to use. Supported values: "semantic", "recursive"
+      # Defaults to "semantic" which leverages sentence-aware rebalancing.
+      CHUNKER_MODE: "semantic"
       CHUNKER_MAX_SIZE: 1000
       CHUNKER_OVERLAP: 300
       CHUNKER_SEMANTIC_BREAKPOINT_THRESHOLD_TYPE: "percentile"

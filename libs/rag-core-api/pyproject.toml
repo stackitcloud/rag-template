@@ -12,10 +12,10 @@ packages = [{ include = "rag_core_api", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.13"
 rag-core-lib = { path = "../rag-core-lib", develop = true}
-uvicorn = "^0.37.0"
+uvicorn = "^0.38.0"
 langchain-qdrant = "^0.2.0"
 dependency-injector = "^4.46.0"
-fastapi = "^0.118.0"
+fastapi = "^0.119.0"
 requests-oauthlib = "^2.0.0"
 qdrant-client = "^1.14.2"
 deprecated = "^1.2.18"
@@ -28,10 +28,10 @@ langgraph = "^0.6.0"
 pillow = "^11.2.1"
 langchain-ollama = "^0.3.2"
 pytest-asyncio = "^0.26.0"
-langchain-community = "0.3.30"
+langchain-community = "0.4"
 fastembed = "^0.7.0"
 langdetect = "^1.0.9"
-langfuse = "3.6.1"
+langfuse = "3.7.0"
 langchain-text-splitters = ">=0.3.9"
 
 [tool.poetry.group.dev.dependencies]

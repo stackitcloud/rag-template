@@ -7,7 +7,7 @@ version: 0.0.1
 appVersion: "0.0.1"
 dependencies:
 - name: cert-manager
-  version: "v1.18.2"
+  version: "v1.19.1"
   repository: https://charts.jetstack.io
 - name: ingress-nginx
   version: "4.13.3"

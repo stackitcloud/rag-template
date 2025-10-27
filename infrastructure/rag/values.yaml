@@ -338,8 +338,16 @@ adminBackend:
     ragapi:
       RAG_API_HOST: "http://backend:8080"
     chunker:
+      # Select which chunker implementation to use. Supported values: "semantic", "recursive"
+      # Defaults to "semantic" which leverages sentence-aware rebalancing.
+      CHUNKER_CLASS_TYPE_CHUNKER_TYPE: "recursive"
       CHUNKER_MAX_SIZE: 1000
-      CHUNKER_OVERLAP: 300
+      CHUNKER_OVERLAP: 100
+      # The following settings for the Chunker are only used when CHUNKER_CLASS_TYPE_CHUNKER_TYPE is set to "semantic".
+      CHUNKER_BREAKPOINT_THRESHOLD_TYPE: "percentile"
+      CHUNKER_BREAKPOINT_THRESHOLD_AMOUNT: 95
+      CHUNKER_BUFFER_SIZE: 1
+      CHUNKER_MIN_SIZE: 200
     keyValueStore:
       USECASE_KEYVALUE_PORT: 6379
       USECASE_KEYVALUE_HOST: "rag-keydb"

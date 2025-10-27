@@ -66,7 +66,6 @@ from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.embedder_class_type_settings import (
     EmbedderClassTypeSettings,
 )
-from rag_core_lib.impl.settings.fake_embedder_settings import FakeEmbedderSettings
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_embedder_settings import OllamaEmbedderSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
@@ -90,7 +89,6 @@ class DependencyContainer(DeclarativeContainer):
     chunker_embedder_type_settings = EmbedderClassTypeSettings()
     stackit_chunker_embedder_settings = StackitEmbedderSettings()
     ollama_chunker_embedder_settings = OllamaEmbedderSettings()
-    fake_chunker_embedder_settings = FakeEmbedderSettings()
     ollama_settings = OllamaSettings()
     langfuse_settings = LangfuseSettings()
     stackit_vllm_settings = StackitVllmSettings()

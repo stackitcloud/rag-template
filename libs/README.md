@@ -231,9 +231,9 @@ Behavior details
 
 #### Embeddings backend for semantic chunking
 
-When `CHUNKER_MODE` is set to `semantic`, the dependency container selects embeddings using [`EmbedderClassTypeSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/embedder_class_type_settings.py). Configure the backend via:
+When `CHUNKER_CLASS_TYPE_CHUNKER_TYPE` is set to `semantic`, the dependency container selects embeddings using [`EmbedderClassTypeSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/embedder_class_type_settings.py). Configure the backend via:
 
-- `EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE`: choose one of `stackit`, `ollama`, or `fake`.
+- `EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE`: choose one of `stackit`, `ollama`.
 
 Backend-specific options:
 
@@ -245,8 +245,6 @@ Backend-specific options:
 - **Ollama embeddings** (self-hosted)
   - `OLLAMA_EMBEDDER_MODEL`
   - `OLLAMA_EMBEDDER_BASE_URL`
-- **Fake embeddings** (testing)
-  - `FAKE_EMBEDDER_SIZE`
 
 In the Helm chart set `CHUNKER_*` keys under `adminBackend.envs.chunker`. The admin deployment reuses the embedder config maps from the backend release, so adjust `backend.envs.embedderClassTypes`, `backend.envs.stackitEmbedder`, `backend.envs.ollamaEmbedder`, or `backend.envs.fakeEmbedder` accordingly when switching embeddings for semantic chunking.
 

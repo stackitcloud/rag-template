@@ -203,25 +203,24 @@ The extracted information will be summarized using LLM. The summary, as well as 
 
 ### 2.4 Chunker configuration (multiple chunkers)
 
-The default dependency container now exposes two chunking strategies via [`ChunkerSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/chunker_settings.py):
+The default dependency container now exposes two chunking strategies which can be chosen by [`ChunkerClassTypeSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/chunker_class_type_settings.py):
 
 - `recursive` (default) wraps LangChain's `RecursiveCharacterTextSplitter`.
-- `semantic` wraps LangChain's `SemanticChunker` and requires an embeddings backend.
+- `semantic` wraps LangChain's `SemanticChunker`, and considers minimum/maximum chunk size with `nltk`/`RecursiveCharacterTextSplitter`.
 
 You can switch between them and fine-tune their behaviour through environment variables:
 
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `CHUNKER_MAX_SIZE` | Maximum character count per recursive chunk. | `1000` |
-| `CHUNKER_OVERLAP` | Character overlap between recursive chunks. | `100` |
-| `CHUNKER_SEMANTIC_BREAKPOINT_THRESHOLD_TYPE` | Breakpoint heuristic (`percentile`, `standard_deviation`, `interquartile`). | `percentile` |
-| `CHUNKER_SEMANTIC_BREAKPOINT_THRESHOLD` | Threshold associated with the selected heuristic. | `95.0` |
-| `CHUNKER_SEMANTIC_BUFFER_SIZE` | Context buffer that is kept on both sides of a semantic breakpoint. | `1` |
-| `CHUNKER_SEMANTIC_MIN_CHUNK_SIZE` | Minimum size for semantic chunks. | `200` |
-| `CHUNKER_SEMANTIC_MAX_CHUNK_SIZE` | Optional maximum size for semantic chunks (`None` when omitted). | `1200` |
-| `CHUNKER_SEMANTIC_TRIM_CHUNKS` | Whether to strip whitespace around semantic chunks. | `true` |
+| `CHUNKER_OVERLAP` | Character overlap between recursive chunks. | `300` |
+|||
+| `CHUNKER_BREAKPOINT_THRESHOLD_TYPE` | Breakpoint heuristic (`percentile`, `standard_deviation`, `interquartile`). | `percentile` |
+| `CHUNKER_BREAKPOINT_THRESHOLD_AMOUNT` | Threshold associated with the selected heuristic. | `95.0` |
+| `CHUNKER_BUFFER_SIZE` | Context buffer that is kept on both sides of a semantic breakpoint. | `1` |
+| `CHUNKER_MIN_SIZE` | Minimum size for semantic chunks. | `200` |
 
-> 📌 The recursive chunker only uses the `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` knobs. The remaining keys are ignored unless `CHUNKER_MODE=semantic`.
+> 📌 The recursive chunker only uses the `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` knobs. The remaining keys are ignored unless `CHUNKER_CLASS_TYPE_CHUNKER_TYPE=semantic`.
 
 Behavior details
 

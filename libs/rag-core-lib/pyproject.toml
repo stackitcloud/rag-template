@@ -4,10 +4,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-lib"
-version = "1.0.1"
-description = "The perfect rag template"
-authors = ["STACKIT GmbH & Co. KG"]
+version = "v3.2.0"
+description = "The rag-core-lib contains the shared components of at least two of the rag libs."
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
 packages = [{ include = "rag_core_lib", from = "src" }]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
+homepage = "https://pypi.org/project/rag-core-lib"
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -105,7 +114,7 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.pytest.ini_options]
-log_cli = 1
+log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = "src"
 testpaths = "src/tests"

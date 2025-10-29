@@ -30,7 +30,7 @@ Requires Python 3.13 and `rag-core-lib`.
 
 Other services (admin backend and MCP server) call the endpoints provided by this package to ingest, delete, and chat with information pieces.
 
-## Component tour
+## Module tour
 
 - `dependency_container.py` – Configures dependency-injector providers. Override registrations here to swap providers or inject fakes for tests.
 - `api_endpoints/` & `impl/api_endpoints/` – Thin endpoints + abstractions (`Chat`, `InformationPiecesUploader`, etc.) that map HTTP verbs to underlying logic.
@@ -68,20 +68,24 @@ The Helm chart supplies these values through `backend.envs.*`. Local development
 
 ## Quick start
 
-For full example, see [`services/rag-backend`](https://github.com/stackitcloud/rag-template/tree/main/services/rag-backend). It shows how to replace components of the rag-core-api container.
+```python
+from rag_core_api.main import app as perfect_rag_app
+```
 
-## Extending the API
+Delivers a full functional API. See [`services/rag-backend/main.py`](https://github.com/stackitcloud/rag-template/blob/main/services/rag-backend/main.py) and [`services/rag-backend/container.py`](https://github.com/stackitcloud/rag-template/blob/main/services/rag-backend/container.py), which compose the API with additional middleware, auth, and deployment-specific wiring.
+
+## Extending the library
 
 1. Subclass the relevant interface (e.g., `VectorDatabase`, `Retriever`, `Chat` endpoint).
-2. Register your implementation in the dependency container before creating the FastAPI app.
-3. Add tests under `libs/rag-core-api/tests` that exercise the new component via the container or a fake app.
+2. Register your implementation in the dependency container.
+3. Add pytest-based tests under `libs/rag-core-api/tests` that exercise the new component via the container.
 
 Because components depend on interfaces defined here, downstream services can swap behavior without modifying the public API surface.
 
 ## Contributing
 
-Ensure new endpoints or adapters remain thin and defer to `rag-core-lib` for shared logic. Run `poetry run pytest` and the configured linters before opening a PR. Additionally, have a look at the [contributing guidelines](https://github.com/stackitcloud/rag-template/blob/main/CONTRIBUTING.md) in the root of the repository.
+Ensure new endpoints or adapters remain thin and defer to [`rag-core-lib`](../rag-core-lib/) for shared logic. Run `poetry run pytest` and the configured linters before opening a PR.
 
 ## License
 
-Licensed under the project license. See the root `LICENSE` file.
+Licensed under the project license. See the root [`LICENSE`](https://github.com/stackitcloud/rag-template/blob/main/LICENSE) file.

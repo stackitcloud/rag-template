@@ -2,7 +2,7 @@
 
 Document lifecycle orchestration for the STACKIT RAG template. This library exposes a FastAPI-compatible admin surface that receives raw user content, coordinates extraction, summarisation, chunking, and storage, and finally hands normalized information pieces to the core RAG API.
 
-It powers the `services/admin-backend` deployment and is the primary integration point for operators managing their document corpus.
+It powers the [`services/admin-backend`](https://github.com/stackitcloud/rag-template/tree/main/services/admin-backend) deployment and is the primary integration point for operators managing their document corpus.
 
 ## Responsibilities
 

@@ -1,10 +1,15 @@
 # rag-core-api
 
-High-level API layer for the STACKIT RAG template. It transforms its own primitives and those from [`rag-core-lib`](../rag-core-lib/) into a production-ready FastAPI surface, exposing chat, evaluation, and document-management endpoints used by `services/rag-backend` and the MCP server of the [`RAG-Template`](https://github.com/stackitcloud/rag-template).
+High-level API layer for the STACKIT [`RAG-Template`](https://github.com/stackitcloud/rag-template). It transforms its own primitives and those from [`rag-core-lib`](../rag-core-lib/) into a production-ready FastAPI surface, exposing chat, evaluation, and document-management endpoints used by [`services/rag-backend`](https://github.com/stackitcloud/rag-template/tree/main/services/rag-backend) and the MCP server of the `RAG-Template`.
 
-`rag-core-api` composes a dependency-injector container that wires together LLMs, embeddings, vector stores, rerankers, retrievers, API endpoints and more. The shared logic (LLMs, embeddings, tracing etc.) comes from [`rag-core-lib`](../rag-core-lib/). Technically, `rag-core-api` ships a fully functional FastAPI app that can be run directly, but it can be also embedded in custom services or extended with new logic, see the [services of the RAG-Template repository](https://github.com/stackitcloud/rag-template/tree/main/services).
+## Responsibilities
 
-## Highlights
+- **Dependency Injection** – Compose the dependency-injector container to assemble LLMs, embeddings, vector stores, rerankers, and retrievers from [`rag-core-lib`](../rag-core-lib/).
+- **API Exposure** – Expose production-ready FastAPI routers for chat, evaluation, and information piece management.
+- **Chat Orchestration** – Provide default LangGraph chat orchestration and evaluation pipelines that downstream services can reuse or override.
+- **Knowledge base integration** – Manages all interaction with the knowledge base (vector database).
+
+## Feature highlights
 
 - **Chat graph built on LangGraph** – Default `DefaultChatGraph` stitches together language detection, question rephrasing, retrieval (with reranking), answer generation, and Langfuse tracing.
 - **Evaluation endpoint** – Ships a Langfuse + RAGAS evaluator so you can score QA datasets against your RAG stack without custom plumbing.
@@ -66,7 +71,7 @@ Refer to [`libs/README.md`](../README.md#1-rag-core-api) for in-depth API docume
 
 The Helm chart supplies these values through `backend.envs.*`. Local development can rely on `.env` configuration (see repository root documentation).
 
-## Quick start
+## Typical usage
 
 ```python
 from rag_core_api.main import app as perfect_rag_app

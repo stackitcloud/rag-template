@@ -3190,7 +3190,7 @@ files = [
 
 [[package]]
 name = "rag-core-lib"
-version = "v3.2.0"
+version = "v3.2.1"
 description = "The rag-core-lib contains the shared components of at least two of the rag libs."
 optional = false
 python-versions = "^3.13"

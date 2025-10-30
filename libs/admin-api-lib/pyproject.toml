@@ -4,10 +4,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "admin-api-lib"
-version = "1.0.1"
+version = "v3.2.0"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
 packages = [{ include = "admin_api_lib", from = "src" }]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
+homepage = "https://pypi.org/project/admin-api-lib"
 
 [tool.flake8]
 exclude= [".eggs", "./libs/*", "./src/admin_api_lib/models/*", "./src/admin_api_lib/rag_backend_client/*", "./src/admin_api_lib/extractor_api_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]

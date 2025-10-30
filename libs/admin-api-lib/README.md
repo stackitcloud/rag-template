@@ -4,7 +4,7 @@ Document lifecycle orchestration for the STACKIT RAG template. This library expo
 
 It powers the `services/admin-backend` deployment and is the primary integration point for operators managing their document corpus.
 
-## Responsibilities in the RAG stack
+## Responsibilities
 
 1. **Ingestion** – Accept files or external sources from the admin UI or API clients.
 2. **Extraction** – Call `extractor-api-lib` to obtain normalized information pieces.
@@ -89,7 +89,7 @@ Because components depend on interfaces defined here, downstream services can sw
 
 ## Contributing
 
-Ensure new endpoints or adapters remain thin and defer to [`rag-core-lib`](../rag-core-lib/) for shared logic. Run `poetry run pytest` and the configured linters before opening a PR.
+Ensure new endpoints or adapters remain thin and defer to [`rag-core-lib`](../rag-core-lib/) for shared logic. Run `poetry run pytest` and the configured linters before opening a PR. For further instructions see the [Contributing Guide](https://github.com/stackitcloud/rag-template/blob/main/CONTRIBUTING.md).
 
 ## License
 

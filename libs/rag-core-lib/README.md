@@ -78,7 +78,7 @@ print(response.content)
 
 ## Contributing
 
-Follow the repository conventions (Black, isort, Flake8, pytest). When adding new providers or utilities, include typed settings, update Helm values if required, and add unit tests under `libs/rag-core-lib/tests`.
+Follow the repository conventions (Black, isort, Flake8, pytest). When adding new providers or utilities, include typed settings, update Helm values if required, and add unit tests under `libs/rag-core-lib/tests`. For further instructions see the [Contributing Guide](https://github.com/stackitcloud/rag-template/blob/main/CONTRIBUTING.md).
 
 ## License
 

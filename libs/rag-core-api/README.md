@@ -2,7 +2,7 @@
 
 High-level API layer for the STACKIT RAG template. It transforms its on primitives and those from [`rag-core-lib`](../rag-core-lib/) into a production-ready FastAPI surface, exposing chat, evaluation, and document-management endpoints used by `services/rag-backend` and the MCP server of the [`RAG-Template`](https://github.com/stackitcloud/rag-template).
 
-`rag-core-api` composes a dependency-injector1 container that wires together LLMs, embeddings, vector stores, rerankers, retrievers, API endpoints and more. The shared logic (LLMs, embeddings, tracing etc.) comes from [`rag-core-lib`](../rag-core-lib/). Technically, `rag-core-api` ships a fully functional FastAPI app that can be run directly, but it can be also embedded in custom services or extended with new logic, see the [services of the RAG-Template repository](https://github.com/stackitcloud/rag-template/tree/main/services).
+`rag-core-api` composes a dependency-injector container that wires together LLMs, embeddings, vector stores, rerankers, retrievers, API endpoints and more. The shared logic (LLMs, embeddings, tracing etc.) comes from [`rag-core-lib`](../rag-core-lib/). Technically, `rag-core-api` ships a fully functional FastAPI app that can be run directly, but it can be also embedded in custom services or extended with new logic, see the [services of the RAG-Template repository](https://github.com/stackitcloud/rag-template/tree/main/services).
 
 ## Highlights
 

@@ -1102,24 +1102,20 @@ standard-no-fastapi-cloud-cli = ["email-validator (>=2.0.0)", "fastapi-cli[stand
 
 [[package]]
 name = "fasttext"
-version = "0.9.2"
+version = "0.9.3"
 description = "fasttext Python bindings"
 optional = false
 python-versions = "*"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "fasttext-0.9.3-cp39-cp39-macosx_14_0_arm64.whl", hash = "sha256:8b39f3ac5df43873648ea400cb75d4f7f9455730ac5105490b23b70f14e03ea7"},
+    {file = "fasttext-0.9.3.tar.gz", hash = "sha256:eb03f2ef6340c6ac9e4398a30026f05471da99381b307aafe2f56e4cd26baaef"},
+]
 
 [package.dependencies]
 numpy = "*"
 pybind11 = ">=2.2"
 setuptools = ">=0.7.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/cfculhane/fastText"
-reference = "4a4451337ae6b476b9c584b97776c8c3eb4b27c5"
-resolved_reference = "4a4451337ae6b476b9c584b97776c8c3eb4b27c5"
 
 [[package]]
 name = "filelock"
@@ -5087,4 +5083,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "d1e91c06b1bef49556b8e17fa9d920e9e0fde3b3828c489055fe2e0b2797779f"
+content-hash = "8cafc0e5aa5d8040a4cd8784bf6caa156efe50cccd36095ae51d39abfd61641b"

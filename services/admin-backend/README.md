@@ -39,3 +39,16 @@ The extracted information will be summarized using LLM. The summary, as well as 
 
 A detailed explanation of the deployment can be found in the [project README](../../README.md).
 The *helm-chart* used for the deployment can be found in the [infrastructure directory](../../infrastructure/).
+
+## Chunking modes
+
+The admin backend supports multiple chunkers for splitting content before uploading to the vector database:
+
+- Semantic: LangChain `SemanticChunker` with sentence-aware rebalancing
+- Recursive (Default): LangChain `RecursiveCharacterTextSplitter`
+
+Select via environment variable `CHUNKER_CLASS_TYPE_CHUNKER_TYPE` set to `semantic` or `recursive`.
+
+Helm users: set `adminBackend.envs.chunker.CHUNKER_CLASS_TYPE_CHUNKER_TYPE` in `infrastructure/rag/values.yaml` to switch. The chart defaults to `recursive` and also exposes tuning keys like `CHUNKER_MAX_SIZE`, `CHUNKER_OVERLAP`, and semantic-specific knobs.
+
+For detailed configuration (min/max size, overlap, semantic thresholds, buffer size, and embeddings), see the libraries guide: libs/README.md section "2.4 Chunker configuration (multiple chunkers)".

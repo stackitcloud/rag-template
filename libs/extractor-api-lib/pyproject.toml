@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "extractor_api_lib"
+name = "extractor-api-lib"
 version = "v3.2.1"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
 authors = [

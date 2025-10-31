@@ -34,11 +34,10 @@ export const initializeMarkdown = () => {
         }
     });
 
-    const originalImage = anyRenderer['image']?.bind(renderer) as ((...args: any[]) => string) | undefined;
     anyRenderer['image'] = (...args: any[]): string => {
-        let href = '' as string | undefined;
-        let title = null as string | null;
-        let text = '' as string | undefined;
+        let href: string | undefined = '';
+        let title: string | null = null;
+        let text: string | undefined = '';
         // token form
         if (args.length === 1 && typeof args[0] === 'object') {
             const token = args[0] as { href?: string; title?: string | null; text?: string };

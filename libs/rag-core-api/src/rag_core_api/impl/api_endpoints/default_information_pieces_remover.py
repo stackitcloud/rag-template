@@ -53,7 +53,6 @@ class DefaultInformationPiecesRemover(InformationPieceRemover):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error while parsing metadata.",
-                detail="Error while parsing metadata.",
             )
         if not metadata:
             raise HTTPException(

@@ -66,7 +66,7 @@
      Used by: bg-base-100/200/300, text-base-content, etc.
   ---------------------------------------------------------------- */
   --color-base-100: #ffffff;           /* page background */
-  --color-base-200: #f7f7f7;           /* cards/secondary surfaces */
+  --color-base-200: #EDEDED;           /* cards/secondary surfaces */
   --color-base-300: #dadada;           /* borders/dividers/elevations */
   --color-base-content: #333333;       /* default text on base-* */
 

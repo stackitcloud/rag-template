@@ -34,7 +34,6 @@ export const initializeMarkdown = () => {
         }
     });
 
-    const originalImage = anyRenderer['image']?.bind(renderer) as ((...args: any[]) => string) | undefined;
     anyRenderer['image'] = (...args: any[]): string => {
         let href: string | undefined = '';
         let title: string | null = null;

@@ -1,9 +1,5 @@
-@import "tailwindcss";
-@plugin "daisyui";
-@plugin "@tailwindcss/typography";
-@source "../../apps/**/src/**/*.{vue,js,ts}";
-@source "../../apps/**/index.html";
-@source "../../libs/**/*.{vue,js,ts}";
+/* # Assumptions: No other stylesheet depends on the old Tailwind directives because they now live in ui-styles/src/tailwind.css. */
+@import "../ui-styles/src/tailwind.css";
 
 html,
 body,

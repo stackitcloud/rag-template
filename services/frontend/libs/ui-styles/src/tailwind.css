@@ -125,12 +125,7 @@
    If you generate classes dynamically (from JSON/DB), list them here
    so Tailwind includes them even if they’re not found in source files.
    =========================================================== */
-@source inline("
-  w-32 w-40 h-5 w-5 flex flex-1 items-center gap-2 p-4
-  md:container md:mx-auto
-  btn btn-primary btn-circle btn-ghost
-  bg-primary hover:bg-white/20 hover:bg-base-300
-");
+@source inline("w-32 w-40 h-5 w-5 flex flex-1 items-center gap-2 p-4 md:container md:mx-auto btn btn-primary btn-circle btn-ghost bg-primary hover:bg-white/20 hover:bg-base-300");
 
 /* ===========================================================
    HOW TO USE (quick cheatsheet)

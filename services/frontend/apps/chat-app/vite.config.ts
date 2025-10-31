@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
-import tailwindcss from '@tailwindcss/vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';

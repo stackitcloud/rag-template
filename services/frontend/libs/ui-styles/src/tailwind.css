@@ -40,7 +40,7 @@
      Primary = main brand/action color for CTAs & highlights.
      Primary-content = text/icon color that sits on top of Primary.
   ---------------------------------------------------------------- */
-  --color-primary: #f8f9fa;            /* primary brand/CTA (red) */
+  --color-primary: #f8f9fa;            /* primary brand/CTA (light gray) */
   --color-primary-content: #0a1e2d;    /* readable text on primary */
 
   /* Secondary = supporting brand color (chips, subtle accents) */

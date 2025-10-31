@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple test script to verify the chat_model_provider function works correctly
-with the new init_chat_model approach.
-"""
+"""Verify the chat_model_provider function works correctly."""
 
 import os
 import sys
@@ -18,7 +15,6 @@ from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 
 def test_chat_model_provider():
     """Test that the chat_model_provider function creates a model correctly."""
-
     # Set up test environment variables
     os.environ["STACKIT_VLLM_API_KEY"] = "test_key"
     os.environ["STACKIT_VLLM_BASE_URL"] = "https://test.example.com/v1"

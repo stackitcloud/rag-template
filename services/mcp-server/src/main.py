@@ -1,3 +1,5 @@
+"""Module for configuring and initializing the MCP server."""
+
 import logging.config
 
 import yaml

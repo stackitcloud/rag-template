@@ -13,7 +13,8 @@ class InformationExtractor(ABC):
 
     @property
     @abstractmethod
-    def extractor_type(self) -> ExtractorTypes: ...
+    def extractor_type(self) -> ExtractorTypes:
+        """The type of the extractor."""
 
     @abstractmethod
     async def aextract_content(

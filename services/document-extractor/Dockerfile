@@ -1,6 +1,7 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
-ARG dev=0
+# Build argument to control which dependency group to install
+ARG DEPENDENCY_GROUP=prod
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_VIRTUALENVS_IN_PROJECT=false \
@@ -9,34 +10,27 @@ ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
     POETRY_VERSION=2.1.3
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make \
-    ffmpeg \
-    poppler-utils \
-    tesseract-ocr \
-    tesseract-ocr-deu \
-    tesseract-ocr-eng && \
-    python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
-      && $POETRY_VIRTUALENVS_PATH/bin/pip install "poetry==${POETRY_VERSION}"
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       build-essential make ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \
+    && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
+      && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
-
-COPY libs/extractor-api-lib /app/libs/extractor-api-lib
 
 WORKDIR /app/services/document-extractor
 COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock ./
 
-RUN mkdir log && chmod 700 log
-RUN touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
+# Copy the extractor-api-lib dependency (needed for both prod and prod-local)
+COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
+COPY libs/extractor-api-lib/src /app/libs/extractor-api-lib/src
 
-# Cache bust with dev arg so dev dependencies install when dev=1
-RUN echo "CACHE_BUST_DEV=$dev" && poetry config virtualenvs.create false &&\
-    if [ "$dev" = "1" ]; then \
-        poetry install --no-interaction --no-ansi --no-root --with dev; \
-    else \
-        poetry install --no-interaction --no-ansi --no-root; \
-    fi
+RUN mkdir -p log && chmod 700 log \
+    && touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
+
+RUN poetry config virtualenvs.create false \
+    && cd /app/services/document-extractor \
+    && poetry install --no-interaction --no-ansi --no-root --with ${DEPENDENCY_GROUP}
 
 FROM --platform=linux/amd64 python:3.13-bookworm
-ARG dev=0
 
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
@@ -48,32 +42,31 @@ COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --from=build /usr/share/tesseract-ocr/5/tessdata /usr/share/tesseract-ocr/5/tessdata
 
-COPY --chown=nonroot:nonroot libs/extractor-api-lib /app/libs/extractor-api-lib
+# Copy the library source code to the final stage only for local path dependencies
+ARG DEPENDENCY_GROUP=prod
+COPY --from=build --chown=nonroot:nonroot \
+    /app/libs/extractor-api-lib \
+    /tmp/conditional-libs/extractor-api-lib
+
+# Move libraries to final location only if using prod-local
+RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \
+        mkdir -p /app/libs && \
+        mv /tmp/conditional-libs/* /app/libs/ && \
+        chown -R nonroot:nonroot /app/libs; \
+    fi && \
+    rm -rf /tmp/conditional-libs
 
 WORKDIR /app/services/document-extractor
 
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
+ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
+
 COPY --chown=nonroot:nonroot services/document-extractor .
-
-
-# Ensure poetry reuses existing virtualenv when running as nonroot
-ENV POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_VIRTUALENVS_IN_PROJECT=false \
-    VIRTUAL_ENV=/opt/.venv \
-    PATH=/opt/.venv/bin:$PATH
+COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log
 
 # cleanup
-RUN apt-get clean autoclean
-RUN apt-get autoremove --yes
-
-RUN if [ "$dev" = "0" ]; then \
-        while read -r shell; do rm -f "$shell"; done < /etc/shells; \
-        rm -rf /var/lib/{apt,dpkg,cache,log}/ \
-    else \
-        echo "POETRY_VIRTUALENVS_PATH=/opt/.venv" >> /etc/environment;\
-        export POETRY_VIRTUALENVS_PATH=/opt/.venv;\
-        export PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH";\
-    fi
-
+RUN apt-get clean autoclean && apt-get autoremove --yes \
+    && while read -r shell; do rm -f "$shell"; done < /etc/shells || true \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
 
 USER nonroot
-COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log

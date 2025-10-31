@@ -4,10 +4,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "extractor_api_lib"
-version = "2.2.1"
+version = "v3.2.1"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
 packages = [{ include = "extractor_api_lib", from = "src" }]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
+homepage = "https://pypi.org/project/extractor-api-lib"
 
 [[tool.poetry.source]]
 name = "pytorch_cpu"
@@ -72,8 +81,8 @@ wheel = "^0.45.1"
 botocore = "^1.38.10"
 fasttext = "^0.9.3"
 pytesseract = "^0.3.10"
-fastapi = "^0.116.0"
-uvicorn = "^0.35.0"
+fastapi = "^0.118.0"
+uvicorn = "^0.37.0"
 dependency-injector = "^4.46.0"
 pydantic-settings = "^2.9.1"
 boto3 = "^1.38.10"
@@ -91,12 +100,12 @@ partial = "^1.0"
 pyyaml = "^6.0.2"
 numpy = "^2.2.5"
 docx2txt = "^0.9"
-unstructured = {extras = ["docx", "pptx"], version = "0.18.13"}
+unstructured = {extras = ["docx", "pptx"], version = "0.18.15"}
 html5lib = "^1.1"
 langchain-community = "^0.3.23"
 atlassian-python-api = "^4.0.3"
 markdownify = "^1.1.0"
-langchain-core = "0.3.74"
+langchain-core = "0.3.77"
 camelot-py = {extras = ["cv"], version = "^1.0.0"}
 fake-useragent = "^2.2.0"
 pypdfium2 = "4.30.0"
@@ -112,7 +121,7 @@ httpx = "^0.28.1"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
-flake8-black = "^0.3.6"
+flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"

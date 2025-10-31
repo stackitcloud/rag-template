@@ -83,6 +83,7 @@ class LangfuseManager:
             return langfuse_prompt
         except NotFoundError:
             logger.info("Prompt '%s' not found in Langfuse. Creating new chat prompt.", base_prompt_name)
+            logger.info("Prompt '%s' not found in Langfuse. Creating new chat prompt.", base_prompt_name)
 
             local_prompt = self._managed_prompts[base_prompt_name]
             chat_messages = self._convert_chat_prompt_to_langfuse_format(local_prompt)
@@ -163,6 +164,7 @@ class LangfuseManager:
                     role = message[0]
                     content = message[1] if len(message) > 1 else ""
                 else:
+                    logger.warning("Unexpected message format: %s", message)
                     logger.warning("Unexpected message format: %s", message)
                     continue
 

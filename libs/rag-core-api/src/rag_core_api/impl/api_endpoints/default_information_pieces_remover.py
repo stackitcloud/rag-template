@@ -53,6 +53,7 @@ class DefaultInformationPiecesRemover(InformationPieceRemover):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error while parsing metadata.",
+                detail="Error while parsing metadata.",
             )
         if not metadata:
             raise HTTPException(
@@ -65,5 +66,5 @@ class DefaultInformationPiecesRemover(InformationPieceRemover):
             logger.exception("Error while deleting from vector db.")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Error while deleting %s from vector db" % delete_request.metadata,
+                detail="Error while deleting from vector db.",
             )

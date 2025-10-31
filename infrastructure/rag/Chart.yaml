@@ -10,10 +10,10 @@ appVersion: "1.0.0"
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: "1.5.1"
+  version: "1.5.4"
   condition: features.langfuse.enabled
 - name: qdrant
-  version: 1.15.4
+  version: 1.15.5
   repository: "https://qdrant.github.io/qdrant-helm"
   condition: features.qdrant.enabled
 - name: minio
@@ -27,6 +27,6 @@ dependencies:
   condition: features.keydb.enabled
 - name: ollama
   alias: ollama
-  version: 1.27.0
+  version: 1.30.0
   repository: https://otwld.github.io/ollama-helm/
   condition: features.ollama.enabled

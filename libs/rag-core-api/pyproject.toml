@@ -4,18 +4,27 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "2.2.1"
-description = "The core of the rag-template."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+version = "v3.2.1"
+description = "The rag-core-api contains the API layer for the RAG template for document retrieval, question answering, knowledge base management in the vector database and more."
 packages = [{ include = "rag_core_api", from = "src" }]
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
+homepage = "https://pypi.org/project/rag-core-api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
 rag-core-lib = { path = "../rag-core-lib", develop = true}
-uvicorn = "^0.35.0"
+uvicorn = "^0.37.0"
 langchain-qdrant = "^0.2.0"
 dependency-injector = "^4.46.0"
-fastapi = "^0.116.0"
+fastapi = "^0.118.0"
 requests-oauthlib = "^2.0.0"
 qdrant-client = "^1.14.2"
 deprecated = "^1.2.18"
@@ -27,20 +36,22 @@ openai = "^1.77.0"
 langgraph = "^0.6.0"
 pillow = "^11.2.1"
 langchain-ollama = "^0.3.2"
-langchain-community = "0.3.27"
+pytest-asyncio = "^0.26.0"
+langchain-community = "0.3.30"
 fastembed = "^0.7.0"
 langdetect = "^1.0.9"
-langfuse = "3.3.4"
-setuptools = "<80.9"
+langfuse = "3.6.1"
+langchain-text-splitters = ">=0.3.9"
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
 pytest = "^8.3.5"
 coverage = "^7.8.0"
 pytest-asyncio = "^0.26.0"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
-flake8-black = "^0.3.6"
+flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
@@ -62,10 +73,6 @@ flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
 flake8-logging-format = "^2024.24.12"
 flake8-docstrings = "^1.7.0"
-
-[tool.poetry.group.dev.dependencies]
-debugpy = "^1.8.14"
-
 
 [tool.flake8]
 exclude= [".eggs", "src/rag_core_api/models", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]

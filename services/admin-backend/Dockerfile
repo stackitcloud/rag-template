@@ -1,11 +1,13 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
-ENV POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv
-ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
-ENV POETRY_VERSION=2.1.3
-
 # Build argument to control which dependency group to install
 ARG DEPENDENCY_GROUP=prod
+ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH \
+    POETRY_VERSION=2.1.3
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make \
@@ -19,6 +21,8 @@ COPY services/admin-backend/pyproject.toml services/admin-backend/poetry.lock ./
 # Copy the required lib dependencies
 COPY libs/admin-api-lib/pyproject.toml libs/admin-api-lib/poetry.lock /app/libs/admin-api-lib/
 COPY libs/admin-api-lib/src /app/libs/admin-api-lib/src
+COPY libs/admin-api-lib/README.md /app/libs/admin-api-lib/README.md
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/README.md
 COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
 COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
 
@@ -34,7 +38,7 @@ WORKDIR /app/services/admin-backend
 
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
-ENV POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv
+ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make

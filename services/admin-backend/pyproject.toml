@@ -47,9 +47,9 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "admin_backend"
-version = "2.2.1"
-description = "The admin backend is responsible for the document management. This includes deletion, upload and getting particular documents or document lists."
+name = "admin-backend-usecase-example"
+version = "3.2.0"
+description = "This example demonstrates the usage of the admin-api-lib."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 
@@ -59,7 +59,7 @@ coverage = "^7.8.0"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
-flake8-black = "^0.3.6"
+flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
@@ -95,8 +95,8 @@ python = "^3.13"
 setuptools = "<80.9"
 
 [tool.poetry.group.prod.dependencies]
-admin-api-lib = "==2.2.1"
-rag-core-lib = "==2.2.1"
+admin-api-lib = "==3.2.1"
+rag-core-lib = "==3.2.1"
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile

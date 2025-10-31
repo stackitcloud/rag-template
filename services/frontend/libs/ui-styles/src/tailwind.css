@@ -67,7 +67,7 @@
   ---------------------------------------------------------------- */
   --color-base-100: #ffffff;           /* page background */
   --color-base-200: #EDEDED;           /* cards/secondary surfaces */
-  --color-base-300: #dadada;           /* borders/dividers/elevations */
+  --color-base-300: #DADADA;           /* borders/dividers/elevations */
   --color-base-content: #333333;       /* default text on base-* */
 
   /* --- FEEDBACK / STATUS ---------------------------------------

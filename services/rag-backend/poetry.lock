@@ -4202,7 +4202,7 @@ fastembed-gpu = ["fastembed-gpu (>=0.7,<0.8)"]
 
 [[package]]
 name = "rag-core-api"
-version = "v3.2.0"
+version = "v3.2.1"
 description = "The rag-core-api contains the API layer for the RAG template for document retrieval, question answering, knowledge base management in the vector database and more."
 optional = false
 python-versions = "^3.13"
@@ -4240,7 +4240,7 @@ url = "../../libs/rag-core-api"
 
 [[package]]
 name = "rag-core-lib"
-version = "v3.2.0"
+version = "v3.2.1"
 description = "The rag-core-lib contains the shared components of at least two of the rag libs."
 optional = false
 python-versions = "^3.13"

@@ -2,7 +2,7 @@
 
 [[package]]
 name = "admin-api-lib"
-version = "v3.2.0"
+version = "v3.2.1"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
 optional = false
 python-versions = "^3.13"
@@ -3152,7 +3152,7 @@ files = [
 
 [[package]]
 name = "rag-core-lib"
-version = "v3.2.0"
+version = "v3.2.1"
 description = "The rag-core-lib contains the shared components of at least two of the rag libs."
 optional = false
 python-versions = "^3.13"

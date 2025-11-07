@@ -44,8 +44,8 @@ max-line-length = 120
 
 [tool.poetry]
 name = "pdfextractor_server"
-version = "0.0.0"
-description = "Extracts the content of pdf  documents."
+version = "3.2.1"
+description = "This example demonstrates the usage of the extractor-api-lib."
 authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
 readme = "README.md"
 

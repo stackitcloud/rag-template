@@ -10,6 +10,8 @@ from extractor_api_lib.extractors.information_extractor import InformationExtrac
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
 )
+from langchain_community.document_loaders.confluence import ContentFormat
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +84,7 @@ class ConfluenceExtractor(InformationExtractor):
         # Drop the document_name parameter as it is not used by the ConfluenceLoader
         if "document_name" in confluence_loader_parameters:
             confluence_loader_parameters.pop("document_name", None)
+        confluence_loader_parameters["content_format"] = ContentFormat.VIEW
         document_loader = ConfluenceLoader(**confluence_loader_parameters)
         documents = document_loader.load()
         return [self._mapper.map_document2informationpiece(x, extraction_parameters.document_name) for x in documents]

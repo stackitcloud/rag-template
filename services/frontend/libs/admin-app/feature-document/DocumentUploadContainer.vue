@@ -190,7 +190,7 @@ const getErrorMessage = (errorType: string) => {
                       <label for="confluenceToken" class="sr-only">Token</label>
                       <input v-model="confluenceToken" type="password" placeholder="Token" class="input input-bordered w-full" />
                       <label for="maxPages" class="sr-only">Max pages</label>
-                      <input v-model.number="maxPages" type="number" placeholder="Max number of pages" class="input input-bordered w-full" />
+                      <input v-model.number="maxPages" type="number" placeholder="Max number of pages (optional)" class="input input-bordered w-full" />
                     </div>
                     <p class="text-xs opacity-50">{{ t('documents.confluenceLoadDescription') }}</p>
                     <p class="text-xs opacity-50 mb-4">{{ t('documents.confluenceQueryHint') }}</p>

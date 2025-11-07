@@ -72,7 +72,7 @@ class ConfluenceExtractor(InformationExtractor):
 
         if "cql" not in confluence_loader_parameters and "space_key" not in confluence_loader_parameters:
             raise ValueError("Either 'space_key' or 'cql' must be provided for Confluence extraction.")
-        if not confluence_loader_parameters.get("max_pages") or isinstance(
+        if "max_pages" in confluence_loader_parameters and not confluence_loader_parameters.get("max_pages") or isinstance(
             confluence_loader_parameters.get("max_pages"), str
         ):
             logging.warning(

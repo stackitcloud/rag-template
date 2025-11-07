@@ -64,5 +64,5 @@ async def test_aextract_content_requires_space_key_or_cql(confluence_mapper):
         ],
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Either 'space_key' or 'cql' must be provided for Confluence extraction."):
         await extractor.aextract_content(extraction_parameters)

@@ -269,12 +269,39 @@ cd infrastructure/rag;helm dependency update; cd ../..
 
 After the initial build of the helm chart *Tilt* is able to update the files.
 
+##### Development vs Production Mode
+
+The template supports two deployment modes for local development:
+
+- **Production Mode** (default): Uses production Dockerfiles with local library dependencies for realistic testing
+- **Development Mode**: Uses development Dockerfiles with live code updates for fast iteration
+
 The following will tear up the microservices in *k3d*.
 For the following steps, it is assumed your current working directory is the root of the git-repository.
+
+**Production Mode (default):**
 
 ```shell
 tilt up
 ```
+
+**Development Mode:**
+
+```shell
+tilt up -- --dev=true
+```
+
+##### Docker File Structure
+
+Each service now has separate Docker files optimized for different use cases:
+
+- `Dockerfile`: Production-optimized builds with multi-stage architecture and security hardening
+- `Dockerfile.dev`: Development-optimized builds with faster build times and development tools
+
+The Tilt configuration automatically selects the appropriate Dockerfile based on the mode:
+
+- Production mode uses `Dockerfile` with local library dependencies (`prod-local` group)
+- Development mode uses `Dockerfile.dev` with live code updates and development dependencies
 
 Environment variables are loaded from `.env` file in the root of this git-repository.
 
@@ -282,12 +309,19 @@ The *Tilt* UI is available at [http://localhost:10350/](http://localhost:10350/)
 
 If you want to access *Qdrant* etc. just click the resource in the UI. In the upper corner will be the link, to access the resource.
 
+##### Debugging
 >  📝 NOTE: For frontend live updates with Tilt see [Frontend live updates with Tilt](./services/frontend/README.md#live-updates-with-tilt)
 
 To enable debugging, start tilt with the following command:
 
 ```shell
 tilt up -- --debug=true
+```
+
+It is recommended to combine debugging with development mode:
+
+```shell
+tilt up -- --debug=true --dev=true
 ```
 
 The backend will wait until your debugger is connected before it will fully start.
@@ -414,10 +448,12 @@ A detailed explanation of, how to access a service via ingress, can be found in 
 ### 2.1 Server provisioning
 
 The RAG template requires *at least*:
- - A Kubernetes Cluster
- - S3 ObjectStorage
+
+- A Kubernetes Cluster
+- S3 ObjectStorage
 
 Provided is an example Terraform script, using the [STACKIT Terrraform Provider](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs):
+
 ```terraform
 resource "stackit_ske_project" "rag-ske" {
   project_id = var.stackit_project_id
@@ -475,8 +511,8 @@ Further requirements for the server can be found in the [infrastructure README](
 
 A detailed description regarding the configuration of Langfuse can be found in the [infrastructure README](./infrastructure/README.md).
 
-
 ## 3. Build and Test
+
 The example `Tiltfile` provides a triggered linting and testing.
 The linting-settings can be changed in the `services/rag-backend/pyproject.toml` file under section `tool.flake8`.
 

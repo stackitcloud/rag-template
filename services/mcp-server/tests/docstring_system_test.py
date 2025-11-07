@@ -1,3 +1,5 @@
+"""Module for testing the docstring system."""
+
 import pytest
 
 from src.docstring_system import DocstringTemplateSystem, extensible_docstring, setup_extensible_docstrings

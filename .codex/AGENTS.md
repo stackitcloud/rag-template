@@ -1,5 +1,4 @@
-# .github/codex-instructions.md
-
+# AGENTS.md
 > **Scope:** These instructions tune our **Codex** code-generation agent (LLM via API/CLI) for this monorepo. They are **authoritative**: follow them over generic best practices. Output must compile, pass linters/tests, and fit our structure.
 
 ---

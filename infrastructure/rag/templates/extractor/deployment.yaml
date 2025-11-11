@@ -25,6 +25,9 @@ spec:
           emptyDir: {}
         - name: nltk-data-dir
           emptyDir: {}
+        - name: modelscope-cache
+          emptyDir: {}
+      {{- $msCacheDir := default "/var/modelscope" .Values.extractor.modelscopeCacheDir }}
       {{- if .Values.shared.imagePullSecret }}
       imagePullSecrets:
       - name: {{ .Values.shared.imagePullSecret.name }}
@@ -32,16 +35,24 @@ spec:
       initContainers:
       - name: init-permissions
         image: busybox
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+          runAsNonRoot: false
         command:
           - sh
           - -c
           - |
             touch /app/services/document-extractor/log/logfile.log && \
-            chmod 600 /app/services/document-extractor/log/logfile.log;
+            chmod 600 /app/services/document-extractor/log/logfile.log && \
+            chown -R 10001:10001 /app/services/document-extractor/log && \
             wget -q -O /tmp/punkt.zip https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt_tab.zip && \
-            unzip /tmp/punkt.zip -d /home/nonroot/nltk_data/tokenizers && \
+            unzip -o -q /tmp/punkt.zip -d /home/nonroot/nltk_data/tokenizers && \
             wget -q -O /tmp/averaged_perceptron_tagger_eng.zip https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/taggers/averaged_perceptron_tagger_eng.zip && \
-            unzip /tmp/averaged_perceptron_tagger_eng.zip -d /home/nonroot/nltk_data/taggers;
+            unzip -o -q /tmp/averaged_perceptron_tagger_eng.zip -d /home/nonroot/nltk_data/taggers && \
+            mkdir -p /tmp/hf-cache &&  chown -R 10001:10001 /tmp/hf-cache && \
+            mkdir -p {{ $msCacheDir }} && chown -R 10001:10001 {{ $msCacheDir }};
+            mkdir -p {{ $msCacheDir }} && chown -R 10001:10001 {{ $msCacheDir }};
         volumeMounts:
         - name: log-dir
           mountPath: /app/services/document-extractor/log
@@ -49,6 +60,8 @@ spec:
           mountPath: /home/nonroot/nltk_data
         - name: tmp-dir
           mountPath: /tmp
+        - name: modelscope-cache
+          mountPath: {{ $msCacheDir }}
       containers:
       - name: {{ .Values.extractor.name }}
         securityContext:
@@ -65,6 +78,8 @@ spec:
           mountPath: /tmp
         - name: nltk-data-dir
           mountPath: /home/nonroot/nltk_data
+        - name: modelscope-cache
+          mountPath: {{ $msCacheDir }}
         image: {{ template "extractor.fullImageName" . }}
         imagePullPolicy: {{ .Values.extractor.image.pullPolicy }}
         {{- if not (empty .Values.extractor.command) }}
@@ -100,8 +115,17 @@ spec:
               name: {{ template "configmap.pdfextractorName" . }}
           - secretRef:
               name: {{ template "secret.s3Name" . }}
+  {{- $hfCacheDir := default "/tmp/hf-cache" .Values.extractor.huggingfaceCacheDir }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.extractor.pythonPathEnv.PYTHONPATH }}
           - name: NLTK_DATA
             value: /home/nonroot/nltk_data
+          - name: HF_HOME
+            value: {{ $hfCacheDir | quote }}
+          - name: HUGGINGFACE_HUB_CACHE
+            value: {{ $hfCacheDir | quote }}
+          - name: MODELSCOPE_HOME
+            value: {{ $msCacheDir | quote }}
+          - name: XDG_CACHE_HOME
+            value: {{ $msCacheDir | quote }}

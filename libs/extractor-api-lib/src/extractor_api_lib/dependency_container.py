@@ -13,6 +13,12 @@ from extractor_api_lib.impl.extractors.confluence_extractor import ConfluenceExt
 from extractor_api_lib.impl.extractors.file_extractors.epub_extractor import (
     EpubExtractor,
 )
+from extractor_api_lib.impl.extractors.file_extractors.docling_extractor import (
+    DoclingFileExtractor,
+)
+from extractor_api_lib.impl.extractors.file_extractors.markitdown_extractor import (
+    MarkitdownFileExtractor,
+)
 from extractor_api_lib.impl.extractors.file_extractors.ms_docs_extractor import (
     MSDocsExtractor,
 )
@@ -56,6 +62,8 @@ class DependencyContainer(DeclarativeContainer):
     pdf_extractor = Singleton(PDFExtractor, file_service, settings_pdf_extractor, database_converter)
     ms_docs_extractor = Singleton(MSDocsExtractor, file_service, database_converter)
     xml_extractor = Singleton(XMLExtractor, file_service)
+    markitdown_extractor = Singleton(MarkitdownFileExtractor, file_service)
+    docling_extractor = Singleton(DoclingFileExtractor, file_service)
 
     intern2external = Singleton(Internal2ExternalInformationPiece)
     confluence_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
@@ -63,9 +71,21 @@ class DependencyContainer(DeclarativeContainer):
     sitemap_document2information_piece = Singleton(SitemapLangchainDocument2InformationPiece)
     epub_extractor = Singleton(EpubExtractor, file_service, langchain_document2information_piece)
 
-    file_extractors = List(pdf_extractor, ms_docs_extractor, xml_extractor, epub_extractor)
+    file_extractors = List(
+        ms_docs_extractor,
+        xml_extractor,
+        epub_extractor,
+        markitdown_extractor,
+        pdf_extractor,
+        docling_extractor,
+    )
 
-    general_file_extractor = Singleton(GeneralFileExtractor, file_service, file_extractors, intern2external)
+    general_file_extractor = Singleton(
+        GeneralFileExtractor,
+        file_service=file_service,
+        available_extractors=file_extractors,
+        mapper=intern2external,
+    )
     confluence_extractor = Singleton(ConfluenceExtractor, mapper=confluence_document2information_piece)
 
     sitemap_extractor = Singleton(

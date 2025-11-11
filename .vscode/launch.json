@@ -1,0 +1,118 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Pytest (current file)",
+            "type": "python",
+            "request": "launch",
+            "python": "${command:python.interpreterPath}",
+            // run pytest as a module
+            "module": "pytest",
+            "args": [
+              "--maxfail=1",
+              "--disable-warnings",
+              "-q",
+              "${file}"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "rag_backend",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31415,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
+                },
+                // avoid tilt warning of missing path mapping
+                {
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
+                }
+            ]
+        },
+        {
+            "name": "document_extractor",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31416,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/services/document-extractor",
+                    "remoteRoot": "/app/services/document-extractor"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/extractor-api-lib",
+                    "remoteRoot": "/app/libs/extractor-api-lib"
+                },
+                // avoid tilt warning of missing path mapping
+                {
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
+                }
+            ]
+        },
+        {
+            "name": "rag_admin_backend",
+            "type": "python",
+            "request": "attach",
+            "host": "localhost",
+            "port": 31417,
+            "justMyCode": false,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "600",
+                "PYDEVD_THREAD_DUMP_ON_WARN_EVALUATION_TIMEOUT": "600"
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/services/admin-backend",
+                    "remoteRoot": "/app/services/admin-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/services/rag-backend",
+                    "remoteRoot": "/app/services/rag-backend"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/rag-core-lib",
+                    "remoteRoot": "/app/libs/rag-core-lib"
+                },
+                {
+                    "localRoot": "${workspaceFolder}/libs/admin-api-lib",
+                    "remoteRoot": "/app/libs/admin-api-lib"
+                },
+                // avoid tilt warning of missing path mapping
+                {
+                    "localRoot": "${workspaceFolder}/libs/rag-core-api",
+                    "remoteRoot": "/app/libs/rag-core-api"
+                }
+            ]
+        }
+    ]
+}

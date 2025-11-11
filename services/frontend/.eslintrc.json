@@ -1,0 +1,6 @@
+{
+  // Legacy .eslintrc placeholder — actual config is in eslint.config.mjs (ESLint 9 flat config)
+  "root": true,
+  // Do NOT ignore everything; let flat config handle files
+  "ignorePatterns": []
+}

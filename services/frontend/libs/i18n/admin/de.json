@@ -1,0 +1,31 @@
+{
+  "documents": {
+    "files": "Dateien",
+    "uploadDocuments": "Dateien hochladen",
+    "uploadDocumentsInfo": "Wählen Sie die Dateien ihrer Wahl aus und laden Sie sie hoch",
+    "uploadSelectTitle": "Wählen Sie eine Datei oder ziehen Sie sie per Drag & Drop hierher",
+    "uploadSelectDescription": "Nur PDF-, DOCX-, PPTX- und XML-Dateien sind erlaubt",
+    "uploadDocumentCompleted": "Hochgeladen",
+    "uploadProcessing": "Wird verarbeitet...",
+    "uploadingDocument": "Wird hochgeladen...",
+    "fileUpload": "Datei-Upload",
+    "confluenceUpload": "Confluence",
+    "confluenceLoadTitle": "Confluence-Inhalte laden",
+    "confluenceLoadDescription": "Geben Sie Ihre Confluence-Zugangsdaten an und wählen Sie einen Space-Key oder einen CQL-Filter",
+    "confluenceQueryHint": "Lassen Sie die Felder leer, um den gesamten Bereich zu laden, oder geben Sie einen Confluence Query Language (CQL) Ausdruck zum Filtern der Seiten ein",
+    "loadConfluence": "Laden starten",
+    "fileTypeNotAllowedTitle": "Dateityp nicht erlaubt",
+    "fileTypeNotAllowedDescription": "Nur PDF-, DOCX-, PPTX- und XML-Dateien sind erlaubt",
+    "select": "Auswählen",
+    "chat": "Chat starten",
+    "uploadDocumentFailed": "Upload fehlgeschlagen",
+    "errorOccurred": "Ein Fehler ist aufgetreten",
+    "deleteError": "Löschen des Dokuments fehlgeschlagen",
+    "uploadError": "Hochladen des Dokuments fehlgeschlagen",
+    "loadError": "Laden der Dokumente fehlgeschlagen",
+    "confluenceError": "Laden aus Confluence fehlgeschlagen",
+    "confluenceNotConfigured": "Confluence ist nicht konfiguriert",
+    "confluenceLocked": "Confluence Loader ist beschäftigt. Versuchen Sie es später erneut",
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten"
+  }
+}

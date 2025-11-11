@@ -1,0 +1,14 @@
+{
+  "chat": {
+    "initialMessage": "Hi 👋, I’m your AI Assistant {bot_name}, here to support you with any questions regarding the provided documents!",
+    "send": "Send",
+    "justAsk": "How can i help you?",
+    "sources": "Sources",
+    "documents": "Manage documents",
+    "noSourcesHint": "Source document references will show up here.",
+    "error": {
+      "requestError": "An error occurred during the request. Please try again."
+    },
+    "disclaimer": "The AI powered chatbot can be wrong. Check important information. The answers are not legally binding."
+  }
+}

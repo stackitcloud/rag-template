@@ -1,0 +1,56 @@
+{
+	"name": "poetry3-poetry-pyenv",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+
+	// 👇 Features to add to the Dev Container. More info: https://containers.dev/implementors/features.
+	// "features": {},
+
+	// 👇 Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// 👇 Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "",
+
+	// 👇 Configure tool-specific properties.
+	"customizations": {
+        "vscode": {
+            "extensions":[
+				"ms-python.python",
+				"njpwerner.autodocstring",
+				"donjayamanne.python-environment-manager",
+				"k--kato.intellij-idea-keybindings",
+				"vscode-icons-team.vscode-icons",
+				"ms-python.black-formatter",
+				"EditorConfig.EditorConfig",
+				"ms-python.flake8",
+				"eamodio.gitlens",
+				"ms-python.isort",
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"hbenl.vscode-test-explorer",
+				"Gruntfuggly.todo-tree",
+				"mikestead.dotenv",
+				"aaron-bond.better-comments",
+				"ms-azuretools.vscode-docker",
+				"cweijan.vscode-postgresql-client2",
+				"DavidKol.fastcompare",
+				"fabiospampinato.vscode-diff"
+			]
+            }
+        },
+	"runArgs": [
+        "--init",
+        "--network=host",
+    ],    
+    "mounts": [
+        {
+            "source": "/var/run/docker.sock",
+            "target": "/var/run/docker.sock",
+            "type": "bind"
+        }
+    ],
+	// 👇 Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": 1000
+}

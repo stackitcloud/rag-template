@@ -1,0 +1,34 @@
+{
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
+    "targetDefaults": {
+        "build": {
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"],
+            "cache": true
+        },
+        "lint": {
+            "inputs": [
+                "default",
+                "{workspaceRoot}/eslint.config.{js,cjs,mjs,ts,mts,cts}"
+            ],
+            "cache": true
+        },
+        "e2e": {
+            "cache": true
+        },
+        "@nx/vite:test": {
+            "inputs": ["default", "^production"],
+            "cache": true
+        }
+    },
+    "namedInputs": {
+        "default": ["{projectRoot}/**/*", "sharedGlobals"],
+        "production": [
+            "default",
+            "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+            "!{projectRoot}/tsconfig.spec.json",
+            "!{projectRoot}/eslint.config.{js,cjs,mjs,ts,mts,cts}"
+        ],
+        "sharedGlobals": []
+    }
+}

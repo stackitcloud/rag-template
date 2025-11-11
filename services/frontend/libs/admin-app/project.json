@@ -1,0 +1,17 @@
+{
+    "name": "lib-admin",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/admin-app",
+    "projectType": "library",
+    "tags": [],
+    "targets": {
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": [
+                    "libs/admin-app/**/*.{ts,tsx,js,jsx,vue,d.ts}"
+                ]
+            }
+        }
+    }
+}

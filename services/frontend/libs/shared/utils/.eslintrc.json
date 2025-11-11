@@ -1,0 +1,5 @@
+{
+  // Legacy .eslintrc disabled in favor of flat config (eslint.config.mjs)
+  "extends": [],
+  "ignorePatterns": ["!**/*"]
+}

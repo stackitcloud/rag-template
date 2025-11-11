@@ -1,0 +1,658 @@
+global:
+  security:
+    # -- Allow insecure images to use bitnami legacy repository. Can be set to false if secure images are being used (Paid).
+    allowInsecureImages: true
+
+features:
+  ollama:
+    enabled: false
+  minio:
+    enabled: false
+  langfuse:
+    enabled: true
+  qdrant:
+    enabled: true
+  frontend:
+    enabled: true
+  keydb:
+    enabled: true
+  mcp:
+    enabled: true
+
+backend:
+
+  mcp:
+    name: "mcp"
+    port: "8000"
+    host: "0.0.0.0"
+
+    # Chat simple tool configuration
+    # The following configuration for the chat_simple tool will render as follows:
+    # """Send a message to the RAG system and get a simple text response.
+
+    # This is the simplest way to interact with the RAG system - just provide a message and get back the answer as plain text.
+    #
+    # Parameters
+    # ----------
+    # session_id : str
+    #     Unique identifier for the chat session.
+    # message : str
+    #     The message/question to ask the RAG system.
+    #
+    # Returns
+    # -------
+    # str
+    #     The answer from the RAG system as plain text.
+    # """
+    chatSimpleDescription: "Send a message to the RAG system and get a simple text response.\n\nThis is the simplest way to interact with the RAG system - just provide a message and get back the answer as plain text."
+    chatSimpleParameterDescriptions:
+      session_id: "Unique identifier for the chat session."
+      message: "The message/question to ask the RAG system."
+    chatSimpleReturns: "The answer from the RAG system as plain text."
+    chatSimpleNotes: ""
+    # If you add a Value to chatSimpleNotes e.g. "This tool is best for simple questions that don't require conversation context."
+    # it will render to:
+    # Notes
+    # -----
+    # This tool is best for simple questions that don't require conversation context.
+    chatSimpleExamples: ""
+    # If you add a Value to chatSimpleExamples e.g. "chat_simple(session_id='my-session', message='What is the main topic of the document?')"
+    # it will render to:
+    # Examples
+    # --------
+    # chat_simple(session_id='my-session', message='What is the main topic of the document?')
+
+    # Chat with history tool configuration
+    chatWithHistoryDescription: "Send a message with conversation history and get structured response.\n\nProvide conversation history as a simple list of dictionaries.\nEach history item should have 'role' (either 'user' or 'assistant') and 'message' keys."
+    chatWithHistoryParameterDescriptions:
+      session_id: "Unique identifier for the chat session."
+      message: "The current message/question to ask."
+      history: "Previous conversation history. Each item should be:\n    {\"role\": \"user\" or \"assistant\", \"message\": \"the message text\"}"
+    chatWithHistoryReturns: "Response containing:\n    - answer: The response text\n    - finish_reason: Why the response ended\n    - citations: List of source documents used (simplified)"
+    chatWithHistoryNotes: ""
+    chatWithHistoryExamples: ""
+
+    image:
+      repository: ghcr.io/stackitcloud/rag-template/mcp-server
+      pullPolicy: Always
+      tag: "v2.3.0"
+
+  name: backend
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/stackitcloud/rag-template/rag-backend
+    pullPolicy: Always
+    tag: "v2.3.0"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_rag_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--loop"
+  - "asyncio"
+
+  workers: 3
+  wsMaxQueue: 6
+
+  debugArgs:
+  - "python"
+  - "-Xfrozen_modules=off"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_rag_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/services/rag-backend"
+  - "--reload-dir"
+  - "/app/libs/rag-core-api"
+  - "--reload-dir"
+  - "/app/libs/rag-core-lib"
+  - "--loop"
+  - "asyncio"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+  ingress:
+    enabled: true
+    host:
+      name: rag.localhost
+      path: /api/chat(/|$)(.*)
+      pathType: ImplementationSpecific
+      port: 8080
+
+  secrets:
+    basicAuth: ""
+    langfuse:
+      publicKey: "pk-lf"
+      secretKey: "sk-lf"
+    stackitEmbedder:
+      apiKey: ""
+    stackitVllm:
+      apiKey: "sk-123"
+    ragas:
+      openaiApikey: ""
+
+  envs:
+    stackitVllm:
+      STACKIT_VLLM_MODEL: cortecs/Llama-3.3-70B-Instruct-FP8-Dynamic
+      STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+    database:
+      VECTOR_DB_COLLECTION_NAME: rag-db
+      VECTOR_DB_LOCATION: http://rag-qdrant:6333
+      VECTOR_DB_VALIDATE_COLLECTION_CONFIG: false
+    retriever:
+      RETRIEVER_THRESHOLD: 0.3
+      RETRIEVER_K_DOCUMENTS: 10
+      RETRIEVER_TOTAL_K: 7
+      RETRIEVER_SUMMARY_THRESHOLD: 0.3
+      RETRIEVER_SUMMARY_K_DOCUMENTS: 10
+      RETRIEVER_TABLE_THRESHOLD: 0.3
+      RETRIEVER_TABLE_K_DOCUMENTS: 10
+      RETRIEVER_IMAGE_THRESHOLD: 0.7
+      RETRIEVER_IMAGE_K_DOCUMENTS: 10
+    errorMessages:
+      ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: "I'm sorry, my responses are limited. You must ask the right questions."
+      ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: "No documents were provided for searching."
+      ERROR_MESSAGES_HARMFUL_QUESTION: "I'm sorry, but harmful requests cannot be processed."
+      ERROR_MESSAGES_NO_ANSWER_FOUND: "I'm sorry, I couldn't find an answer with the context provided."
+      ERROR_MESSAGE_EMPTY_MESSAGE: "I'm sorry, but I can't answer an empty question."
+    langfuse:
+      LANGFUSE_DATASET_NAME: "rag_test_ds"
+      LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
+      LANGFUSE_HOST: "http://rag-langfuse-web:3000" #NOTE: http protocol needs to be defined!
+    ragClassTypes:
+      RAG_CLASS_TYPE_LLM_TYPE: "stackit"
+    ragas:
+      RAGAS_IS_DEBUG: false
+      RAGAS_MODEL: "gpt-4o-mini"
+      RAGAS_USE_OPENAI: true
+      RAGAS_TIMEOUT: 60
+      RAGAS_EVALUATION_DATASET_NAME: "eval-data"
+      RAGAS_MAX_CONCURRENCY: "5"
+    embedderClassTypes:
+      EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE: "stackit"
+    stackitEmbedder:
+      STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
+      STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+      # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
+      STACKIT_EMBEDDER_MAX_RETRIES: "5"
+      STACKIT_EMBEDDER_RETRY_BASE_DELAY: "0.5"
+      STACKIT_EMBEDDER_RETRY_MAX_DELAY: "600"
+      STACKIT_EMBEDDER_BACKOFF_FACTOR: "2"
+      STACKIT_EMBEDDER_ATTEMPT_CAP: "6"
+      STACKIT_EMBEDDER_JITTER_MIN: "0.05"
+      STACKIT_EMBEDDER_JITTER_MAX: "0.25"
+    ollama:
+      OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
+      OLLAMA_BASE_URL: "http://rag-ollama:11434"
+      OLLAMA_TOP_K: 0
+      OLLAMA_TOP_P: 0
+      OLLAMA_TEMPERATURE: 0
+    ollamaEmbedder:
+      OLLAMA_EMBEDDER_MODEL: "bge-m3"
+      OLLAMA_EMBEDDER_BASE_URL: "http://rag-ollama:11434"
+    fakeEmbedder:
+      FAKE_EMBEDDER_SIZE: 386
+    reranker:
+      RERANKER_K_DOCUMENTS: 5
+      RERANKER_MIN_RELEVANCE_SCORE: 0.001
+    chatHistory:
+      CHAT_HISTORY_LIMIT: 4
+      CHAT_HISTORY_REVERSE: true
+
+frontend:
+  name: frontend
+  replicaCount: 1
+  image:
+    repository: ghcr.io/stackitcloud/rag-template/frontend
+    pullPolicy: Always
+    tag: "v2.3.0"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: true
+    host:
+      name: rag.localhost
+      path: /
+      pathType: ImplementationSpecific
+      port: 8080
+
+  secrets:
+    viteAuth:
+      VITE_AUTH_USERNAME: ""
+      VITE_AUTH_PASSWORD: ""
+
+  envs:
+    vite:
+      VITE_CHAT_AUTH_ENABLED: true
+      VITE_API_URL: "http://rag.localhost/api"
+      VITE_CHAT_URL: "http://rag.localhost"
+      VITE_ADMIN_URL: "http://admin.rag.localhost"
+      VITE_ADMIN_API_URL: "http://admin.rag.localhost/api"
+
+adminBackend:
+  replicaCount: 1
+
+  name: admin-backend
+
+  image:
+    repository: ghcr.io/stackitcloud/rag-template/admin-backend
+    pullPolicy: Always
+    tag: "v2.3.0"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_admin_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--root-path"
+  - "/api"
+  debugArgs:
+  - "python"
+  - "-Xfrozen_modules=off"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_admin_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/services/admin-backend"
+  - "--reload-dir"
+  - "/app/libs/rag-core-lib"
+  - "--reload-dir"
+  - "/app/libs/admin-api-lib"
+  - "--root-path"
+  - "/api"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+  ingress:
+    enabled: true
+    host:
+      name: admin.rag.localhost
+      path: /api(/|$)(.*)
+      pathType: ImplementationSpecific
+      port: 8080
+
+  minio:
+    enabled: true
+
+  envs:
+    summarizer:
+      SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
+      SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
+      # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
+      SUMMARIZER_MAX_RETRIES: "5"
+      SUMMARIZER_RETRY_BASE_DELAY: "0.5"
+      SUMMARIZER_RETRY_MAX_DELAY: "600"
+      SUMMARIZER_BACKOFF_FACTOR: "2"
+      SUMMARIZER_ATTEMPT_CAP: "6"
+      SUMMARIZER_JITTER_MIN: "0.05"
+      SUMMARIZER_JITTER_MAX: "0.25"
+    ragapi:
+      RAG_API_HOST: "http://backend:8080"
+    chunker:
+      # Select which chunker implementation to use. Supported values: "semantic", "recursive"
+      # Defaults to "semantic" which leverages sentence-aware rebalancing.
+      CHUNKER_CLASS_TYPE_CHUNKER_TYPE: "recursive"
+      CHUNKER_MAX_SIZE: 1000
+      CHUNKER_OVERLAP: 100
+      # The following settings for the Chunker are only used when CHUNKER_CLASS_TYPE_CHUNKER_TYPE is set to "semantic".
+      CHUNKER_BREAKPOINT_THRESHOLD_TYPE: "percentile"
+      CHUNKER_BREAKPOINT_THRESHOLD_AMOUNT: 95
+      CHUNKER_BUFFER_SIZE: 1
+      CHUNKER_MIN_SIZE: 200
+    keyValueStore:
+      USECASE_KEYVALUE_PORT: 6379
+      USECASE_KEYVALUE_HOST: "rag-keydb"
+    sourceUploader:
+      SOURCE_UPLOADER_TIMEOUT: 3600
+
+extractor:
+  replicaCount: 1
+  name: extractor
+  image:
+    repository: ghcr.io/stackitcloud/rag-template/document-extractor
+    pullPolicy: Always
+    tag: "v2.3.0"
+
+  command:
+  - "poetry"
+  - "run"
+  args:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_extractor_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  debugArgs:
+  - "python"
+  - "-Xfrozen_modules=off"
+  - "-m"
+  - "debugpy"
+  - "--wait-for-client"
+  - "--listen"
+  - "0.0.0.0:31415"
+  - "-m"
+  - "uvicorn"
+  - "main:perfect_extractor_app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8080"
+  - "--reload"
+  - "--reload-dir"
+  - "/app/services/document-extractor"
+  - "--reload-dir"
+  - "/app/libs/extractor-api-lib"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  pythonPathEnv:
+    PYTHONPATH: src
+
+adminFrontend:
+  name: admin-frontend
+  replicaCount: 1
+  image:
+    repository: ghcr.io/stackitcloud/rag-template/admin-frontend
+    pullPolicy: Always
+    tag: "v2.3.0"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  exports:
+    chart_name:
+      adminFrontendChartName: admin-frontend
+
+  ingress:
+    enabled: true
+    host:
+      name: admin.rag.localhost
+      path: /
+      pathType: ImplementationSpecific
+      port: 8080
+
+shared:
+  # These values are used across all templates
+  ssl: true
+
+  debug:
+    backend:
+      enabled: false
+
+  imagePullSecret:
+    # create: false
+    # name: cr-credentials
+    # auths:
+    #   username: github-username # replace with your github username
+    #   pat: github-pat # replace with your github personal access token
+    #   email: email-address@domain.de # replace with your email address
+    #   registry: ghcr.io
+
+  config:
+    dns:
+    - rag.localhost
+    - admin.rag.localhost
+    basicAuth:
+      enabled: true
+    tls:
+      enabled: true
+      host: rag.localhost
+      secretName: tls-certificate
+      issuerName: letsencrypt-cluster-issuer
+      issuerKind: ClusterIssuer
+
+  secrets:
+    s3:
+      accessKey: "admin"
+      secretKey: "adminpassword"
+    usecase:
+
+
+  envs:
+    pdfExtractor:
+      PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME: "connection_diagrams"
+      PDF_EXTRACTOR_FOOTER_HEIGHT: 155
+    s3:
+      S3_ENDPOINT: http://rag-minio:9000
+      S3_BUCKET: documents
+    retryDecorator:
+      RETRY_DECORATOR_MAX_RETRIES: "5"
+      RETRY_DECORATOR_RETRY_BASE_DELAY: "0.5"
+      RETRY_DECORATOR_RETRY_MAX_DELAY: "600"
+      RETRY_DECORATOR_BACKOFF_FACTOR: "2"
+      RETRY_DECORATOR_ATTEMPT_CAP: "6"
+      RETRY_DECORATOR_JITTER_MIN: "0.05"
+      RETRY_DECORATOR_JITTER_MAX: "0.25"
+    usecase:
+
+
+langfuse:
+  # Core Langfuse Configuration
+  langfuse:
+    # Used to hash API keys
+    salt:
+      value: "changeme"
+
+    # Authentication settings
+    features:
+      telemetryEnabled: true
+      signUpDisabled: false
+
+    # Web deployment configuration
+    web:
+      image:
+        repository: langfuse/langfuse
+        tag: "3.115.0"
+        pullPolicy: Always
+
+    # Worker deployment configuration
+    worker:
+      image:
+        repository: langfuse/langfuse-worker
+        tag: "3.115.0"
+        pullPolicy: Always
+      port: 3030
+
+    # NextAuth configuration
+    nextauth:
+      url: http://localhost:3000
+      secret:
+        value: "changeme"
+
+    # Additional environment variables (only for init values)
+    additionalEnv:
+    - name: LANGFUSE_INIT_ORG_ID
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_ID
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
+      value: ""
+    - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
+      value: ""
+    - name: LANGFUSE_INIT_USER_EMAIL
+      value: ""
+    - name: LANGFUSE_INIT_USER_NAME
+      value: ""
+    - name: LANGFUSE_INIT_USER_PASSWORD
+      value: ""
+
+    # Additional init containers
+    extraInitContainers:
+    - name: wait-for-postgres
+      image: busybox
+      command:
+      - sh
+      - -c
+      - |
+        until nc -z rag-postgresql 5432; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 2
+        done
+      # Define a reasonable timeout in case PostgreSQL fails to come up
+      timeoutSeconds: 300
+
+  # PostgreSQL Configuration (use external PostgreSQL)
+  postgresql:
+    deploy: true
+    host: "rag-postgresql"
+    port: 5432
+    auth:
+      username: postgres
+      password: postgres
+      database: langfuse
+
+  # Redis Configuration (external KeyDB)
+  redis:
+    deploy: false
+    host: "rag-keydb"
+    port: 6379
+    auth:
+      username: "default"
+      password: ""
+
+  # ClickHouse Configuration (external ClickHouse)
+  clickhouse:
+    deploy: true
+    host: "rag-clickhouse"
+    httpPort: 8123
+    nativePort: 9000
+    auth:
+      username: "default"
+      password: "changeme"
+    migration:
+      url: "clickhouse://rag-clickhouse:9000"
+      ssl: false
+      autoMigrate: true
+    resources:
+      limits:
+        cpu: "2"
+        memory: "8Gi"
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+
+    zookeeper:
+      resources:
+        limits:
+          cpu: "2"
+          memory: "2Gi"
+        requests:
+          cpu: "1"
+          memory: "1Gi"
+
+  # S3/MinIO Configuration (external MinIO)
+  s3:
+    deploy: false
+    bucket: "langfuse"
+    region: "auto"
+    endpoint: "http://rag-minio:9000"
+    forcePathStyle: true
+    accessKeyId:
+      value: "admin"
+    secretAccessKey:
+      value: "adminpassword"
+    eventUpload:
+      enabled: true
+      bucket: "langfuse"
+      region: "auto"
+      endpoint: "http://rag-minio:9000"
+      forcePathStyle: true
+      accessKeyId:
+        value: "admin"
+      secretAccessKey:
+        value: "adminpassword"
+
+minio:
+  image:
+    repository: bitnamilegacy/minio
+  auth:
+    ## @param auth.rootUser MinIO&reg; root username
+    ##
+    rootUser: admin
+    ## @param auth.rootPassword Password for MinIO&reg; root user
+    ##
+    rootPassword: "adminpassword"
+  ## @param defaultBuckets Comma, semi-colon or space separated list of buckets to create at initialization (only in standalone mode)
+  ## e.g:
+  ## defaultBuckets: "my-bucket, my-second-bucket"
+  ##
+  defaultBuckets: "documents,langfuse"
+  networkPolicy:
+    enabled: false
+  mode: standalone
+
+ollama:
+  image:
+    tag: 0.12.3
+  ollama:
+    models:
+      pull:
+        - llama3.2:3b-instruct-fp16
+        - bge-m3
+      runs:
+        - llama3.2:3b-instruct-fp16
+        - bge-m3
+
+qdrant:
+  image:
+    tag: v1.15.4
+
+keydb:
+  multiMaster: "no"
+  activeReplicas: "no"
+  nodes: 1

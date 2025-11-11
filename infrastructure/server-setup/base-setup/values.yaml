@@ -1,0 +1,10 @@
+cert-manager:
+    installCRDs: false
+
+# Configuration overrides for the official ingress-nginx chart dependency.
+# Pin the controller image tag to v1.13.3 (matching the script installation).
+ingress-nginx:
+    controller:
+        image:
+            # registry and image default to the chart's defaults; only pin tag here.
+            tag: v1.13.3

@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import pytest
 
 from extractor_api_lib.impl.extractors.file_extractors.docling_extractor import DoclingFileExtractor
+from extractor_api_lib.impl.types.content_type import ContentType
 
 
 class _FakeCell:
@@ -82,3 +85,92 @@ def test_cell_to_text_handles_various_sources(cells, expected):
     result = extractor._serialize_table(table)
 
     assert expected in result
+
+
+class _FakeProv:
+    def __init__(self, page_no: int):
+        self.page_no = page_no
+
+
+class _FakeTextItem:
+    def __init__(self, text: str, page: int):
+        self.text = text
+        self.prov = [_FakeProv(page)]
+
+
+class _FakeTableItem:
+    def __init__(self, markdown: str, page: int):
+        self._markdown = markdown
+        self.prov = [_FakeProv(page)]
+
+    def to_markdown(self):
+        return self._markdown
+
+
+class _FakeDocument:
+    def __init__(self, items):
+        self._items = items
+
+    def iterate_items(self):
+        return iter(self._items)
+
+
+class _FakeConversionResult:
+    def __init__(self, document):
+        self.document = document
+
+
+class _FakeConverter:
+    def __init__(self, document):
+        self._document = document
+
+    def convert(self, _):
+        return _FakeConversionResult(self._document)
+
+
+@pytest.mark.asyncio
+async def test_aextract_content_groups_by_page():
+    document = _FakeDocument(
+        [
+            (_FakeTextItem("First page paragraph", page=1), 0),
+            (_FakeTableItem("| Col |\n| --- |\n| Value |", page=1), 0),
+            (_FakeTextItem("Second page text", page=2), 0),
+        ]
+    )
+
+    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
+    extractor._converter = _FakeConverter(document)
+    extractor._file_service = None
+
+    pieces = await extractor.aextract_content(Path("dummy"), "sample.pdf")
+
+    assert len(pieces) == 2
+    page_one_piece = next(piece for piece in pieces if piece.metadata["page"] == 1)
+    assert page_one_piece.type == ContentType.TEXT
+    assert page_one_piece.metadata["format"] == "markdown"
+    assert "First page paragraph" in page_one_piece.page_content
+    assert "| Col |" in page_one_piece.page_content
+
+    page_two_piece = next(piece for piece in pieces if piece.metadata["page"] == 2)
+    assert "Second page text" in page_two_piece.page_content
+
+
+@pytest.mark.asyncio
+async def test_dash_only_table_is_dropped():
+    document = _FakeDocument(
+        [
+            (_FakeTableItem("| --- |\n| --- |", page=1), 0),
+            (_FakeTextItem("Real content", page=1), 0),
+        ]
+    )
+
+    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
+    extractor._converter = _FakeConverter(document)
+    extractor._file_service = None
+
+    pieces = await extractor.aextract_content(Path("dummy"), "sample.pdf")
+
+    assert len(pieces) == 1
+    content = pieces[0].page_content.strip()
+    assert content == "Real content"
+    assert "---" not in content

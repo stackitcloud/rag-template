@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ from docling.document_converter import (
     PowerpointFormatOption,
     WordFormatOption,
 )
+from docling_core.types.doc import TableItem, TextItem
 
 from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
 from extractor_api_lib.file_services.file_service import FileService
@@ -59,49 +61,38 @@ class DoclingFileExtractor(InformationFileExtractor):
         result = self._converter.convert(file_path)
         document = result.document
 
-        pieces: list[InternalInformationPiece] = []
-        for block in getattr(document, "text_blocks", []):
-            text = getattr(block, "text", "")
-            if not text:
-                continue
-            page_number = self._resolve_page_number(block)
-            pieces.append(
-                self._create_information_piece(
-                    document_name=name,
-                    page=page_number,
-                    content=text,
-                    content_type=ContentType.TEXT,
-                    additional_meta={"origin_extractor": "docling"},
-                )
-            )
+        text_segments, table_segments = self._collect_page_segments(document)
 
-        for table_index, table in enumerate(getattr(document, "tables", []), start=1):
-            serialized_table = self._serialize_table(table)
-            if not serialized_table:
+        pieces: list[InternalInformationPiece] = self._create_information_pieces(text_segments, name, ContentType.TEXT)
+        table_pieces: list[InternalInformationPiece] = [self._create_information_piece(key, value, name, ContentType.TABLE) for key, value in table_segments.items()]
+
+        return pieces + table_pieces
+
+    def _create_information_pieces(self, segments, name, content_type: ContentType) -> list[InternalInformationPiece]:
+        pieces: list[InternalInformationPiece] = []
+
+        for page_number in sorted(segments): # when ordered dict, sort not needed
+            segs = [segment for segment in segments[page_number] if segment]
+            if not segs:
                 continue
-            page_number = self._resolve_page_number(table)
+            markdown_content = "\n\n".join(segs)
+            if not markdown_content.strip():
+                continue
             pieces.append(
                 self._create_information_piece(
                     document_name=name,
                     page=page_number,
-                    content=serialized_table,
-                    content_type=ContentType.TABLE,
+                    content=markdown_content,
+                    content_type=content_type,
                     additional_meta={
                         "origin_extractor": "docling",
-                        "table_index": table_index,
+                        "format": "markdown",
                     },
                 )
             )
 
         return pieces
 
-    @staticmethod
-    def _resolve_page_number(block: Any) -> int:
-        for attr in ("page_no", "page_number", "page"):
-            page_number = getattr(block, attr, None)
-            if isinstance(page_number, int):
-                return page_number
-        return 1
 
     def _serialize_table(self, table: Any) -> str:
         if hasattr(table, "to_markdown"):
@@ -112,74 +103,56 @@ class DoclingFileExtractor(InformationFileExtractor):
             except Exception as exc:  # pragma: no cover - defensive logging
                 logger.debug("Docling table markdown conversion failed: %s", exc)
 
-        rows = self._normalize_rows(table)
-        if not rows:
-            return ""
-        column_count = max(len(row) for row in rows)
-        padded_rows = [row + [""] * (column_count - len(row)) for row in rows]
-        header = padded_rows[0]
-        separator = ["---"] * column_count
-        lines = [
-            "| " + " | ".join(header) + " |",
-            "| " + " | ".join(separator) + " |",
-        ]
-        for row in padded_rows[1:]:
-            lines.append("| " + " | ".join(row) + " |")
-        return "\n".join(lines)
-
-    @staticmethod
-    def _normalize_rows(table: Any) -> list[list[str]]:
-        candidates = getattr(table, "rows", None) or getattr(table, "cells", None) or getattr(table, "data", None)
-        if candidates is None:
-            return []
-
-        normalized: list[list[str]] = []
-        for row in candidates:
-            cells = getattr(row, "cells", None) or row
-            row_values: list[str] = []
-            for cell in cells:
-                row_values.append(DoclingFileExtractor._cell_to_text(cell))
-            normalized.append(row_values)
-        return normalized
-
-    @staticmethod
-    def _cell_to_text(cell: Any) -> str:
-        for attr in ("text", "value", "content", "plain_text"):
-            if hasattr(cell, attr):
-                text_candidate = DoclingFileExtractor._stringify_cell_value(getattr(cell, attr))
-                if text_candidate:
-                    return text_candidate
-
-        getter = getattr(cell, "get_text", None)
-        if callable(getter):
+        export_fn = getattr(table, "export_to_dataframe", None)
+        if callable(export_fn):
             try:
-                text_candidate = DoclingFileExtractor._stringify_cell_value(getter())
-                if text_candidate:
-                    return text_candidate
+                dataframe = export_fn()
+                if dataframe is not None:
+                    markdown = dataframe.to_markdown(index=False)
+                    if markdown:
+                        return markdown
             except Exception:  # pragma: no cover - defensive logging
-                logger.debug("Docling cell get_text invocation failed", exc_info=True)
+                logger.debug("Docling table dataframe export failed", exc_info=True)
 
-        cell_repr = str(cell).strip()
-        match = re.search(r"text\s*=\s*(['\"])(.*?)\1", cell_repr, re.DOTALL)
-        if match:
-            return match.group(2).strip()
+    def _collect_page_segments(self, document: Any) -> tuple[dict[int, list[str]], dict[int, list[str]]]:
+        iterator = getattr(document, "iterate_items", None)
+        if not callable(iterator):
+            return {}
 
-        if isinstance(cell, (list, tuple)):
-            return " ".join(part for part in (DoclingFileExtractor._cell_to_text(item) for item in cell) if part)
-
-        return cell_repr
+        segments: dict[int, list[str]] = defaultdict(list)#TODO maybe use ordered dict
+        table_segments: dict[int, list[str]] = defaultdict(list)
+        for item, _level in iterator():
+            if isinstance(item, TextItem):
+                text = getattr(item, "text", "")
+                if not text:
+                    continue
+                page_number = self._resolve_item_page(item)
+                segments[page_number].append(text)
+            elif isinstance(item, TableItem):
+                table_df = item.export_to_dataframe()
+                table = table_df.to_markdown()
+                if not table:
+                    continue
+                if not self._has_meaningful_table_content(table):
+                    continue
+                page_number = self._resolve_item_page(item)
+                table_segments[page_number].append(table)
+        return segments, table_segments
 
     @staticmethod
-    def _stringify_cell_value(value: Any) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, str):
-            return value.strip()
-        if isinstance(value, (list, tuple, set)):
-            return " ".join(
-                part for part in (DoclingFileExtractor._stringify_cell_value(item) for item in value) if part
-            )
-        return str(value).strip()
+    def _has_meaningful_table_content(table_markdown: str) -> bool:
+        return bool(re.search(r"\w", table_markdown)) # Check for at least one alphanumeric character
+
+    @staticmethod
+    def _resolve_item_page(item: Any) -> int:
+        provenance = getattr(item, "prov", None)
+        if isinstance(provenance, list):
+            for prov_entry in provenance:
+                page = getattr(prov_entry, "page_no", None)
+                if isinstance(page, int):
+                    return page
+        return -1 # Default page number when not found
+
 
     def _create_information_piece(
         self,

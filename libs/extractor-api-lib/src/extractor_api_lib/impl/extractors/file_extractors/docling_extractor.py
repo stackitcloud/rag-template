@@ -35,7 +35,7 @@ class DoclingFileExtractor(InformationFileExtractor):
 
     def __init__(self, file_service: FileService):
         super().__init__(file_service)
-        ocr = TesseractCliOcrOptions(lang=["auto"])    # Tesseract via CLI, auto language
+        ocr = TesseractCliOcrOptions(lang=["deu", "eng"])    # Tesseract via CLI, auto language
         ocr_pipe = PdfPipelineOptions(ocr_options=ocr)
         format_options = {
             InputFormat.PDF: PdfFormatOption(ocr=True, pipeline_options=ocr_pipe),

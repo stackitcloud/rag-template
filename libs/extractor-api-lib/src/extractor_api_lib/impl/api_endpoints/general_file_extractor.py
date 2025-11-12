@@ -11,6 +11,7 @@ from extractor_api_lib.impl.mapper.internal2external_information_piece import In
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 from extractor_api_lib.models.information_piece import InformationPiece
 
 logger = logging.getLogger(__name__)
@@ -67,14 +68,55 @@ class GeneralFileExtractor(FileExtractor):
                     logger.debug("Temp file created and content written.")
                 file_type = str(temp_file_path).split(".")[-1].upper()
                 correct_extractors = [
-                    x for x in self._available_extractors if file_type in [y.value for y in x.compatible_file_types]
+                    extractor
+                    for extractor in self._available_extractors
+                    if file_type in [file_type_option.value for file_type_option in extractor.compatible_file_types]
                 ]
                 if not correct_extractors:
                     raise ValueError(f"No extractor found for file-ending {file_type}")
-                results = await correct_extractors[-1].aextract_content(
-                    temp_file_path, extraction_request.document_name
+
+                results = await self._run_extractors_with_fallback(
+                    list(reversed(correct_extractors)), temp_file_path, extraction_request.document_name
                 )
+
                 return [self._mapper.map_internal_to_external(x) for x in results if x.page_content is not None]
         except Exception as e:
             logger.error("Error during document parsing: %s %s", e, traceback.format_exc())
             raise e
+
+    async def _run_extractors_with_fallback(
+        self,
+        extractors: list[InformationFileExtractor],
+        temp_file_path: Path,
+        document_name: str,
+    ) -> list[InternalInformationPiece]:
+        errors: list[Exception] = []
+
+        for extractor in extractors:
+            extractor_name = extractor.__class__.__name__
+            try:
+                result = await extractor.aextract_content(temp_file_path, document_name)
+            except Exception as exc:  # pragma: no cover - defensive logging
+                logger.warning(
+                    "Extractor %s failed for document %s: %s",
+                    extractor_name,
+                    document_name,
+                    exc,
+                    exc_info=logger.isEnabledFor(logging.DEBUG),
+                )
+                errors.append(exc)
+                continue
+
+            if result:
+                return result
+
+            logger.info(
+                "Extractor %s returned no content for document %s.",
+                extractor_name,
+                document_name,
+            )
+
+        if errors:
+            raise RuntimeError("All extractors failed to process the document") from errors[-1]
+
+        return []

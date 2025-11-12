@@ -25,6 +25,7 @@ from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from docling.datamodel.pipeline_options import TesseractCliOcrOptions, PdfPipelineOptions # TODO check for image as well
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +35,10 @@ class DoclingFileExtractor(InformationFileExtractor):
 
     def __init__(self, file_service: FileService):
         super().__init__(file_service)
+        ocr = TesseractCliOcrOptions(lang=["auto"])    # Tesseract via CLI, auto language
+        ocr_pipe = PdfPipelineOptions(ocr_options=ocr)
         format_options = {
-            InputFormat.PDF: PdfFormatOption(ocr=True),
+            InputFormat.PDF: PdfFormatOption(ocr=True, pipeline_options=ocr_pipe),
             InputFormat.IMAGE: ImageFormatOption(ocr=True),
             InputFormat.DOCX: WordFormatOption(),
             InputFormat.PPTX: PowerpointFormatOption(),
@@ -136,7 +139,7 @@ class DoclingFileExtractor(InformationFileExtractor):
                 if not self._has_meaningful_table_content(table):
                     continue
                 page_number = self._resolve_item_page(item)
-                table_segments[page_number].append(table)
+                segments[page_number].append(table)
         return segments, table_segments
 
     @staticmethod

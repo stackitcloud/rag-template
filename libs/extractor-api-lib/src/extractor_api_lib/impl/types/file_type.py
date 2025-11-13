@@ -14,3 +14,8 @@ class FileType(StrEnum):
     XML = "XML"
     EPUB = "EPUB"
     HTML = "HTML"
+    MD = "MD"
+    ASCIIDOC = "ASCIIDOC"
+    CSV = "CSV"
+    TXT = "TXT"
+    IMAGE = "IMAGE"

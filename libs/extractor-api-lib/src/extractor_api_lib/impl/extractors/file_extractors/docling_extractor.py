@@ -5,10 +5,12 @@ from __future__ import annotations
 import logging
 import re
 from collections import defaultdict
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
 from docling.document_converter import (
+    ConversionResult,
     DocumentConverter,
     ExcelFormatOption,
     ImageFormatOption,
@@ -16,6 +18,10 @@ from docling.document_converter import (
     PdfFormatOption,
     PowerpointFormatOption,
     WordFormatOption,
+    HTMLFormatOption,
+    MarkdownFormatOption,
+    AsciiDocFormatOption,
+    CsvFormatOption,
 )
 from docling_core.types.doc import TableItem, TextItem
 
@@ -25,7 +31,7 @@ from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
-from docling.datamodel.pipeline_options import TesseractCliOcrOptions, PdfPipelineOptions # TODO check for image as well
+from docling.datamodel.pipeline_options import PdfPipelineOptions, TesseractCliOcrOptions
 
 logger = logging.getLogger(__name__)
 
@@ -35,18 +41,24 @@ class DoclingFileExtractor(InformationFileExtractor):
 
     def __init__(self, file_service: FileService):
         super().__init__(file_service)
-        ocr = TesseractCliOcrOptions(lang=["deu", "eng"])    # Tesseract via CLI, auto language
-        ocr_pipe = PdfPipelineOptions(ocr_options=ocr)
+        ocr = TesseractCliOcrOptions(lang=["deu","eng"])
+        ocr_pipe = PdfPipelineOptions(
+            ocr_options=ocr,
+            do_table_structure=True,
+        )
+
         format_options = {
             InputFormat.PDF: PdfFormatOption(ocr=True, pipeline_options=ocr_pipe),
-            InputFormat.IMAGE: ImageFormatOption(ocr=True),
+            InputFormat.IMAGE: ImageFormatOption(ocr=True, pipeline_options=ocr_pipe),
             InputFormat.DOCX: WordFormatOption(),
             InputFormat.PPTX: PowerpointFormatOption(),
             InputFormat.XLSX: ExcelFormatOption(),
+            InputFormat.HTML: HTMLFormatOption(),
+            InputFormat.MD: MarkdownFormatOption(),
+            InputFormat.ASCIIDOC: AsciiDocFormatOption(),
+            InputFormat.CSV: CsvFormatOption(),
         }
-        html_format = getattr(InputFormat, "HTML", None)
-        if html_format:
-            format_options[html_format] = None
+
         self._converter = DocumentConverter(format_options=format_options)
 
     @property
@@ -58,18 +70,44 @@ class DoclingFileExtractor(InformationFileExtractor):
             FileType.PPTX,
             FileType.XLSX,
             FileType.HTML,
+            FileType.MD,
+            FileType.ASCIIDOC,
+            FileType.CSV,
+            FileType.IMAGE,
         ]
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
-        result = self._converter.convert(file_path)
-        document = result.document
+        conversion_result: ConversionResult | None = None
+        try:
+            conversion_result = self._converter.convert(file_path)
+            document = conversion_result.document
 
-        text_segments, table_segments = self._collect_page_segments(document)
+            text_segments, table_segments = self._collect_page_segments(document)
 
-        pieces: list[InternalInformationPiece] = self._create_information_pieces(text_segments, name, ContentType.TEXT)
-        table_pieces: list[InternalInformationPiece] = [self._create_information_piece(key, value, name, ContentType.TABLE) for key, value in table_segments.items()]
+            pieces: list[InternalInformationPiece] = self._create_information_pieces(
+                text_segments,
+                name,
+                ContentType.TEXT,
+            )
+            table_pieces = [
+                self._create_information_piece(
+                    document_name=name,
+                    page=page,
+                    content=table_markdown,
+                    content_type=ContentType.TABLE,
+                    additional_meta={
+                        "origin_extractor": "docling",
+                        "format": "markdown",
+                        "table_index": index,
+                    },
+                )
+                for page, tables in table_segments.items()
+                for index, table_markdown in enumerate(tables, start=1)
+            ]
 
-        return pieces + table_pieces
+            return pieces + table_pieces
+        finally:
+            self._cleanup_conversion_result(conversion_result)
 
     def _create_information_pieces(self, segments, name, content_type: ContentType) -> list[InternalInformationPiece]:
         pieces: list[InternalInformationPiece] = []
@@ -120,26 +158,25 @@ class DoclingFileExtractor(InformationFileExtractor):
     def _collect_page_segments(self, document: Any) -> tuple[dict[int, list[str]], dict[int, list[str]]]:
         iterator = getattr(document, "iterate_items", None)
         if not callable(iterator):
-            return {}
+            return {}, {}
 
-        segments: dict[int, list[str]] = defaultdict(list)#TODO maybe use ordered dict
+        segments: dict[int, list[str]] = defaultdict(list)
         table_segments: dict[int, list[str]] = defaultdict(list)
         for item, _level in iterator():
-            if isinstance(item, TextItem):
+            if isinstance(item, TextItem) or hasattr(item, "text"):
                 text = getattr(item, "text", "")
                 if not text:
                     continue
                 page_number = self._resolve_item_page(item)
                 segments[page_number].append(text)
-            elif isinstance(item, TableItem):
-                table_df = item.export_to_dataframe()
-                table = table_df.to_markdown()
-                if not table:
+            elif isinstance(item, TableItem) or hasattr(item, "to_markdown") or hasattr(item, "export_to_dataframe"):
+                table_markdown = self._serialize_table(item)
+                if not table_markdown:
                     continue
-                if not self._has_meaningful_table_content(table):
+                if not self._has_meaningful_table_content(table_markdown):
                     continue
                 page_number = self._resolve_item_page(item)
-                segments[page_number].append(table)
+                table_segments[page_number].append(table_markdown)
         return segments, table_segments
 
     @staticmethod
@@ -179,3 +216,21 @@ class DoclingFileExtractor(InformationFileExtractor):
             metadata=metadata,
             page_content=content,
         )
+
+    def _cleanup_conversion_result(self, conversion_result: ConversionResult | None) -> None:
+        if conversion_result is None:
+            return
+
+        document = getattr(conversion_result, "document", None)
+        if document is not None:
+            clear_cache = getattr(document, "_clear_picture_pil_cache", None)
+            if callable(clear_cache):
+                with suppress(Exception):  # pragma: no cover - defensive cleanup
+                    clear_cache()
+
+        with suppress(AttributeError):
+            conversion_result.pages.clear()
+        with suppress(AttributeError):
+            conversion_result.errors.clear()
+        with suppress(AttributeError):
+            conversion_result.assembled = None

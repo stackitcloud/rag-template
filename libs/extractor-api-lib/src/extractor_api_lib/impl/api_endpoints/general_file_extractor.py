@@ -67,10 +67,36 @@ class GeneralFileExtractor(FileExtractor):
                     logger.debug("Temporary file created at %s.", temp_file_path)
                     logger.debug("Temp file created and content written.")
                 file_type = str(temp_file_path).split(".")[-1].upper()
+                # treat common image file extensions as IMAGE so extractors that declare IMAGE match them
+                image_extensions = {
+                    "JPEG",
+                    "JPG",
+                    "PNG",
+                    "TIFF",
+                    "TIF",
+                    "BMP",
+                }
+
+                ascii_doc_extensions = {
+                    "ASCIIDOC",
+                    "ADOC",
+                }
+
+                def _extractor_matches_file_type(extractor, ft: str) -> bool:
+                    for file_type_option in extractor.compatible_file_types:
+                        opt = str(file_type_option.value).upper()
+                        if opt == ft:
+                            return True
+                        elif opt == "IMAGE" and ft in image_extensions:
+                            return True
+                        elif opt == "ASCIIDOC" and ft in ascii_doc_extensions:
+                            return True
+                    return False
+
                 correct_extractors = [
                     extractor
                     for extractor in self._available_extractors
-                    if file_type in [file_type_option.value for file_type_option in extractor.compatible_file_types]
+                    if _extractor_matches_file_type(extractor, file_type)
                 ]
                 if not correct_extractors:
                     raise ValueError(f"No extractor found for file-ending {file_type}")

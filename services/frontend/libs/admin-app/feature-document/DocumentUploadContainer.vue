@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useDocumentsStore } from '../data-access/+state/documents.store';
 import { UploadedDocument } from '../models/uploaded-document.model';
 import UploadedDocumentItem from '../ui/UploadedDocumentItem.vue';
+import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
 
 const store = useDocumentsStore();
 const {t} = useI18n();
@@ -12,8 +13,9 @@ const isDragOver = ref(false);
 const fileInputRef = ref<HTMLInputElement>();
 const uploadedDocuments = computed((): UploadedDocument[] => store.uploadedDocuments);
 const isInvalidFileType = ref(false);
-const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml'];
 const uploadMethod = ref<'file' | 'confluence' | 'sitemap'>('file');
+const allowedFileTypesLabel = allowedDocumentDisplayNames.join(', ');
+const allowedFileInputAccept = allowedDocumentAccepts.join(',');
 
 
 // confluence configuration refs
@@ -33,7 +35,7 @@ const sitemapHeaderTemplate = ref('');
 const error = computed(() => store.error);
 
 const uploadDocuments = (files: File[]) => {
-    if (files.some(file => !allowedFileTypes.includes(file.type))) {
+    if (files.some(file => !isAllowedDocumentType(file.name, file.type))) {
         isInvalidFileType.value = true;
         return;
     }
@@ -162,12 +164,12 @@ const getErrorMessage = (errorType: string) => {
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
                     <CloudArrowUpIcon class="w-10 h-10 mb-4 text-accent-content" />
                     <p class="mb-1 font-bold text-cente">{{ t('documents.uploadSelectTitle') }}</p>
-                    <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }}</p>
+                    <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }} {{ allowedFileTypesLabel }}</p>
 
                     <button class="btn btn-sm mt-4 btn-accent" @click="fileInputRef!.click()">{{ t('documents.select')
                         }}</button>
                 </div>
-                <input ref="fileInputRef" type="file" multiple accept=".pdf,.docx,.pptx,.xml" @change="onFileInputChange"
+                <input ref="fileInputRef" type="file" multiple :accept="allowedFileInputAccept" @change="onFileInputChange"
                     class="hidden" />
             </div>
 
@@ -237,7 +239,7 @@ const getErrorMessage = (errorType: string) => {
                 <InformationCircleIcon class="w-6 h-6" />
                 <div>
                     <h3 class="font-bold">{{ t('documents.fileTypeNotAllowedTitle') }}</h3>
-                    <div class="text-xs">{{ t('documents.fileTypeNotAllowedDescription') }}</div>
+                    <div class="text-xs">{{ t('documents.fileTypeNotAllowedDescription') }} {{ allowedFileTypesLabel }}</div>
                 </div>
             </div>
         </div>

@@ -6,63 +6,33 @@ from extractor_api_lib.impl.extractors.file_extractors.docling_extractor import 
 from extractor_api_lib.impl.types.content_type import ContentType
 
 
-class _FakeCell:
-    def __init__(self, repr_text: str):
-        self._repr_text = repr_text
+class _FakeDataFrame:
+    def __init__(self, markdown: str):
+        self._markdown = markdown
 
-    def __str__(self) -> str:  # pragma: no cover - simple data holder
-        return self._repr_text
-
-
-class _FakeRow:
-    def __init__(self, cells):
-        self.cells = cells
+    def to_markdown(self, index: bool = False):  # pragma: no cover - simple stub
+        return self._markdown
 
 
 class _FakeTable:
-    def __init__(self, rows):
-        self.rows = rows
-        self.page_no = 1
+    def __init__(self, markdown: str | None = None, dataframe_markdown: str | None = None, page_no: int = 1):
+        self._markdown = markdown
+        self._dataframe_markdown = dataframe_markdown
+        self.page_no = page_no
+
+    def to_markdown(self):
+        if self._markdown is None:
+            raise AttributeError  # pragma: no cover - aligns with docling default behaviour when not implemented
+        return self._markdown
+
+    def export_to_dataframe(self):
+        if self._dataframe_markdown is None:
+            raise AttributeError  # pragma: no cover - aligns with docling default behaviour when not implemented
+        return _FakeDataFrame(self._dataframe_markdown)
 
 
-class _FragmentCell:
-    def __init__(self, fragments):
-        self.text = fragments
-
-
-class _GetTextCell:
-    def __init__(self, value: str):
-        self._value = value
-
-    def get_text(self):
-        return self._value
-
-
-def test_serialize_table_extracts_text_from_repr():
-    table = _FakeTable(
-        rows=[
-            _FakeRow(
-                [
-                    _FakeCell(
-                        "text='Heading' column_header=True bbox=BoundingBox(l=0, t=0, r=1, b=1)"
-                    ),
-                    _FakeCell(
-                        "text='Value' column_header=True bbox=BoundingBox(l=1, t=0, r=2, b=1)"
-                    ),
-                ]
-            ),
-            _FakeRow(
-                [
-                    _FakeCell(
-                        "text='Entry A' column_header=False bbox=BoundingBox(l=0, t=1, r=1, b=2)"
-                    ),
-                    _FakeCell(
-                        "text='Entry B' column_header=False bbox=BoundingBox(l=1, t=1, r=2, b=2)"
-                    ),
-                ]
-            ),
-        ]
-    )
+def test_serialize_table_prefers_markdown_attr():
+    table = _FakeTable(markdown="| Heading | Value |\n| --- | --- |\n| Entry A | Entry B |")
 
     extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
     markdown = extractor._serialize_table(table)
@@ -70,21 +40,13 @@ def test_serialize_table_extracts_text_from_repr():
     assert markdown == "| Heading | Value |\n| --- | --- |\n| Entry A | Entry B |"
 
 
-@pytest.mark.parametrize(
-    "cells, expected",
-    [
-        ([ _FragmentCell(["Part", "One"]) ], "Part One"),
-        ([ _GetTextCell("From getter") ], "From getter"),
-    ],
-)
-def test_cell_to_text_handles_various_sources(cells, expected):
-    row = _FakeRow(cells)
-    table = _FakeTable([row])
+def test_serialize_table_falls_back_to_dataframe():
+    table = _FakeTable(markdown=None, dataframe_markdown="| Col |\n| --- |\n| 42 |")
 
     extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
-    result = extractor._serialize_table(table)
+    markdown = extractor._serialize_table(table)
 
-    assert expected in result
+    assert markdown == "| Col |\n| --- |\n| 42 |"
 
 
 class _FakeProv:
@@ -118,14 +80,19 @@ class _FakeDocument:
 class _FakeConversionResult:
     def __init__(self, document):
         self.document = document
+        self.pages = [object()]
+        self.errors = [object()]
+        self.assembled = object()
 
 
 class _FakeConverter:
     def __init__(self, document):
         self._document = document
+        self._conversion_result: _FakeConversionResult | None = None
 
     def convert(self, _):
-        return _FakeConversionResult(self._document)
+        self._conversion_result = _FakeConversionResult(self._document)
+        return self._conversion_result
 
 
 @pytest.mark.asyncio
@@ -144,15 +111,21 @@ async def test_aextract_content_groups_by_page():
 
     pieces = await extractor.aextract_content(Path("dummy"), "sample.pdf")
 
-    assert len(pieces) == 2
-    page_one_piece = next(piece for piece in pieces if piece.metadata["page"] == 1)
-    assert page_one_piece.type == ContentType.TEXT
-    assert page_one_piece.metadata["format"] == "markdown"
-    assert "First page paragraph" in page_one_piece.page_content
-    assert "| Col |" in page_one_piece.page_content
+    assert len(pieces) == 3
 
-    page_two_piece = next(piece for piece in pieces if piece.metadata["page"] == 2)
+    text_pages = [piece for piece in pieces if piece.type == ContentType.TEXT]
+    assert len(text_pages) == 2
+    page_one_piece = next(piece for piece in text_pages if piece.metadata["page"] == 1)
+    assert "First page paragraph" in page_one_piece.page_content
+
+    page_two_piece = next(piece for piece in text_pages if piece.metadata["page"] == 2)
     assert "Second page text" in page_two_piece.page_content
+
+    table_pieces = [piece for piece in pieces if piece.type == ContentType.TABLE]
+    assert len(table_pieces) == 1
+    table_piece = table_pieces[0]
+    assert table_piece.metadata["table_index"] == 1
+    assert "| Col |" in table_piece.page_content
 
 
 @pytest.mark.asyncio
@@ -174,3 +147,29 @@ async def test_dash_only_table_is_dropped():
     content = pieces[0].page_content.strip()
     assert content == "Real content"
     assert "---" not in content
+
+
+@pytest.mark.asyncio
+async def test_cleanup_clears_conversion_result_buffers():
+    class _DocWithCache(_FakeDocument):
+        def __init__(self, items):
+            super().__init__(items)
+            self.cleared = False
+
+        def _clear_picture_pil_cache(self):  # pragma: no cover - simple flag setter
+            self.cleared = True
+
+    document = _DocWithCache([(_FakeTextItem("Content", page=1), 0)])
+    converter = _FakeConverter(document)
+
+    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
+    extractor._converter = converter
+    extractor._file_service = None
+
+    await extractor.aextract_content(Path("dummy"), "sample.pdf")
+
+    assert converter._document.cleared is True
+    assert converter._conversion_result is not None
+    assert converter._conversion_result.pages == []
+    assert converter._conversion_result.errors == []
+    assert converter._conversion_result.assembled is None

@@ -32,9 +32,10 @@ class MarkitdownFileExtractor(InformationFileExtractor):
             FileType.PDF,
             FileType.DOCX,
             FileType.PPTX,
-            FileType.XML,
             FileType.EPUB,
             FileType.HTML,
+            FileType.CSV,
+            FileType.TXT
         ]
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { CloudArrowUpIcon, GlobeAltIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
 import { computed, ref } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useDocumentsStore } from '../data-access/+state/documents.store';
 import { UploadedDocument } from '../models/uploaded-document.model';
 import UploadedDocumentItem from '../ui/UploadedDocumentItem.vue';
-import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
 
 const store = useDocumentsStore();
 const {t} = useI18n();

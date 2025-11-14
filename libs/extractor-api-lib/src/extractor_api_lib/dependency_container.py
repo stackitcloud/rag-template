@@ -16,6 +16,9 @@ from extractor_api_lib.impl.extractors.file_extractors.epub_extractor import (
 from extractor_api_lib.impl.extractors.file_extractors.docling_extractor import (
     DoclingFileExtractor,
 )
+from extractor_api_lib.impl.extractors.file_extractors.image_extractor import (
+    TesseractImageExtractor,
+)
 from extractor_api_lib.impl.extractors.file_extractors.markitdown_extractor import (
     MarkitdownFileExtractor,
 )
@@ -64,6 +67,7 @@ class DependencyContainer(DeclarativeContainer):
     xml_extractor = Singleton(XMLExtractor, file_service)
     markitdown_extractor = Singleton(MarkitdownFileExtractor, file_service)
     docling_extractor = Singleton(DoclingFileExtractor, file_service)
+    image_extractor = Singleton(TesseractImageExtractor, file_service)
 
     intern2external = Singleton(Internal2ExternalInformationPiece)
     confluence_document2information_piece = Singleton(ConfluenceLangchainDocument2InformationPiece)
@@ -72,11 +76,12 @@ class DependencyContainer(DeclarativeContainer):
     epub_extractor = Singleton(EpubExtractor, file_service, langchain_document2information_piece)
 
     file_extractors = List(
+        image_extractor,
         ms_docs_extractor,
         xml_extractor,
         epub_extractor,
-        markitdown_extractor,
         pdf_extractor,
+        markitdown_extractor,
         docling_extractor,
     )
 

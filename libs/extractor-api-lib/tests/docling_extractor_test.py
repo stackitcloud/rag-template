@@ -4,6 +4,7 @@ import pytest
 
 from extractor_api_lib.impl.extractors.file_extractors.docling_extractor import DoclingFileExtractor
 from extractor_api_lib.impl.types.content_type import ContentType
+from extractor_api_lib.file_services.file_service import FileService
 
 
 class _FakeDataFrame:
@@ -95,6 +96,26 @@ class _FakeConverter:
         return self._conversion_result
 
 
+class _NoopFileService(FileService):
+    def download_folder(self, source: str, target: Path) -> None:  # pragma: no cover - not used in tests
+        raise NotImplementedError
+
+    def download_file(self, source: str, target_file) -> None:  # pragma: no cover - not used in tests
+        raise NotImplementedError
+
+    def upload_file(self, file_path: str, file_name: str) -> None:  # pragma: no cover - not used in tests
+        raise NotImplementedError
+
+    def get_all_sorted_file_names(self) -> list[str]:  # pragma: no cover - not used in tests
+        raise NotImplementedError
+
+    def delete_file(self, file_name: str) -> None:  # pragma: no cover - not used in tests
+        raise NotImplementedError
+
+
+DATA_DIR = Path(__file__).parent / "test_data"
+
+
 @pytest.mark.asyncio
 async def test_aextract_content_groups_by_page():
     document = _FakeDocument(
@@ -173,3 +194,49 @@ async def test_cleanup_clears_conversion_result_buffers():
     assert converter._conversion_result.pages == []
     assert converter._conversion_result.errors == []
     assert converter._conversion_result.assembled is None
+
+
+@pytest.mark.asyncio
+async def test_docling_extracts_real_html_document(tmp_path: Path):
+    sample_file = DATA_DIR / "sample.html"
+    extractor = DoclingFileExtractor(_NoopFileService())
+
+    pieces = await extractor.aextract_content(sample_file, sample_file.name)
+
+    assert pieces, "Docling should return at least one information piece"
+
+    text_piece = next(piece for piece in pieces if piece.type == ContentType.TEXT)
+    assert "Docling Sample Document" in text_piece.page_content
+    assert "Trailing text" in text_piece.page_content
+
+    table_piece = next(piece for piece in pieces if piece.type == ContentType.TABLE)
+    assert "Alpha" in table_piece.page_content and "Beta" in table_piece.page_content
+    assert table_piece.metadata["origin_extractor"] == "docling"
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "mixed_content_document.pdf",
+        "text_based_document.pdf",
+        "scanned_document.pdf",
+        "multi_column_document.pdf",
+        "sample.html",
+        "sample.md",
+        "sample.csv",
+        "sample.adoc",
+        "sample.png",
+        "image.png",
+        "sample.docx",
+        "sample.pptx",
+        "sample.xlsx",
+    ],
+)
+async def test_docling_handles_various_inputs(relative_path: str):
+    sample_file = DATA_DIR / relative_path
+    extractor = DoclingFileExtractor(_NoopFileService())
+
+    pieces = await extractor.aextract_content(sample_file, sample_file.name)
+    assert isinstance(pieces, list)
+    for piece in pieces:
+        assert piece.page_content is not None

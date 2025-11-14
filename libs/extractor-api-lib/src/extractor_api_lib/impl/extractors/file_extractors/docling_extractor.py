@@ -1,5 +1,3 @@
-"""Module containing the DoclingFileExtractor."""
-
 from __future__ import annotations
 
 import logging
@@ -39,17 +37,21 @@ logger = logging.getLogger(__name__)
 class DoclingFileExtractor(InformationFileExtractor):
     """InformationFileExtractor implemented with Docling."""
 
+    DEBUG = False
+
     def __init__(self, file_service: FileService):
         super().__init__(file_service)
         ocr = TesseractCliOcrOptions(lang=["deu","eng"])
-        ocr_pipe = PdfPipelineOptions(
+        pipe_options = PdfPipelineOptions(
             ocr_options=ocr,
             do_table_structure=True,
+            generate_page_images=self.DEBUG,
+            images_scale=2.0,
         )
 
         format_options = {
-            InputFormat.PDF: PdfFormatOption(ocr=True, pipeline_options=ocr_pipe),
-            InputFormat.IMAGE: ImageFormatOption(ocr=True, pipeline_options=ocr_pipe),
+            InputFormat.PDF: PdfFormatOption(ocr=True, pipeline_options=pipe_options),
+            InputFormat.IMAGE: ImageFormatOption(ocr=True, pipeline_options=pipe_options),
             InputFormat.DOCX: WordFormatOption(),
             InputFormat.PPTX: PowerpointFormatOption(),
             InputFormat.XLSX: ExcelFormatOption(),
@@ -76,11 +78,23 @@ class DoclingFileExtractor(InformationFileExtractor):
             FileType.IMAGE,
         ]
 
+    def _store_reading_order_images(self, document, base_path: Path):
+        viz = document.get_visualization(
+            viz_mode="reading_order",
+            show_branch_numbering=True,
+        )
+
+        for page_no, image in viz.items():
+            image.save(base_path / f"reading_order_page_{page_no}.png")
+
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         conversion_result: ConversionResult | None = None
         try:
             conversion_result = self._converter.convert(file_path)
             document = conversion_result.document
+
+            if self.DEBUG:
+                self._store_reading_order_images(document, Path("/app/services/document-extractor/log"))
 
             text_segments, table_segments = self._collect_page_segments(document)
 

@@ -14,7 +14,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     poppler-utils \
     tesseract-ocr \
     tesseract-ocr-deu \
-    tesseract-ocr-eng && \
+    tesseract-ocr-eng \
+    libleptonica-dev \
+    pkg-config && \
     python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
       && $POETRY_VIRTUALENVS_PATH/bin/pip install "poetry==${POETRY_VERSION}"
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
@@ -46,7 +48,10 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/ /usr/bin/
 COPY --from=build /usr/local/lib/ /usr/local/lib/
 COPY --from=build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
-COPY --from=build /usr/share/tesseract-ocr/5/tessdata /usr/share/tesseract-ocr/5/tessdata
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+COPY --from=build /usr/share/tesseract-ocr/5/tessdata ${TESSDATA_PREFIX}
+
+
 
 COPY --chown=nonroot:nonroot libs/extractor-api-lib /app/libs/extractor-api-lib
 

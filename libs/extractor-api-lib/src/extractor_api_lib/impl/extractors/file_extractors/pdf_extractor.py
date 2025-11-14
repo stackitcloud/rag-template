@@ -450,6 +450,9 @@ class PDFExtractor(InformationFileExtractor):
                         full_content,
                         ContentType.TEXT,
                         information_id=hash_datetime(),
+                        additional_meta={
+                            "origin_extractor": "custom_pdf_extractor",
+                        },
                     )
                 )
 

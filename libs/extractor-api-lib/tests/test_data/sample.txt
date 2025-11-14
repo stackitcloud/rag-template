@@ -1,0 +1,3 @@
+Plain sample text
+second line
+third line

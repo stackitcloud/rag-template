@@ -48,7 +48,7 @@ max-line-length = 120
 
 [tool.poetry]
 name = "extractor_server"
-version = "3.3.0"
+version = "v3.4.0"
 description = "This example demonstrates the usage of the extractor-api-lib."
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",

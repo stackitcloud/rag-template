@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rag-mcp-server"
-version = "3.3.0"
+version = "v3.4.0"
 description = "Offers to use the chat interface of the RAG using MCP"
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",

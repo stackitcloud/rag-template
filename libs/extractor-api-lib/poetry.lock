@@ -4722,6 +4722,24 @@ toml = ["tomli (>=2.0.1)"]
 yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
+name = "pydocstyle"
+version = "6.3.0"
+description = "Python docstring style checker"
+optional = false
+python-versions = ">=3.6"
+groups = ["dev"]
+files = [
+    {file = "pydocstyle-6.3.0-py3-none-any.whl", hash = "sha256:118762d452a49d6b05e194ef344a55822987a462831ade91ec5c06fd2169d019"},
+    {file = "pydocstyle-6.3.0.tar.gz", hash = "sha256:7ce43f0c0ac87b07494eb9c0b462c0b73e6ff276807f204d6b53edc72b7e44e1"},
+]
+
+[package.dependencies]
+snowballstemmer = ">=2.2.0"
+
+[package.extras]
+toml = ["tomli (>=1.2.3) ; python_version < \"3.11\""]
+
+[[package]]
 name = "pydub"
 version = "0.25.1"
 description = "Manipulate audio with an simple and easy high level interface"
@@ -7373,4 +7391,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "ea287dfd6bd8276946e7c42fae6c315fc6a1f79c17ff9e91a662f5486218b957"
+content-hash = "eb99f347de8f91fc995a9b825f71b54c2f636ac01750cc5d1c55eee04c65c3f3"

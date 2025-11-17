@@ -1529,7 +1529,7 @@ files = [
 
 [[package]]
 name = "extractor-api-lib"
-version = "v3.3.0"
+version = "v3.4.0"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
 optional = false
 python-versions = ">=3.13,<3.14"

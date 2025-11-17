@@ -4301,7 +4301,7 @@ fastembed-gpu = ["fastembed-gpu (>=0.7,<0.8)"]
 
 [[package]]
 name = "rag-core-lib"
-version = "v3.3.0"
+version = "v3.4.0"
 description = "The rag-core-lib contains the shared components of at least two of the rag libs."
 optional = false
 python-versions = "^3.13"

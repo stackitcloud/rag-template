@@ -41,7 +41,6 @@ from extractor_api_lib.impl.mapper.langchain_document2information_piece import (
 from extractor_api_lib.impl.mapper.sitemap_document2information_piece import (
     SitemapLangchainDocument2InformationPiece,
 )
-from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.settings.s3_settings import S3Settings
 from extractor_api_lib.impl.table_converter.dataframe2markdown import DataFrame2Markdown
 from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
@@ -55,14 +54,13 @@ class DependencyContainer(DeclarativeContainer):
 
     # Settings
     settings_s3 = S3Settings()
-    settings_pdf_extractor = PDFExtractorSettings()
 
     sitemap_parsing_function = Factory(lambda: custom_sitemap_parser_function)
     sitemap_meta_function = Factory(lambda: custom_sitemap_metadata_parser_function)
 
     database_converter = Singleton(DataFrame2Markdown)
     file_service = Singleton(S3Service, settings_s3)
-    pdf_extractor = Singleton(PDFExtractor, file_service, settings_pdf_extractor, database_converter)
+    pdf_extractor = Singleton(PDFExtractor, file_service, database_converter)
     ms_docs_extractor = Singleton(MSDocsExtractor, file_service, database_converter)
     xml_extractor = Singleton(XMLExtractor, file_service)
     markitdown_extractor = Singleton(MarkitdownFileExtractor, file_service)

@@ -52,10 +52,6 @@
 {{- printf "%s-langfuse-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "configmap.pdfextractorName" -}}
-{{- printf "%s-pdfextractor-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "configmap.adminBackendName" -}}
 {{- printf "%s-admin-backend-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

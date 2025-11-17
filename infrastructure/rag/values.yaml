@@ -467,9 +467,6 @@ shared:
 
 
   envs:
-    pdfExtractor:
-      PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME: "connection_diagrams"
-      PDF_EXTRACTOR_FOOTER_HEIGHT: 155
     s3:
       S3_ENDPOINT: http://rag-minio:9000
       S3_BUCKET: documents

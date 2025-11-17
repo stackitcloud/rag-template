@@ -114,8 +114,6 @@ spec:
           - configMapRef:
               name: {{ template "configmap.stackitVllmName" . }}
           - configMapRef:
-              name: {{ template "configmap.pdfextractorName" . }}
-          - configMapRef:
               name: {{ template "configmap.keyValueStoreName" . }}
           - configMapRef:
               name: {{ template "configmap.sourceUploaderName" . }}

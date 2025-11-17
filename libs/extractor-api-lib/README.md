@@ -64,7 +64,6 @@ Both endpoints stream their results back to `admin-api-lib`, which takes care of
 Two `pydantic-settings` models ship with this package:
 
 - **S3 storage** (`S3Settings`) – configure the built-in file service with `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_ENDPOINT`, and `S3_BUCKET`.
-- **PDF extraction** (`PDFExtractorSettings`) – adjust footer trimming or diagram export via `PDF_EXTRACTOR_FOOTER_HEIGHT` and `PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME`.
 
 Other extractors accept their parameters at runtime through the request payload (`ExtractionParameters`). For example, the admin backend forwards Confluence credentials, sitemap URLs, or custom headers when it calls `/extract_from_source`. This keeps the library stateless and makes it easy to plug in additional sources without redeploying.
 

@@ -107,8 +107,6 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.s3Name" . }}
-          - configMapRef:
-              name: {{ template "configmap.pdfextractorName" . }}
           - secretRef:
               name: {{ template "secret.s3Name" . }}
   {{- $hfCacheDir := default "/tmp/hf-cache" .Values.extractor.huggingfaceCacheDir }}

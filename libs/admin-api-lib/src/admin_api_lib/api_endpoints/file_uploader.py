@@ -8,6 +8,7 @@ from admin_api_lib.api_endpoints.uploader_base import UploaderBase
 
 
 class FileUploader(UploaderBase):
+    """File uploader endpoint of the admin API."""
 
     @abstractmethod
     async def upload_file(
@@ -16,7 +17,7 @@ class FileUploader(UploaderBase):
         file: UploadFile,
     ) -> None:
         """
-        Uploads a source file for content extraction.
+        Upload a source file for content extraction.
 
         Parameters
         ----------

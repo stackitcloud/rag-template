@@ -1,9 +1,8 @@
-from __future__ import annotations
+"""Module for Docling file extraction."""
 
 import logging
 import re
 from collections import defaultdict
-from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -40,8 +39,15 @@ class DoclingFileExtractor(InformationFileExtractor):
     DEBUG = False
 
     def __init__(self, file_service: FileService):
+        """Initialize the DoclingFileExtractor with the given FileService.
+
+        Parameters
+        ----------
+        file_service : FileService
+            The file service to use for file operations.
+        """
         super().__init__(file_service)
-        ocr = TesseractCliOcrOptions(lang=["deu","eng"])
+        ocr = TesseractCliOcrOptions(lang=["deu", "eng"])
         pipe_options = PdfPipelineOptions(
             ocr_options=ocr,
             do_table_structure=True,
@@ -65,7 +71,13 @@ class DoclingFileExtractor(InformationFileExtractor):
 
     @property
     def compatible_file_types(self) -> list[FileType]:
-        """Return supported file types."""
+        """Return supported file types.
+
+        Returns
+        -------
+        list[FileType]
+            The list of supported file types.
+        """
         return [
             FileType.PDF,
             FileType.DOCX,
@@ -88,45 +100,56 @@ class DoclingFileExtractor(InformationFileExtractor):
             image.save(base_path / f"reading_order_page_{page_no}.png")
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
+        """Extract content from the given file path.
+
+        Parameters
+        ----------
+        file_path : Path
+            Path to the file to extract content from.
+        name : str
+            Name of the document.
+
+        Returns
+        -------
+        list[InternalInformationPiece]
+            Extracted information pieces.
+        """
         conversion_result: ConversionResult | None = None
-        try:
-            conversion_result = self._converter.convert(file_path)
-            document = conversion_result.document
+        conversion_result = self._converter.convert(file_path)
+        document = conversion_result.document
 
-            if self.DEBUG:
-                self._store_reading_order_images(document, Path("/app/services/document-extractor/log"))
+        if self.DEBUG:
+            self._store_reading_order_images(document, Path("/app/services/document-extractor/log"))
 
-            text_segments, table_segments = self._collect_page_segments(document)
+        text_segments, table_segments = self._collect_page_segments(document)
 
-            pieces: list[InternalInformationPiece] = self._create_information_pieces(
-                text_segments,
-                name,
-                ContentType.TEXT,
+        pieces: list[InternalInformationPiece] = self._create_information_pieces(
+            text_segments,
+            name,
+            ContentType.TEXT,
+        )
+        table_pieces = [
+            self._create_information_piece(
+                document_name=name,
+                page=page,
+                content=table_markdown,
+                content_type=ContentType.TABLE,
+                additional_meta={
+                    "origin_extractor": "docling",
+                    "format": "markdown",
+                    "table_index": index,
+                },
             )
-            table_pieces = [
-                self._create_information_piece(
-                    document_name=name,
-                    page=page,
-                    content=table_markdown,
-                    content_type=ContentType.TABLE,
-                    additional_meta={
-                        "origin_extractor": "docling",
-                        "format": "markdown",
-                        "table_index": index,
-                    },
-                )
-                for page, tables in table_segments.items()
-                for index, table_markdown in enumerate(tables, start=1)
-            ]
+            for page, tables in table_segments.items()
+            for index, table_markdown in enumerate(tables, start=1)
+        ]
 
-            return pieces + table_pieces
-        finally:
-            self._cleanup_conversion_result(conversion_result)
+        return pieces + table_pieces
 
     def _create_information_pieces(self, segments, name, content_type: ContentType) -> list[InternalInformationPiece]:
         pieces: list[InternalInformationPiece] = []
 
-        for page_number in sorted(segments): # when ordered dict, sort not needed
+        for page_number in sorted(segments):  # when ordered dict, sort not needed
             segs = [segment for segment in segments[page_number] if segment]
             if not segs:
                 continue
@@ -148,8 +171,7 @@ class DoclingFileExtractor(InformationFileExtractor):
 
         return pieces
 
-
-    def _serialize_table(self, table: Any) -> str:
+    def _serialize_table(self, table: Any) -> str | None:
         if hasattr(table, "to_markdown"):
             try:
                 markdown = table.to_markdown()
@@ -162,12 +184,13 @@ class DoclingFileExtractor(InformationFileExtractor):
         if callable(export_fn):
             try:
                 dataframe = export_fn()
-                if dataframe is not None:
+                if dataframe:
                     markdown = dataframe.to_markdown(index=False)
                     if markdown:
                         return markdown
             except Exception:  # pragma: no cover - defensive logging
                 logger.debug("Docling table dataframe export failed", exc_info=True)
+        logger.debug("Docling table serialization failed for table: %s", table)
 
     def _collect_page_segments(self, document: Any) -> tuple[dict[int, list[str]], dict[int, list[str]]]:
         iterator = getattr(document, "iterate_items", None)
@@ -195,7 +218,7 @@ class DoclingFileExtractor(InformationFileExtractor):
 
     @staticmethod
     def _has_meaningful_table_content(table_markdown: str) -> bool:
-        return bool(re.search(r"\w", table_markdown)) # Check for at least one alphanumeric character
+        return bool(re.search(r"\w", table_markdown))  # Check for at least one alphanumeric character
 
     @staticmethod
     def _resolve_item_page(item: Any) -> int:
@@ -205,8 +228,7 @@ class DoclingFileExtractor(InformationFileExtractor):
                 page = getattr(prov_entry, "page_no", None)
                 if isinstance(page, int):
                     return page
-        return -1 # Default page number when not found
-
+        return -1  # Default page number when not found
 
     def _create_information_piece(
         self,
@@ -230,21 +252,3 @@ class DoclingFileExtractor(InformationFileExtractor):
             metadata=metadata,
             page_content=content,
         )
-
-    def _cleanup_conversion_result(self, conversion_result: ConversionResult | None) -> None:
-        if conversion_result is None:
-            return
-
-        document = getattr(conversion_result, "document", None)
-        if document is not None:
-            clear_cache = getattr(document, "_clear_picture_pil_cache", None)
-            if callable(clear_cache):
-                with suppress(Exception):  # pragma: no cover - defensive cleanup
-                    clear_cache()
-
-        with suppress(AttributeError):
-            conversion_result.pages.clear()
-        with suppress(AttributeError):
-            conversion_result.errors.clear()
-        with suppress(AttributeError):
-            conversion_result.assembled = None

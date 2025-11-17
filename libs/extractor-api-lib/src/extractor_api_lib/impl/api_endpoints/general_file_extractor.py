@@ -82,6 +82,12 @@ class GeneralFileExtractor(FileExtractor):
                     "ADOC",
                 }
 
+                markdown_extensions = {
+                    "MD",
+                    "MARKDOWN",
+                    "MDX",
+                }
+
                 def _extractor_matches_file_type(extractor, ft: str) -> bool:
                     for file_type_option in extractor.compatible_file_types:
                         opt = str(file_type_option.value).upper()
@@ -90,6 +96,8 @@ class GeneralFileExtractor(FileExtractor):
                         elif opt == "IMAGE" and ft in image_extensions:
                             return True
                         elif opt == "ASCIIDOC" and ft in ascii_doc_extensions:
+                            return True
+                        elif opt == "MD" and ft in markdown_extensions:
                             return True
                     return False
 
@@ -122,7 +130,7 @@ class GeneralFileExtractor(FileExtractor):
             extractor_name = extractor.__class__.__name__
             try:
                 result = await extractor.aextract_content(temp_file_path, document_name)
-            except Exception as exc:  # pragma: no cover - defensive logging
+            except Exception as exc:
                 logger.warning(
                     "Extractor %s failed for document %s: %s",
                     extractor_name,

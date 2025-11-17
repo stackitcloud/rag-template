@@ -340,7 +340,7 @@ adminBackend:
     chunker:
       # Select which chunker implementation to use. Supported values: "semantic", "recursive"
       # Defaults to "semantic" which leverages sentence-aware rebalancing.
-      CHUNKER_CLASS_TYPE_CHUNKER_TYPE: "semantic"
+      CHUNKER_CLASS_TYPE_CHUNKER_TYPE: "recursive"
       CHUNKER_MAX_SIZE: 1000
       CHUNKER_OVERLAP: 100
       # The following settings for the Chunker are only used when CHUNKER_CLASS_TYPE_CHUNKER_TYPE is set to "semantic".
@@ -402,7 +402,7 @@ extractor:
   pythonPathEnv:
     PYTHONPATH: src
   huggingfaceCacheDir: /tmp/hf-cache
-  # Directory inside the container to use as writable cache for ModelScope / RapidOCR
+  # Directory inside the container to use as writable cache for ModelScope / OCR models
   modelscopeCacheDir: /var/modelscope
 
 adminFrontend:

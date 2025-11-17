@@ -213,6 +213,7 @@ async def test_docling_extracts_real_html_document(tmp_path: Path):
     assert "Alpha" in table_piece.page_content and "Beta" in table_piece.page_content
     assert table_piece.metadata["origin_extractor"] == "docling"
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "relative_path",

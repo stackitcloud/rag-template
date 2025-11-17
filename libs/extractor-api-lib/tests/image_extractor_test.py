@@ -80,3 +80,17 @@ async def test_image_extractor_raises_for_invalid_image(tmp_path: Path):
 
     with pytest.raises(ValueError):
         await extractor.aextract_content(invalid_path, invalid_path.name)
+
+
+@pytest.mark.asyncio
+async def test_image_extractor_raises_for_multi_frame_image(tmp_path: Path):
+    animated_path = tmp_path / "animated.tiff"
+
+    frame_one = Image.new("RGB", (10, 10), color="white")
+    frame_two = Image.new("RGB", (10, 10), color="black")
+    frame_one.save(animated_path, save_all=True, append_images=[frame_two], format="TIFF")
+
+    extractor = TesseractImageExtractor(_NoopFileService())
+
+    with pytest.raises(ValueError):
+        await extractor.aextract_content(animated_path, animated_path.name)

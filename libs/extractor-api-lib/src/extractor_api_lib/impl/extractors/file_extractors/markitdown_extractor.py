@@ -1,3 +1,5 @@
+"""Module for MarkItDown-based file extraction."""
+
 import logging
 import re
 from io import BytesIO
@@ -28,13 +30,26 @@ class MarkitdownFileExtractor(InformationFileExtractor):
     SLIDE_MARKER_RE = re.compile(r"<!--\s*Slide number:\s*(\d+)\s*-->")
 
     def __init__(self, file_service: FileService):
+        """Initialize the MarkitdownFileExtractor with the given FileService.
+
+        Parameters
+        ----------
+        file_service : FileService
+            The file service to use for file operations.
+        """
         super().__init__(file_service)
         self._converter = MarkItDown()
         self._md_table_parser = MarkdownIt("commonmark").enable("table")
 
     @property
     def compatible_file_types(self) -> list[FileType]:
-        """Return the list of file types handled by this extractor."""
+        """Return the list of file types handled by this extractor.
+
+        Returns
+        -------
+        list[FileType]
+            The list of file types handled by this extractor.
+        """
         return [
             FileType.PDF,
             FileType.DOCX,
@@ -46,13 +61,26 @@ class MarkitdownFileExtractor(InformationFileExtractor):
         ]
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
+        """Asynchronously extract content from a file using MarkItDown.
+
+        Parameters
+        ----------
+        file_path : Path
+            The path to the file.
+        name : str
+            The name of the document.
+
+        Returns
+        -------
+        list[InternalInformationPiece]
+            The list of extracted information pieces.
+        """
+
         suffix = file_path.suffix.lower()
 
-        # --- PDF: real pages -------------------------------------------------
         if suffix == ".pdf":
             return self._extract_pdf_pages(file_path, name)
 
-        # --- Everything else: convert once ----------------------------------
         with file_path.open("rb") as stream:
             result = self._converter.convert_stream(stream, filename=file_path.name)
 
@@ -159,7 +187,17 @@ class MarkitdownFileExtractor(InformationFileExtractor):
     # -------------------------------------------------------------- PDF pages
 
     def _extract_pdf_pages(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
-        """Split the PDF and run MarkItDown once per page."""
+        """Split the PDF and run MarkItDown once per page.
+
+        This ensures that the page number is preserved in the extracted pieces.
+
+        Parameters
+        ----------
+        file_path : Path
+            The path to the PDF file.
+        name : str
+            The name of the document.
+        """
         reader = PdfReader(str(file_path))
         pieces: list[InternalInformationPiece] = []
 

@@ -35,10 +35,6 @@ spec:
       initContainers:
       - name: init-permissions
         image: busybox
-        securityContext:
-          runAsUser: 0
-          runAsGroup: 0
-          runAsNonRoot: false
         command:
           - sh
           - -c

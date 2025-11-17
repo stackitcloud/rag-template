@@ -167,7 +167,9 @@ async def test_aextract_content_pptx_splits_per_slide(tmp_path: Path, markitdown
 
 
 @pytest.mark.asyncio
-async def test_aextract_content_returns_single_page_for_text(tmp_path: Path, markitdown_extractor: MarkitdownFileExtractor):
+async def test_aextract_content_returns_single_page_for_text(
+    tmp_path: Path, markitdown_extractor: MarkitdownFileExtractor
+):
     txt_path = tmp_path / "notes.txt"
     txt_path.write_text("Hello world")
 

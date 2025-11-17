@@ -1,10 +1,10 @@
-from __future__ import annotations
+"""Module for Tesseract image extraction."""
 
 import logging
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Sequence
 
-from PIL import Image, ImageSequence, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 import pytesseract
 from pytesseract import TesseractError
 
@@ -15,41 +15,59 @@ from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 
-# Assumptions:
-# - Tesseract CLI is present in the runtime image for pytesseract to shell out to.
-# - Image files are already downloaded to local storage via the FileService before extraction runs.
-
 logger = logging.getLogger(__name__)
 
 
 class TesseractImageExtractor(InformationFileExtractor):
     """InformationFileExtractor specialization that OCRs image files via Tesseract."""
 
-    DEFAULT_LANGUAGES: tuple[str, ...] = ("eng","deu")
+    DEFAULT_LANGUAGES: tuple[str, ...] = ("eng", "deu")
     ORIGIN = "tesseract-image"
 
-    def __init__(self, file_service: FileService, languages: Sequence[str] | None = None, psm: int = 6):
+    def __init__(self, file_service: FileService, languages: Sequence[str] | None = None, psm: int = 2):
         super().__init__(file_service)
         self._languages = self._sanitize_languages(languages)
         self._tesseract_config = f"--psm {psm}"
 
     @property
     def compatible_file_types(self) -> list[FileType]:
+        """Return the list of file types handled by this extractor.
+
+        Returns
+        -------
+        list[FileType]
+            The list of file types handled by this extractor.
+        """
         return [FileType.IMAGE]
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
+        """Asynchronously extract content from an image file using OCR.
+
+        Only supports single-frame images.
+
+        Parameters
+        ----------
+        file_path : Path
+            The path to the image file.
+        name : str
+            The name of the document.
+
+        Returns
+        -------
+        list[InternalInformationPiece]
+            The list of extracted information pieces.
+        """
         try:
             with Image.open(file_path) as image:
-                frames = list(self._enumerate_frames(image))
+                self._validate_single_frame(image, file_path)
+                frame = image.convert("RGB")
         except UnidentifiedImageError as exc:
             raise ValueError(f"Unsupported image file: {file_path}") from exc
 
         pieces: list[InternalInformationPiece] = []
-        for page, frame in frames:
-            text = self._perform_ocr(frame)
-            if not text:
-                continue
-            pieces.append(self._build_piece(document_name=name, page=page, content=text))
+        text = self._perform_ocr(frame)
+        if text:
+            pieces.append(self._build_piece(document_name=name, page=1, content=text))
 
         if not pieces:
             logger.info("No OCR content produced for image file: %s", file_path)
@@ -65,14 +83,11 @@ class TesseractImageExtractor(InformationFileExtractor):
 
         return text.strip()
 
-    def _enumerate_frames(self, image: Image.Image) -> Iterable[tuple[int, Image.Image]]:
-        produced = False
-        for index, frame in enumerate(ImageSequence.Iterator(image), start=1):
-            produced = True
-            yield index, frame.convert("RGB")
-
-        if not produced:
-            yield 1, image.convert("RGB")
+    def _validate_single_frame(self, image: Image.Image, file_path: Path) -> None:
+        frame_count = getattr(image, "n_frames", 1)
+        if frame_count > 1:
+            logger.warning("Multi-frame images are not supported: %s", file_path)
+            raise ValueError(f"Multi-frame images are not supported: {file_path}")
 
     @property
     def _ocr_language(self) -> str:

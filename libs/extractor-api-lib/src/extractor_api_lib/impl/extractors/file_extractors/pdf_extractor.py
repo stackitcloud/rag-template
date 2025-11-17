@@ -213,6 +213,9 @@ class PDFExtractor(InformationFileExtractor):
                         converted_table,
                         ContentType.TABLE,
                         information_id=hash_datetime(),
+                        additional_meta={
+                            "origin_extractor": "custom_pdf_extractor",
+                        },
                     )
                 )
         except Exception:
@@ -318,6 +321,7 @@ class PDFExtractor(InformationFileExtractor):
                                         "table_method": "camelot",
                                         "accuracy": table.accuracy,
                                         "table_index": i,
+                                        "origin_extractor": "custom_pdf_extractor",
                                     },
                                 )
                             )

@@ -61,7 +61,7 @@ license = "Apache-2.0"
 repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = ">=3.13,<3.14"
 extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]
@@ -97,3 +97,8 @@ httpx = "^0.28.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"

@@ -17,7 +17,6 @@ from langdetect import detect
 import camelot
 
 
-from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
@@ -53,7 +52,6 @@ class PDFExtractor(InformationFileExtractor):
     def __init__(
         self,
         file_service: FileService,
-        pdf_extractor_settings: PDFExtractorSettings,
         dataframe_converter: DataframeConverter,
     ):
         """Initialize the PDFExtractor.
@@ -62,14 +60,11 @@ class PDFExtractor(InformationFileExtractor):
         ----------
         file_service : FileService
             Handler for downloading the file to extract content from and upload results to if required.
-        pdf_extractor_settings : PDFExtractorSettings
-            Settings for the pdf extractor.
         dataframe_converter: DataframeConverter
             Converter for dataframe tables to a search and saveable format.
         """
         super().__init__(file_service=file_service)
         self._dataframe_converter = dataframe_converter
-        self._settings = pdf_extractor_settings
         self.old_image_id = None
         self._lang_map = {
             "en": "eng",
@@ -213,6 +208,9 @@ class PDFExtractor(InformationFileExtractor):
                         converted_table,
                         ContentType.TABLE,
                         information_id=hash_datetime(),
+                        additional_meta={
+                            "origin_extractor": "custom_pdf_extractor",
+                        },
                     )
                 )
         except Exception:
@@ -318,6 +316,7 @@ class PDFExtractor(InformationFileExtractor):
                                         "table_method": "camelot",
                                         "accuracy": table.accuracy,
                                         "table_index": i,
+                                        "origin_extractor": "custom_pdf_extractor",
                                     },
                                 )
                             )
@@ -450,6 +449,9 @@ class PDFExtractor(InformationFileExtractor):
                         full_content,
                         ContentType.TEXT,
                         information_id=hash_datetime(),
+                        additional_meta={
+                            "origin_extractor": "custom_pdf_extractor",
+                        },
                     )
                 )
 

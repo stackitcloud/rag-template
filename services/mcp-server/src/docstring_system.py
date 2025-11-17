@@ -167,7 +167,7 @@ def _get_settings_value(settings, config_prefix: str, suffix: str, default: str 
 
 
 def extensible_docstring(config_prefix: str):
-    """Decorator for creating extensible docstrings.
+    """Create an extensible docstring decorator.
 
     Parameters
     ----------

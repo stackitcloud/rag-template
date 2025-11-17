@@ -1,3 +1,5 @@
+"""Module for testing the retry_with_backoff decorator."""
+
 import asyncio
 import time
 from typing import Optional
@@ -9,10 +11,14 @@ from rag_core_lib.impl.utils.retry_decorator import retry_with_backoff
 
 
 class DummyError(Exception):
+    """Dummy error for testing purposes."""
+
     pass
 
 
 class RateLimitError(Exception):
+    """Dummy error for testing purposes."""
+
     def __init__(self, headers: Optional[dict[str, str]] = None, status_code: Optional[int] = None):
         self.response = type("Resp", (), {"headers": headers or {}, "status_code": status_code})()
         super().__init__("rate limit")
@@ -20,6 +26,8 @@ class RateLimitError(Exception):
 
 @pytest.fixture
 def counter():
+    """Counter fixture for tracking increments."""
+
     class C:
         def __init__(self) -> None:
             self.n = 0
@@ -33,6 +41,7 @@ def counter():
 
 @pytest.fixture
 def async_sleeps(monkeypatch):
+    """Async sleeps fixture for tracking sleep durations."""
     sleeps: list[float] = []
 
     async def fake_sleep(x):
@@ -44,6 +53,7 @@ def async_sleeps(monkeypatch):
 
 @pytest.fixture
 def sync_sleeps(monkeypatch):
+    """Sync sleeps fixture for tracking sleep durations."""
     sleeps: list[float] = []
 
     def fake_sleep(x):
@@ -55,6 +65,8 @@ def sync_sleeps(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_async_success_first_try(counter):
+    """Test that the async function succeeds on the first try without retries."""
+
     @retry_with_backoff(settings=RetryDecoratorSettings(max_retries=2))
     async def fn():
         counter.inc()
@@ -66,6 +78,8 @@ async def test_async_success_first_try(counter):
 
 @pytest.mark.asyncio
 async def test_async_retries_then_success(counter, async_sleeps):
+    """Test that the async function retries on failure and eventually succeeds."""
+
     @retry_with_backoff(settings=RetryDecoratorSettings(max_retries=3, retry_base_delay=0.01))
     async def fn():
         if counter.inc() < 3:
@@ -78,6 +92,8 @@ async def test_async_retries_then_success(counter, async_sleeps):
 
 
 def test_sync_success_first_try(counter):
+    """Test that the sync function succeeds on the first try without retries."""
+
     @retry_with_backoff(settings=RetryDecoratorSettings(max_retries=2))
     def fn():
         counter.inc()
@@ -88,6 +104,8 @@ def test_sync_success_first_try(counter):
 
 
 def test_sync_retries_then_fail(counter, sync_sleeps):
+    """Test that the sync function retries on failure and eventually fails."""
+
     @retry_with_backoff(settings=RetryDecoratorSettings(max_retries=2, retry_base_delay=0.01))
     def fn():
         counter.inc()
@@ -101,6 +119,7 @@ def test_sync_retries_then_fail(counter, sync_sleeps):
 
 @pytest.mark.asyncio
 async def test_async_rate_limit_uses_header_wait(counter, async_sleeps):
+    """Test that the async function respects rate limit wait headers."""
     headers = {"x-ratelimit-reset-requests": "1.5s", "x-ratelimit-remaining-requests": "0"}
 
     @retry_with_backoff(
@@ -120,6 +139,8 @@ async def test_async_rate_limit_uses_header_wait(counter, async_sleeps):
 
 @pytest.mark.asyncio
 async def test_is_rate_limited_callback(counter, async_sleeps):
+    """Test that the async function respects a custom rate limit callback."""
+
     def mark_rate_limited(exc: BaseException) -> bool:  # noqa: ANN001 - explicit for clarity
         return isinstance(exc, DummyError)
 
@@ -139,6 +160,7 @@ async def test_is_rate_limited_callback(counter, async_sleeps):
 
 
 def test_sync_rate_limit_headers(counter, sync_sleeps):
+    """Test that the sync function respects rate limit wait headers."""
     headers = {"x-ratelimit-reset-requests": "2s"}
 
     @retry_with_backoff(

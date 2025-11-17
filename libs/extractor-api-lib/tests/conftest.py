@@ -1,3 +1,5 @@
+"""Fixtures for testing the extractor API library."""
+
 import pytest
 from unittest.mock import MagicMock
 

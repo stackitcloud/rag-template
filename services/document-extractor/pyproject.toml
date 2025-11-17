@@ -12,6 +12,10 @@ docstring-quotes = '"""'
 multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
+per-file-ignores = """
+  ./tests/*: S101,
+  **/__init__.py: D104,
+"""
 
 [tool.black]
 line-length = 120
@@ -43,11 +47,18 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "pdfextractor_server"
-version = "3.2.1"
+name = "extractor_server"
+version = "3.3.0"
 description = "This example demonstrates the usage of the extractor-api-lib."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
 readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
@@ -77,8 +88,8 @@ flake8-simplify = "^0.22.0"
 flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
 [tool.poetry.group.tests.dependencies]
 httpx = "^0.28.1"

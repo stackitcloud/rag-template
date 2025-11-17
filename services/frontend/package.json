@@ -1,6 +1,6 @@
 {
     "name": "rag",
-    "version": "3.2.1",
+    "version": "3.3.0",
     "license": "Apache-2.0",
     "description": "Frontend applications for RAG",
     "scripts": {

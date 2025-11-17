@@ -3,8 +3,6 @@
 import logging
 from pathlib import Path
 import tempfile
-import traceback
-
 
 from extractor_api_lib.api_endpoints.file_extractor import FileExtractor
 from extractor_api_lib.impl.mapper.internal2external_information_piece import Internal2ExternalInformationPiece
@@ -115,7 +113,7 @@ class GeneralFileExtractor(FileExtractor):
 
                 return [self._mapper.map_internal_to_external(x) for x in results if x.page_content is not None]
         except Exception as e:
-            logger.error("Error during document parsing: %s %s", e, traceback.format_exc())
+            logger.exception("Error during document parsing")
             raise e
 
     async def _run_extractors_with_fallback(

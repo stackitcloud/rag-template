@@ -285,7 +285,6 @@ This subsection covers data collection procedures.
     @pytest.mark.integration
     def test_extract_text_from_scanned_page(self, pdf_extractor, test_pdf_files):
         """Test text extraction from scanned pages using OCR with real PDF."""
-
         # Use the actual scanned test PDF
         scanned_pdf_path = test_pdf_files["scanned"]
 

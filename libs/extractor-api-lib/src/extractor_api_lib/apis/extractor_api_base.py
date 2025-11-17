@@ -22,6 +22,7 @@ class BaseExtractorApi:
     subclasses: ClassVar[Tuple] = ()
 
     def __init_subclass__(cls, **kwargs):
+        """Register the subclass."""
         super().__init_subclass__(**kwargs)
         BaseExtractorApi.subclasses = BaseExtractorApi.subclasses + (cls,)
 

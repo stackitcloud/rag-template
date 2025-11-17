@@ -333,7 +333,7 @@ class PDFExtractor(InformationFileExtractor):
         try:
             return page.extract_text() or ""
         except Exception:
-            logger.warning("Failed to extract text with pdfplumber", exc_info=True)
+            logger.warning("Failed to extract text with pdfplumber.", exc_info=True)
             return ""
 
     def _extract_content_from_page(

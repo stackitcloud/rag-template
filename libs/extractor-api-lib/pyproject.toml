@@ -119,6 +119,7 @@ docling = "2.61.2"
 torch =      { version = "2.9.0+cpu",  source = "pytorch_cpu" }
 torchvision = { version = "0.24.0+cpu", source = "pytorch_cpu" }
 transformers = ">=4.53.3,<5.0.0"
+pypandoc = ">=1.6.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

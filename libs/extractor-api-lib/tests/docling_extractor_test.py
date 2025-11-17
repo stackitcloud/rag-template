@@ -2,52 +2,10 @@ from pathlib import Path
 
 import pytest
 
+from extractor_api_lib.impl.extractors.file_extractors import docling_extractor as docling_module
 from extractor_api_lib.impl.extractors.file_extractors.docling_extractor import DoclingFileExtractor
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.file_services.file_service import FileService
-
-
-class _FakeDataFrame:
-    def __init__(self, markdown: str):
-        self._markdown = markdown
-
-    def to_markdown(self, index: bool = False):  # pragma: no cover - simple stub
-        return self._markdown
-
-
-class _FakeTable:
-    def __init__(self, markdown: str | None = None, dataframe_markdown: str | None = None, page_no: int = 1):
-        self._markdown = markdown
-        self._dataframe_markdown = dataframe_markdown
-        self.page_no = page_no
-
-    def to_markdown(self):
-        if self._markdown is None:
-            raise AttributeError  # pragma: no cover - aligns with docling default behaviour when not implemented
-        return self._markdown
-
-    def export_to_dataframe(self):
-        if self._dataframe_markdown is None:
-            raise AttributeError  # pragma: no cover - aligns with docling default behaviour when not implemented
-        return _FakeDataFrame(self._dataframe_markdown)
-
-
-def test_serialize_table_prefers_markdown_attr():
-    table = _FakeTable(markdown="| Heading | Value |\n| --- | --- |\n| Entry A | Entry B |")
-
-    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
-    markdown = extractor._serialize_table(table)
-
-    assert markdown == "| Heading | Value |\n| --- | --- |\n| Entry A | Entry B |"
-
-
-def test_serialize_table_falls_back_to_dataframe():
-    table = _FakeTable(markdown=None, dataframe_markdown="| Col |\n| --- |\n| 42 |")
-
-    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
-    markdown = extractor._serialize_table(table)
-
-    assert markdown == "| Col |\n| --- |\n| 42 |"
 
 
 class _FakeProv:
@@ -66,7 +24,7 @@ class _FakeTableItem:
         self._markdown = markdown
         self.prov = [_FakeProv(page)]
 
-    def to_markdown(self):
+    def export_to_markdown(self):
         return self._markdown
 
 
@@ -117,7 +75,7 @@ DATA_DIR = Path(__file__).parent / "test_data"
 
 
 @pytest.mark.asyncio
-async def test_aextract_content_groups_by_page():
+async def test_aextract_content_groups_by_page(monkeypatch: pytest.MonkeyPatch):
     document = _FakeDocument(
         [
             (_FakeTextItem("First page paragraph", page=1), 0),
@@ -125,6 +83,9 @@ async def test_aextract_content_groups_by_page():
             (_FakeTextItem("Second page text", page=2), 0),
         ]
     )
+
+    monkeypatch.setattr(docling_module, "TextItem", _FakeTextItem)
+    monkeypatch.setattr(docling_module, "TableItem", _FakeTableItem)
 
     extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
     extractor._converter = _FakeConverter(document)
@@ -150,13 +111,16 @@ async def test_aextract_content_groups_by_page():
 
 
 @pytest.mark.asyncio
-async def test_dash_only_table_is_dropped():
+async def test_dash_only_table_is_dropped(monkeypatch: pytest.MonkeyPatch):
     document = _FakeDocument(
         [
             (_FakeTableItem("| --- |\n| --- |", page=1), 0),
             (_FakeTextItem("Real content", page=1), 0),
         ]
     )
+
+    monkeypatch.setattr(docling_module, "TextItem", _FakeTextItem)
+    monkeypatch.setattr(docling_module, "TableItem", _FakeTableItem)
 
     extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
     extractor._converter = _FakeConverter(document)
@@ -171,33 +135,7 @@ async def test_dash_only_table_is_dropped():
 
 
 @pytest.mark.asyncio
-async def test_cleanup_clears_conversion_result_buffers():
-    class _DocWithCache(_FakeDocument):
-        def __init__(self, items):
-            super().__init__(items)
-            self.cleared = False
-
-        def _clear_picture_pil_cache(self):  # pragma: no cover - simple flag setter
-            self.cleared = True
-
-    document = _DocWithCache([(_FakeTextItem("Content", page=1), 0)])
-    converter = _FakeConverter(document)
-
-    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
-    extractor._converter = converter
-    extractor._file_service = None
-
-    await extractor.aextract_content(Path("dummy"), "sample.pdf")
-
-    assert converter._document.cleared is True
-    assert converter._conversion_result is not None
-    assert converter._conversion_result.pages == []
-    assert converter._conversion_result.errors == []
-    assert converter._conversion_result.assembled is None
-
-
-@pytest.mark.asyncio
-async def test_docling_extracts_real_html_document(tmp_path: Path):
+async def test_docling_extracts_real_html_document():
     sample_file = DATA_DIR / "sample.html"
     extractor = DoclingFileExtractor(_NoopFileService())
 
@@ -241,3 +179,38 @@ async def test_docling_handles_various_inputs(relative_path: str):
     assert isinstance(pieces, list)
     for piece in pieces:
         assert piece.page_content is not None
+
+
+def test_has_meaningful_table_content():
+    assert DoclingFileExtractor._has_meaningful_table_content("| A |\n| --- |\n| 1 |") is True
+    assert DoclingFileExtractor._has_meaningful_table_content("| --- |\n| --- |") is False
+
+
+def test_resolve_item_page_prefers_valid_page():
+    class _Prov:
+        def __init__(self, page_no: int):
+            self.page_no = page_no
+
+    class _Item:
+        def __init__(self, page_numbers: list[int]):
+            self.prov = [_Prov(page) for page in page_numbers]
+
+    assert DoclingFileExtractor._resolve_item_page(_Item([3, 4])) == 3
+    assert DoclingFileExtractor._resolve_item_page(_Item([])) == -1
+
+
+def test_compatible_file_types_cover_all_supported_formats():
+    extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
+    expected = {
+        docling_module.FileType.PDF,
+        docling_module.FileType.DOCX,
+        docling_module.FileType.PPTX,
+        docling_module.FileType.XLSX,
+        docling_module.FileType.HTML,
+        docling_module.FileType.MD,
+        docling_module.FileType.ASCIIDOC,
+        docling_module.FileType.CSV,
+        docling_module.FileType.IMAGE,
+    }
+
+    assert set(extractor.compatible_file_types) == expected

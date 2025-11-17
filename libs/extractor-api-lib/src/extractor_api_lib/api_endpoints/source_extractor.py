@@ -1,3 +1,5 @@
+"""Module for the abstract source extractor."""
+
 from abc import ABC, abstractmethod
 
 from extractor_api_lib.models.extraction_parameters import ExtractionParameters

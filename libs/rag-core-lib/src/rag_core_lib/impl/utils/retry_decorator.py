@@ -105,7 +105,7 @@ class _RetryEngine:
         total_attempts = self.cfg.max_retries + 1
         if attempt == self.cfg.max_retries:
             if self.logger:
-                self.logger.error("Failed after %d attempts: %s", total_attempts, exc, exc_info=False)
+                self.logger.exception("Failed after %d attempts.", total_attempts)
             return None
 
         if self._should_rate_limited(exc):

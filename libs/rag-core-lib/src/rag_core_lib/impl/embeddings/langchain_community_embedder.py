@@ -20,15 +20,12 @@ class LangchainCommunityEmbedder(Embedder, Embeddings):
 
     def get_embedder(self) -> "LangchainCommunityEmbedder":
         """Return the embedder instance."""
-
         return self
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Embed a list of documents using the wrapped embedder."""
-
         return self._embedder.embed_documents(texts)
 
     def embed_query(self, text: str) -> list[float]:
         """Embed a single query using the wrapped embedder."""
-
         return self._embedder.embed_query(text)

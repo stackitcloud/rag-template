@@ -1,3 +1,5 @@
+"""Module containing the ExtractorTypes enum."""
+
 from enum import StrEnum
 
 

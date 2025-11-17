@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "v3.2.1"
+version = "v3.3.0"
 description = "The rag-core-api contains the API layer for the RAG template for document retrieval, question answering, knowledge base management in the vector database and more."
 packages = [{ include = "rag_core_api", from = "src" }]
 authors = [
@@ -68,8 +68,8 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
 
 [tool.flake8]

@@ -11,6 +11,7 @@ describe("isAllowedDocumentType", () => {
 
     it("allows supported extensions when MIME is missing", () => {
         expect(isAllowedDocumentType("notes.MD", "")).toBe(true);
+        expect(isAllowedDocumentType("walkthrough.mdx", "")).toBe(true);
         expect(isAllowedDocumentType("diagram.PNG")).toBe(true);
         expect(isAllowedDocumentType("readme.adoc")).toBe(true);
     });

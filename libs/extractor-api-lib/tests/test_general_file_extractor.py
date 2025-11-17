@@ -1,3 +1,5 @@
+"""Tests for the GeneralFileExtractor fallback orchestration."""
+
 import pytest
 from unittest.mock import MagicMock
 
@@ -50,6 +52,14 @@ class _EmptyExtractor(InformationFileExtractor):
 
 @pytest.fixture
 def file_service():
+    """
+    Provide a mocked `FileService` that writes placeholder bytes.
+
+    Returns
+    -------
+    FileService
+        MagicMock adhering to the FileService specification.
+    """
     service = MagicMock(spec=FileService)
 
     def _download(_path: str, handle):
@@ -61,6 +71,14 @@ def file_service():
 
 @pytest.fixture
 def mapper():
+    """
+    Provide a mapper translating internal pieces to their content strings.
+
+    Returns
+    -------
+    MagicMock
+        Mapper mock that echoes the piece content.
+    """
     _mapper = MagicMock()
     _mapper.map_internal_to_external.side_effect = lambda piece: piece.page_content
     return _mapper
@@ -68,6 +86,16 @@ def mapper():
 
 @pytest.mark.asyncio
 async def test_general_file_extractor_fallbacks_to_next_extractor(file_service, mapper):
+    """
+    Ensure the extractor falls back until one yields content.
+
+    Parameters
+    ----------
+    file_service : FileService
+        Mock file service used to provide temporary files.
+    mapper : MagicMock
+        Mapper mock that converts internal pieces to strings.
+    """
     successful_piece = InternalInformationPiece(
         type=ContentType.TEXT,
         metadata={"document": "doc", "page": 1},
@@ -89,6 +117,16 @@ async def test_general_file_extractor_fallbacks_to_next_extractor(file_service, 
 
 @pytest.mark.asyncio
 async def test_general_file_extractor_raises_when_all_extractors_fail(file_service, mapper):
+    """
+    Raise a RuntimeError when every extractor fails.
+
+    Parameters
+    ----------
+    file_service : FileService
+        Mock file service used to provide temporary files.
+    mapper : MagicMock
+        Mapper mock that converts internal pieces to strings.
+    """
     extractors = [
         _FailingExtractor(file_service, message="primary failure"),
         _FailingExtractor(file_service, message="secondary failure"),

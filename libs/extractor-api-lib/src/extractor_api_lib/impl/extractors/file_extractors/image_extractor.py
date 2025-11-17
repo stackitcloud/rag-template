@@ -25,6 +25,17 @@ class TesseractImageExtractor(InformationFileExtractor):
     ORIGIN = "tesseract-image"
 
     def __init__(self, file_service: FileService, languages: Sequence[str] | None = None, psm: int = 6):
+        """Initialize the TesseractImageExtractor with the given FileService.
+
+        Parameters
+        ----------
+        file_service : FileService
+            The file service to use for file operations.
+        languages : Sequence[str] | None, optional
+            The languages to use for OCR, by default None which uses DEFAULT_LANGUAGES.
+        psm : int, optional
+            The Page Segmentation Mode (PSM) for Tesseract OCR, by default 6.
+        """
         super().__init__(file_service)
         self._languages = self._sanitize_languages(languages)
         self._tesseract_config = f"--psm {psm}"
@@ -39,6 +50,10 @@ class TesseractImageExtractor(InformationFileExtractor):
             The list of file types handled by this extractor.
         """
         return [FileType.IMAGE]
+
+    @property
+    def _ocr_language(self) -> str:
+        return "+".join(self._languages)
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """Asynchronously extract content from an image file using OCR.
@@ -74,25 +89,6 @@ class TesseractImageExtractor(InformationFileExtractor):
 
         return pieces
 
-    def _perform_ocr(self, frame: Image.Image) -> str:
-        try:
-            text = pytesseract.image_to_string(frame, lang=self._ocr_language, config=self._tesseract_config)
-        except TesseractError as exc:  # pragma: no cover - defensive logging
-            logger.warning("Tesseract OCR failed: %s", exc)
-            return ""
-
-        return text.strip()
-
-    def _validate_single_frame(self, image: Image.Image, file_path: Path) -> None:
-        frame_count = getattr(image, "n_frames", 1)
-        if frame_count > 1:
-            logger.warning("Multi-frame images are not supported: %s", file_path)
-            raise ValueError(f"Multi-frame images are not supported: {file_path}")
-
-    @property
-    def _ocr_language(self) -> str:
-        return "+".join(self._languages)
-
     def _sanitize_languages(self, languages: Sequence[str] | None) -> list[str]:
         normalized = [lang.strip() for lang in languages or self.DEFAULT_LANGUAGES if lang and lang.strip()]
         return normalized or list(self.DEFAULT_LANGUAGES)
@@ -107,3 +103,21 @@ class TesseractImageExtractor(InformationFileExtractor):
             "format": "markdown",
         }
         return InternalInformationPiece(type=ContentType.TEXT, metadata=metadata, page_content=content)
+
+    def _perform_ocr(self, frame: Image.Image) -> str:
+        try:
+            text = pytesseract.image_to_string(frame, lang=self._ocr_language, config=self._tesseract_config)
+        except TesseractError:  # pragma: no cover - defensive logging
+            logger.warning(
+                "Tesseract OCR failed.",
+                exc_info=logger.isEnabledFor(logging.DEBUG),
+            )
+            return ""
+
+        return text.strip()
+
+    def _validate_single_frame(self, image: Image.Image, file_path: Path) -> None:
+        frame_count = getattr(image, "n_frames", 1)
+        if frame_count > 1:
+            logger.warning("Multi-frame images are not supported: %s", file_path)
+            raise ValueError(f"Multi-frame images are not supported: {file_path}")

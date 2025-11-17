@@ -1,3 +1,5 @@
+"""Tests for the TesseractImageExtractor behaviour and error handling."""
+
 from pathlib import Path
 
 import pytest
@@ -28,7 +30,17 @@ class _NoopFileService(FileService):
 
 
 @pytest.mark.asyncio
-async def test_image_extractor_returns_clean_piece(monkeypatch, tmp_path: Path):
+async def test_image_extractor_returns_clean_piece(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """
+    Validate that OCR output is normalized and metadata is populated.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        Fixture used to replace the pytesseract call.
+    tmp_path : Path
+        Temporary directory provided by pytest for sample image creation.
+    """
     sample_path = tmp_path / "hello.png"
     Image.new("RGB", (50, 50), color="white").save(sample_path)
 
@@ -58,7 +70,20 @@ async def test_image_extractor_returns_clean_piece(monkeypatch, tmp_path: Path):
 
 
 @pytest.mark.asyncio
-async def test_image_extractor_returns_empty_when_ocr_blank(monkeypatch, tmp_path: Path):
+async def test_image_extractor_returns_empty_when_ocr_blank(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    """
+    Ensure blank OCR results yield no pieces.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        Fixture used to force an empty OCR response.
+    tmp_path : Path
+        Temporary directory provided by pytest for sample image creation.
+    """
     sample_path = tmp_path / "blank.png"
     Image.new("RGB", (20, 20), color="white").save(sample_path)
 
@@ -73,17 +98,33 @@ async def test_image_extractor_returns_empty_when_ocr_blank(monkeypatch, tmp_pat
 
 @pytest.mark.asyncio
 async def test_image_extractor_raises_for_invalid_image(tmp_path: Path):
+    """
+    Confirm that invalid files raise a user-facing ValueError.
+
+    Parameters
+    ----------
+    tmp_path : Path
+        Temporary directory provided by pytest for sample file creation.
+    """
     invalid_path = tmp_path / "invalid.png"
     invalid_path.write_bytes(b"not an image")
 
     extractor = TesseractImageExtractor(_NoopFileService())
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Unsupported image file"):
         await extractor.aextract_content(invalid_path, invalid_path.name)
 
 
 @pytest.mark.asyncio
 async def test_image_extractor_raises_for_multi_frame_image(tmp_path: Path):
+    """
+    Verify that animated images are rejected explicitly.
+
+    Parameters
+    ----------
+    tmp_path : Path
+        Temporary directory provided by pytest for sample file creation.
+    """
     animated_path = tmp_path / "animated.tiff"
 
     frame_one = Image.new("RGB", (10, 10), color="white")
@@ -92,5 +133,5 @@ async def test_image_extractor_raises_for_multi_frame_image(tmp_path: Path):
 
     extractor = TesseractImageExtractor(_NoopFileService())
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Multi-frame images are not supported"):
         await extractor.aextract_content(animated_path, animated_path.name)

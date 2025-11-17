@@ -90,14 +90,19 @@ class DoclingFileExtractor(InformationFileExtractor):
             FileType.IMAGE,
         ]
 
-    def _store_reading_order_images(self, document, base_path: Path):
-        viz = document.get_visualization(
-            viz_mode="reading_order",
-            show_branch_numbering=True,
-        )
+    @staticmethod
+    def _has_meaningful_table_content(table_markdown: str) -> bool:
+        return bool(re.search(r"\w", table_markdown))  # Check for at least one alphanumeric character
 
-        for page_no, image in viz.items():
-            image.save(base_path / f"reading_order_page_{page_no}.png")
+    @staticmethod
+    def _resolve_item_page(item: Any) -> int:
+        provenance = getattr(item, "prov", None)
+        if isinstance(provenance, list):
+            for prov_entry in provenance:
+                page = getattr(prov_entry, "page_no", None)
+                if isinstance(page, int):
+                    return page
+        return -1  # Default page number when not found
 
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """Extract content from the given file path.
@@ -146,6 +151,15 @@ class DoclingFileExtractor(InformationFileExtractor):
 
         return pieces + table_pieces
 
+    def _store_reading_order_images(self, document, base_path: Path):
+        viz = document.get_visualization(
+            viz_mode="reading_order",
+            show_branch_numbering=True,
+        )
+
+        for page_no, image in viz.items():
+            image.save(base_path / f"reading_order_page_{page_no}.png")
+
     def _create_information_pieces(self, segments, name, content_type: ContentType) -> list[InternalInformationPiece]:
         pieces: list[InternalInformationPiece] = []
 
@@ -171,7 +185,7 @@ class DoclingFileExtractor(InformationFileExtractor):
 
         return pieces
 
-    def _collect_page_segments(self, document: Any) -> tuple[dict[int, list[str]], dict[int, list[str]]]:
+    def _collect_page_segments(self, document: Any) -> tuple[dict[int, list], dict[int, list]]:
         iterator = getattr(document, "iterate_items", None)
         if not callable(iterator):
             return {}, {}
@@ -194,20 +208,6 @@ class DoclingFileExtractor(InformationFileExtractor):
                 page_number = self._resolve_item_page(item)
                 table_segments[page_number].append(table_markdown)
         return segments, table_segments
-
-    @staticmethod
-    def _has_meaningful_table_content(table_markdown: str) -> bool:
-        return bool(re.search(r"\w", table_markdown))  # Check for at least one alphanumeric character
-
-    @staticmethod
-    def _resolve_item_page(item: Any) -> int:
-        provenance = getattr(item, "prov", None)
-        if isinstance(provenance, list):
-            for prov_entry in provenance:
-                page = getattr(prov_entry, "page_no", None)
-                if isinstance(page, int):
-                    return page
-        return -1  # Default page number when not found
 
     def _create_information_piece(
         self,

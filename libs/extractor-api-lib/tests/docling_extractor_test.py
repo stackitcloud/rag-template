@@ -1,3 +1,5 @@
+"""Tests for the Docling-backed file extractor."""
+
 from pathlib import Path
 
 import pytest
@@ -76,6 +78,14 @@ DATA_DIR = Path(__file__).parent / "test_data"
 
 @pytest.mark.asyncio
 async def test_aextract_content_groups_by_page(monkeypatch: pytest.MonkeyPatch):
+    """
+    Verify that text and table segments are grouped per originating page.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        Pytest fixture used to inject fake Docling items.
+    """
     document = _FakeDocument(
         [
             (_FakeTextItem("First page paragraph", page=1), 0),
@@ -112,6 +122,14 @@ async def test_aextract_content_groups_by_page(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.asyncio
 async def test_dash_only_table_is_dropped(monkeypatch: pytest.MonkeyPatch):
+    """
+    Ensure tables without alphanumeric cells are excluded from extraction.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        Pytest fixture used to inject fake Docling items.
+    """
     document = _FakeDocument(
         [
             (_FakeTableItem("| --- |\n| --- |", page=1), 0),
@@ -136,6 +154,14 @@ async def test_dash_only_table_is_dropped(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.asyncio
 async def test_docling_extracts_real_html_document():
+    """
+    Run an integration-like check against the bundled HTML sample.
+
+    Returns
+    -------
+    None
+        The assertions validate textual and tabular extraction.
+    """
     sample_file = DATA_DIR / "sample.html"
     extractor = DoclingFileExtractor(_NoopFileService())
 
@@ -148,7 +174,8 @@ async def test_docling_extracts_real_html_document():
     assert "Trailing text" in text_piece.page_content
 
     table_piece = next(piece for piece in pieces if piece.type == ContentType.TABLE)
-    assert "Alpha" in table_piece.page_content and "Beta" in table_piece.page_content
+    assert "Alpha" in table_piece.page_content
+    assert "Beta" in table_piece.page_content
     assert table_piece.metadata["origin_extractor"] == "docling"
 
 
@@ -172,6 +199,14 @@ async def test_docling_extracts_real_html_document():
     ],
 )
 async def test_docling_handles_various_inputs(relative_path: str):
+    """
+    Confirm that supported sample files are processed without raising errors.
+
+    Parameters
+    ----------
+    relative_path : str
+        The fixture file name to feed into the extractor.
+    """
     sample_file = DATA_DIR / relative_path
     extractor = DoclingFileExtractor(_NoopFileService())
 
@@ -182,11 +217,28 @@ async def test_docling_handles_various_inputs(relative_path: str):
 
 
 def test_has_meaningful_table_content():
+    """
+    Verify that the helper detects tables with substantive content.
+
+    Returns
+    -------
+    None
+        The assertions cover both positive and negative inputs.
+    """
     assert DoclingFileExtractor._has_meaningful_table_content("| A |\n| --- |\n| 1 |") is True
     assert DoclingFileExtractor._has_meaningful_table_content("| --- |\n| --- |") is False
 
 
 def test_resolve_item_page_prefers_valid_page():
+    """
+    Ensure provenance details are converted to numeric page markers.
+
+    Returns
+    -------
+    None
+        The assertions exercise found and missing provenance values.
+    """
+
     class _Prov:
         def __init__(self, page_no: int):
             self.page_no = page_no
@@ -200,6 +252,14 @@ def test_resolve_item_page_prefers_valid_page():
 
 
 def test_compatible_file_types_cover_all_supported_formats():
+    """
+    Check that the extractor advertises every supported Docling format.
+
+    Returns
+    -------
+    None
+        Ensures no file type regression slips through unnoticed.
+    """
     extractor = DoclingFileExtractor.__new__(DoclingFileExtractor)
     expected = {
         docling_module.FileType.PDF,

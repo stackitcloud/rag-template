@@ -89,13 +89,12 @@ class GeneralFileExtractor(FileExtractor):
                 def _extractor_matches_file_type(extractor, ft: str) -> bool:
                     for file_type_option in extractor.compatible_file_types:
                         opt = str(file_type_option.value).upper()
-                        if opt == ft:
-                            return True
-                        elif opt == "IMAGE" and ft in image_extensions:
-                            return True
-                        elif opt == "ASCIIDOC" and ft in ascii_doc_extensions:
-                            return True
-                        elif opt == "MD" and ft in markdown_extensions:
+                        if (
+                            opt == ft
+                            or (opt == "IMAGE" and ft in image_extensions)
+                            or (opt == "ASCIIDOC" and ft in ascii_doc_extensions)
+                            or (opt == "MD" and ft in markdown_extensions)
+                        ):
                             return True
                     return False
 
@@ -112,9 +111,9 @@ class GeneralFileExtractor(FileExtractor):
                 )
 
                 return [self._mapper.map_internal_to_external(x) for x in results if x.page_content is not None]
-        except Exception as e:
-            logger.exception("Error during document parsing")
-            raise e
+        except Exception:  # noqa: TRY302 reraising original exception
+            logger.exception("Error during document parsing.")
+            raise
 
     async def _run_extractors_with_fallback(
         self,
@@ -130,10 +129,9 @@ class GeneralFileExtractor(FileExtractor):
                 result = await extractor.aextract_content(temp_file_path, document_name)
             except Exception as exc:
                 logger.warning(
-                    "Extractor %s failed for document %s: %s",
+                    "Extractor %s failed for document %s.",
                     extractor_name,
                     document_name,
-                    exc,
                     exc_info=logger.isEnabledFor(logging.DEBUG),
                 )
                 errors.append(exc)

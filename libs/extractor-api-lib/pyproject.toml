@@ -43,6 +43,7 @@ per-file-ignores = """
   ./src/extractor_api_lib/container.py: CCE002,CCE001,
   ./src/extractor_api_lib/apis/extractor_api_base.py: WOT001,
   ./tests/*: S101,E501,
+  **/__init__.py: D107,
 """
 
 [tool.black]

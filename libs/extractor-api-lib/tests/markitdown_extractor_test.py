@@ -1,3 +1,5 @@
+"""Tests for the MarkitdownFileExtractor conversion helpers."""
+
 from pathlib import Path
 
 import pytest
@@ -43,13 +45,21 @@ class _StubConverter:
 DATA_DIR = Path(__file__).parent / "test_data"
 
 
-@pytest.fixture()
+@pytest.fixture
 def markitdown_extractor() -> MarkitdownFileExtractor:
+    """
+    Provide a MarkitdownFileExtractor with a no-op file service.
+
+    Returns
+    -------
+    MarkitdownFileExtractor
+        Instance under test for the Markitdown extractor suite.
+    """
     return MarkitdownFileExtractor(_NoopFileService())
 
 
 @pytest.mark.parametrize(
-    "result, expected",
+    ("result", "expected"),
     [
         (_StubResult(markdown="primary", text_content="secondary"), "primary"),
         (_StubResult(text_content=" fallback "), " fallback "),
@@ -59,10 +69,28 @@ def markitdown_extractor() -> MarkitdownFileExtractor:
     ],
 )
 def test_extract_markdown_prefers_available_fields(result, expected):
+    """
+    Validate that markdown extraction prefers richer attributes first.
+
+    Parameters
+    ----------
+    result : object
+        Stub result with various attribute combinations.
+    expected : str
+        Anticipated markdown returned by the helper.
+    """
     assert MarkitdownFileExtractor._extract_markdown(result) == expected
 
 
 def test_extract_markdown_tables_detects_all_tables(markitdown_extractor: MarkitdownFileExtractor):
+    """
+    Ensure table parsing yields one entry per markdown table.
+
+    Parameters
+    ----------
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     markdown = """
 Intro paragraph
 
@@ -85,6 +113,14 @@ Intermezzo
 
 
 def test_build_pieces_for_markdown_emits_table_metadata(markitdown_extractor: MarkitdownFileExtractor):
+    """
+    Confirm generated pieces include table metadata alongside text.
+
+    Parameters
+    ----------
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     markdown = """# Heading
 
 | Name | Value |
@@ -107,6 +143,14 @@ def test_build_pieces_for_markdown_emits_table_metadata(markitdown_extractor: Ma
 
 
 def test_split_pptx_markdown_uses_markers(markitdown_extractor: MarkitdownFileExtractor):
+    """
+    Verify slide markers are used to split PPTX output by slide number.
+
+    Parameters
+    ----------
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     markdown = """
 Intro
 <!-- Slide number: 1 -->
@@ -124,6 +168,14 @@ Slide three body
 
 
 def test_split_pptx_markdown_without_markers_defaults_to_single_chunk(markitdown_extractor: MarkitdownFileExtractor):
+    """
+    Ensure PPTX markdown without markers returns a single chunk page.
+
+    Parameters
+    ----------
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     slides = markitdown_extractor._split_pptx_markdown("Single chunk content")
 
     assert slides == [(1, "Single chunk content")]
@@ -133,6 +185,16 @@ def test_split_pptx_markdown_without_markers_defaults_to_single_chunk(markitdown
 async def test_aextract_content_routes_pdf_through_page_extractor(
     tmp_path: Path, markitdown_extractor: MarkitdownFileExtractor
 ):
+    """
+    Route PDF files to the per-page extractor helper.
+
+    Parameters
+    ----------
+    tmp_path : Path
+        Temporary directory provided by pytest.
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     pdf_path = tmp_path / "report.pdf"
     pdf_path.write_bytes(b"%PDF-FAKE")
 
@@ -152,6 +214,16 @@ async def test_aextract_content_routes_pdf_through_page_extractor(
 
 @pytest.mark.asyncio
 async def test_aextract_content_pptx_splits_per_slide(tmp_path: Path, markitdown_extractor: MarkitdownFileExtractor):
+    """
+    Confirm PPTX processing results in one page-per-slide output.
+
+    Parameters
+    ----------
+    tmp_path : Path
+        Temporary directory provided by pytest.
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     pptx_path = tmp_path / "deck.pptx"
     pptx_path.write_bytes(b"fake pptx")
 
@@ -170,6 +242,16 @@ async def test_aextract_content_pptx_splits_per_slide(tmp_path: Path, markitdown
 async def test_aextract_content_returns_single_page_for_text(
     tmp_path: Path, markitdown_extractor: MarkitdownFileExtractor
 ):
+    """
+    Verify plain text inputs return a single text piece tagged with page 1.
+
+    Parameters
+    ----------
+    tmp_path : Path
+        Temporary directory provided by pytest.
+    markitdown_extractor : MarkitdownFileExtractor
+        Fixture-managed extractor instance under test.
+    """
     txt_path = tmp_path / "notes.txt"
     txt_path.write_text("Hello world")
 
@@ -201,13 +283,25 @@ async def test_aextract_content_returns_single_page_for_text(
     ],
 )
 async def test_markitdown_handles_various_inputs(relative_path: str):
+    """
+    Run smoke tests over the collection of bundled fixture documents.
+
+    Parameters
+    ----------
+    relative_path : str
+        Fixture file path relative to the test data directory.
+    """
     sample_file = DATA_DIR / relative_path
     extractor = MarkitdownFileExtractor(_NoopFileService())
 
-    # For integration tests: ensure extractor runs without raising and returns 0..n pieces
     pieces = await extractor.aextract_content(sample_file, sample_file.name)
-    assert isinstance(pieces, list) and pieces or relative_path == "scanned_document.pdf" and not pieces
-    # If we got any pieces, ensure their metadata mentions origin when expected
+    assert isinstance(pieces, list)
+
+    if relative_path == "scanned_document.pdf":
+        assert pieces == []
+    else:
+        assert pieces
+
     for piece in pieces:
         assert piece.page_content is not None
         if piece.type == ContentType.TABLE:

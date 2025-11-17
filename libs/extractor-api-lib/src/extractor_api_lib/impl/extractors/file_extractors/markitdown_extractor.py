@@ -60,6 +60,23 @@ class MarkitdownFileExtractor(InformationFileExtractor):
             FileType.TXT,
         ]
 
+    @staticmethod
+    def _extract_markdown(result: object) -> str:
+        """Robustly grab markdown from a DocumentConverterResult or string."""
+        if result is None:
+            return ""
+
+        # Newer MarkItDown prefers `.markdown`; `.text_content` is kept for BC.
+        for attr in ("markdown", "text_content", "text"):
+            value = getattr(result, attr, None)
+            if isinstance(value, str) and value.strip():
+                return value
+
+        if isinstance(result, str):
+            return result
+
+        return ""
+
     async def aextract_content(self, file_path: Path, name: str) -> list[InternalInformationPiece]:
         """Asynchronously extract content from a file using MarkItDown.
 
@@ -75,7 +92,6 @@ class MarkitdownFileExtractor(InformationFileExtractor):
         list[InternalInformationPiece]
             The list of extracted information pieces.
         """
-
         suffix = file_path.suffix.lower()
 
         if suffix == ".pdf":
@@ -101,25 +117,6 @@ class MarkitdownFileExtractor(InformationFileExtractor):
                 markdown=markdown,
             )
         )
-
-    # ------------------------------------------------------------------ utils
-
-    @staticmethod
-    def _extract_markdown(result: object) -> str:
-        """Robustly grab markdown from a DocumentConverterResult or string."""
-        if result is None:
-            return ""
-
-        # Newer MarkItDown prefers `.markdown`; `.text_content` is kept for BC.
-        for attr in ("markdown", "text_content", "text"):
-            value = getattr(result, attr, None)
-            if isinstance(value, str) and value.strip():
-                return value
-
-        if isinstance(result, str):
-            return result
-
-        return ""
 
     def _extract_markdown_tables(self, markdown: str) -> list[str]:
         """Use markdown-it-py to extract table blocks as markdown slices."""

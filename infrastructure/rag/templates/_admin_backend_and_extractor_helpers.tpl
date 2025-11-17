@@ -87,6 +87,14 @@
 {{- default "/var/modelscope" .Values.extractor.modelscopeCacheDir -}}
 {{- end -}}
 
+{{- define "extractor.huggingfaceCacheDir" -}}
+{{- default "/tmp/hf-cache" .Values.extractor.huggingfaceCacheDir -}}
+{{- end -}}
+
+{{- define "extractor.modelscopeCacheDir" -}}
+{{- default "/var/modelscope" .Values.extractor.modelscopeCacheDir -}}
+{{- end -}}
+
 # ingress
 {{- define "ingress.adminBackendFullname" -}}
 {{- printf "%s-admin-backend-ingress" .Release.Name | trunc 63 | trimSuffix "-" -}}

@@ -24,7 +24,7 @@ class TesseractImageExtractor(InformationFileExtractor):
     DEFAULT_LANGUAGES: tuple[str, ...] = ("eng", "deu")
     ORIGIN = "tesseract-image"
 
-    def __init__(self, file_service: FileService, languages: Sequence[str] | None = None, psm: int = 2):
+    def __init__(self, file_service: FileService, languages: Sequence[str] | None = None, psm: int = 6):
         super().__init__(file_service)
         self._languages = self._sanitize_languages(languages)
         self._tesseract_config = f"--psm {psm}"

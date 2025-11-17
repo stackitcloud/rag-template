@@ -171,27 +171,6 @@ class DoclingFileExtractor(InformationFileExtractor):
 
         return pieces
 
-    def _serialize_table(self, table: Any) -> str | None:
-        if hasattr(table, "to_markdown"):
-            try:
-                markdown = table.to_markdown()
-                if markdown:
-                    return markdown
-            except Exception as exc:  # pragma: no cover - defensive logging
-                logger.debug("Docling table markdown conversion failed: %s", exc)
-
-        export_fn = getattr(table, "export_to_dataframe", None)
-        if callable(export_fn):
-            try:
-                dataframe = export_fn()
-                if dataframe:
-                    markdown = dataframe.to_markdown(index=False)
-                    if markdown:
-                        return markdown
-            except Exception:  # pragma: no cover - defensive logging
-                logger.debug("Docling table dataframe export failed", exc_info=True)
-        logger.debug("Docling table serialization failed for table: %s", table)
-
     def _collect_page_segments(self, document: Any) -> tuple[dict[int, list[str]], dict[int, list[str]]]:
         iterator = getattr(document, "iterate_items", None)
         if not callable(iterator):
@@ -200,14 +179,14 @@ class DoclingFileExtractor(InformationFileExtractor):
         segments: dict[int, list[str]] = defaultdict(list)
         table_segments: dict[int, list[str]] = defaultdict(list)
         for item, _level in iterator():
-            if isinstance(item, TextItem) or hasattr(item, "text"):
+            if isinstance(item, TextItem):
                 text = getattr(item, "text", "")
                 if not text:
                     continue
                 page_number = self._resolve_item_page(item)
                 segments[page_number].append(text)
-            elif isinstance(item, TableItem) or hasattr(item, "to_markdown") or hasattr(item, "export_to_dataframe"):
-                table_markdown = self._serialize_table(item)
+            elif isinstance(item, TableItem):
+                table_markdown = item.export_to_markdown()
                 if not table_markdown:
                     continue
                 if not self._has_meaningful_table_content(table_markdown):

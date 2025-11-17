@@ -3,7 +3,8 @@
 {{- end -}}
 
 {{- define "frontend.fullImageName" -}}
-{{- printf "%s:%s" .Values.frontend.image.repository .Values.frontend.image.tag | trimSuffix ":" -}}
+{{- $tag := default .Chart.AppVersion .Values.frontend.image.tag -}}
+{{- printf "%s:%s" .Values.frontend.image.repository $tag | trimSuffix ":" -}}
 {{- end -}}
 
 {{- define "ingress.frontendFullname" -}}

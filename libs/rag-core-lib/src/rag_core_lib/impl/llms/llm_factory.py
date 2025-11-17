@@ -1,3 +1,5 @@
+"""Module for creating and managing Large Language Models (LLMs) in the application."""
+
 from pydantic_settings import BaseSettings
 from langchain.chat_models import init_chat_model
 from langchain.chat_models.base import _SUPPORTED_PROVIDERS

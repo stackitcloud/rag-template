@@ -45,7 +45,6 @@ class StackitEmbedder(Embedder, Embeddings):
 
     def get_embedder(self) -> "StackitEmbedder":
         """Return the embedder instance."""
-
         return self
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
@@ -63,7 +62,6 @@ class StackitEmbedder(Embedder, Embeddings):
 
     def embed_query(self, text: str) -> list[float]:
         """Embed a single query using the STACKIT embeddings endpoint."""
-
         embeddings_list = self.embed_documents([text])
         if embeddings_list:
             embeddings = embeddings_list[0]

@@ -51,7 +51,7 @@ Welcome to the STACKIT RAG Template! This is a basic example of how to use the R
 
 ## Features 🚀
 
-**Document Management**: Supports PDFs, DOCX, PPTX, XML, EPUB documents and websource via confluence as well as sitemaps.
+**Document Management**: Supports PDFs, Office docs (DOCX, PPTX), spreadsheets (XLSX), Markdown/AsciiDoc (MD, MDX, ADOC), EPUB/HTML/XML, CSV/TXT, and raster images, with automatic fallbacks between Docling, MarkItDown, and custom extractors; also handles Confluence spaces and sitemaps.
 
 **AI Integration**: Multiple LLM and embedder providers for flexibility.
 
@@ -109,9 +109,9 @@ All components are provided by the *admin-api-lib*. For further information on e
 
 #### 1.1.3 Document extractor
 
-The Document extractor is a component that is used to extract the content from the documents and confluence spaces.
+The Document extractor ingests uploaded files and remote sources (Confluence, sitemap) and now orchestrates multiple extractors with a deterministic fallback chain. Docling runs first for rich formats (PDF, Office, Markdown, HTML, images), MarkItDown provides lightweight markdown conversion, and specialised custom extractors (PDF, MS Office, XML, EPUB, Tesseract OCR) handle edge cases. The order and availability can be customised through the dependency-injector container.
 
-All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [the libs README](./libs/README.md#3-extractor-api-lib).
+All components are provided by the *extractor-api-lib*. For further information on endpoints, extractor ordering, supported formats, and configuration tips, please consult [the libs README](./libs/README.md#3-extractor-api-lib).
 
 #### 1.1.4 MCP Server
 

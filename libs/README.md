@@ -13,7 +13,8 @@ It consists of the following python packages:
   - [2.1 Requirements](#21-requirements)
   - [2.2 Endpoints](#22-endpoints)
   - [2.3 Replaceable parts](#23-replaceable-parts)
-  - [2.4 Summarizer retry behavior](#24-summarizer-retry-behavior)
+  - [2.4 Chunker configuration](#24-chunker-configuration-multiple-chunkers)
+  - [2.5 Summarizer retry behavior](#25-summarizer-retry-behavior)
 - [`3. Extractor API lib`](#3-extractor-api-lib)
   - [3.1 Requirements](#31-requirements)
   - [3.2 Endpoints](#32-endpoints)
@@ -84,18 +85,20 @@ Uploaded documents are required to contain the following metadata:
 
 | Name | Type | Default | Notes |
 |----------|---------|--------------|--------------|
-| embedder | [`rag_core_api.embeddings.embedder.Embedder`](./rag-core-api/src/rag_core_api/embeddings/embedder.py) | Depends on your settings. Can be [`rag_core_api.impl.embeddings.langchain_community_embedder.LangchainCommunityEmbedder`](./rag-core-api/src/rag_core_api/impl/embeddings/langchain_community_embedder.py) or [`rag_core_api.impl.embeddings.stackit_embedder.StackitEmbedder`](./rag-core-api/src/rag_core_api/impl/embeddings/stackit_embedder.py) | Selected by EmbedderClassTypeSettings.embedder_type. |
+| embedder | [`rag_core_lib.impl.embeddings.embedder.Embedder`](./rag-core-lib/src/rag_core_lib/impl/embeddings/embedder.py) | Depends on your settings. Can be [`rag_core_lib.impl.embeddings.langchain_community_embedder.LangchainCommunityEmbedder`](./rag-core-lib/src/rag_core_lib/impl/embeddings/langchain_community_embedder.py) or [`rag_core_lib.impl.embeddings.stackit_embedder.StackitEmbedder`](./rag-core-lib/src/rag_core_lib/impl/embeddings/stackit_embedder.py) | Selected by [`rag_core_lib.impl.settings.embedder_class_type_settings.EmbedderClassTypeSettings.embedder_type`](./rag-core-lib/src/rag_core_lib/impl/settings/embedder_class_type_settings.py). |
 | vector_database | [`rag_core_api.vector_databases.vector_database.VectorDatabase`](./rag-core-api/src/rag_core_api/vector_databases/vector_database.py) | [`rag_core_api.impl.vector_databases.qdrant_database.QdrantDatabase`](./rag-core-api/src/rag_core_api/impl/vector_databases/qdrant_database.py) | |
 | reranker | [`rag_core_api.reranking.reranker.Reranker`](./rag-core-api/src/rag_core_api/reranking/reranker.py)  | [`rag_core_api.impl.reranking.flashrank_reranker.FlashrankReranker`](./rag-core-api/src/rag_core_api/impl/reranking/flashrank_reranker.py) | Used in the *composed_retriever* |
 | composed_retriever | [`rag_core_api.retriever.retriever.Retriever`](./rag-core-api/src/rag_core_api/retriever/retriever.py) | [`rag_core_api.impl.retriever.composite_retriever.CompositeRetriever`](./rag-core-api/src/rag_core_api/impl/retriever/composite_retriever.py) | Handles retrieval, re-ranking, etc. |
-| large_language_model | `langchain_core.language_models.llms.BaseLLM` | `langchain_community.llms.vllm.VLLMOpenAI`, `langchain_community.llms.Ollama` or `langchain_community.llms.FakeListLLM` | The LLm that is used for all LLM tasks. The default depends on the value of `rag_core_lib.impl.settings.rag_class_types_settings.RAGClassTypeSettings.llm_type`. The FakeListLLM is used for testing |
+| large_language_model | `langchain_core.language_models.chat_models.BaseChatModel` | Provided via [`rag_core_lib.impl.llms.llm_factory.chat_model_provider`](./rag-core-lib/src/rag_core_lib/impl/llms/llm_factory.py): `langchain_openai.ChatOpenAI` or `langchain_ollama.ChatOllama` | The LLM used for all LLM tasks. The default depends on `rag_core_lib.impl.settings.rag_class_types_settings.RAGClassTypeSettings.llm_type`. A fake model is used in tests. |
 | prompt | `str` | [`rag_core_api.prompt_templates.answer_generation_prompt.ANSWER_GENERATION_PROMPT`](./rag-core-api/src/rag_core_api/prompt_templates/answer_generation_prompt.py) | The prompt used for answering the question. |
-| rephrasing_prompt | `str` |  [`rag_core_api.prompt_templates.question_rephrasing_prompt.ANSWER_REPHRASING_PROMPT`](./rag-core-api/src/rag_core_api/prompt_templates/question_rephrasing_prompt.py) | The prompt used for rephrasing the question. The rephrased question (and the *original* question are both used for retrival of the documents)|
+| rephrasing_prompt | `str` |  [`rag_core_api.prompt_templates.question_rephrasing_prompt.QUESTION_REPHRASING_PROMPT`](./rag-core-api/src/rag_core_api/prompt_templates/question_rephrasing_prompt.py) | The prompt used for rephrasing the question. The rephrased question (and the *original* question are both used for retrieval of the documents). |
+| language_detection_prompt | `str` | [`rag_core_api.prompt_templates.language_detection_prompt.LANGUAGE_DETECTION_PROMPT`](./rag-core-api/src/rag_core_api/prompt_templates/language_detection_prompt.py) | Prompt for detecting input language. Enforces structured JSON output `{ "language": "<iso639-1>" }` and defaults to `en` when uncertain. |
 | langfuse_manager | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | Retrieves additional settings, as well as the prompt from langfuse if available. |
-| answer_generation_chain | [`rag_core_lib.chains.async_chain.AsyncChain[rag_core_api.impl.graph.graph_state.graph_state.AnswerGraphState, str]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py) | [`rag_core_api.impl.answer_generation_chains.answer_generation_chain.AnswerGenerationChain`](./rag-core-api/src/rag_core_api/impl/answer_generation_chains/answer_generation_chain.py) | LangChain chain used for answering the question. Is part of the *chat_graph*, |
-| rephrasing_chain | [`rag_core_lib.chains.async_chain.AsyncChain[rag_core_api.impl.graph.graph_state.graph_state.AnswerGraphState, str]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py) | [`rag_core_api.impl.answer_generation_chains.rephrasing_chain.RephrasingChain`](./rag-core-api/src/rag_core_api/impl/answer_generation_chains/rephrasing_chain.py) | LangChain chain used for rephrasing the question. Is part of the *chat_graph*. |
+| answer_generation_chain | [`rag_core_lib.runnables.AsyncRunnable[rag_core_api.impl.graph.graph_state.graph_state.AnswerGraphState, str]`](./rag-core-lib/src/rag_core_lib/runnables/async_runnable.py) | [`rag_core_api.impl.answer_generation_chains.answer_generation_chain.AnswerGenerationChain`](./rag-core-api/src/rag_core_api/impl/answer_generation_chains/answer_generation_chain.py) | LangChain chain used for answering the question. Is part of the *chat_graph*. |
+| rephrasing_chain | [`rag_core_lib.runnables.AsyncRunnable[rag_core_api.impl.graph.graph_state.graph_state.AnswerGraphState, str]`](./rag-core-lib/src/rag_core_lib/runnables/async_runnable.py) | [`rag_core_api.impl.answer_generation_chains.rephrasing_chain.RephrasingChain`](./rag-core-api/src/rag_core_api/impl/answer_generation_chains/rephrasing_chain.py) | LangChain chain used for rephrasing the question. Is part of the *chat_graph*. |
+| language_detection_chain | [`rag_core_lib.runnables.AsyncRunnable[rag_core_api.impl.graph.graph_state.graph_state.AnswerGraphState, str]`](./rag-core-lib/src/rag_core_lib/runnables/async_runnable.py) | [`rag_core_api.impl.answer_generation_chains.language_detection_chain.LanguageDetectionChain`](./rag-core-api/src/rag_core_api/impl/answer_generation_chains/language_detection_chain.py) | Detects the language of the question and returns an ISO 639-1 code (e.g., `en`, `de`). Uses structured-output guidance and robust parsing with fallback to `en`. Part of the *chat_graph*. |
 | chat_graph | [`rag_core_api.graph.graph_base.GraphBase`](./rag-core-api/src/rag_core_api/graph/graph_base.py) | [`rag_core_api.impl.graph.chat_graph.DefaultChatGraph`](./rag-core-api/src/rag_core_api/impl/graph/chat_graph.py) | Langgraph graph that contains the entire logic for question answering. |
-| traced_chat_graph | [`rag_core_lib.chains.async_chain.AsyncChain[Any, Any]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) | Wraps around the *chat_graph* and add langfuse tracing. |
+| traced_chat_graph | [`rag_core_lib.runnables.AsyncRunnable[Any, Any]`](./rag-core-lib/src/rag_core_lib/runnables/async_runnable.py) | [`rag_core_lib.impl.tracers.langfuse_traced_runnable.LangfuseTracedRunnable`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_runnable.py) | Wraps around the *chat_graph* and adds Langfuse tracing. |
 | evaluator | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | [`rag_core_api.impl.evaluator.langfuse_ragas_evaluator.LangfuseRagasEvaluator`](./rag-core-api/src/rag_core_api/impl/evaluator/langfuse_ragas_evaluator.py) | The evaulator used in the evaluate endpoint. |
 | chat_endpoint | [`rag_core_api.api_endpoints.chat.Chat`](./rag-core-api/src/rag_core_api/api_endpoints/chat.py) | [`rag_core_api.impl.api_endpoints.default_chat.DefaultChat`](./rag-core-api/src/rag_core_api/impl/api_endpoints/default_chat.py) | Implementation of the chat endpoint. Default implementation just calls the *traced_chat_graph* |
 | ragas_llm | `langchain_core.language_models.chat_models.BaseChatModel` | `langchain_openai.ChatOpenAI` or `langchain_ollama.ChatOllama` | The LLM used for the ragas evaluation. |
@@ -106,7 +109,7 @@ The default STACKIT embedder implementation (`StackitEmbedder`) uses the shared 
 
 - Decorator: `rag_core_lib.impl.utils.retry_decorator.retry_with_backoff`
 - Base settings (fallback): [`RetryDecoratorSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/retry_decorator_settings.py)
-- Per-embedder overrides: [`StackitEmbedderSettings`](./rag-core-api/src/rag_core_api/impl/settings/stackit_embedder_settings.py)
+- Per-embedder overrides: [`StackitEmbedderSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/stackit_embedder_settings.py)
 
 How it resolves settings
 
@@ -182,23 +185,71 @@ The extracted information will be summarized using LLM. The summary, as well as 
 | Name | Type | Default | Notes |
 |----------|---------|--------------|--------------|
 | file_service | [`admin_api_lib.file_services.file_service.FileService`](./admin-api-lib/src/admin_api_lib/file_services/file_service.py) | [`admin_api_lib.impl.file_services.s3_service.S3Service`](./admin-api-lib/src/admin_api_lib/impl/file_services/s3_service.py) | Handles operations on the connected storage. |
-| large_language_model | `langchain_core.language_models.llms.BaseLLM` | `langchain_community.llms.vllm.VLLMOpenAI` or `langchain_community.llms.Ollama` | The LLm that is used for all LLM tasks. The default depends on the value of `rag_core_lib.impl.settings.rag_class_types_settings.RAGClassTypeSettings.llm_type` |
+| large_language_model | `langchain_core.language_models.chat_models.BaseChatModel` | Provided via [`rag_core_lib.impl.llms.llm_factory.chat_model_provider`](./rag-core-lib/src/rag_core_lib/impl/llms/llm_factory.py): `langchain_openai.ChatOpenAI` or `langchain_ollama.ChatOllama` | The LLM used for all LLM tasks. The default depends on `rag_core_lib.impl.settings.rag_class_types_settings.RAGClassTypeSettings.llm_type`. |
+| semantic_chunker_embeddings | [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | Depends on your settings. Can be [`rag_core_lib.impl.embeddings.langchain_community_embedder.LangchainCommunityEmbedder`](./rag-core-lib/src/rag_core_lib/impl/embeddings/langchain_community_embedder.py) or [`rag_core_lib.impl.embeddings.stackit_embedder.StackitEmbedder`](./rag-core-lib/src/rag_core_lib/impl/embeddings/stackit_embedder.py) | Selected by [`rag_core_lib.impl.settings.embedder_class_type_settings.EmbedderClassTypeSettings.embedder_type`](./rag-core-lib/src/rag_core_lib/impl/settings/embedder_class_type_settings.py). Can be `recursive` or `semantic`. |
 | key_value_store | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | [`admin_api_lib.impl.key_db.file_status_key_value_store.FileStatusKeyValueStore`](./admin-api-lib/src/admin_api_lib/impl/key_db/file_status_key_value_store.py) | Is used for storing the available sources and their current state. |
-| chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) | Used for splitting the documents in managable chunks. |
+| chunker |  [`admin_api_lib.chunker.chunker.Chunker`](./admin-api-lib/src/admin_api_lib/chunker/chunker.py) | [`admin_api_lib.impl.chunker.text_chunker.TextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/text_chunker.py) or [`admin_api_lib.impl.chunker.semantic_text_chunker.SemanticTextChunker`](./admin-api-lib/src/admin_api_lib/impl/chunker/semantic_text_chunker.py) | Splits documents into chunks. Select implementation via `CHUNKER_CLASS_TYPE_CHUNKER_TYPE` (`recursive` or `semantic`). |
 | document_extractor | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | [`admin_api_lib.extractor_api_client.openapi_client.api.extractor_api.ExtractorApi`](./admin-api-lib/src/admin_api_lib/extractor_api_client/openapi_client/api/extractor_api.py) | Needs to be replaced if adjustments to the `extractor-api` is made. |
 | rag_api | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | [`admin_api_lib.rag_backend_client.openapi_client.api.rag_api.RagApi`](./admin-api-lib/src/admin_api_lib/rag_backend_client/openapi_client/api/rag_api.py) | Needs to be replaced if changes to the `/information_pieces/remove` or `/information_pieces/upload` of the [`rag-core-api`](#1-rag-core-api) are made. |
 | summarizer_prompt | `str` | [`admin_api_lib.prompt_templates.summarize_prompt.SUMMARIZE_PROMPT`](./admin-api-lib/src/admin_api_lib/prompt_templates/summarize_prompt.py) | The prompt used of the summarization. |
 | langfuse_manager | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | [`rag_core_lib.impl.langfuse_manager.langfuse_manager.LangfuseManager`](./rag-core-lib/src/rag_core_lib/impl/langfuse_manager/langfuse_manager.py) | Retrieves additional settings, as well as the prompt from langfuse if available. |
-| summarizer |  [`admin_api_lib.summarizer.summarizer.Summarizer`](./admin-api-lib/src/admin_api_lib/summarizer/summarizer.py) | [`admin_api_lib.impl.summarizer.langchain_summarizer.LangchainSummarizer`](./admin-api-lib/src/admin_api_lib/impl/summarizer/langchain_summarizer.py) | Creates the summaries. Uses the shared retry decorator with optional per-summarizer overrides (see 2.4). |
+| summarizer |  [`admin_api_lib.summarizer.summarizer.Summarizer`](./admin-api-lib/src/admin_api_lib/summarizer/summarizer.py) | [`admin_api_lib.impl.summarizer.langchain_summarizer.LangchainSummarizer`](./admin-api-lib/src/admin_api_lib/impl/summarizer/langchain_summarizer.py) | Creates the summaries. Uses the shared retry decorator with optional per-summarizer overrides (see 2.5). |
 | untraced_information_enhancer |[`admin_api_lib.information_enhancer.information_enhancer.InformationEnhancer`](./admin-api-lib/src/admin_api_lib/information_enhancer/information_enhancer.py) | [`admin_api_lib.impl.information_enhancer.general_enhancer.GeneralEnhancer`](./admin-api-lib/src/admin_api_lib/impl/information_enhancer/general_enhancer.py) |  Uses the *summarizer* to enhance the extracted documents. |
-| information_enhancer |  [`rag_core_lib.chains.async_chain.AsyncChain[Any, Any]`](./rag-core-lib/src/rag_core_lib/chains/async_chain.py)| [`rag_core_lib.impl.tracers.langfuse_traced_chain.LangfuseTracedGraph`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_chain.py) |Wraps around the *untraced_information_enhancer* and adds langfuse tracing. |
+| information_enhancer |  [`rag_core_lib.runnables.AsyncRunnable[Any, Any]`](./rag-core-lib/src/rag_core_lib/runnables/async_runnable.py) | [`rag_core_lib.impl.tracers.langfuse_traced_runnable.LangfuseTracedRunnable`](./rag-core-lib/src/rag_core_lib/impl/tracers/langfuse_traced_runnable.py) | Wraps around the *untraced_information_enhancer* and adds Langfuse tracing. |
 | document_deleter |[`admin_api_lib.api_endpoints.document_deleter.DocumentDeleter`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_deleter.py) | [`admin_api_lib.impl.api_endpoints.default_document_deleter.DefaultDocumentDeleter`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_deleter.py) |  Handles deletion of sources. |
 | documents_status_retriever |  [`admin_api_lib.api_endpoints.documents_status_retriever.DocumentsStatusRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/documents_status_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_documents_status_retriever.DefaultDocumentsStatusRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_documents_status_retriever.py) |Handles return of source status. |
 | source_uploader | [`admin_api_lib.api_endpoints.source_uploader.SourceUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/source_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_source_uploader.DefaultSourceUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_source_uploader.py)| Handles data loading and extraction from various non-file sources. |
 | document_reference_retriever | [`admin_api_lib.api_endpoints.document_reference_retriever.DocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/api_endpoints/document_reference_retriever.py) | [`admin_api_lib.impl.api_endpoints.default_document_reference_retriever.DefaultDocumentReferenceRetriever`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_document_reference_retriever.py) | Handles return of files from connected storage. |
 | file_uploader | [`admin_api_lib.api_endpoints.file_uploader.FileUploader`](./admin-api-lib/src/admin_api_lib/api_endpoints/file_uploader.py) | [`admin_api_lib.impl.api_endpoints.default_file_uploader.DefaultFileUploader`](./admin-api-lib/src/admin_api_lib/impl/api_endpoints/default_file_uploader.py) | Handles upload and extraction of files. |
 
-### 2.4 Summarizer retry behavior
+### 2.4 Chunker configuration (multiple chunkers)
+
+The default dependency container now exposes two chunking strategies which can be chosen by [`ChunkerClassTypeSettings`](./admin-api-lib/src/admin_api_lib/impl/settings/chunker_class_type_settings.py):
+
+- `recursive` (default) wraps LangChain's `RecursiveCharacterTextSplitter`.
+- `semantic` wraps LangChain's `SemanticChunker`, and considers minimum/maximum chunk size with `nltk`/`RecursiveCharacterTextSplitter`.
+
+You can switch between them and fine-tune their behaviour through environment variables:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `CHUNKER_MAX_SIZE` | Maximum character count per recursive chunk. | `1000` |
+| `CHUNKER_OVERLAP` | Character overlap between recursive chunks. | `100` |
+|||
+| `CHUNKER_BREAKPOINT_THRESHOLD_TYPE` | Breakpoint heuristic (`percentile`, `standard_deviation`, `interquartile`). | `percentile` |
+| `CHUNKER_BREAKPOINT_THRESHOLD_AMOUNT` | Threshold associated with the selected heuristic. | `95.0` |
+| `CHUNKER_BUFFER_SIZE` | Context buffer that is kept on both sides of a semantic breakpoint. | `1` |
+| `CHUNKER_MIN_SIZE` | Minimum size for semantic chunks. | `200` |
+
+> 📌 The recursive chunker only uses the `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` knobs. The remaining keys are ignored unless `CHUNKER_CLASS_TYPE_CHUNKER_TYPE=semantic`.
+
+Behavior details
+
+- Recursive chunker enforces `CHUNKER_MAX_SIZE` and `CHUNKER_OVERLAP` only.
+- Semantic chunker uses embeddings to detect semantic breakpoints and can also enforce `min`/`max` sizes:
+  - Oversized chunks are re-split with `RecursiveCharacterTextSplitter` (auto-provisioned when `max > min`).
+  - Trailing undersized chunks are rebalanced using sentence-aware splitting (NLTK Punkt when available, regex fallback otherwise) to avoid tiny tails while respecting `[min, max]`.
+
+#### Embeddings backend for semantic chunking
+
+When `CHUNKER_CLASS_TYPE_CHUNKER_TYPE` is set to `semantic`, the dependency container selects embeddings using [`EmbedderClassTypeSettings`](./rag-core-lib/src/rag_core_lib/impl/settings/embedder_class_type_settings.py). Configure the backend via:
+
+- `EMBEDDER_CLASS_TYPE_EMBEDDER_TYPE`: choose one of `stackit`, `ollama`.
+
+Backend-specific options:
+
+- **STACKIT embeddings** (production default)
+  - `STACKIT_EMBEDDER_MODEL`
+  - `STACKIT_EMBEDDER_BASE_URL`
+  - `STACKIT_EMBEDDER_API_KEY` *(required)*
+  - Optional retry overrides: `STACKIT_EMBEDDER_MAX_RETRIES`, `STACKIT_EMBEDDER_RETRY_BASE_DELAY`, `STACKIT_EMBEDDER_RETRY_MAX_DELAY`, `STACKIT_EMBEDDER_BACKOFF_FACTOR`, `STACKIT_EMBEDDER_ATTEMPT_CAP`, `STACKIT_EMBEDDER_JITTER_MIN`, `STACKIT_EMBEDDER_JITTER_MAX`
+- **Ollama embeddings** (self-hosted)
+  - `OLLAMA_EMBEDDER_MODEL`
+  - `OLLAMA_EMBEDDER_BASE_URL`
+
+In the Helm chart set `CHUNKER_*` keys under `adminBackend.envs.chunker`. The admin deployment reuses the embedder config maps from the backend release, so adjust `backend.envs.embedderClassTypes`, `backend.envs.stackitEmbedder`, `backend.envs.ollamaEmbedder`, or `backend.envs.fakeEmbedder` accordingly when switching embeddings for semantic chunking.
+
+### 2.5 Summarizer retry behavior
 
 The default summarizer implementation (`LangchainSummarizer`) now uses the shared retry decorator with exponential backoff from the `rag-core-lib`.
 
@@ -269,6 +320,8 @@ The following types of information can be extracted:
 - `TEXT`: plain text
 - `TABLE`: data in tabular form found in the document
 - `IMAGE`: image found in the document
+
+For Confluence sources, provide the instance `url` and API `token` and include either a `space_key` or a `cql` filter (empty values are ignored). Optional flags such as `include_attachments`, `keep_markdown_format`, and `keep_newlines` mirror the parameters supported by LangChain's `ConfluenceLoader`.
 
 For sitemap sources, additional parameters can be provided, e.g.:
 

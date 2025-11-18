@@ -33,7 +33,11 @@ class ConfluenceParameters(BaseModel):
 
     url: StrictStr = Field(description="url of the confluence space.")
     token: StrictStr = Field(description="api key to access confluence.")
-    space_key: StrictStr = Field(description="the space key of the confluence pages.")
+    space_key: Optional[StrictStr] = Field(default=None, description="the space key of the confluence pages.")
+    cql: Optional[StrictStr] = Field(
+        default=None,
+        description="Optional Confluence Query Language (CQL) expression used to filter pages.",
+    )
     include_attachments: Optional[StrictBool] = Field(
         default=False,
         description="whether to include file attachments (e.g., images, documents) in the parsed content. Default is `false`.",
@@ -55,6 +59,7 @@ class ConfluenceParameters(BaseModel):
         "url",
         "token",
         "space_key",
+        "cql",
         "include_attachments",
         "keep_markdown_format",
         "keep_newlines",
@@ -120,6 +125,7 @@ class ConfluenceParameters(BaseModel):
                 "url": obj.get("url"),
                 "token": obj.get("token"),
                 "space_key": obj.get("space_key"),
+                "cql": obj.get("cql"),
                 "include_attachments": (
                     obj.get("include_attachments") if obj.get("include_attachments") is not None else False
                 ),

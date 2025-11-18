@@ -40,7 +40,7 @@
      Primary = main brand/action color for CTAs & highlights.
      Primary-content = text/icon color that sits on top of Primary.
   ---------------------------------------------------------------- */
-  --color-primary: #f8f9fa;            /* primary brand/CTA (red) */
+  --color-primary: #f8f9fa;            /* primary brand/CTA (light gray) */
   --color-primary-content: #0a1e2d;    /* readable text on primary */
 
   /* Secondary = supporting brand color (chips, subtle accents) */
@@ -66,8 +66,8 @@
      Used by: bg-base-100/200/300, text-base-content, etc.
   ---------------------------------------------------------------- */
   --color-base-100: #ffffff;           /* page background */
-  --color-base-200: #f7f7f7;           /* cards/secondary surfaces */
-  --color-base-300: #dadada;           /* borders/dividers/elevations */
+  --color-base-200: #EDEDED;           /* cards/secondary surfaces */
+  --color-base-300: #DADADA;           /* borders/dividers/elevations */
   --color-base-content: #333333;       /* default text on base-* */
 
   /* --- FEEDBACK / STATUS ---------------------------------------
@@ -125,12 +125,7 @@
    If you generate classes dynamically (from JSON/DB), list them here
    so Tailwind includes them even if they’re not found in source files.
    =========================================================== */
-@source inline("
-  w-32 w-40 h-5 w-5 flex flex-1 items-center gap-2 p-4
-  md:container md:mx-auto
-  btn btn-primary btn-circle btn-ghost
-  bg-primary hover:bg-white/20 hover:bg-base-300
-");
+@source inline("w-32 w-40 h-5 w-5 flex flex-1 items-center gap-2 p-4 md:container md:mx-auto btn btn-primary btn-circle btn-ghost bg-primary hover:bg-white/20 hover:bg-base-300");
 
 /* ===========================================================
    HOW TO USE (quick cheatsheet)

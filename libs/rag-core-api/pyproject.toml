@@ -4,10 +4,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "1.0.1"
-description = "The core of the rag-template."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+version = "v3.4.0"
+description = "The rag-core-api contains the API layer for the RAG template for document retrieval, question answering, knowledge base management in the vector database and more."
 packages = [{ include = "rag_core_api", from = "src" }]
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
+homepage = "https://pypi.org/project/rag-core-api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -59,8 +68,8 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
 
 [tool.flake8]

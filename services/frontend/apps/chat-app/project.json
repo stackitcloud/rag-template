@@ -12,7 +12,7 @@
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/chat-app",
-        "configFile": "apps/chat-app/vite.config.mts"
+        "configFile": "apps/chat-app/vite.config.ts"
       },
       "configurations": {
         "development": {
@@ -28,7 +28,7 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "chat-app:build",
-        "configFile": "apps/chat-app/vite.config.mts"
+        "configFile": "apps/chat-app/vite.config.ts"
       },
       "configurations": {
         "development": {

@@ -3,6 +3,47 @@
 
 # RAG Template
 
+<p align="center">
+    <a href="https://github.com/stackitcloud/rag-template/blob/1d95afe0aab477600e225d939c1e0606b24bac69/LICENSE">
+        <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="Apache 2.0 License">
+    <a href="https://github.com/stackitcloud/rag-template/graphs/commit-activity" target="_blank">
+        <img alt="Commits last month" src="https://img.shields.io/github/commit-activity/m/stackitcloud/rag-template?labelColor=%20%2332b583&color=%20%2312b76a">
+    </a>
+    <a href="https://github.com/stackitcloud/rag-template-lib/" target="_blank">
+        <img alt="Issues closed" src="https://img.shields.io/github/issues-search?query=repo%3Astackitcloud%2Frag-template%20is%3Aclosed&label=issues%20closed&labelColor=%20%237d89b0&color=%20%235d6b98">
+    </a>
+    <a href="https://github.com/stackitcloud/rag-template/discussions/" target="_blank">
+        <img alt="Discussion posts" src="https://img.shields.io/github/discussions/stackitcloud/rag-template?labelColor=%20%239b8afb&color=%20%237a5af8">
+    </a>
+    <a href="https://pypi.org/project/rag-core-api/">
+        <img src="https://img.shields.io/pypi/dm/rag-core-api?logo=python&logoColor=white&label=pypi%20rag-core-api&color=blue" alt="rag-core-api  Python package on PyPi">
+    </a>
+    <a href="https://pypi.org/project/rag-core-lib/">
+        <img src="https://img.shields.io/pypi/dm/rag-core-lib?logo=python&logoColor=white&label=pypi%20rag-core-lib&color=blue" alt="rag-core-lib  Python package on PyPi">
+    </a>
+    <a href="https://pypi.org/project/admin-api-lib/">
+        <img src="https://img.shields.io/pypi/dm/admin-api-lib?logo=python&logoColor=white&label=pypi%20admin-api-lib&color=blue" alt="admin-api-lib  Python package on PyPi">
+    </a>
+    <a href="https://pypi.org/project/extractor-api-lib/">
+        <img src="https://img.shields.io/pypi/dm/extractor-api-lib?logo=python&logoColor=white&label=pypi%20extractor-api-lib&color=blue" alt="extractor-api-lib  Python package on PyPi">
+    </a>
+    <a   href="https://deepwiki.com/stackitcloud/rag-template">
+        <img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg">
+    </a>
+    <a href="https://github.com/stackitcloud/rag-template/blob/main/infrastructure">
+    <img alt="Kubernetes ready 🚀"
+        src="https://img.shields.io/badge/Kubernetes-ready%20🚀-brightgreen?style=flat&logo=kubernetes&logoColor=white&labelColor=326CE5"
+        height="20" style="vertical-align:top">
+    </a>
+    <a href="https://github.com/stackitcloud/rag-template/tree/main/infrastructure">
+    <img
+        alt="STACKIT ready"
+        height="20"
+        style="vertical-align:top"
+        src="https://img.shields.io/badge/STACKIT-ready-brightgreen?style=flat&labelColor=004E5A&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iRWJlbmVfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHdpZHRoPSI2NCIgaGVpZ2h0PSI0Ny4xMjMzNjkzNjI2NTM3NSIgdmlld0JveD0iMCAwIDUzNi42IDM5NS4xIj4KICA8IS0tIEdlbmVyYXRvcjogR2l0SHViIENvcGlsb3Qgc2NhbGVkIHZlcnNpb24gLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICNmZmY7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTM3LjggMCA4OS43IDIyNS4zIDIwOS45IDIyNS4zIDIzNS44IDEwNC4xIDUxNC4yIDEwNC4xIDUzNi40IDAgMTM3LjggMCIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMzI3LjYgMTY5LjEgMzAxLjYgMjkxIDIyLjIgMjkxIDAgMzk1LjEgMzk5LjUgMzk1LjEgNDQ3LjggMTY5LjEgMzI3LjYgMTY5LjEiLz4KPC9zdmc+Cg==">
+    </a>
+</p>
+
 Welcome to the STACKIT RAG Template! This is a basic example of how to use the RAG-API libraries, designed to help you get started with building AI-powered chatbots and document management systems 📖 (see [main.py](./services/rag-backend/main.py), [container.py](./services/rag-backend/container.py) and [chat_endpoint.py](./services/rag-backend/chat_endpoint.py)).
 
 <!-- The RAG (Retrieve, Augment, Generate) template is here to simplify your journey into developing and deploying AI-driven applications in a kubernetes cluster. It provides a comprehensive guide, including local setup as well as production deployment instructions. Whether you're a developer, data scientist, or researcher, this template offers everything you need to build and deploy your own RAG solution.  -->
@@ -10,7 +51,7 @@ Welcome to the STACKIT RAG Template! This is a basic example of how to use the R
 
 ## Features 🚀
 
-**Document Management**: Supports PDFs, DOCX, PPTX, XML, EPUB documents and websource via confluence as well as sitemaps.
+**Document Management**: Supports PDFs, Office docs (DOCX, PPTX), spreadsheets (XLSX), Markdown/AsciiDoc (MD, MDX, ADOC), EPUB/HTML/XML, CSV/TXT, and raster images, with automatic fallbacks between Docling, MarkItDown, and custom extractors; also handles Confluence spaces and sitemaps.
 
 **AI Integration**: Multiple LLM and embedder providers for flexibility.
 
@@ -68,9 +109,9 @@ All components are provided by the *admin-api-lib*. For further information on e
 
 #### 1.1.3 Document extractor
 
-The Document extractor is a component that is used to extract the content from the documents and confluence spaces.
+The Document extractor ingests uploaded files and remote sources (Confluence, sitemap) and now orchestrates multiple extractors with a deterministic fallback chain. Docling runs first for rich formats (PDF, Office, Markdown, HTML, images), MarkItDown provides lightweight markdown conversion, and specialised custom extractors (PDF, MS Office, XML, EPUB, Tesseract OCR) handle edge cases. The order and availability can be customised through the dependency-injector container.
 
-All components are provided by the *extractor-api-lib*. For further information on endpoints and requirements, please consult [the libs README](./libs/README.md#3-extractor-api-lib).
+All components are provided by the *extractor-api-lib*. For further information on endpoints, extractor ordering, supported formats, and configuration tips, please consult [the libs README](./libs/README.md#3-extractor-api-lib).
 
 #### 1.1.4 MCP Server
 

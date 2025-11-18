@@ -1,4 +1,5 @@
-"""
+"""Module for the use case dependency container.
+
 This is an example of how to replace a dependency in the dependency container of the rag-core-api library.
 If you replace a dependency keep in mind that the dependency you are replacing should have:
 1. the same name and
@@ -19,4 +20,6 @@ from chat_endpoint import UseCaseChat
 
 @containers.copy(DependencyContainer)
 class UseCaseContainer(DependencyContainer):
+    """Use case dependency container."""
+
     chat_endpoint = Singleton(UseCaseChat, DependencyContainer.traced_chat_graph)

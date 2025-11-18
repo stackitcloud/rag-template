@@ -1,12 +1,5 @@
-"""Module containing the EmbedderType enumeration."""
+"""Backward-compatible re-export for EmbedderType."""
 
-from enum import StrEnum, unique
+from rag_core_lib.impl.embeddings.embedder_type import EmbedderType
 
-
-@unique
-class EmbedderType(StrEnum):
-    """An enumeration representing different types of embedders."""
-
-    OLLAMA = "ollama"
-    STACKIT = "stackit"
-    FAKE = "fake"
+__all__ = ["EmbedderType"]

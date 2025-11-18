@@ -7,9 +7,7 @@ class UploaderBase:
     """Base class for uploader API endpoints."""
 
     def __init__(self):
-        """
-        Initialize the UploaderBase.
-        """
+        """Initialize the UploaderBase."""
         self._background_threads = []
 
     def _prune_background_threads(self) -> list[Thread]:

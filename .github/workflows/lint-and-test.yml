@@ -21,7 +21,7 @@ jobs:
       infrastructure: ${{ steps.changes.outputs.infrastructure }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -72,7 +72,7 @@ jobs:
         service: ["admin-backend", "document-extractor", "rag-backend", "mcp-server"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set Docker Image Name
         run: |
@@ -102,7 +102,7 @@ jobs:
         library: ["rag-core-lib", "rag-core-api", "admin-api-lib", "extractor-api-lib"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set Docker Image Names
         run: |
@@ -133,7 +133,7 @@ jobs:
     if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -177,7 +177,7 @@ jobs:
     if: needs.changes.outputs.infrastructure == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

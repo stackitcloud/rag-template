@@ -23,7 +23,7 @@ jobs:
       new-release-version: ${{ steps.semantic-release.outputs.new-release-version }}
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: false
@@ -118,7 +118,7 @@ jobs:
           echo "🔍 Debug: needs.semantic-release.outputs.new-release-version = ${{ needs.semantic-release.outputs.new-release-version }}"
 
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: false

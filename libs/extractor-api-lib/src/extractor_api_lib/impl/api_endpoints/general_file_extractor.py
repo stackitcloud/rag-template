@@ -3,14 +3,13 @@
 import logging
 from pathlib import Path
 import tempfile
-import traceback
-
 
 from extractor_api_lib.api_endpoints.file_extractor import FileExtractor
 from extractor_api_lib.impl.mapper.internal2external_information_piece import Internal2ExternalInformationPiece
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
+from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
 from extractor_api_lib.models.information_piece import InformationPiece
 
 logger = logging.getLogger(__name__)
@@ -66,15 +65,88 @@ class GeneralFileExtractor(FileExtractor):
                     logger.debug("Temporary file created at %s.", temp_file_path)
                     logger.debug("Temp file created and content written.")
                 file_type = str(temp_file_path).split(".")[-1].upper()
+                # treat common image file extensions as IMAGE so extractors that declare IMAGE match them
+                image_extensions = {
+                    "JPEG",
+                    "JPG",
+                    "PNG",
+                    "TIFF",
+                    "TIF",
+                    "BMP",
+                }
+
+                ascii_doc_extensions = {
+                    "ASCIIDOC",
+                    "ADOC",
+                }
+
+                markdown_extensions = {
+                    "MD",
+                    "MARKDOWN",
+                    "MDX",
+                }
+
+                def _extractor_matches_file_type(extractor, ft: str) -> bool:
+                    for file_type_option in extractor.compatible_file_types:
+                        opt = str(file_type_option.value).upper()
+                        if (
+                            opt == ft
+                            or (opt == "IMAGE" and ft in image_extensions)
+                            or (opt == "ASCIIDOC" and ft in ascii_doc_extensions)
+                            or (opt == "MD" and ft in markdown_extensions)
+                        ):
+                            return True
+                    return False
+
                 correct_extractors = [
-                    x for x in self._available_extractors if file_type in [y.value for y in x.compatible_file_types]
+                    extractor
+                    for extractor in self._available_extractors
+                    if _extractor_matches_file_type(extractor, file_type)
                 ]
                 if not correct_extractors:
                     raise ValueError(f"No extractor found for file-ending {file_type}")
-                results = await correct_extractors[-1].aextract_content(
-                    temp_file_path, extraction_request.document_name
+
+                results = await self._run_extractors_with_fallback(
+                    list(reversed(correct_extractors)), temp_file_path, extraction_request.document_name
                 )
+
                 return [self._mapper.map_internal_to_external(x) for x in results if x.page_content is not None]
-        except Exception as e:
-            logger.error("Error during document parsing: %s %s", e, traceback.format_exc())
-            raise e
+        except Exception:  # noqa: TRY302 reraising original exception
+            logger.exception("Error during document parsing.")
+            raise
+
+    async def _run_extractors_with_fallback(
+        self,
+        extractors: list[InformationFileExtractor],
+        temp_file_path: Path,
+        document_name: str,
+    ) -> list[InternalInformationPiece]:
+        errors: list[Exception] = []
+
+        for extractor in extractors:
+            extractor_name = extractor.__class__.__name__
+            try:
+                result = await extractor.aextract_content(temp_file_path, document_name)
+            except Exception as exc:
+                logger.warning(
+                    "Extractor %s failed for document %s.",
+                    extractor_name,
+                    document_name,
+                    exc_info=logger.isEnabledFor(logging.DEBUG),
+                )
+                errors.append(exc)
+                continue
+
+            if result:
+                return result
+
+            logger.info(
+                "Extractor %s returned no content for document %s.",
+                extractor_name,
+                document_name,
+            )
+
+        if errors:
+            raise RuntimeError("All extractors failed to process the document") from errors[-1]
+
+        return []

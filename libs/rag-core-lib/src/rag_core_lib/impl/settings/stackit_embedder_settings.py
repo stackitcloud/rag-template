@@ -27,7 +27,6 @@ class StackitEmbedderSettings(BaseSettings):
     @model_validator(mode="after")
     def _check_relations(self) -> "StackitEmbedderSettings":
         """Ensure that retry-related ranges are valid."""
-
         if not self.jitter_min or not self.jitter_max:
             return self
         if self.jitter_max < self.jitter_min:

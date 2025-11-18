@@ -124,6 +124,6 @@ class S3Service(FileService):
             file_name = f"/{file_name}" if not file_name.startswith("/") else file_name
             self._s3_client.delete_object(Bucket=self._s3_settings.bucket, Key=file_name)
             logger.info("File %s successfully deleted.", file_name)
-        except Exception as e:
-            logger.error("Error deleting file %s: %s", file_name, e)
+        except Exception:
+            logger.exception("Error deleting file %s", file_name)
             raise

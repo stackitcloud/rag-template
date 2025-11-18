@@ -321,6 +321,8 @@ The following types of information can be extracted:
 - `TABLE`: data in tabular form found in the document
 - `IMAGE`: image found in the document
 
+For Confluence sources, provide the instance `url` and API `token` and include either a `space_key` or a `cql` filter (empty values are ignored). Optional flags such as `include_attachments`, `keep_markdown_format`, and `keep_newlines` mirror the parameters supported by LangChain's `ConfluenceLoader`.
+
 For sitemap sources, additional parameters can be provided, e.g.:
 
 - `web_path`: The URL of the XML sitemap to crawl

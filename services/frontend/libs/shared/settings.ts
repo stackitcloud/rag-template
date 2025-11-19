@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 export interface AppSettings {
   bot: {
     name: string;
@@ -27,8 +29,8 @@ const defaultSettings: AppSettings = {
   ui: {
     logoPath: "/assets/navigation-logo.svg",
     logo: {
-      light: "/assets/navigation-logo.svg",
-      dark: "/assets/navigation-logo.svg",
+      light: "/assets/navigation-logo-light.svg",
+      dark: "/assets/navigation-logo-dark.svg",
     },
     theme: {
       default: "dark",
@@ -78,7 +80,7 @@ export const settings: AppSettings = {
       default: envStr(import.meta.env.VITE_UI_THEME_DEFAULT, defaultSettings.ui.theme.default),
       options:
         typeof import.meta.env.VITE_UI_THEME_OPTIONS === 'string' && import.meta.env.VITE_UI_THEME_OPTIONS.trim()
-          ? import.meta.env.VITE_UI_THEME_OPTIONS.split(',').map((s) => s.trim()).filter(Boolean)
+          ? import.meta.env.VITE_UI_THEME_OPTIONS.split(',').map((s: string) => s.trim()).filter(Boolean)
           : defaultSettings.ui.theme.options,
     },
   },

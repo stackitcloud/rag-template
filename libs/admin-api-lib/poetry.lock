@@ -2019,19 +2019,20 @@ langchain-core = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "langfuse"
-version = "3.6.1"
+version = "3.10.1"
 description = "A client library for accessing langfuse"
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "langfuse-3.6.1-py3-none-any.whl", hash = "sha256:134e0007fcfdd9fb70b491c882bb431c8095b3f5cc5e865756f46a2abd3675a2"},
-    {file = "langfuse-3.6.1.tar.gz", hash = "sha256:eac27ee5bbd8d05e7d665e822e0efb36766b20fe281930ff040f47eb22cc1b69"},
+    {file = "langfuse-3.10.1-py3-none-any.whl", hash = "sha256:78582905874e17f923a3fa6eba9d1a15e1547139bbd5c11d498ce90670e1fdae"},
+    {file = "langfuse-3.10.1.tar.gz", hash = "sha256:11152b77f1869c55b42c3be8fba779cd9102bef171a597ea4baeca8a8000d11f"},
 ]
 
 [package.dependencies]
 backoff = ">=1.10.0"
 httpx = ">=0.15.4,<1.0"
+openai = ">=0.27.8"
 opentelemetry-api = ">=1.33.1,<2.0.0"
 opentelemetry-exporter-otlp-proto-http = ">=1.33.1,<2.0.0"
 opentelemetry-sdk = ">=1.33.1,<2.0.0"
@@ -2039,10 +2040,6 @@ packaging = ">=23.2,<26.0"
 pydantic = ">=1.10.7,<3.0"
 requests = ">=2,<3"
 wrapt = ">=1.14,<2.0"
-
-[package.extras]
-langchain = ["langchain (>=0.0.309)"]
-openai = ["openai (>=0.27.8)"]
 
 [[package]]
 name = "langgraph"
@@ -3424,7 +3421,7 @@ langchain = "^1.0.8"
 langchain-community = "^0.4.1"
 langchain-core = "^1.0.7"
 langchain-openai = "^1.0.3"
-langfuse = "3.6.1"
+langfuse = "^3.10.1"
 oauthlib = "^3.2.2"
 openai = "^1.77.0"
 pydantic = "^2.11.4"
@@ -4546,4 +4543,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "58db1e31af086e18d94aeb519a63b7e7cfbcdfa44ed63ca07dcf6679eb05e66e"
+content-hash = "029b3a9383161646ceb7c41f1b2e3d8ad34f8f35908a0383f4e6b74683118024"

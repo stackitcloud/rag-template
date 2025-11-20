@@ -22,7 +22,7 @@ homepage = "https://pypi.org/project/rag-core-api"
 python = "^3.13"
 rag-core-lib = { path = "../rag-core-lib", develop = true}
 uvicorn = "^0.37.0"
-langchain-qdrant = "^0.2.0"
+langchain-qdrant = "^1.1.0"
 dependency-injector = "^4.46.0"
 fastapi = "^0.121.2"
 requests-oauthlib = "^2.0.0"
@@ -33,15 +33,15 @@ ragas = "^0.3.0"
 flashrank = "^0.2.10"
 pyyaml = "^6.0.2"
 openai = "^1.77.0"
-langgraph = "^0.6.0"
+langgraph = "^1.0.3"
 pillow = "^11.2.1"
-langchain-ollama = "^0.3.2"
+langchain-ollama = "^1.0.0"
 pytest-asyncio = "^0.26.0"
-langchain-community = "0.3.30"
+langchain-community = "^0.4.1"
 fastembed = "^0.7.0"
 langdetect = "^1.0.9"
 langfuse = "3.6.1"
-langchain-text-splitters = ">=0.3.9"
+langchain-text-splitters = "^1.0.0"
 starlette = ">=0.49.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -133,4 +133,3 @@ log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = ["src", "tests"]
 testpaths = ["tests"]
-

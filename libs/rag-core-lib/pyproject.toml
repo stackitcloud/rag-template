@@ -20,8 +20,8 @@ homepage = "https://pypi.org/project/rag-core-lib"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-langchain = "^0.3.25"
-langchain-community = "0.3.30"
+langchain = "^1.0.8"
+langchain-community = "^0.4.1"
 flashrank = "^0.2.10"
 pydantic-settings = "^2.2.1"
 pydantic = "^2.11.4"
@@ -30,8 +30,8 @@ requests-oauthlib = "^2.0.0"
 langfuse = "3.6.1"
 deprecated = "^1.2.18"
 openai = "^1.77.0"
-langchain-core = "0.3.77"
-langchain-openai = "^0.3.27"
+langchain-core = "^1.0.7"
+langchain-openai = "^1.0.3"
 
 
 [tool.poetry.group.dev.dependencies]

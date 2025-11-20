@@ -3,7 +3,7 @@
 from admin_api_lib.impl.api_endpoints.default_file_uploader import DefaultFileUploader
 from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import Configuration, List, Selector, Singleton
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OllamaEmbeddings
 from langfuse import Langfuse
 

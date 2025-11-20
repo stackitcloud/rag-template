@@ -108,7 +108,7 @@ html5lib = "^1.1"
 langchain-community = "^0.3.23"
 atlassian-python-api = "^4.0.3"
 markdownify = "^1.1.0"
-langchain-core = "0.3.77"
+langchain-core = "0.3.80"
 camelot-py = {extras = ["cv"], version = "^1.0.0"}
 fake-useragent = "^2.2.0"
 pypdfium2 = "4.30.0"

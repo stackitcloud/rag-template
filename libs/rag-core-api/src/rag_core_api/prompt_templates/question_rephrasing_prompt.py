@@ -1,4 +1,4 @@
-from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 # Generic LangChain ChatPromptTemplate - works with any LLM
 QUESTION_REPHRASING_PROMPT = ChatPromptTemplate.from_messages(

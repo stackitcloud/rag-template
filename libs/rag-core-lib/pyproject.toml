@@ -32,7 +32,7 @@ deprecated = "^1.2.18"
 openai = "^1.77.0"
 langchain-core = "^1.0.7"
 langchain-openai = "^1.0.3"
-
+langgraph-checkpoint = ">=3.0.0,<4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"

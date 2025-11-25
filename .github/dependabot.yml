@@ -5,5 +5,5 @@ updates:
     versioning-strategy: increase-if-necessary
     schedule:
       interval: "daily"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 20
 

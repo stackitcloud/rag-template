@@ -64,7 +64,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-setuptools = "<80.9"
+fastapi = "^0.121.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"

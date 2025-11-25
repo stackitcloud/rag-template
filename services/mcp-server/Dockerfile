@@ -1,6 +1,5 @@
 FROM --platform=linux/amd64 python:3.13.7-bookworm AS build
 
-ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_VIRTUALENVS_IN_PROJECT=false \
@@ -32,14 +31,14 @@ WORKDIR /app/services/mcp-server
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH
 
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
-
-ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
 
 COPY --from=build --chown=nonroot:nonroot  /app/services/mcp-server/log /app/services/mcp-server/log
 COPY --chown=nonroot:nonroot services/mcp-server/src ./src

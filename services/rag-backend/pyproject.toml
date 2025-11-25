@@ -71,7 +71,7 @@ dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
   ./main.py: D100,
-  ./tests/*: S101,D100,D103,D104
+  ./tests/*: S101,D100,D103,D104,
   **/__init__.py: D104,
 """
 
@@ -116,7 +116,6 @@ priority = "supplemental"
 [tool.poetry.group.prod.dependencies]
 rag-core-api = "==3.4.0"
 rag-core-lib = "==3.4.0"
-
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile

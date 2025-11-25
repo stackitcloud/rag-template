@@ -401,6 +401,8 @@ else:
         "DEPENDENCY_GROUP": "prod-local"
     }
 
+docker_build(**extractor_docker_build_config)
+
 # Add linter trigger
 local_resource(
     "Extractor linting",

@@ -13,7 +13,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make \
     && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
       && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}"
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
 
 WORKDIR /app/services/admin-backend
 COPY services/admin-backend/pyproject.toml services/admin-backend/poetry.lock ./
@@ -39,13 +38,15 @@ WORKDIR /app/services/admin-backend
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
+ENV POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH
+
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
-
-ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
 
 COPY --chown=nonroot:nonroot services/admin-backend .
 COPY --from=build --chown=nonroot:nonroot  /app/services/admin-backend/log /app/services/admin-backend/log

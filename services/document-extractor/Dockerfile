@@ -40,8 +40,10 @@ FROM --platform=linux/amd64 python:3.13-bookworm
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
-ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}" \
-    PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
+# Ensure poetry reuses existing virtualenv when running as nonroot
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH} \
+    PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH
 COPY --from=build  --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/ /usr/bin/

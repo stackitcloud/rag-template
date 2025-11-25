@@ -1,8 +1,7 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
-ARG dev=0
-ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
-    POETRY_VIRTUALENVS_CREATE=false \
+ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
+ENV POETRY_VIRTUALENVS_CREATE=false \
     POETRY_VIRTUALENVS_IN_PROJECT=false \
     VIRTUAL_ENV=/opt/.venv \
     PATH=/opt/.venv/bin:$PATH \
@@ -17,14 +16,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make \
     && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
     && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}"
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
-
-COPY libs/rag-core-lib /app/libs/rag-core-lib
-COPY libs/rag-core-api /app/libs/rag-core-api
 
 # Copy service manifest + lockfile and install runtime deps using the lock
 WORKDIR /app/services/rag-backend
 COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock ./
+
+# Copy the required lib dependencies
+COPY libs/rag-core-api/pyproject.toml libs/rag-core-api/poetry.lock /app/libs/rag-core-api/
+COPY libs/rag-core-api/src /app/libs/rag-core-api/src
+COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
+COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
 
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/rag-backend/log/logfile.log && chmod 600 /app/services/rag-backend/log/logfile.log
@@ -40,13 +41,14 @@ WORKDIR /app/services/rag-backend
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH} \
+    PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH
+
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
-
-ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
-ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:${PATH}"
 
 COPY --chown=nonroot:nonroot services/rag-backend .
 # Preserve log directory from build stage

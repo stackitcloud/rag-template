@@ -9,11 +9,14 @@ WORKDIR /app
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-       build-essential make ffmpeg poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \
+       build-essential make ffmpeg poppler-utils \
+       tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \
+       libleptonica-dev pkg-config \
     && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
     && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}" \
     && rm -rf /var/lib/apt/lists/*
 ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 # Copy lockfiles first
 COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock /app/services/document-extractor/

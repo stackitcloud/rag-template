@@ -215,7 +215,7 @@ IGNORE_BASE = [
     "**/node_modules/",
     "services/frontend/node_modules/",
     # OS / editor files
-    ".DS_Store",
+    "**/.DS_Store",
     "*.swp",
     "*.swo",
     # pytest / test caches inside libs

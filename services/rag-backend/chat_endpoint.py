@@ -1,4 +1,4 @@
-"""Module for handling chat-related functionality."""
+"""Module for the use case chat endpoint."""
 
 import logging
 from langchain_core.runnables import RunnableConfig
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class UseCaseChat(Chat):
-    """Use case-specific chat implementation."""
+    """Use case chat endpoint implementation."""
 
     def __init__(self, chat_graph: TracedRunnable):
         self._chat_graph = chat_graph
@@ -22,19 +22,20 @@ class UseCaseChat(Chat):
         session_id: str,
         chat_request: ChatRequest,
     ) -> ChatResponse:
-        """Handle chat requests.
+        """
+        Handle a chat request and return a chat response.
 
         Parameters
         ----------
         session_id : str
-            The ID of the user session.
+            The session identifier for the chat.
         chat_request : ChatRequest
-            The chat request object containing user input.
+            The chat request data.
 
         Returns
         -------
         ChatResponse
-            The response object containing the chat output.
+            The chat response.
         """
         config = RunnableConfig(
             tags=[],

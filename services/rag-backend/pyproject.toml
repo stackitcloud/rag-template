@@ -1,8 +1,16 @@
 [tool.poetry]
 name = "rag-backend-usecase-example"
-version = "3.2.0"
-description = "This example demonstrates the use of the rag-core-lib and how to replace components of its dependency container."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+version = "v3.4.0"
+description = "This example demonstrates the use of the rag-core-api and how to replace components of its dependency container."
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -64,6 +72,7 @@ ban-relative-imports = true
 per-file-ignores = """
   ./main.py: D100,
   ./tests/*: S101,D100,D103,D104
+  **/__init__.py: D104,
 """
 
 
@@ -105,8 +114,8 @@ priority = "supplemental"
 
 
 [tool.poetry.group.prod.dependencies]
-rag-core-api = "==3.2.1"
-rag-core-lib = "==3.2.1"
+rag-core-api = "==3.4.0"
+rag-core-lib = "==3.4.0"
 
 
 [tool.poetry.group.prod-local.dependencies]

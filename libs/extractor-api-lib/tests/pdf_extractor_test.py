@@ -13,7 +13,6 @@ import pdfplumber
 from pdf2image import convert_from_path
 
 from extractor_api_lib.impl.extractors.file_extractors.pdf_extractor import PDFExtractor
-from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
@@ -26,11 +25,6 @@ class TestPDFExtractor:
     """Test class for PDFExtractor."""
 
     @pytest.fixture
-    def mock_pdf_extractor_settings(self):
-        """Create mock PDF extractor settings."""
-        return MagicMock(spec=PDFExtractorSettings)
-
-    @pytest.fixture
     def mock_dataframe_converter(self):
         """Create a mock dataframe converter."""
         converter = MagicMock(spec=DataframeConverter)
@@ -38,11 +32,10 @@ class TestPDFExtractor:
         return converter
 
     @pytest.fixture
-    def pdf_extractor(self, mock_file_service, mock_pdf_extractor_settings, mock_dataframe_converter):
+    def pdf_extractor(self, mock_file_service, mock_dataframe_converter):
         """Create a PDFExtractor instance for testing."""
         return PDFExtractor(
             file_service=mock_file_service,
-            pdf_extractor_settings=mock_pdf_extractor_settings,
             dataframe_converter=mock_dataframe_converter,
         )
 

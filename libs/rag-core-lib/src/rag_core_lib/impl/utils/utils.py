@@ -1,3 +1,5 @@
+"""Module for utility functions."""
+
 import re
 from typing import Any, Iterable, Optional
 
@@ -49,11 +51,35 @@ def _normalize_headers(raw_headers: Any) -> dict[str, str]:
 
 
 def status_code_from_exception(exc: BaseException) -> Optional[int]:
+    """Extract the HTTP status code from an exception, if available.
+
+    Parameters
+    ----------
+    exc : BaseException
+        The exception from which to extract the status code.
+
+    Returns
+    -------
+    Optional[int]
+        The HTTP status code if available, otherwise None.
+    """
     resp = getattr(exc, "response", None)
     return getattr(resp, "status_code", None)
 
 
 def headers_from_exception(exc: BaseException) -> dict[str, str]:
+    """Extract HTTP headers from an exception, if available.
+
+    Parameters
+    ----------
+    exc : BaseException
+        The exception from which to extract the headers.
+
+    Returns
+    -------
+    dict[str, str]
+        The HTTP headers if available, otherwise an empty dictionary.
+    """
     resp = getattr(exc, "response", None)
     raw = getattr(resp, "headers", None)
     return _normalize_headers(raw)
@@ -63,6 +89,20 @@ def wait_from_rate_limit_headers(
     headers: dict[str, str],
     header_names: Iterable[str] = ("x-ratelimit-reset-requests", "x-ratelimit-reset-tokens"),
 ) -> Optional[float]:
+    """Extract the wait time from rate limit headers, if available.
+
+    Parameters
+    ----------
+    headers : dict[str, str]
+        The HTTP headers from which to extract the wait time.
+    header_names : Iterable[str], optional
+        The header names to look for, by default ("x-ratelimit-reset-requests", "x-ratelimit-reset-tokens")
+
+    Returns
+    -------
+    Optional[float]
+        The wait time in seconds if available, otherwise None.
+    """
     candidates = []
     for name in header_names:
         sec = _to_seconds(headers.get(name))

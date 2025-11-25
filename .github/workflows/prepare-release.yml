@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  prepare:
+  changes:
     if: >-
       ${{
         github.event.pull_request.merged &&
@@ -18,7 +18,28 @@ jobs:
         !contains(github.event.pull_request.labels.*.name, 'refresh-locks') &&
         !contains(github.event.pull_request.labels.*.name, 'chart-bump')
       }}
+    name: Detect release-relevant changes
     runs-on: ubuntu-latest
+    outputs:
+      releasable: ${{ steps.filter.outputs.releasable }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter paths
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            releasable:
+              - 'services/**'
+              - 'libs/**'
+
+  prepare:
+    if: ${{ needs.changes.outputs.releasable == 'true' }}
+    runs-on: ubuntu-latest
+    needs: [changes]
     steps:
       - uses: actions/checkout@v4
         with:

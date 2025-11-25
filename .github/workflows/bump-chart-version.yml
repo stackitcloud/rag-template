@@ -1,0 +1,58 @@
+name: bump-chart-version
+on:
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: "Chart version to set (does not touch appVersion)"
+        required: true
+        type: string
+      ref:
+        description: "Git ref to bump (default: main)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || 'main' }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "pyyaml==6.0.2" "packaging==25.0"
+
+      - name: Bump chart version only
+        env:
+          CHART_VERSION: ${{ inputs.chart_version }}
+        run: |
+          if [ -z "${CHART_VERSION}" ]; then
+            echo "chart_version input is required" >&2
+            exit 1
+          fi
+          python tools/bump_chart_versions.py --mode chart-only --chart-version "$CHART_VERSION"
+
+      - name: Open PR for chart version bump
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: main
+          branch: chore/chart-bump-${{ inputs.chart_version }}
+          title: "chore(release): bump chart version to ${{ inputs.chart_version }}"
+          body: |
+            Bump Chart.yaml version to ${{ inputs.chart_version }} (appVersion unchanged).
+          commit-message: "chore(release): bump chart version to ${{ inputs.chart_version }}"
+          add-paths: |
+            infrastructure/**/Chart.yaml
+          labels: chart-bump

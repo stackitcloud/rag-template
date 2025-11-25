@@ -1,0 +1,190 @@
+name: publish-pre-and-qa
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+  issues: write
+
+jobs:
+  publish-pre:
+    name: Publish pre-release to TestPyPI (core-first)
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'prepare-release') }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      clean_version: ${{ steps.ver.outputs.clean_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive version from PR title
+        id: ver
+        run: |
+          set -euo pipefail
+          TITLE="${{ github.event.pull_request.title }}"
+          VERSION=$(echo "$TITLE" | sed -nE 's/.*prepare ([0-9]+\.[0-9]+\.[0-9]+(\.post[0-9]+)?).*/\1/p' || true)
+          if [ -z "$VERSION" ]; then
+            echo "Could not derive version from PR title: $TITLE" >&2
+            exit 1
+          fi
+          CLEAN_VERSION="${VERSION%%.post*}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry==2.1.3
+
+      - name: Configure TestPyPI repository
+        run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Publish rag-core-lib first (TestPyPI) and wait for index
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${POETRY_HTTP_BASIC_TESTPYPI_PASSWORD:-}" ]; then
+            echo "Missing TEST_PYPI_TOKEN secret" >&2
+            exit 1
+          fi
+          source tools/publish_libs.sh
+          publish_lib "rag-core-lib" "-r testpypi" "$VERSION"
+          wait_for_index "rag-core-lib" "$VERSION" "https://test.pypi.org" "TestPyPI"
+
+      - name: Publish remaining libs to TestPyPI
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          set -euo pipefail
+          source tools/publish_libs.sh
+          for lib in rag-core-api admin-api-lib extractor-api-lib; do
+            path="libs/$lib"
+            [ -d "$path" ] || { echo "Missing $path" >&2; exit 1; }
+            publish_lib "$lib" "-r testpypi" "$VERSION" "$path"
+          done
+
+      - name: Persist version metadata for downstream workflows
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          CLEAN_VERSION: ${{ steps.ver.outputs.clean_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p meta
+          {
+            echo "PRE_VERSION=${VERSION}"
+            echo "CLEAN_VERSION=${CLEAN_VERSION}"
+          } > meta/version.env
+        # Upload artifact for workflow_run trigger consumption
+      - name: Upload version artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-release-meta
+          path: meta/version.env
+          retention-days: 5
+
+  qa-verify:
+    name: Deploy to QA and run black-box tests
+    runs-on: ubuntu-latest
+    needs: publish-pre
+    if: ${{ needs.publish-pre.result == 'success' }}
+    env:
+      PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate QA secrets are present
+        run: |
+          missing=()
+          [ -z "${{ secrets.STACKIT_KUBECONFIG }}" ] && missing+=("STACKIT_KUBECONFIG")
+          [ -z "${{ secrets.QA_NAMESPACE }}" ] && missing+=("QA_NAMESPACE")
+          [ -z "${{ secrets.QA_BASE_URL }}" ] && missing+=("QA_BASE_URL")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing required secrets: ${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.STACKIT_KUBECONFIG }}" > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Deploy to QA via Helm
+        env:
+          QA_NAMESPACE: ${{ secrets.QA_NAMESPACE }}
+          QA_HELM_VALUES_FILE: ${{ secrets.QA_HELM_VALUES_FILE }}
+          RELEASE_NAME: rag-qa
+        run: |
+          set -euo pipefail
+          VALUES_ARG=""
+          if [ -n "${QA_HELM_VALUES_FILE:-}" ]; then
+            echo "Using custom values file from QA_HELM_VALUES_FILE"
+            printf '%s' "${QA_HELM_VALUES_FILE}" > /tmp/qa-values.yaml
+            VALUES_ARG="-f /tmp/qa-values.yaml"
+          elif [ -f infrastructure/rag/values.yaml ]; then
+            echo "Using default chart values from infrastructure/rag/values.yaml"
+            VALUES_ARG="-f infrastructure/rag/values.yaml"
+          else
+            echo "No values file provided and default missing" >&2
+            exit 1
+          fi
+
+          helm dependency update infrastructure/rag || true
+          helm upgrade --install "$RELEASE_NAME" infrastructure/rag \
+            --namespace "$QA_NAMESPACE" \
+            --create-namespace \
+            $VALUES_ARG
+
+      - name: Wait for core workloads to be ready
+        env:
+          QA_NAMESPACE: ${{ secrets.QA_NAMESPACE }}
+        run: |
+          set -euo pipefail
+          for deploy in backend admin-backend extractor frontend admin-frontend; do
+            if kubectl -n "$QA_NAMESPACE" get deployment "$deploy" >/dev/null 2>&1; then
+              echo "Waiting for deployment/$deploy rollout..."
+              kubectl -n "$QA_NAMESPACE" rollout status "deployment/$deploy" --timeout=5m
+            else
+              echo "deployment/$deploy not found in namespace $QA_NAMESPACE (skipping)"
+            fi
+          done
+
+      - name: Run black-box smoke tests
+        env:
+          QA_BASE_URL: ${{ secrets.QA_BASE_URL }}
+          QA_ADMIN_TOKEN: ${{ secrets.QA_ADMIN_TOKEN }}
+          QA_DOC_PATHS: ${{ secrets.QA_DOC_PATHS }}
+          QA_DOC_UPLOAD_URL: ${{ secrets.QA_DOC_UPLOAD_URL }}
+          QA_CHAT_URL: ${{ secrets.QA_CHAT_URL }}
+          QA_EXPECTED_ANSWER: ${{ secrets.QA_EXPECTED_ANSWER }}
+          QA_QUESTION: ${{ secrets.QA_QUESTION }}
+        run: |
+          set -euo pipefail
+          bash tools/blackbox/qa_smoke.sh

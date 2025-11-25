@@ -31,6 +31,24 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Verify appVersion matches release version (clean semver)
+        env:
+          RELEASE_VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          if echo "$RELEASE_VERSION" | grep -q '\.post'; then
+            echo "Release version must be clean semver (no .post): $RELEASE_VERSION" >&2
+            exit 1
+          fi
+          APP_VERSION=$(awk '/^appVersion:/ {print $2}' infrastructure/rag/Chart.yaml | tr -d "\"'")
+          if [ -z "$APP_VERSION" ]; then
+            echo "Could not read appVersion from infrastructure/rag/Chart.yaml" >&2
+            exit 1
+          fi
+          if [ "$APP_VERSION" != "$RELEASE_VERSION" ]; then
+            echo "Chart appVersion ($APP_VERSION) does not match release version ($RELEASE_VERSION)" >&2
+            exit 1
+          fi
+
       - name: Create Git tag
         run: |
           git config user.name "github-actions"

@@ -33,21 +33,41 @@ def _to_chart_version(app_version: str) -> str:
     return base.group(1) if base else app_version
 
 
-def bump_chart(chart_path: pathlib.Path, app_version: str):
+def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str):
     data = yaml.safe_load(chart_path.read_text())
-    data['appVersion'] = str(app_version)
-    data['version'] = _to_chart_version(str(app_version))
+    if mode in ("app-and-chart", "app-only"):
+        if not app_version:
+            raise ValueError("app_version is required for mode app-and-chart or app-only")
+        data['appVersion'] = str(app_version)
+    if mode in ("app-and-chart", "chart-only"):
+        if mode == "chart-only":
+            if not app_version:
+                raise ValueError("chart-only mode requires chart_version provided via app_version argument")
+            data['version'] = str(app_version)
+        else:
+            data['version'] = _to_chart_version(str(app_version))
     chart_path.write_text(yaml.safe_dump(data, sort_keys=False))
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--app-version', required=True)
+    p.add_argument('--app-version', help='App version to set (required for app-and-chart/app-only)')
+    p.add_argument('--chart-version', help='Chart version to set (required for chart-only)')
+    p.add_argument(
+        '--mode',
+        choices=['app-and-chart', 'app-only', 'chart-only'],
+        default='app-and-chart',
+        help='app-and-chart: bump appVersion and chart version; app-only: bump only appVersion; chart-only: bump only chart version'
+    )
     args = p.parse_args()
+
+    app_version = args.app_version
+    if args.mode == 'chart-only':
+        app_version = args.chart_version
 
     charts = list((ROOT / 'infrastructure').glob('*/Chart.yaml'))
     for ch in charts:
-        bump_chart(ch, args.app_version)
+        bump_chart(ch, app_version, args.mode)
 
 
 if __name__ == '__main__':

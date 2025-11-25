@@ -41,8 +41,7 @@ WORKDIR /app/services/rag-backend
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
-ENV POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_VIRTUALENVS_IN_PROJECT=false \
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
     VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH} \
     PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH
 
@@ -78,4 +77,3 @@ RUN apt-get clean autoclean && apt-get autoremove --yes \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
 
 USER nonroot
-COPY --from=build --chown=nonroot:nonroot  /app/services/rag-backend/log /app/services/rag-backend/log

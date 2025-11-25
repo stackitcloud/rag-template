@@ -31,17 +31,14 @@ WORKDIR /app/services/mcp-server
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH
 
 COPY --from=build --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /usr/bin/make /usr/bin/make
 COPY --from=build /usr/local/lib/ /usr/local/lib/
-
-# Ensure poetry reuses existing virtualenv when running as nonroot
-ENV POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_VIRTUALENVS_IN_PROJECT=false \
-    VIRTUAL_ENV=/opt/.venv \
-    PATH=/opt/.venv/bin:$PATH
 
 COPY --from=build --chown=nonroot:nonroot  /app/services/mcp-server/log /app/services/mcp-server/log
 COPY --chown=nonroot:nonroot services/mcp-server/src ./src
@@ -55,7 +52,5 @@ RUN apt-get clean autoclean && apt-get autoremove --yes \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/ || true
 
 USER nonroot
-
-COPY --from=build --chown=nonroot:nonroot  /app/services/mcp-server/log /app/services/mcp-server/log
 
 CMD [ "poetry", "run", "python", "src/main.py" ]

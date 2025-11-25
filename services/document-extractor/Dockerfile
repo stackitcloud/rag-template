@@ -41,8 +41,7 @@ RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
 # Ensure poetry reuses existing virtualenv when running as nonroot
-ENV POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_VIRTUALENVS_IN_PROJECT=false \
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
     VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH} \
     PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH
 COPY --from=build  --chown=nonroot:nonroot ${POETRY_VIRTUALENVS_PATH} ${POETRY_VIRTUALENVS_PATH}

@@ -113,7 +113,7 @@ class QdrantDatabase(VectorDatabase):
             return results + related_results
 
         except Exception:
-            logger.exception("Search failed.")
+            logger.exception("Search failed")
             raise
 
     def get_specific_document(self, document_id: str) -> list[Document]:

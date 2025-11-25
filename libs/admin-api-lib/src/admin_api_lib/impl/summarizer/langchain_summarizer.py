@@ -72,8 +72,6 @@ class LangchainSummarizer(Summarizer):
         """
         assert query, "Query is empty: %s" % query  # noqa S101
         config = ensure_config(config)
-        tries_remaining = config.get("configurable", {}).get("tries_remaining", 3)
-        logger.debug("Tries remaining %d", tries_remaining)
 
         document = Document(page_content=query)
         langchain_documents = self._chunker.split_documents([document])

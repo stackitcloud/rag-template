@@ -46,20 +46,6 @@ class RagMcpServer:
 
     @extensible_docstring("chat_simple")
     async def chat_simple(self, session_id: str, message: str) -> str:
-        """Handle a simple chat request.
-
-        Parameters
-        ----------
-        session_id : str
-            The ID of the user session.
-        message : str
-            The user message to process.
-
-        Returns
-        -------
-        str
-            The response from the chat model.
-        """
         chat_request = ChatRequest(message=message)
         response = await self._handle_chat(session_id, chat_request)
         return response.answer
@@ -68,22 +54,6 @@ class RagMcpServer:
     async def chat_with_history(
         self, session_id: str, message: str, history: list[dict[str, str]] = None
     ) -> dict[str, Any]:
-        """Handle a chat request with history.
-
-        Parameters
-        ----------
-        session_id : str
-            The ID of the user session.
-        message : str
-            The user message to process.
-        history : list[dict[str, str]], optional
-            The chat history to include in the request.
-
-        Returns
-        -------
-        dict[str, Any]
-            The response from the chat model.
-        """
         # Build chat history if provided
         chat_history = None
         if history:

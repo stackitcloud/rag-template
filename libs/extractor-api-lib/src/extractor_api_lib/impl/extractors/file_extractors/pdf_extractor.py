@@ -149,8 +149,8 @@ class PDFExtractor(InformationFileExtractor):
                     )
                     pdf_elements += new_pdf_elements
 
-        logger.info("Extraction completed. Found %d information pieces.", len(pdf_elements))
-        return pdf_elements
+            logger.info("Extraction completed. Found %d information pieces.", len(pdf_elements))
+            return pdf_elements
 
     def _is_text_based(self, page: Page) -> bool:
         """Classify whether a page is text-based, scanned.
@@ -196,7 +196,7 @@ class PDFExtractor(InformationFileExtractor):
                 try:
                     converted_table = self._dataframe_converter.convert(table_df)
                 except TypeError:
-                    logger.exception("Error while converting table to string.")
+                    logger.exception("Error while converting table to string")
                     continue
                 if not converted_table.strip():
                     continue
@@ -214,8 +214,7 @@ class PDFExtractor(InformationFileExtractor):
                     )
                 )
         except Exception:
-            # Include stack trace without embedding exception object in log arguments (G200)
-            logger.warning("Failed to find tables on page %d.", page_index, exc_info=True)
+            logger.warning("Failed to find tables on page %d", page_index, exc_info=True)
 
         return table_elements
 
@@ -322,10 +321,10 @@ class PDFExtractor(InformationFileExtractor):
                                 )
                             )
                     except Exception:
-                        logger.warning("Failed to convert Camelot table %d.", i + 1, exc_info=True)
+                        logger.warning("Failed to convert Camelot table %d", i + 1, exc_info=True)
 
         except Exception:
-            logger.debug("Camelot table extraction failed for page %d.", page_index, exc_info=True)
+            logger.debug("Camelot table extraction failed for page %d", page_index, exc_info=True)
 
         return table_elements
 

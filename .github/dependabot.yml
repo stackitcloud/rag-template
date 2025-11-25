@@ -1,0 +1,7 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/services/rag-backend"
+    schedule:
+      interval: "weekly"
+    versioning-strategy: increase  # or increase-if-necessary

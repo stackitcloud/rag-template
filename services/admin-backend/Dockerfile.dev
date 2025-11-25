@@ -22,7 +22,9 @@ COPY libs/admin-api-lib/pyproject.toml libs/admin-api-lib/poetry.lock ./libs/adm
 
 # Copy minimal lib structure for poetry to recognize local packages
 COPY libs/rag-core-lib/src ./libs/rag-core-lib/src
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/
 COPY libs/admin-api-lib/src ./libs/admin-api-lib/src
+COPY libs/admin-api-lib/README.md /app/libs/admin-api-lib/
 
 # Install deps (with dev extras) without packaging
 RUN poetry config virtualenvs.create false \

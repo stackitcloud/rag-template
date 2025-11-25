@@ -238,7 +238,7 @@ docker_build_config = {
     "ref": rag_api_full_image_name,
     "context": ".",
     "dockerfile": backend_dockerfile,
-    "ignore": IGNORE_BASE + libs_ignore_except(["rag-core-api", "rag-core-lib"])
+    "ignore": IGNORE_BASE + libs_ignore_except(["rag-core-api", "rag-core-lib"]),
 }
 
 # Add build args and live_update based on dev mode

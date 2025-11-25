@@ -1,14 +1,13 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
+# Build argument to control which dependency group to install
+ARG DEPENDENCY_GROUP=prod
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
 ENV POETRY_VIRTUALENVS_CREATE=false \
     POETRY_VIRTUALENVS_IN_PROJECT=false \
-    VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH} \
+    VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH}} \
     PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH \
     POETRY_VERSION=2.1.3
-
-# Build argument to control which dependency group to install
-ARG DEPENDENCY_GROUP=prod
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential --no-install-recommends make \
@@ -70,11 +69,8 @@ RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \
 
 WORKDIR /app/services/document-extractor
 
-
 COPY --chown=nonroot:nonroot services/document-extractor .
 COPY --from=build --chown=nonroot:nonroot  /app/services/document-extractor/log /app/services/document-extractor/log
-
-
 
 # cleanup
 RUN apt-get clean autoclean && apt-get autoremove --yes \

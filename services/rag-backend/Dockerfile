@@ -1,9 +1,14 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
-ARG dev=0
 ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
-ENV POETRY_VERSION=2.1.3 \
-    PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH
+ENV POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_VIRTUALENVS_IN_PROJECT=false \
+    VIRTUAL_ENV=/opt/.venv \
+    PATH=/opt/.venv/bin:$PATH \
+    POETRY_VERSION=2.1.3
+
+# Build argument to control which dependency group to install
+ARG DEPENDENCY_GROUP=prod
 
 WORKDIR /app
 
@@ -25,12 +30,9 @@ COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/rag-backend/log/logfile.log && chmod 600 /app/services/rag-backend/log/logfile.log
 
-RUN poetry config virtualenvs.create false &&\
-    if [ "$dev" = "1" ]; then \
-    poetry install --no-interaction --no-ansi --no-root --with dev; \
-    else \
-    poetry install --no-interaction --no-ansi --no-root; \
-    fi
+RUN poetry config virtualenvs.create false \
+    && cd /app/services/rag-backend \
+    && poetry install --no-interaction --no-ansi --no-root --with ${DEPENDENCY_GROUP}
 
 FROM --platform=linux/amd64 python:3.13-bookworm
 
@@ -69,8 +71,6 @@ RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \
         chown -R nonroot:nonroot /app/libs; \
     fi && \
     rm -rf /tmp/conditional-libs
-
-# Ensure poetry reuses existing virtualenv when running as nonroot
 
 # cleanup
 RUN apt-get clean autoclean && apt-get autoremove --yes \

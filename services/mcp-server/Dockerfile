@@ -21,13 +21,8 @@ COPY services/mcp-server/pyproject.toml services/mcp-server/poetry.lock ./
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/mcp-server/log/logfile.log && chmod 600 /app/services/mcp-server/log/logfile.log
 
-# Cache bust with dev arg so dev dependencies install when dev=1
-RUN echo "CACHE_BUST_DEV=$dev" && poetry config virtualenvs.create false &&\
-    if [ "$dev" = "1" ]; then \
-    poetry install --no-interaction --no-ansi --no-root --with dev; \
-    else \
-    poetry install --no-interaction --no-ansi --no-root; \
-    fi
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-root
 
 FROM --platform=linux/amd64 python:3.13.7-bookworm
 
@@ -53,8 +48,6 @@ COPY --chown=nonroot:nonroot services/mcp-server/src ./src
 COPY --chown=nonroot:nonroot services/mcp-server/tests ./tests
 COPY --chown=nonroot:nonroot services/mcp-server/pyproject.toml services/mcp-server/poetry.lock ./
 COPY --chown=nonroot:nonroot services/mcp-server/Makefile ./
-
-
 
 # cleanup
 RUN apt-get clean autoclean && apt-get autoremove --yes \

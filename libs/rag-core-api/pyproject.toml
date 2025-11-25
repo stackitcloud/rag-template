@@ -36,7 +36,6 @@ openai = "^1.77.0"
 langgraph = "^1.0.3"
 pillow = "^11.2.1"
 langchain-ollama = "^1.0.0"
-pytest-asyncio = "^0.26.0"
 langchain-community = "^0.4.1"
 fastembed = "^0.7.0"
 langdetect = "^1.0.9"
@@ -49,6 +48,9 @@ langgraph-checkpoint = ">=3.0.0,<4.0.0"
 pytest = "^8.3.5"
 coverage = "^7.8.0"
 pytest-asyncio = "^0.26.0"
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
@@ -74,9 +76,6 @@ flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
 flake8-logging-format = "^2024.24.12"
 flake8-docstrings = "^1.7.0"
-
-[tool.poetry.group.dev.dependencies]
-debugpy = "^1.8.14"
 
 
 [tool.flake8]

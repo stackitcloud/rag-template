@@ -23,7 +23,9 @@ COPY libs/rag-core-api/pyproject.toml libs/rag-core-api/poetry.lock /app/libs/ra
 
 # Copy minimal lib structure for poetry to recognize local packages
 COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/
 COPY libs/rag-core-api/src /app/libs/rag-core-api/src
+COPY libs/rag-core-api/README.md /app/libs/rag-core-api/
 
 # Install third-party dependencies (dev extras) without packaging the projects themselves
 RUN poetry config virtualenvs.create false \

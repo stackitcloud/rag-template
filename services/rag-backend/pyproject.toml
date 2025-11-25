@@ -15,6 +15,7 @@ repository = "https://github.com/stackitcloud/rag-template"
 [tool.poetry.dependencies]
 python = "^3.13"
 setuptools = "<80.9"
+propcache = "0.4.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"
@@ -110,6 +111,7 @@ max-line-length = 120
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
 priority = "supplemental"
+
 
 [tool.poetry.group.prod.dependencies]
 rag-core-api = "==3.4.0"

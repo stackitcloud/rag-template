@@ -53,7 +53,7 @@ class RagMcpServer:
     @extensible_docstring("chat_with_history")
     async def chat_with_history(
         self, session_id: str, message: str, history: list[dict[str, str]] = None
-        ) -> dict[str, Any]:
+    ) -> dict[str, Any]:
         # Build chat history if provided
         chat_history = None
         if history:

@@ -3,12 +3,11 @@
 import logging
 from typing import Optional
 
-from langchain.prompts import ChatPromptTemplate
 from langchain_core.language_models.llms import LLM
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.model import TextPromptClient
-from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +103,7 @@ class LangfuseManager:
             return langfuse_prompt
 
         except Exception:
-            logger.exception("Error occurred while getting prompt template from langfuse.")
+            logger.exception("Error occurred while getting prompt template from langfuse")
             return None
 
     def get_base_llm(self, name: str) -> LLM:

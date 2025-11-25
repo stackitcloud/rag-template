@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { CloudArrowUpIcon, GlobeAltIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
 import { computed, ref } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useDocumentsStore } from '../data-access/+state/documents.store';
@@ -12,8 +13,9 @@ const isDragOver = ref(false);
 const fileInputRef = ref<HTMLInputElement>();
 const uploadedDocuments = computed((): UploadedDocument[] => store.uploadedDocuments);
 const isInvalidFileType = ref(false);
-const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'text/xml'];
 const uploadMethod = ref<'file' | 'confluence' | 'sitemap'>('file');
+const allowedFileTypesLabel = allowedDocumentDisplayNames.join(', ');
+const allowedFileInputAccept = allowedDocumentAccepts.join(',');
 
 
 // confluence configuration refs
@@ -22,6 +24,7 @@ const spaceKey = ref('');
 const confluenceToken = ref('');
 const confluenceUrl = ref('');
 const maxPages = ref<number>();
+const confluenceCql = ref('');
 
 // sitemap configuration refs
 const sitemapName = ref('');
@@ -32,7 +35,7 @@ const sitemapHeaderTemplate = ref('');
 const error = computed(() => store.error);
 
 const uploadDocuments = (files: File[]) => {
-    if (files.some(file => !allowedFileTypes.includes(file.type))) {
+    if (files.some(file => !isAllowedDocumentType(file.name, file.type))) {
         isInvalidFileType.value = true;
         return;
     }
@@ -75,7 +78,8 @@ const handleConfluenceUpload = () => {
         spaceKey: spaceKey.value,
         token: confluenceToken.value,
         url: confluenceUrl.value,
-        maxPages: maxPages.value
+        maxPages: maxPages.value,
+        cql: confluenceCql.value,
     });
 }
 
@@ -160,12 +164,12 @@ const getErrorMessage = (errorType: string) => {
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
                     <CloudArrowUpIcon class="w-10 h-10 mb-4 text-accent-content" />
                     <p class="mb-1 font-bold text-cente">{{ t('documents.uploadSelectTitle') }}</p>
-                    <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }}</p>
+                    <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }} {{ allowedFileTypesLabel }}</p>
 
                     <button class="btn btn-sm mt-4 btn-accent" @click="fileInputRef!.click()">{{ t('documents.select')
                         }}</button>
                 </div>
-                <input ref="fileInputRef" type="file" multiple accept=".pdf,.docx,.pptx,.xml" @change="onFileInputChange"
+                <input ref="fileInputRef" type="file" multiple :accept="allowedFileInputAccept" @change="onFileInputChange"
                     class="hidden" />
             </div>
 
@@ -182,13 +186,16 @@ const getErrorMessage = (errorType: string) => {
                       <label for="confluenceName" class="sr-only"> Confluence Name</label>
                       <input v-model="confluenceName" type="text" placeholder="Name" class="input input-bordered w-full" />
                       <label for="spaceKey" class="sr-only">Space key</label>
-                      <input v-model="spaceKey" type="text" placeholder="Space key" class="input input-bordered w-full" />
+                      <input v-model="spaceKey" type="text" placeholder="Space key (optional)" class="input input-bordered w-full" />
+                      <label for="confluenceCql" class="sr-only">CQL</label>
+                      <input v-model="confluenceCql" type="text" placeholder="CQL query (optional)" class="input input-bordered w-full" />
                       <label for="confluenceToken" class="sr-only">Token</label>
                       <input v-model="confluenceToken" type="password" placeholder="Token" class="input input-bordered w-full" />
                       <label for="maxPages" class="sr-only">Max pages</label>
-                      <input v-model.number="maxPages" type="number" placeholder="Max number of pages" class="input input-bordered w-full" />
+                      <input v-model.number="maxPages" type="number" placeholder="Max number of pages (optional)" class="input input-bordered w-full" />
                     </div>
-                    <p class="text-xs opacity-50 mb-4">{{ t('documents.confluenceLoadDescription') }}</p>
+                    <p class="text-xs opacity-50">{{ t('documents.confluenceLoadDescription') }}</p>
+                    <p class="text-xs opacity-50 mb-4">{{ t('documents.confluenceQueryHint') }}</p>
                     <button class="btn btn-sm btn-accent" @click="handleConfluenceUpload">
                         {{ t('documents.loadConfluence') }}
                     </button>
@@ -232,7 +239,7 @@ const getErrorMessage = (errorType: string) => {
                 <InformationCircleIcon class="w-6 h-6" />
                 <div>
                     <h3 class="font-bold">{{ t('documents.fileTypeNotAllowedTitle') }}</h3>
-                    <div class="text-xs">{{ t('documents.fileTypeNotAllowedDescription') }}</div>
+                    <div class="text-xs">{{ t('documents.fileTypeNotAllowedDescription') }} {{ allowedFileTypesLabel }}</div>
                 </div>
             </div>
         </div>

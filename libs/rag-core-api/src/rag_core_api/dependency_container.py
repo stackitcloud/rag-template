@@ -19,6 +19,7 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
+from rag_core_api.impl.answer_generation_chains.language_detection_chain import LanguageDetectionChain
 from rag_core_api.impl.api_endpoints.default_chat import DefaultChat
 from rag_core_api.impl.api_endpoints.default_information_pieces_remover import (
     DefaultInformationPiecesRemover,
@@ -57,12 +58,14 @@ from rag_core_api.prompt_templates.answer_generation_prompt import (
 from rag_core_api.prompt_templates.question_rephrasing_prompt import (
     QUESTION_REPHRASING_PROMPT,
 )
+from rag_core_api.prompt_templates.language_detection_prompt import LANGUAGE_DETECTION_PROMPT
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import chat_model_provider
 from rag_core_lib.impl.settings.langfuse_settings import LangfuseSettings
 from rag_core_lib.impl.settings.ollama_llm_settings import OllamaSettings
 from rag_core_lib.impl.settings.rag_class_types_settings import RAGClassTypeSettings
+from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.settings.stackit_vllm_settings import StackitVllmSettings
 from rag_core_lib.impl.tracers.langfuse_traced_runnable import LangfuseTracedRunnable
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
@@ -89,6 +92,7 @@ class DependencyContainer(DeclarativeContainer):
     stackit_embedder_settings = StackitEmbedderSettings()
     chat_history_settings = ChatHistorySettings()
     sparse_embedder_settings = SparseEmbedderSettings()
+    retry_decorator_settings = RetryDecoratorSettings()
     chat_history_config.from_dict(chat_history_settings.model_dump())
 
     class_selector_config.from_dict(rag_class_type_settings.model_dump() | embedder_class_type_settings.model_dump())
@@ -98,7 +102,7 @@ class DependencyContainer(DeclarativeContainer):
         ollama=Singleton(
             LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
         ),
-        stackit=Singleton(StackitEmbedder, stackit_embedder_settings),
+        stackit=Singleton(StackitEmbedder, stackit_embedder_settings, retry_decorator_settings),
     )
 
     sparse_embedder = Singleton(FastEmbedSparse, **sparse_embedder_settings.model_dump())
@@ -178,6 +182,7 @@ class DependencyContainer(DeclarativeContainer):
 
     prompt = ANSWER_GENERATION_PROMPT
     rephrasing_prompt = QUESTION_REPHRASING_PROMPT
+    language_detection_prompt = LANGUAGE_DETECTION_PROMPT
 
     langfuse = Singleton(
         Langfuse,
@@ -192,6 +197,7 @@ class DependencyContainer(DeclarativeContainer):
         managed_prompts={
             AnswerGenerationChain.__name__: prompt,
             RephrasingChain.__name__: rephrasing_prompt,
+            LanguageDetectionChain.__name__: language_detection_prompt,
         },
         llm=large_language_model,
     )
@@ -206,10 +212,16 @@ class DependencyContainer(DeclarativeContainer):
         langfuse_manager=langfuse_manager,
     )
 
+    language_detection_chain = Singleton(
+        LanguageDetectionChain,
+        langfuse_manager=langfuse_manager,
+    )
+
     chat_graph = Singleton(
         DefaultChatGraph,
         composed_retriever=composed_retriever,
         rephrasing_chain=rephrasing_chain,
+        language_detection_chain=language_detection_chain,
         mapper=information_piece_mapper,
         answer_generation_chain=answer_generation_chain,
         error_messages=error_messages,

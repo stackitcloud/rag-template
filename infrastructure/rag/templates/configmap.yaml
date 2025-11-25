@@ -10,17 +10,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "configmap.pdfextractorName" . }}
+  name: {{ template "configmap.usecaseName" . }}
 data:
-  {{- range $key, $value := .Values.shared.envs.pdfextractor }}
+  {{- range $key, $value := .Values.shared.envs.usecase }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "configmap.usecaseName" . }}
+  name: {{ template "configmap.retryDecoratorName" . }}
 data:
-  {{- range $key, $value := .Values.shared.envs.usecase }}
+  {{- range $key, $value := .Values.shared.envs.retryDecorator }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}

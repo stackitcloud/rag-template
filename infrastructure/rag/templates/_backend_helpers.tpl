@@ -95,11 +95,13 @@
 {{- end -}}
 
 {{- define "backend.fullImageName" -}}
-{{- printf "%s:%s" .Values.backend.image.repository .Values.backend.image.tag | trimSuffix ":" | trimSuffix "-" }}
+{{- $tag := default .Chart.AppVersion .Values.backend.image.tag -}}
+{{- printf "%s:%s" .Values.backend.image.repository $tag | trimSuffix ":" | trimSuffix "-" }}
 {{- end -}}
 
 {{- define "mcp.fullImageName" -}}
-{{- printf "%s:%s" .Values.backend.mcp.image.repository .Values.backend.mcp.image.tag | trimSuffix ":" | trimSuffix "-" }}
+{{- $tag := default .Chart.AppVersion .Values.backend.mcp.image.tag -}}
+{{- printf "%s:%s" .Values.backend.mcp.image.repository $tag | trimSuffix ":" | trimSuffix "-" }}
 {{- end -}}
 
 

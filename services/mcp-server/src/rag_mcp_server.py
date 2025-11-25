@@ -36,7 +36,12 @@ class RagMcpServer:
 
     def run(self):
         """Run the MCP server with specified transport."""
-        logger.info("Starting FastMCP Server on %s://%s:%s", self.TRANSPORT, self._settings.host, self._settings.port)
+        logger.info(
+            "Starting FastMCP Server on %s://%s:%s",
+            self.TRANSPORT,
+            self._settings.host,
+            self._settings.port,
+        )
         self._server.run(transport=self.TRANSPORT, host=self._settings.host, port=self._settings.port)
 
     @extensible_docstring("chat_simple")

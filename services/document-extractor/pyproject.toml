@@ -14,7 +14,8 @@ dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
   ./main.py: D100,
-  ./tests/*: S101,D100,D103,D104
+  ./tests/*: S101,D100,D103,D104,
+  **/__init__.py: D104,
 """
 
 [tool.black]
@@ -47,15 +48,21 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "document-extractor"
-version = "2.2.1"
-description = "Extracts content from files and sources like Confluence spaces, sitemaps etc."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+name = "extractor_server"
+version = "v3.4.0"
+description = "This example demonstrates the usage of the extractor-api-lib."
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
 readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
-python = "^3.13"
-setuptools = "<80.9"
+python = ">=3.13,<3.14"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"
@@ -65,7 +72,7 @@ httpx = "^0.28.1"
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
 black = "^25.1.0"
-flake8-black = "^0.3.6"
+flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
@@ -103,8 +110,13 @@ priority = "supplemental"
 
 [tool.poetry.group.prod.dependencies]
 # Try PyPI first, then TestPyPI automatically due to supplemental priority
-extractor-api-lib = "==2.2.1"
+extractor-api-lib = "==3.4.0"
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile
 extractor-api-lib = {path = "../../libs/extractor-api-lib"}
+
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"

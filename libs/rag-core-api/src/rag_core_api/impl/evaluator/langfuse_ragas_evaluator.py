@@ -140,7 +140,7 @@ class LangfuseRagasEvaluator(Evaluator):
             evaluation_dataset = self._get_dataset(self._settings.evaluation_dataset_name)
             await self._aauto_answer_generation4evaluation_questions(evaluation_dataset)
         except Exception:
-            logger.exception("Failed to evaluate questions.")
+            logger.exception("Failed to evaluate questions")
 
     async def _aauto_answer_generation4evaluation_questions(self, dataset) -> tuple[int, Dataset]:
         session_id = str(uuid4())
@@ -172,7 +172,7 @@ class LangfuseRagasEvaluator(Evaluator):
                 try:
                     response = await self._chat_endpoint.achat(config["metadata"]["session_id"], chat_request)
                 except Exception:
-                    logger.info("Error while answering question %s.", item.input, exc_info=True)
+                    logger.exception("Error while answering question %s", item.input)
                     response = None
                 output = {
                     "answer": response.answer if response else None,

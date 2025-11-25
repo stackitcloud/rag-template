@@ -9,6 +9,19 @@ on:
         description: "Clean semver to promote (no .post)"
         required: true
         type: string
+      ref:
+        description: "Git ref to use (defaults to main)"
+        required: false
+        type: string
+      pre_version:
+        description: "Pre-release version (optional, for bookkeeping)"
+        required: false
+        type: string
+      dry_run:
+        description: "If true, skip publishing to PyPI (only TestPyPI)"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -86,13 +99,14 @@ jobs:
           POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
           POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}
         run: |
           set -euo pipefail
           if [ -z "${POETRY_HTTP_BASIC_TESTPYPI_PASSWORD:-}" ]; then
             echo "Missing TEST_PYPI_TOKEN secret" >&2
             exit 1
           fi
-          if [ -z "${POETRY_PYPI_TOKEN_PYPI:-}" ]; then
+          if [ "${DRY_RUN:-false}" != "true" ] && [ -z "${POETRY_PYPI_TOKEN_PYPI:-}" ]; then
             echo "Missing PYPI_TOKEN secret" >&2
             exit 1
           fi
@@ -106,12 +120,16 @@ jobs:
             publish_lib "$lib" "-r testpypi" "$CLEAN_VERSION"
           done
 
-          echo "Publishing clean version $CLEAN_VERSION (core-first) to PyPI..."
-          publish_lib "rag-core-lib" "" "$CLEAN_VERSION"
-          wait_for_index "rag-core-lib" "$CLEAN_VERSION" "https://pypi.org" "PyPI"
-          for lib in rag-core-api admin-api-lib extractor-api-lib; do
-            publish_lib "$lib" "" "$CLEAN_VERSION"
-          done
+          if [ "${DRY_RUN:-false}" = "true" ]; then
+            echo "Dry run enabled: skipping PyPI publish."
+          else
+            echo "Publishing clean version $CLEAN_VERSION (core-first) to PyPI..."
+            publish_lib "rag-core-lib" "" "$CLEAN_VERSION"
+            wait_for_index "rag-core-lib" "$CLEAN_VERSION" "https://pypi.org" "PyPI"
+            for lib in rag-core-api admin-api-lib extractor-api-lib; do
+              publish_lib "$lib" "" "$CLEAN_VERSION"
+            done
+          fi
 
       - name: Clear poetry caches
         run: |

@@ -20,6 +20,7 @@ COPY services/document-extractor/pyproject.toml services/document-extractor/poet
 COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
 
 COPY libs/extractor-api-lib/src ./libs/extractor-api-lib/src
+COPY libs/extractor-api-lib/README.md /app/libs/extractor-api-lib/
 
 # Install third-party deps for service and lib (with dev extras)
 RUN poetry config virtualenvs.create false \

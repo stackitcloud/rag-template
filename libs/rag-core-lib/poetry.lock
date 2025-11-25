@@ -3076,7 +3076,7 @@ name = "pytest-asyncio"
 version = "1.2.0"
 description = "Pytest support for asyncio"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 groups = ["test"]
 files = [
     {file = "pytest_asyncio-1.2.0-py3-none-any.whl", hash = "sha256:8e17ae5e46d8e7efe51ab6494dd2010f4ca8dae51652aa3c8d55acf50bfb2e99"},
@@ -3084,7 +3084,7 @@ files = [
 ]
 
 [package.dependencies]
-pytest = ">=8.2,<10"
+pytest = ">=8.2,<9"
 
 [package.extras]
 docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1)"]

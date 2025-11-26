@@ -55,4 +55,5 @@ jobs:
           commit-message: "chore(release): bump chart version to ${{ inputs.chart_version }}"
           add-paths: |
             infrastructure/**/Chart.yaml
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}
           labels: chart-bump

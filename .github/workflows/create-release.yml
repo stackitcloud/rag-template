@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}
 
       - name: Derive version from PR title
         id: ver
@@ -62,4 +63,4 @@ jobs:
           tag_name: v${{ steps.ver.outputs.version }}
           name: v${{ steps.ver.outputs.version }}
           generate_release_notes: true
-          token: ${{ secrets.GHCR_PAT }}
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}

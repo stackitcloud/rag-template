@@ -59,7 +59,7 @@ jobs:
       - name: Compute next version (dry-run)
         id: semrel
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
         run: |
           npx semantic-release --dry-run --no-ci | tee semrel.log
           BASE_VERSION=$(grep -Eo "next release version is [0-9]+\.[0-9]+\.[0-9]+" semrel.log | awk '{print $5}')
@@ -93,3 +93,4 @@ jobs:
           add-paths: |
             libs/**/pyproject.toml
           labels: prepare-release
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}

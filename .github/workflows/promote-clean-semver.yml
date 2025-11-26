@@ -177,3 +177,4 @@ jobs:
             infrastructure/**/Chart.yaml
             libs/**/pyproject.toml
           labels: refresh-locks
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}

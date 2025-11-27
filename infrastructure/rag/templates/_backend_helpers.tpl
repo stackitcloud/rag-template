@@ -109,7 +109,7 @@
 {{- define "backend.ingress.commonAnnotations" -}}
 {{- if .Values.shared.config.basicAuth.enabled }}
 nginx.ingress.kubernetes.io/auth-type: basic
-nginx.ingress.kubernetes.io/auth-secret: basic-auth
+nginx.ingress.kubernetes.io/auth-secret: {{ include "secret.basicAuthName" . }}
 {{- end }}
 nginx.ingress.kubernetes.io/proxy-body-size: "0"
 nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"

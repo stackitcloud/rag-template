@@ -110,10 +110,10 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.s3Name" . }}
-          - secretRef:
-              name: {{ template "secret.s3Name" . }}
         {{- $hfCacheDir := include "extractor.huggingfaceCacheDir" . }}
         env:
+{{ include "rag.secretEnvVar" (dict "name" "S3_ACCESS_KEY_ID" "config" .Values.shared.secrets.s3.accessKey "defaultName" (include "secret.s3Name" .) "defaultKey" "S3_ACCESS_KEY_ID") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "S3_SECRET_ACCESS_KEY" "config" .Values.shared.secrets.s3.secretKey "defaultName" (include "secret.s3Name" .) "defaultKey" "S3_SECRET_ACCESS_KEY") | nindent 10 }}
           - name: PYTHONPATH
             value: {{ .Values.extractor.pythonPathEnv.PYTHONPATH }}
           - name: NLTK_DATA

@@ -469,14 +469,14 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
-    "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
-    "backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
-    "backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
-    "backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
-    "backend.secrets.ragas.openaiApikey=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
-    "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
-    "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
+    "shared.secrets.s3.accessKey.value=%s" % os.environ["S3_ACCESS_KEY_ID"],
+    "shared.secrets.s3.secretKey.value=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
+    "backend.secrets.basicAuth.value=%s" % os.environ["BASIC_AUTH"],
+    "backend.secrets.langfuse.publicKey.value=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
+    "backend.secrets.langfuse.secretKey.value=%s" % os.environ["LANGFUSE_SECRET_KEY"],
+    "backend.secrets.ragas.openaiApikey.value=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
+    "frontend.secrets.viteAuth.VITE_AUTH_USERNAME.value=%s" % os.environ["VITE_AUTH_USERNAME"],
+    "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD.value=%s" % os.environ["VITE_AUTH_PASSWORD"],
     # variables
     "shared.debug.backend.enabled=%s" % backend_debug,
     "features.frontend.enabled=true",
@@ -532,13 +532,13 @@ if has_confluence_config():
 
 if os.environ.get("STACKIT_VLLM_API_KEY", False):
     stackit_vllm_settings = [
-        "backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
+        "backend.secrets.stackitVllm.apiKey.value=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     ]
     value_override.extend(stackit_vllm_settings)
 
 if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
     stackit_embedder_settings = [
-        "backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
+        "backend.secrets.stackitEmbedder.apiKey.value=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
     ]
     value_override.extend(stackit_embedder_settings)
 

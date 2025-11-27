@@ -7,7 +7,7 @@ metadata:
   annotations:
     {{- if .Values.shared.config.basicAuth.enabled }}
     nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-secret: {{ include "secret.basicAuthName" . }}
     {{- end }}
     {{- if .Values.shared.config.tls.enabled }}
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -35,4 +35,3 @@ spec:
                   number: {{ .Values.frontend.ingress.host.port }}
 {{- end }}
 {{- end }}
-

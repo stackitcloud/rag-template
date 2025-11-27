@@ -145,16 +145,40 @@ backend:
       port: 8080
 
   secrets:
-    basicAuth: ""
+    basicAuth:
+      value: ""
+      secretKeyRef:
+        name: ""
+        key: "auth"
     langfuse:
-      publicKey: "pk-lf"
-      secretKey: "sk-lf"
+      publicKey:
+        value: "pk-lf"
+        secretKeyRef:
+          name: ""
+          key: "LANGFUSE_PUBLIC_KEY"
+      secretKey:
+        value: "sk-lf"
+        secretKeyRef:
+          name: ""
+          key: "LANGFUSE_SECRET_KEY"
     stackitEmbedder:
-      apiKey: ""
+      apiKey:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "STACKIT_EMBEDDER_API_KEY"
     stackitVllm:
-      apiKey: "sk-123"
+      apiKey:
+        value: "sk-123"
+        secretKeyRef:
+          name: ""
+          key: "STACKIT_VLLM_API_KEY"
     ragas:
-      openaiApikey: ""
+      openaiApikey:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "RAGAS_OPENAI_API_KEY"
 
   envs:
     stackitVllm:
@@ -246,8 +270,16 @@ frontend:
 
   secrets:
     viteAuth:
-      VITE_AUTH_USERNAME: ""
-      VITE_AUTH_PASSWORD: ""
+      VITE_AUTH_USERNAME:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "VITE_AUTH_USERNAME"
+      VITE_AUTH_PASSWORD:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "VITE_AUTH_PASSWORD"
 
   envs:
     vite:
@@ -462,9 +494,17 @@ shared:
 
   secrets:
     s3:
-      accessKey: "admin"
-      secretKey: "adminpassword"
-    usecase:
+      accessKey:
+        value: "admin"
+        secretKeyRef:
+          name: ""
+          key: "S3_ACCESS_KEY_ID"
+      secretKey:
+        value: "adminpassword"
+        secretKeyRef:
+          name: ""
+          key: "S3_SECRET_ACCESS_KEY"
+    usecase: {}
 
 
   envs:
@@ -488,6 +528,9 @@ langfuse:
     # Used to hash API keys
     salt:
       value: "changeme"
+      secretKeyRef:
+        name: ""
+        key: ""
 
     # Authentication settings
     features:
@@ -514,6 +557,9 @@ langfuse:
       url: http://localhost:3000
       secret:
         value: "changeme"
+        secretKeyRef:
+          name: ""
+          key: ""
 
     # Additional environment variables (only for init values)
     additionalEnv:

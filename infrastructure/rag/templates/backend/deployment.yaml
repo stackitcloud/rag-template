@@ -133,16 +133,14 @@ spec:
               name: {{ template "configmap.chatHistoryName" . }}
           - configMapRef:
               name: {{ template "configmap.retryDecoratorName" . }}
-          - secretRef:
-              name: {{ template "secret.langfuseName" . }}
-          - secretRef:
-              name: {{ template "secret.stackitVllmName" . }}
-          - secretRef:
-              name: {{ template "secret.usecaseName" . }}
-          - secretRef:
-              name: {{ template "secret.stackitEmbedderName" . }}
-          - secretRef:
-              name: {{ template "secret.ragasName" . }}
         env:
+{{ include "rag.secretEnvVar" (dict "name" "LANGFUSE_PUBLIC_KEY" "config" .Values.backend.secrets.langfuse.publicKey "defaultName" (include "secret.langfuseName" .) "defaultKey" "LANGFUSE_PUBLIC_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "LANGFUSE_SECRET_KEY" "config" .Values.backend.secrets.langfuse.secretKey "defaultName" (include "secret.langfuseName" .) "defaultKey" "LANGFUSE_SECRET_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "STACKIT_VLLM_API_KEY" "config" .Values.backend.secrets.stackitVllm.apiKey "defaultName" (include "secret.stackitVllmName" .) "defaultKey" "STACKIT_VLLM_API_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "STACKIT_EMBEDDER_API_KEY" "config" .Values.backend.secrets.stackitEmbedder.apiKey "defaultName" (include "secret.stackitEmbedderName" .) "defaultKey" "STACKIT_EMBEDDER_API_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "RAGAS_OPENAI_API_KEY" "config" .Values.backend.secrets.ragas.openaiApikey "defaultName" (include "secret.ragasName" .) "defaultKey" "RAGAS_OPENAI_API_KEY") | nindent 10 }}
+{{- range $key, $cfg := .Values.shared.secrets.usecase }}
+{{ include "rag.secretEnvVar" (dict "name" $key "config" $cfg "defaultName" (include "secret.usecaseName" $) "defaultKey" $key) | nindent 10 }}
+{{- end }}
           - name: PYTHONPATH
             value: {{ .Values.backend.pythonPathEnv.PYTHONPATH }}

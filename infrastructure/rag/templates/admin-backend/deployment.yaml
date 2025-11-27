@@ -121,16 +121,15 @@ spec:
               name: {{ template "configmap.retryDecoratorName" . }}
           - configMapRef:
               name: {{ template "configmap.chunkerName" . }}
-          - secretRef:
-              name: {{ template "secret.langfuseName" . }}
-          - secretRef:
-              name: {{ template "secret.usecaseName" . }}
-          - secretRef:
-              name: {{ template "secret.s3Name" . }}
-          - secretRef:
-              name: {{ template "secret.stackitVllmName" . }}
-          - secretRef:
-              name: {{ template "secret.stackitEmbedderName" . }}
         env:
+{{ include "rag.secretEnvVar" (dict "name" "LANGFUSE_PUBLIC_KEY" "config" .Values.backend.secrets.langfuse.publicKey "defaultName" (include "secret.langfuseName" .) "defaultKey" "LANGFUSE_PUBLIC_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "LANGFUSE_SECRET_KEY" "config" .Values.backend.secrets.langfuse.secretKey "defaultName" (include "secret.langfuseName" .) "defaultKey" "LANGFUSE_SECRET_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "STACKIT_VLLM_API_KEY" "config" .Values.backend.secrets.stackitVllm.apiKey "defaultName" (include "secret.stackitVllmName" .) "defaultKey" "STACKIT_VLLM_API_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "STACKIT_EMBEDDER_API_KEY" "config" .Values.backend.secrets.stackitEmbedder.apiKey "defaultName" (include "secret.stackitEmbedderName" .) "defaultKey" "STACKIT_EMBEDDER_API_KEY") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "S3_ACCESS_KEY_ID" "config" .Values.shared.secrets.s3.accessKey "defaultName" (include "secret.s3Name" .) "defaultKey" "S3_ACCESS_KEY_ID") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "S3_SECRET_ACCESS_KEY" "config" .Values.shared.secrets.s3.secretKey "defaultName" (include "secret.s3Name" .) "defaultKey" "S3_SECRET_ACCESS_KEY") | nindent 10 }}
+{{- range $key, $cfg := .Values.shared.secrets.usecase }}
+{{ include "rag.secretEnvVar" (dict "name" $key "config" $cfg "defaultName" (include "secret.usecaseName" $) "defaultKey" $key) | nindent 10 }}
+{{- end }}
           - name: PYTHONPATH
             value: {{ .Values.adminBackend.pythonPathEnv.PYTHONPATH }}

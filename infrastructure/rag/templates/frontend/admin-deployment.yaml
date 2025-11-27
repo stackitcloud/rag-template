@@ -47,8 +47,11 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ template "configmap.frontendName" . }}
-          - secretRef:
-              name: "vite-auth"
+        {{- if .Values.shared.config.basicAuth.enabled }}
+        env:
+{{ include "rag.secretEnvVar" (dict "name" "VITE_AUTH_USERNAME" "config" .Values.frontend.secrets.viteAuth.VITE_AUTH_USERNAME "defaultName" "vite-auth" "defaultKey" "VITE_AUTH_USERNAME") | nindent 10 }}
+{{ include "rag.secretEnvVar" (dict "name" "VITE_AUTH_PASSWORD" "config" .Values.frontend.secrets.viteAuth.VITE_AUTH_PASSWORD "defaultName" "vite-auth" "defaultKey" "VITE_AUTH_PASSWORD") | nindent 10 }}
+        {{- end }}
       {{- if .Values.shared.imagePullSecret }}
       imagePullSecrets:
       - name: {{ .Values.shared.imagePullSecret.name }}

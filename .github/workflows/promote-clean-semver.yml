@@ -1,8 +1,5 @@
 name: promote-clean-semver
 on:
-  workflow_run:
-    workflows: ["publish-pre-and-qa"]
-    types: [completed]
   workflow_dispatch:
     inputs:
       clean_version:
@@ -31,9 +28,6 @@ permissions:
 jobs:
   promote:
     name: Publish clean semver, refresh locks, bump appVersion
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

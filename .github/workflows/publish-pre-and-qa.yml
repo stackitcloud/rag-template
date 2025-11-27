@@ -121,7 +121,7 @@ jobs:
           retention-days: 5
 
   qa-verify:
-    name: Deploy to QA and run black-box tests
+    name: Build QA images and update Argo deployment repo
     runs-on: ubuntu-latest
     needs: publish-pre
     if: ${{ needs.publish-pre.result == 'success' }}
@@ -135,75 +135,97 @@ jobs:
       - name: Validate QA secrets are present
         run: |
           missing=()
-          [ -z "${{ secrets.STACKIT_KUBECONFIG }}" ] && missing+=("STACKIT_KUBECONFIG")
-          [ -z "${{ secrets.QA_NAMESPACE }}" ] && missing+=("QA_NAMESPACE")
-          [ -z "${{ secrets.QA_BASE_URL }}" ] && missing+=("QA_BASE_URL")
+          [ -z "${{ secrets.STACKIT_REGISTRY_USERNAME }}" ] && missing+=("STACKIT_REGISTRY_USERNAME")
+          [ -z "${{ secrets.STACKIT_REGISTRY_PASSWORD }}" ] && missing+=("STACKIT_REGISTRY_PASSWORD")
+          [ -z "${{ secrets.DEPLOY_REPO_URL }}" ] && missing+=("DEPLOY_REPO_URL")
+          [ -z "${{ secrets.DEPLOY_REPO_TOKEN }}" ] && missing+=("DEPLOY_REPO_TOKEN")
+          [ -z "${{ secrets.QA_IMAGE_REGISTRY }}" ] && echo "QA_IMAGE_REGISTRY not set, defaulting to registry.onstackit.cloud/qa-rag-template"
           if [ ${#missing[@]} -gt 0 ]; then
             echo "Missing required secrets: ${missing[*]}" >&2
             exit 1
           fi
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p "$HOME/.kube"
-          echo "${{ secrets.STACKIT_KUBECONFIG }}" > "$HOME/.kube/config"
-          chmod 600 "$HOME/.kube/config"
-
-      - name: Deploy to QA via Helm
+      - name: Set image registry and version
         env:
-          QA_NAMESPACE: ${{ secrets.QA_NAMESPACE }}
-          QA_HELM_VALUES_FILE: ${{ secrets.QA_HELM_VALUES_FILE }}
-          RELEASE_NAME: rag-qa
+          QA_IMAGE_REGISTRY: ${{ secrets.QA_IMAGE_REGISTRY }}
+        run: |
+          IMAGE_REGISTRY="${QA_IMAGE_REGISTRY:-registry.onstackit.cloud/qa-rag-template}"
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${PRE_RELEASE_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to STACKIT registry
+        env:
+          STACKIT_REGISTRY_USERNAME: ${{ secrets.STACKIT_REGISTRY_USERNAME }}
+          STACKIT_REGISTRY_PASSWORD: ${{ secrets.STACKIT_REGISTRY_PASSWORD }}
+        run: |
+          echo "$STACKIT_REGISTRY_PASSWORD" | docker login registry.onstackit.cloud -u "$STACKIT_REGISTRY_USERNAME" --password-stdin
+
+      - name: Build and push QA images
+        env:
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           set -euo pipefail
-          VALUES_ARG=""
-          if [ -n "${QA_HELM_VALUES_FILE:-}" ]; then
-            echo "Using custom values file from QA_HELM_VALUES_FILE"
-            printf '%s' "${QA_HELM_VALUES_FILE}" > /tmp/qa-values.yaml
-            VALUES_ARG="-f /tmp/qa-values.yaml"
-          elif [ -f infrastructure/rag/values.yaml ]; then
-            echo "Using default chart values from infrastructure/rag/values.yaml"
-            VALUES_ARG="-f infrastructure/rag/values.yaml"
-          else
-            echo "No values file provided and default missing" >&2
-            exit 1
-          fi
-
-          helm dependency update infrastructure/rag || true
-          helm upgrade --install "$RELEASE_NAME" infrastructure/rag \
-            --namespace "$QA_NAMESPACE" \
-            --create-namespace \
-            $VALUES_ARG
-
-      - name: Wait for core workloads to be ready
-        env:
-          QA_NAMESPACE: ${{ secrets.QA_NAMESPACE }}
-        run: |
-          set -euo pipefail
-          for deploy in backend admin-backend extractor frontend admin-frontend; do
-            if kubectl -n "$QA_NAMESPACE" get deployment "$deploy" >/dev/null 2>&1; then
-              echo "Waiting for deployment/$deploy rollout..."
-              kubectl -n "$QA_NAMESPACE" rollout status "deployment/$deploy" --timeout=5m
-            else
-              echo "deployment/$deploy not found in namespace $QA_NAMESPACE (skipping)"
-            fi
+          images=(
+            "rag-backend services/rag-backend/Dockerfile ."
+            "admin-backend services/admin-backend/Dockerfile ."
+            "document-extractor services/document-extractor/Dockerfile ."
+            "mcp-server services/mcp-server/Dockerfile ."
+            "frontend services/frontend/apps/chat-app/Dockerfile services/frontend"
+            "admin-frontend services/frontend/apps/admin-app/Dockerfile services/frontend"
+          )
+          for entry in "${images[@]}"; do
+            IFS=" " read -r name dockerfile context <<<"$entry"
+            ref="$IMAGE_REGISTRY/$name:$IMAGE_TAG"
+            echo "Building and pushing $ref (Dockerfile=$dockerfile context=$context)"
+            docker buildx build --platform linux/amd64 -t "$ref" -f "$dockerfile" "$context" --push
           done
 
-      - name: Run black-box smoke tests
+      - name: Checkout deployment repo
         env:
-          QA_BASE_URL: ${{ secrets.QA_BASE_URL }}
-          QA_ADMIN_TOKEN: ${{ secrets.QA_ADMIN_TOKEN }}
-          QA_DOC_PATHS: ${{ secrets.QA_DOC_PATHS }}
-          QA_DOC_UPLOAD_URL: ${{ secrets.QA_DOC_UPLOAD_URL }}
-          QA_CHAT_URL: ${{ secrets.QA_CHAT_URL }}
-          QA_EXPECTED_ANSWER: ${{ secrets.QA_EXPECTED_ANSWER }}
-          QA_QUESTION: ${{ secrets.QA_QUESTION }}
+          DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
+          DEPLOY_REPO_BRANCH: ${{ secrets.DEPLOY_REPO_BRANCH || 'main' }}
+          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
         run: |
           set -euo pipefail
-          bash tools/blackbox/qa_smoke.sh
+          mkdir -p /tmp/deploy-repo
+          AUTH_URL="${DEPLOY_REPO_URL/https:\/\//https://${DEPLOY_REPO_TOKEN}@}"
+          git clone --depth 1 --branch "${DEPLOY_REPO_BRANCH:-main}" "$AUTH_URL" /tmp/deploy-repo
+
+      - name: Update values file in deployment repo
+        env:
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          DEPLOY_VALUES_FILE: ${{ secrets.DEPLOY_VALUES_FILE || 'values-qa.yaml' }}
+        run: |
+          set -euo pipefail
+          cd /tmp/deploy-repo
+          python -m pip install --quiet pyyaml
+          python "$GITHUB_WORKSPACE/tools/update_deploy_values.py" \
+            --values-file "$DEPLOY_VALUES_FILE" \
+            --image-registry "$IMAGE_REGISTRY" \
+            --image-tag "$IMAGE_TAG"
+
+      - name: Commit and push deployment repo changes
+        env:
+          DEPLOY_REPO_BRANCH: ${{ secrets.DEPLOY_REPO_BRANCH || 'main' }}
+          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
+          DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
+          DEPLOY_GIT_USER_NAME: ${{ secrets.DEPLOY_GIT_USER_NAME || 'github-actions' }}
+          DEPLOY_GIT_USER_EMAIL: ${{ secrets.DEPLOY_GIT_USER_EMAIL || 'github-actions@users.noreply.github.com' }}
+        run: |
+          set -euo pipefail
+          cd /tmp/deploy-repo
+          git config user.name "${DEPLOY_GIT_USER_NAME}"
+          git config user.email "${DEPLOY_GIT_USER_EMAIL}"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update QA images to ${IMAGE_TAG}"
+          AUTH_URL="${DEPLOY_REPO_URL/https:\/\//https://${DEPLOY_REPO_TOKEN}@}"
+          git push "$AUTH_URL" "HEAD:${DEPLOY_REPO_BRANCH:-main}"

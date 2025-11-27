@@ -131,6 +131,7 @@ backend:
   service:
     type: ClusterIP
     port: 8080
+    annotations: {}
 
   pythonPathEnv:
     PYTHONPATH: src

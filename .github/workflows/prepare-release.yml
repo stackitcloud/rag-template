@@ -1,0 +1,96 @@
+name: prepare-release
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changes:
+    if: >-
+      ${{
+        github.event.pull_request.merged &&
+        !contains(github.event.pull_request.labels.*.name, 'prepare-release') &&
+        !contains(github.event.pull_request.labels.*.name, 'refresh-locks') &&
+        !contains(github.event.pull_request.labels.*.name, 'chart-bump')
+      }}
+    name: Detect release-relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      releasable: ${{ steps.filter.outputs.releasable }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter paths
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            releasable:
+              - 'services/**'
+              - 'libs/**'
+
+  prepare:
+    if: ${{ needs.changes.outputs.releasable == 'true' }}
+    runs-on: ubuntu-latest
+    needs: [changes]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Install semantic-release deps
+        run: npm ci
+
+      - name: verify-dependencies-integrity
+        run: npm audit signatures
+
+      - name: Compute next version (dry-run)
+        id: semrel
+        env:
+          GITHUB_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
+        run: |
+          npx semantic-release --dry-run --no-ci | tee semrel.log
+          BASE_VERSION=$(grep -Eo "next release version is [0-9]+\.[0-9]+\.[0-9]+" semrel.log | awk '{print $5}')
+          if [ -z "$BASE_VERSION" ]; then echo "No new release required"; exit 1; fi
+          VERSION="${BASE_VERSION}.post$(date +%Y%m%d%H%M%S)"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install bump script deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "tomlkit==0.13.3" "pyyaml==6.0.2" "packaging==25.0"
+
+      - name: Bump internal libs only (no service pins)
+        run: |
+          python tools/bump_pyproject_deps.py --version "${{ steps.semrel.outputs.version }}" --bump-libs
+
+      - name: Commit and open PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/release-${{ steps.semrel.outputs.version }}
+          title: "chore(release): prepare ${{ steps.semrel.outputs.version }}"
+          body: |
+            Prepare release ${{ steps.semrel.outputs.version }}
+            - bump internal libs versions only
+          commit-message: "chore(release): prepare ${{ steps.semrel.outputs.version }}"
+          add-paths: |
+            libs/**/pyproject.toml
+          labels: prepare-release
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}

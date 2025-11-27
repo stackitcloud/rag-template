@@ -1,0 +1,66 @@
+name: create-release
+on:
+  pull_request_target:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: >-
+      ${{
+        github.event.pull_request.merged == true &&
+        contains(github.event.pull_request.labels.*.name, 'refresh-locks')
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}
+
+      - name: Derive version from PR title
+        id: ver
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          VERSION=$(echo "$TITLE" | sed -nE 's/.*([0-9]+\.[0-9]+\.[0-9]+(\.post[0-9]+)?).*/\1/p' || true)
+          if [ -z "$VERSION" ]; then
+            echo "Could not extract version from PR title: $TITLE" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify appVersion matches release version (clean semver)
+        env:
+          RELEASE_VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          if echo "$RELEASE_VERSION" | grep -q '\.post'; then
+            echo "Release version must be clean semver (no .post): $RELEASE_VERSION" >&2
+            exit 1
+          fi
+          APP_VERSION=$(awk '/^appVersion:/ {print $2}' infrastructure/rag/Chart.yaml | tr -d "\"'")
+          if [ -z "$APP_VERSION" ]; then
+            echo "Could not read appVersion from infrastructure/rag/Chart.yaml" >&2
+            exit 1
+          fi
+          if [ "$APP_VERSION" != "$RELEASE_VERSION" ]; then
+            echo "Chart appVersion ($APP_VERSION) does not match release version ($RELEASE_VERSION)" >&2
+            exit 1
+          fi
+
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -a "v${{ steps.ver.outputs.version }}" -m "Release v${{ steps.ver.outputs.version }}"
+          git push origin "v${{ steps.ver.outputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: v${{ steps.ver.outputs.version }}
+          generate_release_notes: true
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}

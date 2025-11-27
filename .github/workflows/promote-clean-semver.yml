@@ -1,0 +1,174 @@
+name: promote-clean-semver
+on:
+  workflow_dispatch:
+    inputs:
+      clean_version:
+        description: "Clean semver to promote (no .post)"
+        required: true
+        type: string
+      ref:
+        description: "Git ref to use (defaults to main)"
+        required: false
+        type: string
+      pre_version:
+        description: "Pre-release version (optional, for bookkeeping)"
+        required: false
+        type: string
+      dry_run:
+        description: "If true, skip publishing to PyPI (only TestPyPI)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  promote:
+    name: Publish clean semver, refresh locks, bump appVersion
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || 'main' }}
+
+      - name: Load version metadata (workflow_run)
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: pre-release-meta
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: meta
+
+      - name: Determine versions
+        id: versions
+        run: |
+          set -euo pipefail
+          CLEAN_VERSION_INPUT="${{ inputs.clean_version || '' }}"
+          if [ -f meta/version.env ]; then
+            source meta/version.env
+          fi
+          CLEAN_VERSION="${CLEAN_VERSION_INPUT:-${CLEAN_VERSION:-}}"
+          if [ -z "${CLEAN_VERSION:-}" ]; then
+            echo "CLEAN_VERSION is required (input or artifact)" >&2
+            exit 1
+          fi
+          if echo "$CLEAN_VERSION" | grep -q '\.post'; then
+            echo "CLEAN_VERSION must be clean semver (no .post): $CLEAN_VERSION" >&2
+            exit 1
+          fi
+          echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry and deps
+        run: |
+          pip install poetry==2.1.3
+          python -m pip install --upgrade pip
+          python -m pip install "tomlkit==0.13.3" "pyyaml==6.0.2" "packaging==25.0"
+
+      - name: Configure TestPyPI repository
+        run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Update internal libs and service pins to clean version
+        env:
+          VERSION: ${{ steps.versions.outputs.clean_version }}
+        run: |
+          python tools/bump_pyproject_deps.py --version "$VERSION" --bump-libs --bump-service-pins
+
+      - name: Publish clean semver to TestPyPI and PyPI (core-first)
+        env:
+          CLEAN_VERSION: ${{ steps.versions.outputs.clean_version }}
+          POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${POETRY_HTTP_BASIC_TESTPYPI_PASSWORD:-}" ]; then
+            echo "Missing TEST_PYPI_TOKEN secret" >&2
+            exit 1
+          fi
+          if [ "${DRY_RUN:-false}" != "true" ] && [ -z "${POETRY_PYPI_TOKEN_PYPI:-}" ]; then
+            echo "Missing PYPI_TOKEN secret" >&2
+            exit 1
+          fi
+
+          source tools/publish_libs.sh
+
+          echo "Publishing clean version $CLEAN_VERSION (core-first) to TestPyPI..."
+          publish_lib "rag-core-lib" "-r testpypi" "$CLEAN_VERSION"
+          wait_for_index "rag-core-lib" "$CLEAN_VERSION" "https://test.pypi.org" "TestPyPI"
+          for lib in rag-core-api admin-api-lib extractor-api-lib; do
+            publish_lib "$lib" "-r testpypi" "$CLEAN_VERSION"
+          done
+
+          if [ "${DRY_RUN:-false}" = "true" ]; then
+            echo "Dry run enabled: skipping PyPI publish."
+          else
+            echo "Publishing clean version $CLEAN_VERSION (core-first) to PyPI..."
+            publish_lib "rag-core-lib" "" "$CLEAN_VERSION"
+            wait_for_index "rag-core-lib" "$CLEAN_VERSION" "https://pypi.org" "PyPI"
+            for lib in rag-core-api admin-api-lib extractor-api-lib; do
+              publish_lib "$lib" "" "$CLEAN_VERSION"
+            done
+          fi
+
+      - name: Clear poetry caches
+        run: |
+          poetry cache clear --all pypi -n || true
+          poetry cache clear --all testpypi -n || true
+
+      - name: Refresh service lockfiles
+        env:
+          VERSION: ${{ steps.versions.outputs.clean_version }}
+        run: |
+          for svc in services/rag-backend services/admin-backend services/document-extractor services/mcp-server; do
+            if [ -f "$svc/pyproject.toml" ]; then
+              echo "Locking $svc"
+              (
+                cd "$svc"
+                poetry lock -v || (
+                  echo "Lock failed, clearing caches and retrying...";
+                  poetry cache clear --all pypi -n || true;
+                  poetry cache clear --all testpypi -n || true;
+                  sleep 10;
+                  poetry lock -v
+                )
+              )
+            fi
+          done
+
+      - name: Bump Chart appVersion to clean version (leave chart version for manual chart publish)
+        env:
+          APP_VERSION: ${{ steps.versions.outputs.clean_version }}
+        run: |
+          python tools/bump_chart_versions.py --app-version "$APP_VERSION" --mode app-only
+
+      - name: Open PR with updated locks, pins, and Chart appVersion
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/refresh-locks-${{ steps.versions.outputs.clean_version }}-${{ github.run_number }}
+          title: "chore(release): refresh service lockfiles for ${{ steps.versions.outputs.clean_version }}"
+          body: |
+            Refresh service poetry.lock files, dependency pins, and Chart appVersion for version ${{ steps.versions.outputs.clean_version }}.
+          commit-message: "chore(release): refresh service lockfiles, pins, and Chart appVersion"
+          add-paths: |
+            services/**/pyproject.toml
+            services/**/poetry.lock
+            infrastructure/**/Chart.yaml
+            libs/**/pyproject.toml
+          labels: refresh-locks
+          token: ${{ secrets.PR_AUTOMATION_TOKEN }}

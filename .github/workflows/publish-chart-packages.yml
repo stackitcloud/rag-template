@@ -1,0 +1,113 @@
+name: publish-chart-packages
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: "Chart version to publish (default: read from Chart.yaml)"
+        required: false
+        type: string
+      ref:
+        description: "Git ref to package from (default: main)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+
+env:
+  OCI_REGISTRY: ghcr.io
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'chart-bump'))
+      || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref || 'main' }}
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Login to GHCR for Helm OCI
+        run: echo ${{ secrets.GHCR_PAT }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Determine chart version
+        id: meta
+        run: |
+          set -euo pipefail
+          INPUT_VER="${{ inputs.chart_version }}"
+          FILE_VER=$(awk '/^version:/ {print $2}' infrastructure/rag/Chart.yaml | tr -d "\"'")
+          CHART_VERSION="${INPUT_VER:-$FILE_VER}"
+          if [ -z "$CHART_VERSION" ]; then
+            echo "Could not determine chart version" >&2
+            exit 1
+          fi
+          echo "chart_version=$CHART_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify chart version matches input (if provided)
+        env:
+          INPUT_VER: ${{ inputs.chart_version }}
+          FILE_VER: ${{ steps.meta.outputs.chart_version }}
+        run: |
+          if [ -n "$INPUT_VER" ] && [ "$INPUT_VER" != "$FILE_VER" ]; then
+            echo "Chart.yaml version ($FILE_VER) does not match input $INPUT_VER" >&2
+            exit 1
+          fi
+
+      - name: Package chart
+        run: |
+          set -euo pipefail
+          CHART_DIR="infrastructure/rag"
+          mkdir -p dist
+          helm dependency update "$CHART_DIR" || true
+          helm package "$CHART_DIR" --destination dist
+          ls -la dist
+
+      - name: Push chart to GHCR (OCI)
+        env:
+          CHART_VERSION: ${{ steps.meta.outputs.chart_version }}
+        run: |
+          set -euo pipefail
+          PKG=$(ls dist/*.tgz)
+          helm show chart "$PKG" | grep -E "^version: "
+          helm push "$PKG" oci://$OCI_REGISTRY/${{ github.repository_owner }}/charts
+
+      - name: Build Helm repo index for Pages
+        env:
+          CHART_VERSION: ${{ steps.meta.outputs.chart_version }}
+        run: |
+          set -euo pipefail
+          PKG=$(ls dist/*.tgz)
+          REPO="${GITHUB_REPOSITORY#*/}"
+          BASE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO}"
+          helm repo index dist --url "$BASE_URL"
+          echo "Index generated for $BASE_URL"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy-pages:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

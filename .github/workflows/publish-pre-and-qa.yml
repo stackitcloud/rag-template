@@ -1,0 +1,231 @@
+name: publish-pre-and-qa
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      clean_version:
+        description: "Clean semver to promote (no .post)"
+        required: true
+        type: string
+      ref:
+        description: "Git ref to use (defaults to main)"
+        required: false
+        type: string
+      pre_version:
+        description: "Pre-release version (optional, for bookkeeping)"
+        required: false
+        type: string
+      dry_run:
+        description: "If true, skip publishing to PyPI (only TestPyPI)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+  issues: write
+
+jobs:
+  publish-pre:
+    name: Publish pre-release to TestPyPI (core-first)
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'prepare-release') }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      clean_version: ${{ steps.ver.outputs.clean_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive version from PR title
+        id: ver
+        run: |
+          set -euo pipefail
+          TITLE="${{ github.event.pull_request.title }}"
+          VERSION=$(echo "$TITLE" | sed -nE 's/.*prepare ([0-9]+\.[0-9]+\.[0-9]+(\.post[0-9]+)?).*/\1/p' || true)
+          if [ -z "$VERSION" ]; then
+            echo "Could not derive version from PR title: $TITLE" >&2
+            exit 1
+          fi
+          CLEAN_VERSION="${VERSION%%.post*}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry==2.1.3
+
+      - name: Configure TestPyPI repository
+        run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Publish rag-core-lib first (TestPyPI) and wait for index
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${POETRY_HTTP_BASIC_TESTPYPI_PASSWORD:-}" ]; then
+            echo "Missing TEST_PYPI_TOKEN secret" >&2
+            exit 1
+          fi
+          source tools/publish_libs.sh
+          publish_lib "rag-core-lib" "-r testpypi" "$VERSION"
+          wait_for_index "rag-core-lib" "$VERSION" "https://test.pypi.org" "TestPyPI"
+
+      - name: Publish remaining libs to TestPyPI
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          POETRY_HTTP_BASIC_TESTPYPI_USERNAME: __token__
+          POETRY_HTTP_BASIC_TESTPYPI_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          set -euo pipefail
+          source tools/publish_libs.sh
+          for lib in rag-core-api admin-api-lib extractor-api-lib; do
+            path="libs/$lib"
+            [ -d "$path" ] || { echo "Missing $path" >&2; exit 1; }
+            publish_lib "$lib" "-r testpypi" "$VERSION" "$path"
+          done
+
+      - name: Persist version metadata for downstream workflows
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          CLEAN_VERSION: ${{ steps.ver.outputs.clean_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p meta
+          {
+            echo "PRE_VERSION=${VERSION}"
+            echo "CLEAN_VERSION=${CLEAN_VERSION}"
+          } > meta/version.env
+        # Upload artifact for workflow_run trigger consumption
+      - name: Upload version artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-release-meta
+          path: meta/version.env
+          retention-days: 5
+
+  qa-verify:
+    name: Build QA images and update Argo deployment repo
+    runs-on: ubuntu-latest
+    needs: publish-pre
+    if: ${{ needs.publish-pre.result == 'success' }}
+    env:
+      PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate QA secrets are present
+        run: |
+          missing=()
+          [ -z "${{ secrets.STACKIT_REGISTRY_USERNAME }}" ] && missing+=("STACKIT_REGISTRY_USERNAME")
+          [ -z "${{ secrets.STACKIT_REGISTRY_PASSWORD }}" ] && missing+=("STACKIT_REGISTRY_PASSWORD")
+          [ -z "${{ secrets.DEPLOY_REPO_URL }}" ] && missing+=("DEPLOY_REPO_URL")
+          [ -z "${{ secrets.DEPLOY_REPO_TOKEN }}" ] && missing+=("DEPLOY_REPO_TOKEN")
+          [ -z "${{ secrets.QA_IMAGE_REGISTRY }}" ] && echo "QA_IMAGE_REGISTRY not set, defaulting to registry.onstackit.cloud/qa-rag-template"
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing required secrets: ${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Set image registry and version
+        env:
+          QA_IMAGE_REGISTRY: ${{ secrets.QA_IMAGE_REGISTRY }}
+        run: |
+          IMAGE_REGISTRY="${QA_IMAGE_REGISTRY:-registry.onstackit.cloud/qa-rag-template}"
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${PRE_RELEASE_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to STACKIT registry
+        env:
+          STACKIT_REGISTRY_USERNAME: ${{ secrets.STACKIT_REGISTRY_USERNAME }}
+          STACKIT_REGISTRY_PASSWORD: ${{ secrets.STACKIT_REGISTRY_PASSWORD }}
+        run: |
+          echo "$STACKIT_REGISTRY_PASSWORD" | docker login registry.onstackit.cloud -u "$STACKIT_REGISTRY_USERNAME" --password-stdin
+
+      - name: Build and push QA images
+        env:
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          set -euo pipefail
+          images=(
+            "rag-backend services/rag-backend/Dockerfile ."
+            "admin-backend services/admin-backend/Dockerfile ."
+            "document-extractor services/document-extractor/Dockerfile ."
+            "mcp-server services/mcp-server/Dockerfile ."
+            "frontend services/frontend/apps/chat-app/Dockerfile services/frontend"
+            "admin-frontend services/frontend/apps/admin-app/Dockerfile services/frontend"
+          )
+          for entry in "${images[@]}"; do
+            IFS=" " read -r name dockerfile context <<<"$entry"
+            ref="$IMAGE_REGISTRY/$name:$IMAGE_TAG"
+            echo "Building and pushing $ref (Dockerfile=$dockerfile context=$context)"
+            docker buildx build --platform linux/amd64 -t "$ref" -f "$dockerfile" "$context" --push
+          done
+
+      - name: Checkout deployment repo
+        env:
+          DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
+          DEPLOY_REPO_BRANCH: ${{ secrets.DEPLOY_REPO_BRANCH || 'main' }}
+          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/deploy-repo
+          AUTH_URL="${DEPLOY_REPO_URL/https:\/\//https://${DEPLOY_REPO_TOKEN}@}"
+          git clone --depth 1 --branch "${DEPLOY_REPO_BRANCH:-main}" "$AUTH_URL" /tmp/deploy-repo
+
+      - name: Update values file in deployment repo
+        env:
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          DEPLOY_VALUES_FILE: ${{ secrets.DEPLOY_VALUES_FILE || 'values-qa.yaml' }}
+        run: |
+          set -euo pipefail
+          cd /tmp/deploy-repo
+          python -m pip install --quiet pyyaml
+          python "$GITHUB_WORKSPACE/tools/update_deploy_values.py" \
+            --values-file "$DEPLOY_VALUES_FILE" \
+            --image-registry "$IMAGE_REGISTRY" \
+            --image-tag "$IMAGE_TAG"
+
+      - name: Commit and push deployment repo changes
+        env:
+          DEPLOY_REPO_BRANCH: ${{ secrets.DEPLOY_REPO_BRANCH || 'main' }}
+          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
+          DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
+          DEPLOY_GIT_USER_NAME: ${{ secrets.DEPLOY_GIT_USER_NAME || 'github-actions' }}
+          DEPLOY_GIT_USER_EMAIL: ${{ secrets.DEPLOY_GIT_USER_EMAIL || 'github-actions@users.noreply.github.com' }}
+        run: |
+          set -euo pipefail
+          cd /tmp/deploy-repo
+          git config user.name "${DEPLOY_GIT_USER_NAME}"
+          git config user.email "${DEPLOY_GIT_USER_EMAIL}"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update QA images to ${IMAGE_TAG}"
+          AUTH_URL="${DEPLOY_REPO_URL/https:\/\//https://${DEPLOY_REPO_TOKEN}@}"
+          git push "$AUTH_URL" "HEAD:${DEPLOY_REPO_BRANCH:-main}"

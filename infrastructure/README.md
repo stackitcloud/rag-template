@@ -184,7 +184,7 @@ Default values for the deployment are provided in the `rag/values.yaml` file und
 
 **Dev helper via Kustomize/Tilt**  
 For local development you can let Tilt generate Langfuse init secrets automatically:
-- Fill `infrastructure/kustomize/langfuse/.env.langfuse` with the Langfuse init env values.
+- Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `.env.langfuse` and fill it with the Langfuse init env values.
 - Tilt runs Kustomize on `infrastructure/kustomize/langfuse` and applies the resulting `langfuse-init-secrets` (hash disabled) before Helm resources.
 - This is dev-only. For production, create/manage secrets with your secret manager and set `secretKeyRef.name` in `values.yaml` to your managed secret.
 
@@ -265,6 +265,10 @@ frontend:
   ingress:
     host:
       name: ... # Your domain name (e.g., rag.yourdomain.com)
+
+# In production, ensure a secret named "vite-auth" exists with keys
+# VITE_AUTH_USERNAME and VITE_AUTH_PASSWORD set to your basic auth creds.
+# (For local/dev, the chart can generate it from shared.secrets.)
 ```
 
 ### 1.5 Backend

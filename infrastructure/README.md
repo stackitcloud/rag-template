@@ -182,6 +182,12 @@ Default values for the deployment are provided in the `rag/values.yaml` file und
 >
 >All values containing `...` are placeholders and have to be replaced with real values.
 
+**Dev helper via Kustomize/Tilt**  
+For local development you can let Tilt generate Langfuse init secrets automatically:
+- Fill `infrastructure/kustomize/langfuse/.env.langfuse` with the Langfuse init env values.
+- Tilt runs Kustomize on `infrastructure/kustomize/langfuse` and applies the resulting `langfuse-init-secrets` (hash disabled) before Helm resources.
+- This is dev-only. For production, create/manage secrets with your secret manager and set `secretKeyRef.name` in `values.yaml` to your managed secret.
+
 ### 1.2 Qdrant
 
 The deployment of the Qdrant can be disabled by setting the following value in the helm-chart:

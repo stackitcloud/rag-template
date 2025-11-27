@@ -243,6 +243,12 @@ Using the defaults in `.env.template` results in a basic auth with username=`foo
 > - `ollama`: Uses ollama as an LLM provider.
 >
 
+##### Langfuse init secret (dev-only, Tilt + Kustomize)
+
+- Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `infrastructure/kustomize/langfuse/.env.langfuse` and fill in your Langfuse init values (org/project/user and API keys) before starting Tilt.
+- Tilt runs Kustomize automatically to create a stable `langfuse-init-secrets` secret before Helm applies manifests.
+- Use this helper only for local/dev. For production, manage secrets via your usual mechanism and point `secretKeyRef.name` in `values.yaml` to your precreated secrets.
+
 #### 1.4.1 Environment Variables Setup
 
 Before running the application, you need to configure environment variables. Copy the provided example file and fill in your values:

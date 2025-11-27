@@ -320,6 +320,14 @@ local_resource(
     allow_parallel=True,
 )
 
+# Dev-only Langfuse init secrets via Kustomize (stable name, no hash suffix)
+langfuse_kustomize_dir = "./infrastructure/kustomize/langfuse"
+langfuse_env_file = "%s/.env.langfuse" % langfuse_kustomize_dir
+if os.path.exists(langfuse_env_file):
+    watch_file(langfuse_env_file)
+    watch_file("%s/kustomization.yaml" % langfuse_kustomize_dir)
+    k8s_yaml(kustomize(langfuse_kustomize_dir))
+
 ########################################################################################################################
 ################################## build document extractor image and do live update ##############################################
 ########################################################################################################################
@@ -486,21 +494,6 @@ value_override = [
     "features.mcp.enabled=true",
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
-    # langfuse
-    "langfuse.langfuse.additionalEnv[0].name=LANGFUSE_INIT_ORG_ID",
-    "langfuse.langfuse.additionalEnv[0].value=\"%s\"" % os.environ["LANGFUSE_INIT_ORG_ID"],
-    "langfuse.langfuse.additionalEnv[1].name=LANGFUSE_INIT_PROJECT_ID",
-    "langfuse.langfuse.additionalEnv[1].value=\"%s\"" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
-    "langfuse.langfuse.additionalEnv[2].name=LANGFUSE_INIT_PROJECT_PUBLIC_KEY",
-    "langfuse.langfuse.additionalEnv[2].value=%s" % os.environ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"],
-    "langfuse.langfuse.additionalEnv[3].name=LANGFUSE_INIT_PROJECT_SECRET_KEY",
-    "langfuse.langfuse.additionalEnv[3].value=%s" % os.environ["LANGFUSE_INIT_PROJECT_SECRET_KEY"],
-    "langfuse.langfuse.additionalEnv[4].name=LANGFUSE_INIT_USER_EMAIL",
-    "langfuse.langfuse.additionalEnv[4].value=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
-    "langfuse.langfuse.additionalEnv[5].name=LANGFUSE_INIT_USER_PASSWORD",
-    "langfuse.langfuse.additionalEnv[5].value=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
-    "langfuse.langfuse.additionalEnv[6].name=LANGFUSE_INIT_USER_NAME",
-    "langfuse.langfuse.additionalEnv[6].value=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
 ]
 
 def has_confluence_config():

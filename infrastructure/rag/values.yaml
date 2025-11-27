@@ -616,6 +616,7 @@ langfuse:
       username: postgres
       password: postgres
       database: langfuse
+      existingSecret: "" # NOTE: for production use existing secret to fetch password
 
   # Redis Configuration (external KeyDB)
   redis:
@@ -625,6 +626,7 @@ langfuse:
     auth:
       username: "default"
       password: ""
+      existingSecret: "" # NOTE: for production use existing secret to fetch password
 
   # ClickHouse Configuration (external ClickHouse)
   clickhouse:
@@ -635,6 +637,7 @@ langfuse:
     auth:
       username: "default"
       password: "changeme"
+      existingSecret: "" # NOTE: for production use existing secret to fetch password
     migration:
       url: "clickhouse://rag-clickhouse:9000"
       ssl: false
@@ -665,8 +668,14 @@ langfuse:
     forcePathStyle: true
     accessKeyId:
       value: "admin"
+      secretKeyRef:
+        name: ""
+        key: ""
     secretAccessKey:
       value: "adminpassword"
+      secretKeyRef:
+        name: ""
+        key: ""
     eventUpload:
       enabled: true
       bucket: "langfuse"
@@ -675,8 +684,14 @@ langfuse:
       forcePathStyle: true
       accessKeyId:
         value: "admin"
+        secretKeyRef:
+          name: ""
+          key: ""
       secretAccessKey:
         value: "adminpassword"
+        secretKeyRef:
+          name: ""
+      key: ""
 
 minio:
   image:

@@ -557,19 +557,40 @@ langfuse:
     # Additional environment variables (only for init values)
     additionalEnv:
     - name: LANGFUSE_INIT_ORG_ID
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_ORG_ID"
     - name: LANGFUSE_INIT_PROJECT_ID
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_PROJECT_ID"
     - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_PROJECT_PUBLIC_KEY"
     - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_PROJECT_SECRET_KEY"
     - name: LANGFUSE_INIT_USER_EMAIL
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_USER_EMAIL"
     - name: LANGFUSE_INIT_USER_NAME
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_USER_NAME"
     - name: LANGFUSE_INIT_USER_PASSWORD
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_USER_PASSWORD"
 
     # Additional init containers
     extraInitContainers:

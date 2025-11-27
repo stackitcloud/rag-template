@@ -471,12 +471,13 @@ value_override = [
     # secrets env
     "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
-    "backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
+    "shared.secrets.basicAuthUser=%s" % os.environ["BASIC_AUTH_USER"],
+    "shared.secrets.basicAuthPassword=%s" % os.environ["BASIC_AUTH_PASSWORD"],
     "backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     "backend.secrets.ragas.openaiApikey=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
-    "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
-    "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
+    "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["BASIC_AUTH_USER"],#TODO
+    "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["BASIC_AUTH_PASSWORD"],
     # variables
     "shared.debug.backend.enabled=%s" % backend_debug,
     "features.frontend.enabled=true",

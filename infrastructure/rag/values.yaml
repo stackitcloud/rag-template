@@ -335,9 +335,6 @@ adminBackend:
       pathType: ImplementationSpecific
       port: 8080
 
-  minio:
-    enabled: true
-
   envs:
     summarizer:
       SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"

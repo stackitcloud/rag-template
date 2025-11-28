@@ -482,7 +482,6 @@ shared:
       secretKeyRef:
         name: ""
         key: "BASIC_AUTH_PASSWORD"
-
     s3:
       accessKey:
         value: "admin"

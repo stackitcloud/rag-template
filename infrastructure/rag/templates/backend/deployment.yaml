@@ -134,15 +134,15 @@ spec:
           - configMapRef:
               name: {{ template "configmap.retryDecoratorName" . }}
           - secretRef:
-              name: {{ template "secret.langfuseName" . }}
+              name: {{ template "secret.langfuseRefName" . }}
           - secretRef:
-              name: {{ template "secret.stackitVllmName" . }}
+              name: {{ template "secret.stackitVllmRefName" . }}
           - secretRef:
               name: {{ template "secret.usecaseName" . }}
           - secretRef:
-              name: {{ template "secret.stackitEmbedderName" . }}
+              name: {{ template "secret.stackitEmbedderRefName" . }}
           - secretRef:
-              name: {{ template "secret.ragasName" . }}
+              name: {{ template "secret.ragasRefName" . }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.backend.pythonPathEnv.PYTHONPATH }}

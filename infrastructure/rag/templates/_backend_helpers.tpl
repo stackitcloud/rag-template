@@ -19,6 +19,50 @@
 {{- printf "%s-stackit-ragas-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "secret.basicAuthName" -}}
+{{- if .Values.shared.secrets.basicAuthUser.secretKeyRef.name -}}
+{{- .Values.shared.secrets.basicAuthUser.secretKeyRef.name -}}
+{{- else if .Values.shared.secrets.basicAuthPassword.secretKeyRef.name -}}
+{{- .Values.shared.secrets.basicAuthPassword.secretKeyRef.name -}}
+{{- else -}}
+basic-auth
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.langfuseRefName" -}}
+{{- if .Values.backend.secrets.langfuse.publicKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.langfuse.publicKey.secretKeyRef.name -}}
+{{- else if .Values.backend.secrets.langfuse.secretKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.langfuse.secretKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.langfuseName" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.stackitEmbedderRefName" -}}
+{{- if .Values.backend.secrets.stackitEmbedder.apiKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.stackitEmbedder.apiKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.stackitEmbedderName" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.stackitVllmRefName" -}}
+{{- if .Values.backend.secrets.stackitVllm.apiKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.stackitVllm.apiKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.stackitVllmName" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.ragasRefName" -}}
+{{- if .Values.backend.secrets.ragas.openaiApikey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.ragas.openaiApikey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.ragasName" . }}
+{{- end -}}
+{{- end -}}
+
 
 # configmaps
 {{- define "configmap.publicName" -}}
@@ -109,7 +153,7 @@
 {{- define "backend.ingress.commonAnnotations" -}}
 {{- if .Values.shared.config.basicAuth.enabled }}
 nginx.ingress.kubernetes.io/auth-type: basic
-nginx.ingress.kubernetes.io/auth-secret: basic-auth
+nginx.ingress.kubernetes.io/auth-secret: {{ template "secret.basicAuthName" . }}
 {{- end }}
 nginx.ingress.kubernetes.io/proxy-body-size: "0"
 nginx.ingress.kubernetes.io/proxy-read-timeout: "6000"

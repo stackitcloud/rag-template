@@ -15,6 +15,42 @@
 {{- printf "%s-stackit-vllm-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "secret.langfuseRefName" -}}
+{{- if .Values.backend.secrets.langfuse.publicKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.langfuse.publicKey.secretKeyRef.name -}}
+{{- else if .Values.backend.secrets.langfuse.secretKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.langfuse.secretKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.langfuseName" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.stackitVllmRefName" -}}
+{{- if .Values.backend.secrets.stackitVllm.apiKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.stackitVllm.apiKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.stackitVllmName" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.stackitEmbedderRefName" -}}
+{{- if .Values.backend.secrets.stackitEmbedder.apiKey.secretKeyRef.name -}}
+{{- .Values.backend.secrets.stackitEmbedder.apiKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.stackitEmbedderName" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "secret.s3RefName" -}}
+{{- if .Values.shared.secrets.s3.accessKey.secretKeyRef.name -}}
+{{- .Values.shared.secrets.s3.accessKey.secretKeyRef.name -}}
+{{- else if .Values.shared.secrets.s3.secretKey.secretKeyRef.name -}}
+{{- .Values.shared.secrets.s3.secretKey.secretKeyRef.name -}}
+{{- else -}}
+{{ template "secret.s3Name" . }}
+{{- end -}}
+{{- end -}}
+
 # configmaps
 {{- define "configmap.s3Name" -}}
 {{- printf "%s-s3-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}

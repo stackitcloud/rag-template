@@ -159,3 +159,6 @@ dmypy.json
 cython_debug/
 
 **/.DS_Store
+
+# Nx workspace caches (frontend uses a nested Nx workspace)
+**/.nx/

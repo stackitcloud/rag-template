@@ -18,8 +18,6 @@ COPY --from=builder /usr/src/app/dist/apps/admin-app /app/frontend
 COPY --from=builder /usr/src/app/dist/libs /app/frontend/libs
 
 COPY ./services/frontend/default.nginx.conf /etc/nginx/conf.d/default.conf
-
-
 COPY ./services/frontend/env.sh /app/env.sh
 
 EXPOSE 8080

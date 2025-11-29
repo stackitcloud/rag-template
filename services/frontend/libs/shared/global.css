@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* # Assumptions: No other stylesheet depends on the old Tailwind directives because they now live in ui-styles/src/tailwind.css. */
+@import "../ui-styles/src/tailwind.css";
 
 html,
 body,

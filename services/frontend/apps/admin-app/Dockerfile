@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:24-slim as builder
+FROM node:21-slim as builder
 
 WORKDIR /usr/src/app
 
@@ -10,7 +10,7 @@ COPY ./services/frontend .
 
 RUN npm run admin:build
 
-FROM --platform=linux/amd64 nginx:alpine3.20-slim
+FROM nginx:alpine3.20-slim
 
 WORKDIR /app
 

@@ -613,6 +613,8 @@ langfuse:
       password: postgres
       database: langfuse
       existingSecret: "" # NOTE: for production use existing secret to fetch password
+      secretKeys:
+        userPasswordKey: password
 
   # Redis Configuration (external KeyDB)
   redis:
@@ -623,6 +625,7 @@ langfuse:
       username: "default"
       password: ""
       existingSecret: "" # NOTE: for production use existing secret to fetch password
+      existingSecretPasswordKey: ""
 
   # ClickHouse Configuration (external ClickHouse)
   clickhouse:
@@ -634,6 +637,7 @@ langfuse:
       username: "default"
       password: "changeme"
       existingSecret: "" # NOTE: for production use existing secret to fetch password
+      existingSecretKey: ""
     migration:
       url: "clickhouse://rag-clickhouse:9000"
       ssl: false

@@ -1,7 +1,7 @@
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: 1.5.4
+  version: 1.5.13
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
   version: 1.15.5

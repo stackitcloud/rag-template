@@ -14,6 +14,10 @@ class KeyValueSettings(BaseSettings):
         The hostname of the key value store.
     port : int
         The port number of the key value store.
+    username : str | None
+        Optional username for authenticating with the key value store.
+    password : str | None
+        Optional password for authenticating with the key value store.
     """
 
     class Config:
@@ -24,3 +28,5 @@ class KeyValueSettings(BaseSettings):
 
     host: str = Field()
     port: int = Field()
+    username: str | None = Field(default=None)
+    password: str | None = Field(default=None)

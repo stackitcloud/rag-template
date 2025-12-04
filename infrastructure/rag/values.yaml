@@ -335,6 +335,19 @@ adminBackend:
       pathType: ImplementationSpecific
       port: 8080
 
+  secrets:
+    keyValueStore:
+      username:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "USECASE_KEYVALUE_USERNAME"
+      password:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "USECASE_KEYVALUE_PASSWORD"
+
   envs:
     summarizer:
       SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
@@ -732,3 +745,9 @@ keydb:
   multiMaster: "no"
   activeReplicas: "no"
   nodes: 1
+  # Authentication for the bundled KeyDB chart and the admin backend client.
+  password: "" # Inline password for development. Leave empty to disable auth or prefer existingSecret for production.
+  existingSecret: "" # Optional existing secret containing the KeyDB password.
+  existingSecretPasswordKey: "password"
+  auth:
+    username: "default"

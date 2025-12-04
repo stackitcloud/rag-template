@@ -220,10 +220,28 @@ adminBackend:
     keyValueStore:
       USECASE_KEYVALUE_HOST: ... # Your Redis host (e.g., redis.yourdomain.com)
       USECASE_KEYVALUE_PORT: 6379
+  secrets:
+    keyValueStore:
+      username:
+        value: "" # Optional inline username; prefer secretKeyRef in production
+        secretKeyRef:
+          name: "" # Existing secret containing the username
+          key: "USECASE_KEYVALUE_USERNAME"
+      password:
+        value: "" # Optional inline password; prefer secretKeyRef in production
+        secretKeyRef:
+          name: "" # Existing secret containing the password
+          key: "USECASE_KEYVALUE_PASSWORD"
 
 features:
   keydb:
     enabled: false # Disable KeyDB for production
+keydb:
+  password: "" # Optional inline password for the bundled KeyDB chart
+  existingSecret: "" # Name of an existing secret that stores the KeyDB password
+  existingSecretPasswordKey: "password" # Key within the existing secret
+  auth:
+    username: "default" # Username that the admin backend uses when auth is enabled
 
 langfuse:
   valkey:

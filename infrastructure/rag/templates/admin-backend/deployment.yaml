@@ -131,6 +131,33 @@ spec:
               name: {{ template "secret.stackitVllmRefName" . }}
           - secretRef:
               name: {{ template "secret.stackitEmbedderRefName" . }}
+        {{- $kvCreds := (include "keyValueStore.credentials" . | fromYaml) }}
         env:
           - name: PYTHONPATH
             value: {{ .Values.adminBackend.pythonPathEnv.PYTHONPATH }}
+          {{- if $kvCreds.usernameSecretName }}
+          - name: USECASE_KEYVALUE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ $kvCreds.usernameSecretName }}
+                key: {{ $kvCreds.usernameSecretKey }}
+          {{- else if $kvCreds.username }}
+          - name: USECASE_KEYVALUE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "secret.keyValueStoreName" . }}
+                key: USECASE_KEYVALUE_USERNAME
+          {{- end }}
+          {{- if $kvCreds.passwordSecretName }}
+          - name: USECASE_KEYVALUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ $kvCreds.passwordSecretName }}
+                key: {{ $kvCreds.passwordSecretKey }}
+          {{- else if $kvCreds.password }}
+          - name: USECASE_KEYVALUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "secret.keyValueStoreName" . }}
+                key: USECASE_KEYVALUE_PASSWORD
+          {{- end }}

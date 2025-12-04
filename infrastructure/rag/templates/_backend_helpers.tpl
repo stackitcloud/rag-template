@@ -20,10 +20,12 @@
 {{- end -}}
 
 {{- define "secret.basicAuthName" -}}
-{{- if .Values.shared.secrets.basicAuthUser.secretKeyRef.name -}}
-{{- .Values.shared.secrets.basicAuthUser.secretKeyRef.name -}}
-{{- else if .Values.shared.secrets.basicAuthPassword.secretKeyRef.name -}}
-{{- .Values.shared.secrets.basicAuthPassword.secretKeyRef.name -}}
+{{- if .Values.shared.secrets.basicAuth.auth.secretKeyRef.name -}}
+{{- .Values.shared.secrets.basicAuth.auth.secretKeyRef.name -}}
+{{- else if .Values.shared.secrets.basicAuth.user.secretKeyRef.name -}}
+{{- .Values.shared.secrets.basicAuth.user.secretKeyRef.name -}}
+{{- else if .Values.shared.secrets.basicAuth.password.secretKeyRef.name -}}
+{{- .Values.shared.secrets.basicAuth.password.secretKeyRef.name -}}
 {{- else -}}
 basic-auth
 {{- end -}}

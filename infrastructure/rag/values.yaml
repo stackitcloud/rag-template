@@ -485,16 +485,22 @@ shared:
       issuerKind: ClusterIssuer
 
   secrets:
-    basicAuthUser:
-      value: ""
-      secretKeyRef:
-        name: ""
-        key: "BASIC_AUTH_USER"
-    basicAuthPassword:
-      value: ""
-      secretKeyRef:
-        name: ""
-        key: "BASIC_AUTH_PASSWORD"
+    basicAuth:
+      auth:
+        value: "" # Optional: precomputed htpasswd line (e.g., "user:$apr1$..."); overrides inline user/pass hashing.
+        secretKeyRef:
+          name: ""
+          key: "auth"
+      user:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "BASIC_AUTH_USER"
+      password:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "BASIC_AUTH_PASSWORD"
     s3:
       accessKey:
         value: "admin"

@@ -615,12 +615,13 @@ langfuse:
       - sh
       - -c
       - |
-        until nc -z rag-postgresql 5432; do
-          echo "Waiting for PostgreSQL to be ready..."
-          sleep 2
-        done
-      # Define a reasonable timeout in case PostgreSQL fails to come up
-      timeoutSeconds: 300
+        timeout 300 sh -c '
+          until nc -z f17fdc4e-c4da-4cc5-ba3a-0fbe63303957.postgresql.eu01.onstackit.cloud 5432; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+          done
+        '
+      # Stop waiting after 5 minutes if PostgreSQL never comes up.
 
   # PostgreSQL Configuration (use external PostgreSQL)
   postgresql:

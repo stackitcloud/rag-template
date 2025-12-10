@@ -1,6 +1,8 @@
 """Module containing the FileStatusKeyValueStore class."""
 
 import json
+import ssl
+from typing import Any
 
 from redis import Redis
 
@@ -39,10 +41,11 @@ class FileStatusKeyValueStore:
         settings : KeyValueSettings
             The settings object containing the connection information for the Redis connection.
         """
-        redis_kwargs = {
+        redis_kwargs: dict[str, Any] = {
             "host": settings.host,
             "port": settings.port,
             "decode_responses": True,
+            **self._build_ssl_kwargs(settings),
         }
         if settings.username:
             redis_kwargs["username"] = settings.username
@@ -50,6 +53,39 @@ class FileStatusKeyValueStore:
             redis_kwargs["password"] = settings.password
 
         self._redis = Redis(**redis_kwargs)
+
+    @staticmethod
+    def _build_ssl_kwargs(settings: KeyValueSettings) -> dict[str, Any]:
+        """Build Redis SSL settings from configuration, mapping string values to ssl constants."""
+        if not settings.use_ssl:
+            return {}
+
+        cert_reqs_map = {
+            "required": ssl.CERT_REQUIRED,
+            "optional": ssl.CERT_OPTIONAL,
+            "none": ssl.CERT_NONE,
+            "cert_required": ssl.CERT_REQUIRED,
+            "cert_optional": ssl.CERT_OPTIONAL,
+            "cert_none": ssl.CERT_NONE,
+        }
+        ssl_cert_reqs = None
+        if settings.ssl_cert_reqs:
+            ssl_cert_reqs = cert_reqs_map.get(settings.ssl_cert_reqs.lower(), settings.ssl_cert_reqs)
+
+        ssl_kwargs: dict[str, Any] = {
+            "ssl": True,
+            "ssl_check_hostname": settings.ssl_check_hostname,
+        }
+        if ssl_cert_reqs is not None:
+            ssl_kwargs["ssl_cert_reqs"] = ssl_cert_reqs
+        if settings.ssl_ca_certs:
+            ssl_kwargs["ssl_ca_certs"] = settings.ssl_ca_certs
+        if settings.ssl_certfile:
+            ssl_kwargs["ssl_certfile"] = settings.ssl_certfile
+        if settings.ssl_keyfile:
+            ssl_kwargs["ssl_keyfile"] = settings.ssl_keyfile
+
+        return ssl_kwargs
 
     @staticmethod
     def _to_str(file_name: str, file_status: Status) -> str:

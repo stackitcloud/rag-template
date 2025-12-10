@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    versioning-strategy: increase-if-necessary
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+

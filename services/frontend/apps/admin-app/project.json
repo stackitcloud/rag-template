@@ -12,7 +12,7 @@
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/admin-app",
-        "configFile": "apps/admin-app/vite.config.mts"
+        "configFile": "apps/admin-app/vite.config.ts"
       },
       "configurations": {
         "development": {
@@ -28,7 +28,7 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "admin-app:build",
-        "configFile": "apps/admin-app/vite.config.mts"
+        "configFile": "apps/admin-app/vite.config.ts"
       },
       "configurations": {
         "development": {

@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import {
-  ArrowPathIcon,
-  ArrowUpTrayIcon,
-  CheckCircleIcon,
-  DocumentIcon,
-  ExclamationTriangleIcon,
-  TrashIcon,
-} from "@heroicons/vue/24/outline";
+  iconCircleCheck,
+  iconFileText,
+  iconSync,
+  iconTrash,
+  iconTriangleWarning,
+  iconUpload,
+} from "@sit-onyx/icons";
+import { OnyxIcon } from "@shared/ui";
 import { computed, ref } from "vue";
 import { DocumentModel } from "../models/document.model";
 
@@ -23,10 +24,10 @@ const isProcessing = computed(() => props.data.status === PROCESSING_STATE);
 const canDelete = computed(() => !isProcessing.value);
 
 const statusClasses = {
-  UPLOADING: "text-blue-500",
-  PROCESSING: "text-amber-500",
-  READY: "text-green-500",
-  ERROR: "text-red-500",
+  UPLOADING: "text-info",
+  PROCESSING: "text-warning",
+  READY: "text-success",
+  ERROR: "text-error",
 };
 
 const statusText = {
@@ -57,7 +58,7 @@ const executeDelete = () => {
   >
     <!-- Document icon -->
     <div class="flex items-center justify-center text-center w-10">
-      <DocumentIcon class="w-8 h-8 opacity-60" />
+      <OnyxIcon :icon="iconFileText" :size="32" class="opacity-60" />
     </div>
 
     <!-- Document info -->
@@ -77,16 +78,16 @@ const executeDelete = () => {
       :class="statusClasses[props.data.status]"
     >
       <div v-if="props.data.status === 'UPLOADING'">
-        <ArrowUpTrayIcon class="w-5 h-5" />
+        <OnyxIcon :icon="iconUpload" :size="20" />
       </div>
       <div v-else-if="props.data.status === 'PROCESSING'">
-        <ArrowPathIcon class="w-5 h-5 rotating" />
+        <OnyxIcon :icon="iconSync" :size="20" class="rotating" />
       </div>
       <div v-else-if="props.data.status === 'READY'">
-        <CheckCircleIcon class="w-5 h-5" />
+        <OnyxIcon :icon="iconCircleCheck" :size="20" />
       </div>
       <div v-else>
-        <ExclamationTriangleIcon class="w-5 h-5" />
+        <OnyxIcon :icon="iconTriangleWarning" :size="20" />
       </div>
       <span class="text-xs font-medium hidden sm:inline">{{
         statusText[props.data.status]
@@ -103,7 +104,7 @@ const executeDelete = () => {
         class="btn btn-sm btn-ghost btn-circle opacity-60 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Delete document"
       >
-        <TrashIcon class="w-4 h-4" :class="canDelete ? 'text-error' : 'opacity-40'" />
+        <OnyxIcon :icon="iconTrash" :size="16" :class="canDelete ? 'text-error' : 'opacity-40'" />
       </button>
     </div>
   </div>

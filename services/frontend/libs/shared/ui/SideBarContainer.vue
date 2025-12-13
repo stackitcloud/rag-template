@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { DocumentDuplicateIcon } from "@heroicons/vue/24/outline";
+import { iconFileText } from "@sit-onyx/icons";
+import OnyxIcon from "./OnyxIcon.vue";
 
 const props = defineProps<{
   header: string,
@@ -8,9 +9,9 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="h-full bg-base-100 flex flex-col border-l-2 p-2 md:p-2">
+  <div class="h-full bg-base-100 flex flex-col border-l-2 border-base-300 p-2 md:p-2">
     <div class="flex items-center mb-6 mt-2 px-2">
-      <DocumentDuplicateIcon class="w-7 h-7" />
+      <OnyxIcon :icon="iconFileText" :size="28" />
       <h1 class="ml-2 text-xl font-medium flex-1">{{ props.header }}</h1>
       <h1 class="ml-2">{{ props.count }}</h1>
     </div>

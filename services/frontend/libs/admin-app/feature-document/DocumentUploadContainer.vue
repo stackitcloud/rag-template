@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { CloudArrowUpIcon, GlobeAltIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { iconCircleInformation, iconCloudArrowUp, iconGlobe, iconX } from '@sit-onyx/icons';
+import { OnyxIcon } from '@shared/ui';
 import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
 import { computed, ref } from "vue";
 import { useI18n } from 'vue-i18n';
@@ -130,14 +131,14 @@ const getErrorMessage = (errorType: string) => {
             <div v-if="error" role="alert"
                 class="alert alert-error mb-4 slide-in-down flex justify-between items-center">
                 <div class="flex items-center">
-                    <InformationCircleIcon class="w-6 h-6 mr-2" />
+                    <OnyxIcon :icon="iconCircleInformation" :size="24" class="mr-2" />
                     <div>
                         <h3 class="font-bold">{{ t('documents.errorOccurred') }}</h3>
                         <div class="text-sm">{{ getErrorMessage(error) }}</div>
                     </div>
                 </div>
                 <button @click="clearError" class="btn btn-ghost btn-sm">
-                    <XMarkIcon class="w-5 h-5" />
+                    <OnyxIcon :icon="iconX" :size="20" />
                 </button>
             </div>
 
@@ -162,7 +163,7 @@ const getErrorMessage = (errorType: string) => {
                 :class="{'bg-base-200': isDragOver}" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
                 @drop.prevent="onDrop">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
-                    <CloudArrowUpIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <OnyxIcon :icon="iconCloudArrowUp" :size="40" class="mb-4 text-primary" />
                     <p class="mb-1 font-bold text-cente">{{ t('documents.uploadSelectTitle') }}</p>
                     <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }} {{ allowedFileTypesLabel }}</p>
 
@@ -177,7 +178,7 @@ const getErrorMessage = (errorType: string) => {
             <div v-else-if="uploadMethod === 'confluence'"
                 class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
-                    <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <OnyxIcon :icon="iconGlobe" :size="40" class="mb-4 text-primary" />
                     <p class="mb-1 font-bold">{{ t('documents.confluenceLoadTitle') }}</p>
                     <!-- configuration inputs -->
                     <div class="space-y-2 mb-4 w-full max-w-sm">
@@ -206,7 +207,7 @@ const getErrorMessage = (errorType: string) => {
             <div v-else-if="uploadMethod === 'sitemap'"
                 class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
-                    <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <OnyxIcon :icon="iconGlobe" :size="40" class="mb-4 text-primary" />
                     <p class="mb-1 font-bold">{{ t('documents.sitemapLoadTitle') }}</p>
                     <!-- configuration inputs -->
                     <div class="space-y-2 mb-4 w-full max-w-sm">

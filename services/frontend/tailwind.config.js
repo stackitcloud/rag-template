@@ -8,32 +8,61 @@ module.exports = {
   theme: {
     extend: {
       typography: (theme) => ({
-        dark: {
+        DEFAULT: {
           css: {
-            color: theme("colors.white"),
+            color: "hsl(var(--bc) / 1)",
             "h1, h2, h3, h4": {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 1)",
             },
             a: {
-              color: theme("colors.white"),
+              color: "hsl(var(--in) / 1)",
             },
             strong: {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 1)",
             },
             "ol > li::marker": {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 0.8)",
             },
             "ul > li::marker": {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 0.8)",
             },
             li: {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 1)",
             },
             blockquote: {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 1)",
             },
             code: {
-              color: theme("colors.white"),
+              color: "hsl(var(--bc) / 1)",
+            },
+          },
+        },
+        dark: {
+          css: {
+            color: "hsl(var(--bc) / 1)",
+            "h1, h2, h3, h4": {
+              color: "hsl(var(--bc) / 1)",
+            },
+            a: {
+              color: "hsl(var(--in) / 1)",
+            },
+            strong: {
+              color: "hsl(var(--bc) / 1)",
+            },
+            "ol > li::marker": {
+              color: "hsl(var(--bc) / 0.8)",
+            },
+            "ul > li::marker": {
+              color: "hsl(var(--bc) / 0.8)",
+            },
+            li: {
+              color: "hsl(var(--bc) / 1)",
+            },
+            blockquote: {
+              color: "hsl(var(--bc) / 1)",
+            },
+            code: {
+              color: "hsl(var(--bc) / 1)",
             },
           },
         },
@@ -45,78 +74,74 @@ module.exports = {
     themes: [
       {
         light: {
-          // Light color for primary (navigation) in light mode
-          primary: "#f8f9fa",
-          "primary-content": "#0a1e2d", // Dark text on light background
+          // Matches STACKIT docs (digits light)
+          primary: "#00c3cd",
+          "primary-content": "#091a26",
 
-          // Secondary color
-          secondary: "#ffffff", // Gray-80
-          "secondary-content": "#575756",
+          secondary: "#ccf3f5",
+          "secondary-content": "#162938",
 
-          // Spacemint for accent buttons (btn-accent)
-          accent: "#00c3cd", // Spacemint
-          "accent-content": "#fff",
+          accent: "#00c3cd",
+          "accent-content": "#091a26",
 
-          // Neutral colors
-          neutral: "#B2B2B2",
-          "neutral-content": "#0a1e2d",
+          neutral: "#162938",
+          "neutral-content": "#f8f9fa",
 
-          // Base colors - WHITE BACKGROUND
-          "base-100": "#ffffff", // White background
-          "base-200": "#EDEDED", // Gray-10
-          "base-300": "#DADADA", // Gray-20
-          "base-content": "#333333", // Dark text for light theme
+          "base-100": "#ffffff",
+          "base-200": "#f0f2f4",
+          "base-300": "#e7eaed",
+          "base-content": "#162938",
 
-          // Info, success, warning, error
-          info: "#00c3cd", // Spacemint
-          success: "#00c387", // Fresh Green
-          warning: "#fafc00", // Sunshine
-          error: "#ff0555", // Coral
+          info: "#127481",
+          "info-content": "#f8f9fa",
 
-          // Scrollbar and highlights
+          success: "#45a85d",
+          "success-content": "#091a26",
+
+          warning: "#e3774c",
+          "warning-content": "#091a26",
+
+          error: "#dc1f1f",
+          "error-content": "#f8f9fa",
+
           "--scrollbar-track": "#ffffff",
-          "--scrollbar-thumb": "rgba(10, 30, 45, 0.3)",
-          "--base-200-highlight": "#C6C6C6",
-
-          // Fix for chat text color
-          ".chat-text": "#333333", // Dark text color for chat in light mode
+          "--scrollbar-thumb": "rgba(22, 41, 56, 0.35)",
+          "--base-200-highlight": "#ccf3f5",
         },
         dark: {
-          // Keep Navy Blue for primary (navigation) in dark mode
-          primary: "#0a1e2d",
-          "primary-content": "#ffffff",
+          // Matches STACKIT docs (digits dark)
+          primary: "#00c3cd",
+          "primary-content": "#091a26",
 
-          // Secondary color
-          secondary: "#575756", // Gray-80
-          "secondary-content": "#ffffff",
+          secondary: "#165e6c",
+          "secondary-content": "#e7eaed",
 
-          // Spacemint for accent buttons (btn-accent)
-          accent: "#00c3cd", // Spacemint
-          "accent-content": "#fff",
+          accent: "#00c3cd",
+          "accent-content": "#091a26",
 
-          // Neutral colors
-          neutral: "#B2B2B2",
-          "neutral-content": "#ffffff",
+          neutral: "#162938",
+          "neutral-content": "#e7eaed",
 
-          // Base colors - DARK BACKGROUND
-          "base-100": "#1e1e1e", // Dark background
-          "base-200": "#2d2d2d", // Dark Gray
-          "base-300": "#3d3d3d", // Medium Gray
-          "base-content": "#f5f5f5", // Light text for dark theme
+          "base-100": "#091a26",
+          "base-200": "#233542",
+          "base-300": "#2c3d4a",
+          "base-content": "#e7eaed",
 
-          // Info, success, warning, error
-          info: "#00c3cd", // Spacemint
-          success: "#00c387", // Fresh Green
-          warning: "#fafc00", // Sunshine
-          error: "#ff0555", // Coral
+          info: "#66dbe1",
+          "info-content": "#091a26",
 
-          // Scrollbar and highlights
-          "--scrollbar-track": "#2d2d2d",
-          "--scrollbar-thumb": "rgba(255, 255, 255, 0.3)",
-          "--base-200-highlight": "#4d4d4d",
+          success: "#51cf66",
+          "success-content": "#091a26",
 
-          // Fix for chat text color
-          ".chat-text": "#f5f5f5", // Light text color for chat in dark mode
+          warning: "#e3774c",
+          "warning-content": "#091a26",
+
+          error: "#e34c4c",
+          "error-content": "#091a26",
+
+          "--scrollbar-track": "#091a26",
+          "--scrollbar-thumb": "rgba(231, 234, 237, 0.25)",
+          "--base-200-highlight": "#165e6c",
         },
       },
     ],

@@ -16,22 +16,11 @@ const props = defineProps<{
   messages: Array<ChatMessageModel>;
 }>();
 
-const isDarkTheme = (): boolean =>
-  typeof document !== "undefined" &&
-  document.documentElement.getAttribute("data-theme") === "dark";
-
 const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
   const isHuman = message.role === "user";
-  const backgroundColor = isHuman ? "bg-base-200" : "bg-primary";
-  const dark = isDarkTheme();
-  // Use base-content for light theme so text renders black; use white only in dark theme
-  const textColor = isHuman
-    ? "text-black"
-    : dark
-      ? "text-white"
-      : "text-base-content";
-  // Apply typography dark variant only in dark theme
-  const proseDark = dark ? "prose-dark" : "";
+  const backgroundColor = isHuman ? "bg-base-200" : "bg-secondary";
+  const textColor = isHuman ? "text-base-content" : "text-secondary-content";
+  const proseDark = "";
   const avatarSrc = isHuman ? USER_AVATAR : AI_AVATAR;
   const align = isHuman ? "right" : "left";
   const time = message.dateTime ? extractTime(message.dateTime) : undefined;

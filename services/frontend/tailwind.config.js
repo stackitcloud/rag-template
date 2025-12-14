@@ -15,7 +15,7 @@ module.exports = {
               color: "inherit",
             },
             a: {
-              color: "hsl(var(--in) / 1)",
+              color: "var(--fallback-in, oklch(var(--in) / 1))",
             },
             strong: {
               color: "inherit",
@@ -46,7 +46,7 @@ module.exports = {
               color: "inherit",
             },
             a: {
-              color: "hsl(var(--in) / 1)",
+              color: "var(--fallback-in, oklch(var(--in) / 1))",
             },
             strong: {
               color: "inherit",

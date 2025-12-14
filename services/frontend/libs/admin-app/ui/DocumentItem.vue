@@ -7,11 +7,14 @@ import {
   iconUpload,
 } from "@sit-onyx/icons";
 import { OnyxIcon } from "@shared/ui";
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { DocumentModel } from "../models/document.model";
 import { getDocumentIcon } from "../utils/document-icon.utils";
 
 const showDeleteModal = ref(false);
+const cancelButtonRef = ref<HTMLButtonElement | null>(null);
+const deleteButtonRef = ref<HTMLButtonElement | null>(null);
+const previouslyFocusedElement = ref<HTMLElement | null>(null);
 
 const props = defineProps<{
   data: DocumentModel;
@@ -41,6 +44,9 @@ const documentIcon = computed(() => getDocumentIcon(props.data.name));
 
 const confirmDelete = () => {
   if (!canDelete.value) return; // Guard against accidental triggers
+  if (typeof document !== "undefined") {
+    previouslyFocusedElement.value = document.activeElement as HTMLElement | null;
+  }
   showDeleteModal.value = true;
 };
 
@@ -52,6 +58,44 @@ const executeDelete = () => {
   props.deleteDocument(props.data.name);
   showDeleteModal.value = false;
 };
+
+const focusCancel = () => {
+  cancelButtonRef.value?.focus();
+};
+
+const focusDelete = () => {
+  deleteButtonRef.value?.focus();
+};
+
+const onModalKeydown = (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    cancelDelete();
+    return;
+  }
+
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    event.preventDefault();
+    if (typeof document === "undefined") return;
+    const activeElement = document.activeElement;
+    if (activeElement === cancelButtonRef.value) {
+      focusDelete();
+    } else {
+      focusCancel();
+    }
+  }
+};
+
+watch(showDeleteModal, async (isOpen) => {
+  if (isOpen) {
+    await nextTick();
+    focusCancel();
+    return;
+  }
+
+  await nextTick();
+  previouslyFocusedElement.value?.focus?.();
+});
 </script>
 
 <template>
@@ -114,6 +158,7 @@ const executeDelete = () => {
   <!-- Delete confirmation modal -->
   <div
     v-if="showDeleteModal"
+    @keydown.capture="onModalKeydown"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     role="dialog"
     aria-modal="true"
@@ -127,8 +172,22 @@ const executeDelete = () => {
         >? This action cannot be undone.
       </p>
       <div class="flex justify-end gap-2">
-        <button @click="cancelDelete" class="btn btn-ghost">Cancel</button>
-        <button @click="executeDelete" class="btn btn-error">Delete</button>
+        <button
+          ref="cancelButtonRef"
+          type="button"
+          @click="cancelDelete"
+          class="btn btn-ghost modal-action-button modal-action-button--cancel"
+        >
+          Cancel
+        </button>
+        <button
+          ref="deleteButtonRef"
+          type="button"
+          @click="executeDelete"
+          class="btn btn-error modal-action-button modal-action-button--delete"
+        >
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -137,6 +196,21 @@ const executeDelete = () => {
 <style scoped>
 .rotating {
   animation: rotationAnimation 2s linear infinite;
+}
+
+.btn.modal-action-button:focus,
+.btn.modal-action-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--fallback-b1, oklch(var(--b1) / 1)),
+    0 0 0 4px var(--fallback-p, oklch(var(--p) / 1));
+}
+
+.btn.modal-action-button--delete:focus,
+.btn.modal-action-button--delete:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--fallback-b1, oklch(var(--b1) / 1)),
+    0 0 0 4px var(--fallback-er, oklch(var(--er) / 1));
 }
 @keyframes rotationAnimation {
   0% {

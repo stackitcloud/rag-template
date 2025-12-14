@@ -170,7 +170,7 @@ main {
 }
 
 .chat-code-copy-button:focus-visible {
-  outline: 2px solid hsl(var(--in) / 1);
+  outline: 2px solid var(--fallback-in, oklch(var(--in) / 1));
   outline-offset: 2px;
 }
 
@@ -180,8 +180,8 @@ main {
   right: calc(100% + 0.5rem);
   top: 50%;
   transform: translateY(-50%);
-  background-color: hsl(var(--n) / 1);
-  color: hsl(var(--nc) / 1);
+  background-color: var(--fallback-n, oklch(var(--n) / 1));
+  color: var(--fallback-nc, oklch(var(--nc) / 1));
   padding: 0.25rem 0.5rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -455,7 +455,7 @@ main {
 }
 
 .chat-bubble-copy-button:focus-visible {
-  outline: 2px solid hsl(var(--in) / 1);
+  outline: 2px solid var(--fallback-in, oklch(var(--in) / 1));
   outline-offset: 2px;
 }
 

@@ -6,7 +6,7 @@ import { useI18n } from "vue-i18n";
 import { ChatBubbleModel } from "../models/chat-bubble.model";
 import { ChatMessageModel } from "../models/chat-message.model";
 import ChatBubble from "./ChatBubble.vue";
-const USER_AVATAR = "/assets/user.svg";
+const USER_AVATAR = "/assets/user.svg?v=2";
 const AI_AVATAR = "/assets/ai-avatar.svg";
 
 const chatContainer = ref<HTMLElement>();

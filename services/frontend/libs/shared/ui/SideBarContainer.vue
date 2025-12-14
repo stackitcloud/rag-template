@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { iconFileText } from "@sit-onyx/icons";
+import { iconFile } from "@sit-onyx/icons";
 import OnyxIcon from "./OnyxIcon.vue";
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
 <template>
   <div class="h-full bg-base-100 flex flex-col border-l-2 border-base-300 p-2 md:p-2">
     <div class="flex items-center mb-6 mt-2 px-2">
-      <OnyxIcon :icon="iconFileText" :size="28" />
+      <OnyxIcon :icon="iconFile" :size="28" />
       <h1 class="ml-2 text-xl font-medium flex-1">{{ props.header }}</h1>
       <h1 class="ml-2">{{ props.count }}</h1>
     </div>

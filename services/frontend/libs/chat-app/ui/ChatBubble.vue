@@ -2,9 +2,11 @@
 import { ChatBubbleModel } from "../models/chat-bubble.model";
 import { iconCheck, iconCopy, iconFile } from "@sit-onyx/icons";
 import { OnyxIcon } from "@shared/ui";
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
+import { useChatStore } from "../data-access/+state/chat.store";
 
 const props = defineProps<ChatBubbleModel>();
+const chatStore = useChatStore();
 const messageRef = ref<HTMLElement>();
 const isCopied = ref(false);
 let copyTimeoutId: number | undefined;
@@ -50,7 +52,7 @@ const copyMessage = async () => {
     isCopied.value = false;
     copyTimeoutId = undefined;
   }, 1500);
-};
+	};
 
 const scrollReveal = (anchorId: string) => {
   const item = document.getElementById(anchorId);
@@ -62,6 +64,15 @@ const scrollReveal = (anchorId: string) => {
       item?.classList?.remove("base-200-highlight");
     }, 3000);
   }
+};
+
+const revealSource = async (anchorId: string) => {
+  if (!chatStore.isSourcesPanelOpen) {
+    chatStore.openSourcesPanel();
+    await nextTick();
+  }
+
+  scrollReveal(anchorId);
 };
 </script>
 
@@ -115,7 +126,7 @@ const scrollReveal = (anchorId: string) => {
               class="flex items-center"
               v-for="anchorId in anchorIds"
               :key="anchorId"
-              @click="scrollReveal(anchorId.toString())"
+              @click="revealSource(anchorId.toString())"
             >
               <OnyxIcon :icon="iconFile" :size="16" class="mr-1" />
               {{ anchorId }}

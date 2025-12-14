@@ -20,6 +20,7 @@ export const useChatStore = defineStore("chat", () => {
   const chatDocuments = ref<ChatDocumentModel[]>([]);
   const isLoading = ref(false);
   const hasError = ref(false);
+  const isSourcesPanelOpen = ref(true);
 
   // Use the global i18n instance set up in the app
   const t = i18n.global.t;
@@ -131,13 +132,29 @@ export const useChatStore = defineStore("chat", () => {
     });
   };
 
+  const openSourcesPanel = () => {
+    isSourcesPanelOpen.value = true;
+  };
+
+  const closeSourcesPanel = () => {
+    isSourcesPanelOpen.value = false;
+  };
+
+  const toggleSourcesPanel = () => {
+    isSourcesPanelOpen.value = !isSourcesPanelOpen.value;
+  };
+
   return {
     chatDocuments,
     chatHistory,
     isLoading,
     hasError,
     conversationId,
+    isSourcesPanelOpen,
     callInference,
     initiateConversation,
+    openSourcesPanel,
+    closeSourcesPanel,
+    toggleSourcesPanel,
   };
 });

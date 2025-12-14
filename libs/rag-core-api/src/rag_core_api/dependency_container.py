@@ -5,6 +5,7 @@ from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import (  # noqa: WOT001
     Configuration,
     List,
+    Object,
     Selector,
     Singleton,
 )
@@ -130,8 +131,19 @@ class DependencyContainer(DeclarativeContainer):
         vectorstore=vectorstore,
     )
 
-    flashrank_reranker = Singleton(FlashrankRerank, top_n=reranker_settings.k_documents)
-    reranker = Singleton(FlashrankReranker, flashrank_reranker)
+    flashrank_reranker = Singleton(
+        FlashrankRerank,
+        top_n=reranker_settings.k_documents,
+        model=reranker_settings.model,
+        score_threshold=reranker_settings.min_relevance_score,
+    )
+    flashrank_reranker_impl = Singleton(FlashrankReranker, flashrank_reranker)
+
+    reranker = Selector(
+        Object(reranker_settings.type),
+        flashrank=flashrank_reranker_impl,
+        none=Object(None),
+    )
 
     information_pieces_uploader = Singleton(DefaultInformationPiecesUploader, vector_database)
 

@@ -100,6 +100,8 @@ backend:
   - "--loop"
   - "asyncio"
 
+  # Note: Each uvicorn worker is a separate Python process and can significantly
+  # increase memory usage.
   workers: 3
   wsMaxQueue: 6
 
@@ -158,7 +160,7 @@ backend:
 
   envs:
     stackitVllm:
-      STACKIT_VLLM_MODEL: cortecs/Llama-3.3-70B-Instruct-FP8-Dynamic
+      STACKIT_VLLM_MODEL: openai/gpt-oss-120b
       STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
     database:
       VECTOR_DB_COLLECTION_NAME: rag-db
@@ -218,6 +220,10 @@ backend:
     fakeEmbedder:
       FAKE_EMBEDDER_SIZE: 386
     reranker:
+      # "flashrank" (default) reranks results; "none" disables reranking to save memory.
+      RERANKER_TYPE: flashrank
+      # Explicitly pin a small model (e.g. ms-marco-TinyBERT-L-2-v2) to avoid OOM on local k3d/Tilt setups.
+      RERANKER_MODEL: "ms-marco-MultiBERT-L-12"
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
     chatHistory:
@@ -402,6 +408,13 @@ extractor:
 
   pythonPathEnv:
     PYTHONPATH: src
+
+  envs:
+    sitemap:
+      # Controls how HTML pages are parsed when loading from an XML sitemap.
+      # Options: "docusaurus" (default), "astro", "generic"
+      # Note: https://docs.stackit.cloud is built with Astro/Starlight -> use "astro".
+      SITEMAP_PARSER: astro
   huggingfaceCacheDir: /tmp/hf-cache
   # Directory inside the container to use as writable cache for ModelScope / OCR models
   modelscopeCacheDir: /var/modelscope

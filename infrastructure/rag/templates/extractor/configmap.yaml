@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "configmap.extractorSitemapName" . }}
+data:
+  {{- range $key, $value := .Values.extractor.envs.sitemap }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+

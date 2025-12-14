@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {
   iconCircleCheck,
-  iconFileText,
   iconSync,
   iconTrash,
   iconTriangleWarning,
@@ -10,6 +9,7 @@ import {
 import { OnyxIcon } from "@shared/ui";
 import { computed, ref } from "vue";
 import { DocumentModel } from "../models/document.model";
+import { getDocumentIcon } from "../utils/document-icon.utils";
 
 const showDeleteModal = ref(false);
 
@@ -37,6 +37,8 @@ const statusText = {
   ERROR: "Error",
 };
 
+const documentIcon = computed(() => getDocumentIcon(props.data.name));
+
 const confirmDelete = () => {
   if (!canDelete.value) return; // Guard against accidental triggers
   showDeleteModal.value = true;
@@ -58,7 +60,7 @@ const executeDelete = () => {
   >
     <!-- Document icon -->
     <div class="flex items-center justify-center text-center w-10">
-      <OnyxIcon :icon="iconFileText" :size="32" class="opacity-60" />
+      <OnyxIcon :icon="documentIcon" :size="32" class="opacity-60" />
     </div>
 
     <!-- Document info -->

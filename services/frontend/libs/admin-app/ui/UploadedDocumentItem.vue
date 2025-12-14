@@ -1,11 +1,12 @@
 <script lang="ts"
         setup>
-        import { iconCircleCheck, iconCircleX, iconFileText, iconLoadingCircle, iconTriangleWarning } from "@sit-onyx/icons";
+        import { iconCircleCheck, iconCircleX, iconLoadingCircle, iconTriangleWarning } from "@sit-onyx/icons";
         import { UploadedDocument } from "../models/uploaded-document.model.ts";
         import { useI18n } from "vue-i18n";
         import { OnyxIcon } from "@shared/ui";
         import { computed } from "vue";
         import { formatFileSizeToString } from "@shared/utils";
+        import { getDocumentIcon } from "../utils/document-icon.utils";
 
         const { t } = useI18n()
         const props = defineProps<{ data: UploadedDocument, removeItem: (documentId: string) => void }>();
@@ -23,12 +24,14 @@
             const totalStr = formatFileSizeToString(props?.data?.total);
             return `${progressStr} of ${totalStr}`;
         });
+
+        const documentIcon = computed(() => getDocumentIcon(props.data.file.name));
 </script>
 <template>
     <div class="bg-base-200 rounded-box p-2 md:p-4">
         <div class="flex gap-2">
             <div class="flex items-center justify-center text-center w-10">
-                <OnyxIcon :icon="iconFileText" :size="32" class="text-base-content/40" />
+                <OnyxIcon :icon="documentIcon" :size="32" class="text-base-content/40" />
             </div>
             <div class="flex-1 break-words text-ellipsis overflow-hidden flex flex-col">
                 <h4 class="text-sm">{{ props.data.file.name }}</h4>

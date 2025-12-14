@@ -4,6 +4,7 @@ from typing import Optional
 from langchain_community.document_loaders import SitemapLoader
 import asyncio
 import json
+import logging
 
 from extractor_api_lib.impl.types.extractor_types import ExtractorTypes
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
@@ -12,6 +13,16 @@ from extractor_api_lib.extractors.information_extractor import InformationExtrac
 from extractor_api_lib.impl.mapper.sitemap_document2information_piece import (
     SitemapLangchainDocument2InformationPiece,
 )
+from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
+    astro_sitemap_metadata_parser_function,
+    astro_sitemap_parser_function,
+    docusaurus_sitemap_metadata_parser_function,
+    docusaurus_sitemap_parser_function,
+    generic_sitemap_metadata_parser_function,
+    generic_sitemap_parser_function,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class SitemapExtractor(InformationExtractor):
@@ -67,18 +78,24 @@ class SitemapExtractor(InformationExtractor):
         list[InternalInformationPiece]
             A list of information pieces extracted from Sitemap.
         """
-        sitemap_loader_parameters = self._parse_sitemap_loader_parameters(extraction_parameters)
+        sitemap_loader_parameters, parser_override = self._parse_sitemap_loader_parameters(extraction_parameters)
 
         if "document_name" in sitemap_loader_parameters:
             sitemap_loader_parameters.pop("document_name", None)
 
-        # Only pass custom functions if they are provided
-        if self._parsing_function is not None:
-            # Get the actual function from the provider
-            sitemap_loader_parameters["parsing_function"] = self._parsing_function
-        if self._meta_function is not None:
-            # Get the actual function from the provider
-            sitemap_loader_parameters["meta_function"] = self._meta_function
+        parsing_function = self._parsing_function
+        meta_function = self._meta_function
+
+        override_parsing_function, override_meta_function = self._select_parser_functions(parser_override)
+        if override_parsing_function is not None:
+            parsing_function = override_parsing_function
+        if override_meta_function is not None:
+            meta_function = override_meta_function
+
+        if parsing_function is not None:
+            sitemap_loader_parameters["parsing_function"] = parsing_function
+        if meta_function is not None:
+            sitemap_loader_parameters["meta_function"] = meta_function
 
         document_loader = SitemapLoader(**sitemap_loader_parameters)
         documents = []
@@ -92,7 +109,38 @@ class SitemapExtractor(InformationExtractor):
             raise ValueError(f"Failed to load documents from Sitemap: {e}")
         return [self._mapper.map_document2informationpiece(x, extraction_parameters.document_name) for x in documents]
 
-    def _parse_sitemap_loader_parameters(self, extraction_parameters: ExtractionParameters) -> dict:
+    @staticmethod
+    def _select_parser_functions(
+        parser_override: Optional[str],
+    ) -> tuple[Optional[callable], Optional[callable]]:
+        mapping = {
+            "docusaurus": (docusaurus_sitemap_parser_function, docusaurus_sitemap_metadata_parser_function),
+            "astro": (astro_sitemap_parser_function, astro_sitemap_metadata_parser_function),
+            "generic": (generic_sitemap_parser_function, generic_sitemap_metadata_parser_function),
+        }
+
+        if not parser_override:
+            return None, None
+
+        normalized = str(parser_override).strip().lower()
+        aliases = {
+            "starlight": "astro",
+            "astrojs": "astro",
+            "default": "auto",
+            "env": "auto",
+        }
+        normalized = aliases.get(normalized, normalized)
+
+        if normalized in ("auto", ""):
+            return None, None
+
+        if normalized not in mapping:
+            logger.warning("Unknown sitemap_parser '%s'. Falling back to generic.", parser_override)
+            normalized = "generic"
+
+        return mapping[normalized]
+
+    def _parse_sitemap_loader_parameters(self, extraction_parameters: ExtractionParameters) -> tuple[dict, Optional[str]]:
         """
         Parse the extraction parameters to extract sitemap loader parameters.
 
@@ -107,7 +155,11 @@ class SitemapExtractor(InformationExtractor):
             A dictionary containing the parsed sitemap loader parameters.
         """
         sitemap_loader_parameters = {}
-        for x in extraction_parameters.kwargs:
+        parser_override: Optional[str] = None
+        for x in extraction_parameters.kwargs or []:
+            if x.key in ("sitemap_parser", "parser"):
+                parser_override = str(x.value) if x.value is not None else None
+                continue
             if x.key == "header_template" or x.key == "requests_kwargs":
                 try:
                     sitemap_loader_parameters[x.key] = json.loads(x.value)
@@ -120,4 +172,4 @@ class SitemapExtractor(InformationExtractor):
                     sitemap_loader_parameters[x.key] = x.value
             else:
                 sitemap_loader_parameters[x.key] = int(x.value) if x.value.isdigit() else x.value
-        return sitemap_loader_parameters
+        return sitemap_loader_parameters, parser_override

@@ -32,6 +32,7 @@ const sitemapName = ref('');
 const sitemapWebPath = ref('');
 const sitemapFilterUrls = ref('');
 const sitemapHeaderTemplate = ref('');
+const sitemapParser = ref<'auto' | 'docusaurus' | 'astro' | 'generic'>('auto');
 
 const error = computed(() => store.error);
 
@@ -90,7 +91,8 @@ const handleSitemapUpload = () => {
         name: sitemapName.value,
         webPath: sitemapWebPath.value,
         filterUrls: sitemapFilterUrls.value,
-        headerTemplate: sitemapHeaderTemplate.value
+        headerTemplate: sitemapHeaderTemplate.value,
+        parser: sitemapParser.value,
     });
 }
 
@@ -215,6 +217,13 @@ const getErrorMessage = (errorType: string) => {
                       <input id="sitemapName" v-model="sitemapName" type="text" placeholder="Name" class="input input-bordered w-full" required/>
                       <label for="sitemapWebPath" class="sr-only">Sitemap URL</label>
                       <input v-model="sitemapWebPath" type="url" placeholder="Sitemap URL (required)" class="input input-bordered w-full" required />
+                      <label for="sitemapParser" class="sr-only">Parser</label>
+                      <select id="sitemapParser" v-model="sitemapParser" class="select select-bordered w-full">
+                        <option value="auto">{{ t('documents.sitemapParserAuto') }}</option>
+                        <option value="astro">{{ t('documents.sitemapParserAstro') }}</option>
+                        <option value="docusaurus">{{ t('documents.sitemapParserDocusaurus') }}</option>
+                        <option value="generic">{{ t('documents.sitemapParserGeneric') }}</option>
+                      </select>
                       <label for="sitemapFilterUrls" class="sr-only">Filter URLs</label>
                       <textarea v-model="sitemapFilterUrls" placeholder="Filter URLs (optional) - one regex pattern per line" class="textarea textarea-bordered w-full" rows="3"></textarea>
                       <label for="sitemapHeaderTemplate" class="sr-only">Headers JSON</label>
@@ -237,7 +246,7 @@ const getErrorMessage = (errorType: string) => {
             <!-- Invalid file type message -->
             <div role="alert" v-if="isInvalidFileType" @click="isInvalidFileType = false"
                 class="alert alert-warning cursor-pointer mb-2 slide-in-down">
-                <InformationCircleIcon class="w-6 h-6" />
+                <OnyxIcon :icon="iconCircleInformation" :size="24" class="mr-2" />
                 <div>
                     <h3 class="font-bold">{{ t('documents.fileTypeNotAllowedTitle') }}</h3>
                     <div class="text-xs">{{ t('documents.fileTypeNotAllowedDescription') }} {{ allowedFileTypesLabel }}</div>

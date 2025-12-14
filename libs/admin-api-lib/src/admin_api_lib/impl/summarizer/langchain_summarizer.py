@@ -77,9 +77,32 @@ class LangchainSummarizer(Summarizer):
         langchain_documents = self._chunker.split_documents([document])
         logger.debug("Summarizing %d chunk(s)...", len(langchain_documents))
 
-        # Fan out with concurrency, bounded by your semaphore inside _summarize_chunk
-        tasks = [asyncio.create_task(self._summarize_chunk(doc.page_content, config)) for doc in langchain_documents]
-        outputs = await asyncio.gather(*tasks)
+        max_concurrency = config.get("max_concurrency")
+        if max_concurrency is not None:
+            try:
+                max_concurrency = max(1, int(max_concurrency))
+            except (TypeError, ValueError):
+                max_concurrency = None
+
+        if max_concurrency == 1:
+            outputs = []
+            for doc in langchain_documents:
+                outputs.append(await self._summarize_chunk(doc.page_content, config))
+        else:
+            if max_concurrency is not None:
+                semaphore = asyncio.Semaphore(max_concurrency)
+
+                async def _run(doc: Document) -> SummarizerOutput:
+                    async with semaphore:
+                        return await self._summarize_chunk(doc.page_content, config)
+
+                outputs = await asyncio.gather(*(_run(doc) for doc in langchain_documents))
+            else:
+                # Fan out with concurrency, bounded by your semaphore inside _summarize_chunk
+                tasks = [
+                    asyncio.create_task(self._summarize_chunk(doc.page_content, config)) for doc in langchain_documents
+                ]
+                outputs = await asyncio.gather(*tasks)
 
         if len(outputs) == 1:
             return outputs[0]

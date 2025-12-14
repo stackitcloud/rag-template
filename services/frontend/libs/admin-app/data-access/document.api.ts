@@ -1,11 +1,30 @@
 import axios, { AxiosProgressEvent } from 'axios';
 import { DocumentModel } from "../models/document.model.ts";
 
-axios.defaults.baseURL = import.meta.env.VITE_ADMIN_URL + "/api";
-axios.defaults.auth = {
-    username: import.meta.env.VITE_AUTH_USERNAME,
-    password: import.meta.env.VITE_AUTH_PASSWORD
-};
+const adminUrl = import.meta.env.VITE_ADMIN_URL;
+const isPlaceholderEnvValue = (value: unknown): boolean =>
+  typeof value === "string" && /^VITE_[A-Z0-9_]+$/.test(value.trim());
+
+if (!adminUrl || isPlaceholderEnvValue(adminUrl)) {
+  axios.defaults.baseURL = "/api";
+} else {
+  const trimmed = String(adminUrl).trim().replace(/\/$/, "");
+  axios.defaults.baseURL = trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+}
+const authUsername = import.meta.env.VITE_AUTH_USERNAME;
+const authPassword = import.meta.env.VITE_AUTH_PASSWORD;
+const hasExplicitAuthCredentials =
+  !!authUsername &&
+  !!authPassword &&
+  !isPlaceholderEnvValue(authUsername) &&
+  !isPlaceholderEnvValue(authPassword);
+
+if (hasExplicitAuthCredentials) {
+  axios.defaults.auth = {
+    username: authUsername,
+    password: authPassword,
+  };
+}
 
 // confluence configuration interface
 export interface ConfluenceConfig {
@@ -23,6 +42,7 @@ export interface SitemapConfig {
   filterUrls: string;
   headerTemplate: string;
   name: string;
+  parser?: 'auto' | 'docusaurus' | 'astro' | 'generic';
 }
 
 export class DocumentAPI {
@@ -89,6 +109,10 @@ export class DocumentAPI {
             const payload = [
                 { key: 'web_path', value: config.webPath }
             ];
+
+            if (config.parser && config.parser !== 'auto') {
+                payload.push({ key: 'sitemap_parser', value: config.parser });
+            }
 
             // add filter_urls only if provided
             if (config.filterUrls && config.filterUrls.trim()) {

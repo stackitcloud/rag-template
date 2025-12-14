@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
@@ -96,3 +97,31 @@ async def test_page_summary_enhancer_keeps_page_number_separation_for_paged_docu
     assert set(summaries[0].metadata["related"]) == {"p1"}
     assert set(summaries[1].metadata["related"]) == {"p2"}
 
+
+class _ConcurrencyTrackingSummarizer:
+    def __init__(self) -> None:
+        self.in_flight = 0
+        self.max_in_flight = 0
+
+    async def ainvoke(self, _query: str, _config=None) -> str:  # noqa: ANN001
+        self.in_flight += 1
+        self.max_in_flight = max(self.max_in_flight, self.in_flight)
+        await asyncio.sleep(0.01)
+        self.in_flight -= 1
+        return "summary"
+
+
+@pytest.mark.asyncio
+async def test_page_summary_enhancer_respects_max_concurrency_one():
+    summarizer = _ConcurrencyTrackingSummarizer()
+    enhancer = PageSummaryEnhancer(summarizer)  # type: ignore[arg-type]
+
+    docs = [
+        Document(page_content="page-a chunk", metadata={"id": "a1", "related": [], "type": ContentType.TEXT.value, "page": "A", "document_url": "https://example.com/a"}),
+        Document(page_content="page-b chunk", metadata={"id": "b1", "related": [], "type": ContentType.TEXT.value, "page": "B", "document_url": "https://example.com/b"}),
+        Document(page_content="page-c chunk", metadata={"id": "c1", "related": [], "type": ContentType.TEXT.value, "page": "C", "document_url": "https://example.com/c"}),
+    ]
+
+    await enhancer.ainvoke(docs, config={"max_concurrency": 1})
+
+    assert summarizer.max_in_flight == 1

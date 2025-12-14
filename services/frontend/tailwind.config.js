@@ -10,60 +10,64 @@ module.exports = {
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            color: "hsl(var(--bc) / 1)",
+            color: "inherit",
             "h1, h2, h3, h4": {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             a: {
               color: "hsl(var(--in) / 1)",
             },
             strong: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             "ol > li::marker": {
-              color: "hsl(var(--bc) / 0.8)",
+              color: "inherit",
             },
             "ul > li::marker": {
-              color: "hsl(var(--bc) / 0.8)",
+              color: "inherit",
             },
             li: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             blockquote: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             code: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
+            "code::before": { content: '""' },
+            "code::after": { content: '""' },
           },
         },
         dark: {
           css: {
-            color: "hsl(var(--bc) / 1)",
+            color: "inherit",
             "h1, h2, h3, h4": {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             a: {
               color: "hsl(var(--in) / 1)",
             },
             strong: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             "ol > li::marker": {
-              color: "hsl(var(--bc) / 0.8)",
+              color: "inherit",
             },
             "ul > li::marker": {
-              color: "hsl(var(--bc) / 0.8)",
+              color: "inherit",
             },
             li: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             blockquote: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
             code: {
-              color: "hsl(var(--bc) / 1)",
+              color: "inherit",
             },
+            "code::before": { content: '""' },
+            "code::after": { content: '""' },
           },
         },
       }),

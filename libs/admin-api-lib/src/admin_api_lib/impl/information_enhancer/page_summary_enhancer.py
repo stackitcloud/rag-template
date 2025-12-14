@@ -1,6 +1,6 @@
 """Module for enhancing the summary of pages by grouping information by page and summarizing each page."""
 
-from asyncio import gather
+import asyncio
 from hashlib import sha256
 from typing import Optional
 from typing import Any
@@ -66,6 +66,32 @@ class PageSummaryEnhancer(SummaryEnhancer):
             groups[key].append(info)
 
         grouped = [groups[key] for key in ordered_keys]
-        summary_tasks = [self._asummarize_page(info_group, config) for info_group in tqdm(grouped)]
+        max_concurrency = 1
+        if config and config.get("max_concurrency") is not None:
+            try:
+                max_concurrency = max(1, int(config["max_concurrency"]))
+            except (TypeError, ValueError):
+                max_concurrency = 1
 
-        return await gather(*summary_tasks)
+        if max_concurrency == 1:
+            summaries = []
+            for info_group in tqdm(grouped):
+                summaries.append(await self._asummarize_page(info_group, config))
+            return summaries
+
+        semaphore = asyncio.Semaphore(max_concurrency)
+        summaries: list[Document | None] = [None] * len(grouped)
+
+        async def _run(idx: int, info_group: list[Document]) -> tuple[int, Document]:
+            async with semaphore:
+                return idx, await self._asummarize_page(info_group, config)
+
+        tasks = [asyncio.create_task(_run(idx, info_group)) for idx, info_group in enumerate(grouped)]
+
+        with tqdm(total=len(tasks)) as pbar:
+            for task in asyncio.as_completed(tasks):
+                idx, summary = await task
+                summaries[idx] = summary
+                pbar.update(1)
+
+        return [summary for summary in summaries if summary is not None]

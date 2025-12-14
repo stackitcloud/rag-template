@@ -1,6 +1,7 @@
 """Module containing utility functions for sitemap extraction."""
 
 from typing import Any, Union
+from urllib.parse import unquote, urlparse
 
 from bs4 import BeautifulSoup, Tag
 
@@ -132,12 +133,24 @@ def _extract_title(soup: BeautifulSoup, root: Tag) -> str:
     return "Unknown Title"
 
 
+def _title_from_url(url: str) -> str:
+    parsed = urlparse(url)
+    path = unquote(parsed.path or "").rstrip("/")
+    if not path:
+        return parsed.hostname or url
+    segment = path.split("/")[-1].replace("-", " ").replace("_", " ").strip()
+    return segment or url
+
+
 def docusaurus_sitemap_metadata_parser_function(meta: dict, _content: Any) -> dict:
     """Extract metadata for Docusaurus pages."""
     soup = _as_soup(_content) if isinstance(_content, (str, BeautifulSoup)) else _content
     root = _select_docusaurus_root(soup)
-    meta["title"] = _extract_title(soup, root)
     source_url = meta.get("loc") or meta.get("source")
+    title = _extract_title(soup, root)
+    if title == "Unknown Title" and source_url:
+        title = _title_from_url(str(source_url))
+    meta["title"] = title
     return {"source": source_url, **meta} if source_url else meta
 
 
@@ -145,8 +158,11 @@ def astro_sitemap_metadata_parser_function(meta: dict, _content: Any) -> dict:
     """Extract metadata for Astro pages."""
     soup = _as_soup(_content) if isinstance(_content, (str, BeautifulSoup)) else _content
     root = _select_astro_root(soup)
-    meta["title"] = _extract_title(soup, root)
     source_url = meta.get("loc") or meta.get("source")
+    title = _extract_title(soup, root)
+    if title == "Unknown Title" and source_url:
+        title = _title_from_url(str(source_url))
+    meta["title"] = title
     return {"source": source_url, **meta} if source_url else meta
 
 
@@ -154,8 +170,11 @@ def generic_sitemap_metadata_parser_function(meta: dict, _content: Any) -> dict:
     """Extract metadata for generic HTML pages."""
     soup = _as_soup(_content) if isinstance(_content, (str, BeautifulSoup)) else _content
     root = _select_generic_root(soup)
-    meta["title"] = _extract_title(soup, root)
     source_url = meta.get("loc") or meta.get("source")
+    title = _extract_title(soup, root)
+    if title == "Unknown Title" and source_url:
+        title = _title_from_url(str(source_url))
+    meta["title"] = title
     return {"source": source_url, **meta} if source_url else meta
 
 

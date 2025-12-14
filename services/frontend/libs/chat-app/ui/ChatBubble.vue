@@ -1,9 +1,56 @@
 <script lang="ts" setup>
 import { ChatBubbleModel } from "../models/chat-bubble.model";
-import { iconFile } from "@sit-onyx/icons";
+import { iconCheck, iconCopy, iconFile } from "@sit-onyx/icons";
 import { OnyxIcon } from "@shared/ui";
+import { ref } from "vue";
 
 const props = defineProps<ChatBubbleModel>();
+const messageRef = ref<HTMLElement>();
+const isCopied = ref(false);
+let copyTimeoutId: number | undefined;
+
+const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_err) {
+    // fallback below
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    return ok;
+  } catch (_err) {
+    return false;
+  }
+};
+
+const copyMessage = async () => {
+  const text = messageRef.value?.innerText ?? "";
+  if (!text.trim()) return;
+
+  const ok = await copyToClipboard(text);
+  if (!ok) return;
+
+  isCopied.value = true;
+  if (copyTimeoutId) window.clearTimeout(copyTimeoutId);
+  copyTimeoutId = window.setTimeout(() => {
+    isCopied.value = false;
+    copyTimeoutId = undefined;
+  }, 1500);
+};
 
 const scrollReveal = (anchorId: string) => {
   const item = document.getElementById(anchorId);
@@ -44,6 +91,7 @@ const scrollReveal = (anchorId: string) => {
     >
       <div v-if="props.text !== undefined" class="flex flex-col">
         <article
+          ref="messageRef"
           :class="[
             'flex-1',
             'text-pretty',
@@ -57,20 +105,33 @@ const scrollReveal = (anchorId: string) => {
           v-html="props.text"
         ></article>
 
-        <!-- Document jump anchors-->
-        <div
-          v-if="props.anchorIds !== undefined"
-          class="flex gap-3 text-secondary-content text-sm cursor-pointer mt-2"
-        >
+        <div class="flex items-start gap-2 mt-2">
+          <!-- Document jump anchors-->
           <div
-            class="flex items-center"
-            v-for="anchorId in anchorIds"
-            :key="anchorId"
-            @click="scrollReveal(anchorId.toString())"
+            v-if="props.anchorIds !== undefined"
+            class="flex flex-wrap gap-3 text-secondary-content text-sm cursor-pointer flex-1 min-w-0"
           >
-            <OnyxIcon :icon="iconFile" :size="16" class="mr-1" />
-            {{ anchorId }}
+            <div
+              class="flex items-center"
+              v-for="anchorId in anchorIds"
+              :key="anchorId"
+              @click="scrollReveal(anchorId.toString())"
+            >
+              <OnyxIcon :icon="iconFile" :size="16" class="mr-1" />
+              {{ anchorId }}
+            </div>
           </div>
+          <div v-else class="flex-1"></div>
+
+          <button
+            type="button"
+            class="chat-bubble-copy-button shrink-0"
+            :title="isCopied ? 'Copied!' : 'Copy to clipboard'"
+            :aria-label="isCopied ? 'Copied' : 'Copy message to clipboard'"
+            @click="copyMessage"
+          >
+            <OnyxIcon :icon="isCopied ? iconCheck : iconCopy" :size="16" />
+          </button>
         </div>
       </div>
       <span v-else class="jumping-dots text-lg">
@@ -84,10 +145,14 @@ const scrollReveal = (anchorId: string) => {
 
 <style scoped lang="css">
 .chat-text > * {
-  word-break: break-all;
-  overflow-wrap: break-word;
-  white-space: break-spaces;
-  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.chat-text pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .jumping-dots span {

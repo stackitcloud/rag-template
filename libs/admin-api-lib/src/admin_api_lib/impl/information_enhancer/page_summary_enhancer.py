@@ -48,6 +48,8 @@ class PageSummaryEnhancer(SummaryEnhancer):
         # For paged documents (PDF/docling/etc.) keep per-page summaries even if a shared document URL exists.
         if isinstance(page, int):
             return ("page_number", document_url, page)
+        elif isinstance(page, str) and page!="Unknown Title":
+            return ("page_number", document_url, page)
 
         # For sources like sitemaps/confluence, `page` can be a non-unique title (or missing),
         # so group by the page URL when available to ensure one summary per page.

@@ -75,16 +75,6 @@ class SitemapExtractor(InformationExtractor):
             return None, None
 
         normalized = str(parser_override).strip().lower()
-        aliases = {
-            "starlight": "astro",
-            "astrojs": "astro",
-            "default": "auto",
-            "env": "auto",
-        }
-        normalized = aliases.get(normalized, normalized)
-
-        if normalized in ("auto", ""):
-            return None, None
 
         if normalized not in mapping:
             logger.warning("Unknown sitemap_parser '%s'. Falling back to generic.", parser_override)

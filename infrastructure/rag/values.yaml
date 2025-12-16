@@ -202,11 +202,11 @@ backend:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
       STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
       # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
-      STACKIT_EMBEDDER_MAX_RETRIES: "11"
+      STACKIT_EMBEDDER_MAX_RETRIES: "5"
       STACKIT_EMBEDDER_RETRY_BASE_DELAY: "0.5"
       STACKIT_EMBEDDER_RETRY_MAX_DELAY: "600"
       STACKIT_EMBEDDER_BACKOFF_FACTOR: "2"
-      STACKIT_EMBEDDER_ATTEMPT_CAP: "11"
+      STACKIT_EMBEDDER_ATTEMPT_CAP: "6"
       STACKIT_EMBEDDER_JITTER_MIN: "0.05"
       STACKIT_EMBEDDER_JITTER_MAX: "0.25"
     ollama:
@@ -485,11 +485,11 @@ shared:
       S3_ENDPOINT: http://rag-minio:9000
       S3_BUCKET: documents
     retryDecorator:
-      RETRY_DECORATOR_MAX_RETRIES: "11"
+      RETRY_DECORATOR_MAX_RETRIES: "5"
       RETRY_DECORATOR_RETRY_BASE_DELAY: "0.5"
       RETRY_DECORATOR_RETRY_MAX_DELAY: "600"
       RETRY_DECORATOR_BACKOFF_FACTOR: "2"
-      RETRY_DECORATOR_ATTEMPT_CAP: "11"
+      RETRY_DECORATOR_ATTEMPT_CAP: "6"
       RETRY_DECORATOR_JITTER_MIN: "0.05"
       RETRY_DECORATOR_JITTER_MAX: "0.25"
     usecase:

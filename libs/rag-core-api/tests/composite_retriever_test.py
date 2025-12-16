@@ -25,21 +25,24 @@ from mocks.mock_reranker import MockReranker
 
 
 def _mk_doc(
-    id: str, score: float | None = None, type: ContentType = ContentType.TEXT, related: Iterable[str] | None = None
+    doc_id: str,
+    score: float | None = None,
+    doc_type: ContentType = ContentType.TEXT,
+    related: Iterable[str] | None = None,
 ):
-    meta = {"id": id, "type": type.value}
+    meta = {"id": doc_id, "type": doc_type.value}
     if score is not None:
         meta["score"] = score
     if related is not None:
         meta["related"] = list(related)
-    return Document(page_content=f"content-{id}", metadata=meta)
+    return Document(page_content=f"content-{doc_id}", metadata=meta)
 
 
 @pytest.mark.asyncio
 async def test_use_summaries_expands_and_removes_summary():
     # Summary references an underlying doc not in initial results.
     underlying = _mk_doc("doc1", score=0.9)
-    summary = _mk_doc("sum1", type=ContentType.SUMMARY, related=["doc1"])  # type: ignore[arg-type]
+    summary = _mk_doc("sum1", doc_type=ContentType.SUMMARY, related=["doc1"])  # type: ignore[arg-type]
     vector_db = MockVectorDB({"doc1": underlying})
     retriever = MockRetrieverQuark([summary, underlying], vector_database=vector_db)
 
@@ -54,7 +57,7 @@ async def test_use_summaries_expands_and_removes_summary():
 
 
 def test_use_summaries_only_summary_no_related():
-    summary = _mk_doc("sum1", type=ContentType.SUMMARY, related=[])  # type: ignore[arg-type]
+    summary = _mk_doc("sum1", doc_type=ContentType.SUMMARY, related=[])  # type: ignore[arg-type]
     retriever = MockRetrieverQuark([summary])
     cr = CompositeRetriever(retrievers=[retriever], reranker=None, reranker_enabled=False)
     results = cr._use_summaries([summary], [summary])

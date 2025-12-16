@@ -124,9 +124,7 @@ class CompositeRetriever(Retriever):
 
         return_val = self._early_pruning(return_val)
 
-        return_val = await self._arerank_pruning(return_val, retriever_input, config)
-
-        return return_val
+        return await self._arerank_pruning(return_val, retriever_input, config)
 
     def _use_summaries(self, summary_docs: list[Document], results: list[Document]) -> list[Document]:
         """Utilize summary documents to enhance retrieval results.
@@ -152,9 +150,7 @@ class CompositeRetriever(Retriever):
             missing_related_ids: set[str] = set()
             for sdoc in summary_docs:
                 related_list: Iterable[str] = sdoc.metadata.get("related", [])
-                for rid in related_list:
-                    if rid and rid not in existing_ids:
-                        missing_related_ids.add(rid)
+                [missing_related_ids.add(rid) for rid in related_list if rid and rid not in existing_ids]
 
             if missing_related_ids:
                 # Heuristic: use the first retriever's underlying vector database for lookup.
@@ -223,7 +219,7 @@ class CompositeRetriever(Retriever):
             # If score metadata exists, use it to prune; otherwise keep ordering as-is.
             if all("score" in d.metadata for d in documents):
                 documents.sort(key=lambda d: d.metadata["score"], reverse=True)
-            documents = documents[: self._total_retrieved_k_documents]
+            return documents[: self._total_retrieved_k_documents]
         return documents
 
     async def _arerank_pruning(

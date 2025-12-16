@@ -1,4 +1,4 @@
-"""Unit tests for internal helper methods of ``CompositeRetriever``.
+"""Test internal helper methods of ``CompositeRetriever``.
 
 The goal of these tests is to verify the transformation semantics of:
  - _use_summaries
@@ -40,6 +40,10 @@ def _mk_doc(
 
 @pytest.mark.asyncio
 async def test_use_summaries_expands_and_removes_summary():
+    """Expand a summary into its related documents.
+
+    Verify that summary documents are removed and replaced by their related underlying documents.
+    """
     # Summary references an underlying doc not in initial results.
     underlying = _mk_doc("doc1", score=0.9)
     summary = _mk_doc("sum1", doc_type=ContentType.SUMMARY, related=["doc1"])  # type: ignore[arg-type]
@@ -57,6 +61,10 @@ async def test_use_summaries_expands_and_removes_summary():
 
 
 def test_use_summaries_only_summary_no_related():
+    """Drop a summary document that has no related documents.
+
+    Verify that the returned result is empty when no related ids are present.
+    """
     summary = _mk_doc("sum1", doc_type=ContentType.SUMMARY, related=[])  # type: ignore[arg-type]
     retriever = MockRetrieverQuark([summary])
     cr = CompositeRetriever(retrievers=[retriever], reranker=None, reranker_enabled=False)
@@ -66,6 +74,10 @@ def test_use_summaries_only_summary_no_related():
 
 
 def test_remove_duplicates_preserves_first_occurrence():
+    """Preserve the first occurrence when duplicate ids are present.
+
+    Verify that duplicate documents are removed while maintaining the original order.
+    """
     d1a = _mk_doc("a")
     d1b = _mk_doc("a")  # duplicate id
     d2 = _mk_doc("b")
@@ -76,6 +88,10 @@ def test_remove_duplicates_preserves_first_occurrence():
 
 
 def test_early_pruning_sorts_by_score_when_all_have_score():
+    """Sort by score and keep only the top-k documents.
+
+    Verify that documents are sorted descending by score when all documents include scores.
+    """
     docs = [_mk_doc("a", score=0.7), _mk_doc("b", score=0.9), _mk_doc("c", score=0.8)]
     retriever = MockRetrieverQuark(docs)
     cr = CompositeRetriever(
@@ -87,6 +103,10 @@ def test_early_pruning_sorts_by_score_when_all_have_score():
 
 
 def test_early_pruning_preserves_order_without_scores():
+    """Preserve input order when pruning without score metadata.
+
+    Verify that pruning keeps the original order when scores are absent.
+    """
     docs = [_mk_doc("a"), _mk_doc("b"), _mk_doc("c")]  # no scores
     retriever = MockRetrieverQuark(docs)
     cr = CompositeRetriever(
@@ -98,6 +118,10 @@ def test_early_pruning_preserves_order_without_scores():
 
 @pytest.mark.asyncio
 async def test_arerank_pruning_invokes_reranker_when_needed():
+    """Invoke the reranker when more than k documents are retrieved.
+
+    Verify that the reranker is called and that the returned list is trimmed to ``reranker_k_documents``.
+    """
     docs = [_mk_doc("a", score=0.5), _mk_doc("b", score=0.7), _mk_doc("c", score=0.9)]
     retriever = MockRetrieverQuark(docs)
     reranker = MockReranker()
@@ -116,6 +140,10 @@ async def test_arerank_pruning_invokes_reranker_when_needed():
 
 @pytest.mark.asyncio
 async def test_arerank_pruning_skips_when_not_needed():
+    """Skip reranking when the retrieved docs are already within k.
+
+    Verify that the reranker is not invoked when no pruning is required.
+    """
     docs = [_mk_doc("a", score=0.5), _mk_doc("b", score=0.7)]  # already <= k
     retriever = MockRetrieverQuark(docs)
     reranker = MockReranker()

@@ -29,6 +29,18 @@ class PageSummaryEnhancer(SummaryEnhancer):
     DOCUMENT_URL_KEY = "document_url"
     DEFAULT_PAGE_NR = 1
 
+    @staticmethod
+    def _parse_max_concurrency(config: Optional[RunnableConfig]) -> int:
+        if not config:
+            return 1
+        raw = config.get("max_concurrency")
+        if raw is None:
+            return 1
+        try:
+            return max(1, int(raw))
+        except (TypeError, ValueError):
+            return 1
+
     def _group_key(self, piece: Document) -> tuple[Any, ...]:
         document_url = piece.metadata.get(self.DOCUMENT_URL_KEY)
         page = piece.metadata.get("page", self.DEFAULT_PAGE_NR)
@@ -70,18 +82,6 @@ class PageSummaryEnhancer(SummaryEnhancer):
                 groups[key] = []
             groups[key].append(info)
         return [groups[key] for key in ordered_keys]
-
-    @staticmethod
-    def _parse_max_concurrency(config: Optional[RunnableConfig]) -> int:
-        if not config:
-            return 1
-        raw = config.get("max_concurrency")
-        if raw is None:
-            return 1
-        try:
-            return max(1, int(raw))
-        except (TypeError, ValueError):
-            return 1
 
     async def _summarize_groups(
         self,

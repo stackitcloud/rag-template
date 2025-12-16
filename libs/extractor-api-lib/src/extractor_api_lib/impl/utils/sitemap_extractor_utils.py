@@ -138,7 +138,8 @@ def _title_from_url(url: str) -> str:
     path = unquote(parsed.path or "").rstrip("/")
     if not path:
         return parsed.hostname or url
-    segment = path.split("/")[-1].replace("-", " ").replace("_", " ").strip()
+    segment = path.split("/")[-1].replace("-", " ")
+    segment = segment.replace("_", " ").strip()
     return segment or url
 
 

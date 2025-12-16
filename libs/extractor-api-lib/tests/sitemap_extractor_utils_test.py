@@ -1,6 +1,17 @@
-import pytest
+"""Unit tests for sitemap HTML parsing utilities.
 
-pytest.importorskip("bs4")
+These tests validate that the sitemap extractor helper functions correctly:
+
+- extract human-readable content from common documentation site layouts
+- derive basic metadata such as title and source URL
+
+Notes
+-----
+The underlying implementation uses BeautifulSoup. If the optional dependency isn't
+installed, these tests are skipped.
+"""
+
+import pytest
 
 from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
     astro_sitemap_metadata_parser_function,
@@ -11,7 +22,11 @@ from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
 )
 
 
+pytest.importorskip("bs4")
+
+
 def test_docusaurus_parser_extracts_main_article_text():
+    """Ensure the Docusaurus parser extracts main article content and drops navigation."""
     html = """
     <html>
       <body>
@@ -34,6 +49,7 @@ def test_docusaurus_parser_extracts_main_article_text():
 
 
 def test_docusaurus_meta_parser_sets_title_and_source():
+    """Ensure the Docusaurus metadata parser sets title from H1 and includes the source URL."""
     html = """
     <html>
       <head><title>Ignored title</title></head>
@@ -52,6 +68,7 @@ def test_docusaurus_meta_parser_sets_title_and_source():
 
 
 def test_astro_parser_prefers_starlight_article():
+    """Ensure the Astro parser prefers Starlight content and drops irrelevant elements."""
     html = """
     <html>
       <body>
@@ -73,6 +90,7 @@ def test_astro_parser_prefers_starlight_article():
 
 
 def test_astro_meta_parser_sets_title_and_source():
+    """Ensure the Astro metadata parser extracts title from the header container and source URL."""
     html = """
     <html>
       <head><title>Fallback title</title></head>
@@ -92,6 +110,7 @@ def test_astro_meta_parser_sets_title_and_source():
 
 
 def test_meta_parser_falls_back_to_title_tag():
+    """Ensure the generic metadata parser falls back to the <title> tag when no H1 exists."""
     html = """
     <html>
       <head><title>Title Tag</title></head>

@@ -56,6 +56,11 @@ class PageSummaryEnhancer(SummaryEnhancer):
         return Document(metadata=meta, page_content=summary)
 
     async def _acreate_summary(self, information: list[Document], config: Optional[RunnableConfig]) -> list[Document]:
+        grouped = self._group_information(information)
+        max_concurrency = self._parse_max_concurrency(config)
+        return await self._summarize_groups(grouped, config, max_concurrency=max_concurrency)
+
+    def _group_information(self, information: list[Document]) -> list[list[Document]]:
         ordered_keys: list[tuple[Any, ...]] = []
         groups: dict[tuple[Any, ...], list[Document]] = {}
         for info in information:
@@ -64,34 +69,45 @@ class PageSummaryEnhancer(SummaryEnhancer):
                 ordered_keys.append(key)
                 groups[key] = []
             groups[key].append(info)
+        return [groups[key] for key in ordered_keys]
 
-        grouped = [groups[key] for key in ordered_keys]
-        max_concurrency = 1
-        if config and config.get("max_concurrency") is not None:
-            try:
-                max_concurrency = max(1, int(config["max_concurrency"]))
-            except (TypeError, ValueError):
-                max_concurrency = 1
+    @staticmethod
+    def _parse_max_concurrency(config: Optional[RunnableConfig]) -> int:
+        if not config:
+            return 1
+        raw = config.get("max_concurrency")
+        if raw is None:
+            return 1
+        try:
+            return max(1, int(raw))
+        except (TypeError, ValueError):
+            return 1
 
+    async def _summarize_groups(
+        self,
+        grouped: list[list[Document]],
+        config: Optional[RunnableConfig],
+        *,
+        max_concurrency: int,
+    ) -> list[Document]:
         if max_concurrency == 1:
-            summaries = []
+            summaries: list[Document] = []
             for info_group in tqdm(grouped):
                 summaries.append(await self._asummarize_page(info_group, config))
             return summaries
 
         semaphore = asyncio.Semaphore(max_concurrency)
-        summaries: list[Document | None] = [None] * len(grouped)
+        results: list[Document | None] = [None] * len(grouped)
 
         async def _run(idx: int, info_group: list[Document]) -> tuple[int, Document]:
             async with semaphore:
                 return idx, await self._asummarize_page(info_group, config)
 
         tasks = [asyncio.create_task(_run(idx, info_group)) for idx, info_group in enumerate(grouped)]
-
         with tqdm(total=len(tasks)) as pbar:
             for task in asyncio.as_completed(tasks):
                 idx, summary = await task
-                summaries[idx] = summary
+                results[idx] = summary
                 pbar.update(1)
 
-        return [summary for summary in summaries if summary is not None]
+        return [summary for summary in results if summary is not None]

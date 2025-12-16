@@ -28,6 +28,7 @@ spec:
             - /bin/sh
             - "-c"
             - "cp -r /app/frontend/. /usr/share/nginx/html && /bin/sh /app/env.sh"
+          timeoutSeconds: 30
         securityContext:
           runAsUser: 101
           runAsNonRoot: true

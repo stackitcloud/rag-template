@@ -140,7 +140,9 @@ class SitemapExtractor(InformationExtractor):
 
         return mapping[normalized]
 
-    def _parse_sitemap_loader_parameters(self, extraction_parameters: ExtractionParameters) -> tuple[dict, Optional[str]]:
+    def _parse_sitemap_loader_parameters(
+        self, extraction_parameters: ExtractionParameters
+    ) -> tuple[dict, Optional[str]]:
         """
         Parse the extraction parameters to extract sitemap loader parameters.
 

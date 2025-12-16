@@ -1,4 +1,3 @@
-
 """Module for the LangchainSummarizer class."""
 
 import asyncio

@@ -59,6 +59,7 @@ from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
     generic_sitemap_parser_function,
 )
 
+
 class DependencyContainer(DeclarativeContainer):
     """Dependency injection container for managing application dependencies."""
 

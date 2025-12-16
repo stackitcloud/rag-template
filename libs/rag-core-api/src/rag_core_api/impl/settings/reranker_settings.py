@@ -16,10 +16,10 @@ class RerankerSettings(BaseSettings):
         Which reranker implementation to use (default "flashrank").
     k_documents : int
         The number of documents to return after reranking (default 5).
-    model : str
-        Flashrank model to use (default "ms-marco-TinyBERT-L-2-v2").
     min_relevance_score : float
-        Minimum score threshold for keeping a document after reranking (default 0.0).
+        Minimum relevance threshold to return (default 0.001).
+    enabled : bool
+        A flag indicating whether the reranker is enabled (default True).
     """
 
     class Config:
@@ -30,5 +30,5 @@ class RerankerSettings(BaseSettings):
 
     type: Literal["flashrank", "none"] = Field(default="flashrank")
     k_documents: int = Field(default=5)
-    model: str = Field(default="ms-marco-TinyBERT-L-2-v2")
-    min_relevance_score: float = Field(default=0.0)
+    min_relevance_score: float = Field(default=0.001)
+    enabled: bool = Field(default=True)

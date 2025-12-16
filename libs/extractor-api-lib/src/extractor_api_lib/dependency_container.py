@@ -65,10 +65,8 @@ class DependencyContainer(DeclarativeContainer):
 
     # Settings
     settings_s3 = S3Settings()
-    sitemap_settings = SitemapSettings()
 
-    sitemap_selector_config = Configuration()
-    sitemap_selector_config.from_dict(sitemap_settings.model_dump())
+    sitemap_selector_config = Configuration(pydantic_settings=[SitemapSettings()])
 
     sitemap_parsing_function = Selector(
         sitemap_selector_config.parser,

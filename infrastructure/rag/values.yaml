@@ -169,7 +169,8 @@ backend:
     retriever:
       RETRIEVER_THRESHOLD: 0.3
       RETRIEVER_K_DOCUMENTS: 10
-      RETRIEVER_TOTAL_K: 7
+      # Canonical global cap across all retrievers. Replaces legacy RETRIEVER_TOTAL_K / RETRIEVER_OVERALL_K_DOCUMENTS
+      RETRIEVER_TOTAL_K_DOCUMENTS: 7
       RETRIEVER_SUMMARY_THRESHOLD: 0.3
       RETRIEVER_SUMMARY_K_DOCUMENTS: 10
       RETRIEVER_TABLE_THRESHOLD: 0.3
@@ -226,6 +227,8 @@ backend:
       RERANKER_MODEL: "ms-marco-MultiBERT-L-12"
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
+      RERANKER_ENABLED: true
+      RERANKER_MODEL: "ms-marco-MultiBERT-L-12"
     chatHistory:
       CHAT_HISTORY_LIMIT: 4
       CHAT_HISTORY_REVERSE: true
@@ -419,6 +422,13 @@ extractor:
   huggingfaceCacheDir: /tmp/hf-cache
   # Directory inside the container to use as writable cache for ModelScope / OCR models
   modelscopeCacheDir: /var/modelscope
+
+  envs:
+    sitemap:
+      # Controls how HTML pages are parsed when loading from an XML sitemap.
+      # Options: "docusaurus" (default), "astro", "generic"
+      # Note: https://docs.stackit.cloud is built with Astro/Starlight -> use "astro".
+      SITEMAP_PARSER: docusaurus
 
 adminFrontend:
   name: admin-frontend

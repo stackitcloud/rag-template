@@ -61,6 +61,27 @@ class SitemapExtractor(InformationExtractor):
         """Get the mapper instance."""
         return self._mapper
 
+    @staticmethod
+    def _select_parser_functions(
+        parser_override: Optional[str],
+    ) -> tuple[Optional[callable], Optional[callable]]:
+        mapping = {
+            "docusaurus": (docusaurus_sitemap_parser_function, docusaurus_sitemap_metadata_parser_function),
+            "astro": (astro_sitemap_parser_function, astro_sitemap_metadata_parser_function),
+            "generic": (generic_sitemap_parser_function, generic_sitemap_metadata_parser_function),
+        }
+
+        if not parser_override:
+            return None, None
+
+        normalized = str(parser_override).strip().lower()
+
+        if normalized not in mapping:
+            logger.warning("Unknown sitemap_parser '%s'. Falling back to generic.", parser_override)
+            normalized = "generic"
+
+        return mapping[normalized]
+
     async def aextract_content(
         self,
         extraction_parameters: ExtractionParameters,
@@ -109,38 +130,9 @@ class SitemapExtractor(InformationExtractor):
             raise ValueError(f"Failed to load documents from Sitemap: {e}")
         return [self._mapper.map_document2informationpiece(x, extraction_parameters.document_name) for x in documents]
 
-    @staticmethod
-    def _select_parser_functions(
-        parser_override: Optional[str],
-    ) -> tuple[Optional[callable], Optional[callable]]:
-        mapping = {
-            "docusaurus": (docusaurus_sitemap_parser_function, docusaurus_sitemap_metadata_parser_function),
-            "astro": (astro_sitemap_parser_function, astro_sitemap_metadata_parser_function),
-            "generic": (generic_sitemap_parser_function, generic_sitemap_metadata_parser_function),
-        }
-
-        if not parser_override:
-            return None, None
-
-        normalized = str(parser_override).strip().lower()
-        aliases = {
-            "starlight": "astro",
-            "astrojs": "astro",
-            "default": "auto",
-            "env": "auto",
-        }
-        normalized = aliases.get(normalized, normalized)
-
-        if normalized in ("auto", ""):
-            return None, None
-
-        if normalized not in mapping:
-            logger.warning("Unknown sitemap_parser '%s'. Falling back to generic.", parser_override)
-            normalized = "generic"
-
-        return mapping[normalized]
-
-    def _parse_sitemap_loader_parameters(self, extraction_parameters: ExtractionParameters) -> tuple[dict, Optional[str]]:
+    def _parse_sitemap_loader_parameters(
+        self, extraction_parameters: ExtractionParameters
+    ) -> tuple[dict, Optional[str]]:
         """
         Parse the extraction parameters to extract sitemap loader parameters.
 

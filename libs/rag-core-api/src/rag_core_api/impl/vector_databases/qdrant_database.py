@@ -155,6 +155,30 @@ class QdrantDatabase(VectorDatabase):
             for search_result in requested[0]
         ]
 
+    def get_documents_by_ids(self, document_ids: list[str]) -> list[Document]:
+        """Batch fetch multiple documents by their IDs.
+
+        Parameters
+        ----------
+        document_ids : list[str]
+            A list of document IDs to retrieve.
+
+        Returns
+        -------
+        list[Document]
+            A list of found documents. Missing IDs are ignored.
+        """
+        if not document_ids:
+            return []
+        # Scroll with OR semantics: build multiple FieldConditions
+        # Qdrant Python client doesn't support direct OR via 'should' in Filter shortcuts,
+        # but we can perform multiple scrolls as a fallback if needed.
+        # For efficiency, attempt a single scroll per id chunk (keep it simple for now).
+        results: list[Document] = []
+        for doc_id in document_ids:
+            results.extend(self.get_specific_document(doc_id))
+        return results
+
     def upload(self, documents: list[Document]) -> None:
         """
         Save the given documents to the Qdrant database.

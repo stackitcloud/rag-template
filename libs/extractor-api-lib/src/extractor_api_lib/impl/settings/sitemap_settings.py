@@ -16,4 +16,3 @@ class SitemapSettings(BaseSettings):
         case_sensitive = False
 
     parser: Literal["docusaurus", "astro", "generic"] = Field(default="docusaurus")
-

@@ -331,8 +331,7 @@ For sitemap sources, additional parameters can be provided, e.g.:
 
 Technically, all parameters of the `SitemapLoader` from LangChain can be provided.
 
-The HTML parsing logic can be tuned via the `SITEMAP_PARSER` environment variable (default: `docusaurus`; options: `docusaurus`, `astro`, `generic`). For Helm deployments, set `extractor.envs.sitemap.SITEMAP_PARSER` in `infrastructure/rag/values.yaml`. For `https://docs.stackit.cloud` (Astro/Starlight), use `SITEMAP_PARSER=astro`. You can also override the parser per upload by passing a `sitemap_parser` key/value pair (same options) in the `/upload_source` request (available as a dropdown in the admin frontend).
-
+The HTML parsing logic can be tuned via the `SITEMAP_PARSER` environment variable (default: `docusaurus`; options: `docusaurus`, `astro`, `generic`). For Helm deployments, set `extractor.envs.sitemap.SITEMAP_PARSER` in `infrastructure/rag/values.yaml`. You can also override the parser per upload by passing a `sitemap_parser` key/value pair (same options) in the `/upload_source` request (available as a dropdown in the admin frontend).
 
 ### 3.3 Replaceable parts
 

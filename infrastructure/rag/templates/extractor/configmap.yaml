@@ -6,4 +6,3 @@ data:
   {{- range $key, $value := .Values.extractor.envs.sitemap }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
-

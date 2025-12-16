@@ -55,4 +55,3 @@ async def test_langchain_summarizer_respects_max_concurrency_limit():
     await summarizer.ainvoke("input", config={"max_concurrency": 2})
 
     assert summarizer.max_in_flight <= 2
-

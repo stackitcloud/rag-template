@@ -117,9 +117,36 @@ async def test_page_summary_enhancer_respects_max_concurrency_one():
     enhancer = PageSummaryEnhancer(summarizer)  # type: ignore[arg-type]
 
     docs = [
-        Document(page_content="page-a chunk", metadata={"id": "a1", "related": [], "type": ContentType.TEXT.value, "page": "A", "document_url": "https://example.com/a"}),
-        Document(page_content="page-b chunk", metadata={"id": "b1", "related": [], "type": ContentType.TEXT.value, "page": "B", "document_url": "https://example.com/b"}),
-        Document(page_content="page-c chunk", metadata={"id": "c1", "related": [], "type": ContentType.TEXT.value, "page": "C", "document_url": "https://example.com/c"}),
+        Document(
+            page_content="page-a chunk",
+            metadata={
+                "id": "a1",
+                "related": [],
+                "type": ContentType.TEXT.value,
+                "page": "A",
+                "document_url": "https://example.com/a",
+            },
+        ),
+        Document(
+            page_content="page-b chunk",
+            metadata={
+                "id": "b1",
+                "related": [],
+                "type": ContentType.TEXT.value,
+                "page": "B",
+                "document_url": "https://example.com/b",
+            },
+        ),
+        Document(
+            page_content="page-c chunk",
+            metadata={
+                "id": "c1",
+                "related": [],
+                "type": ContentType.TEXT.value,
+                "page": "C",
+                "document_url": "https://example.com/c",
+            },
+        ),
     ]
 
     await enhancer.ainvoke(docs, config={"max_concurrency": 1})

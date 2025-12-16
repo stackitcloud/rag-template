@@ -21,7 +21,7 @@
         "test": {
             "executor": "@nx/vite:test",
             "options": {
-                "configFile": "libs/shared/utils/vite.config.mts"
+                "configFile": "libs/shared/utils/vite.config.ts"
             }
         }
     },

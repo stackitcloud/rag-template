@@ -1,7 +1,13 @@
 """Module for dependency injection container for managing application dependencies."""
 
 from dependency_injector.containers import DeclarativeContainer
-from dependency_injector.providers import Factory, List, Singleton  # noqa: WOT001
+from dependency_injector.providers import (  # noqa: WOT001
+    Configuration,
+    List,
+    Object,
+    Selector,
+    Singleton,
+)
 
 from extractor_api_lib.impl.api_endpoints.general_file_extractor import (
     GeneralFileExtractor,
@@ -41,11 +47,16 @@ from extractor_api_lib.impl.mapper.langchain_document2information_piece import (
 from extractor_api_lib.impl.mapper.sitemap_document2information_piece import (
     SitemapLangchainDocument2InformationPiece,
 )
+from extractor_api_lib.impl.settings.sitemap_settings import SitemapSettings
 from extractor_api_lib.impl.settings.s3_settings import S3Settings
 from extractor_api_lib.impl.table_converter.dataframe2markdown import DataFrame2Markdown
 from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
-    custom_sitemap_metadata_parser_function,
-    custom_sitemap_parser_function,
+    astro_sitemap_metadata_parser_function,
+    astro_sitemap_parser_function,
+    docusaurus_sitemap_metadata_parser_function,
+    docusaurus_sitemap_parser_function,
+    generic_sitemap_metadata_parser_function,
+    generic_sitemap_parser_function,
 )
 
 
@@ -55,8 +66,20 @@ class DependencyContainer(DeclarativeContainer):
     # Settings
     settings_s3 = S3Settings()
 
-    sitemap_parsing_function = Factory(lambda: custom_sitemap_parser_function)
-    sitemap_meta_function = Factory(lambda: custom_sitemap_metadata_parser_function)
+    sitemap_selector_config = Configuration(pydantic_settings=[SitemapSettings()])
+
+    sitemap_parsing_function = Selector(
+        sitemap_selector_config.parser,
+        docusaurus=Object(docusaurus_sitemap_parser_function),
+        astro=Object(astro_sitemap_parser_function),
+        generic=Object(generic_sitemap_parser_function),
+    )
+    sitemap_meta_function = Selector(
+        sitemap_selector_config.parser,
+        docusaurus=Object(docusaurus_sitemap_metadata_parser_function),
+        astro=Object(astro_sitemap_metadata_parser_function),
+        generic=Object(generic_sitemap_metadata_parser_function),
+    )
 
     database_converter = Singleton(DataFrame2Markdown)
     file_service = Singleton(S3Service, settings_s3)

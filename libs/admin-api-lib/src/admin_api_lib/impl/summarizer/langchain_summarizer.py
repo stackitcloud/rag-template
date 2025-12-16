@@ -44,6 +44,24 @@ class LangchainSummarizer(Summarizer):
         self._semaphore = semaphore
         self._retry_decorator_settings = create_retry_decorator_settings(summarizer_settings, retry_decorator_settings)
 
+    @staticmethod
+    def _parse_max_concurrency(config: RunnableConfig) -> Optional[int]:
+        """Parse max concurrency from a RunnableConfig.
+
+        Returns
+        -------
+        Optional[int]
+            An integer >= 1 if configured and valid, otherwise None.
+        """
+        max_concurrency = config.get("max_concurrency")
+        if max_concurrency is None:
+            return None
+
+        try:
+            return max(1, int(max_concurrency))
+        except (TypeError, ValueError):
+            return None
+
     async def ainvoke(self, query: SummarizerInput, config: Optional[RunnableConfig] = None) -> SummarizerOutput:
         """
         Asynchronously invokes the summarization process on the given query.
@@ -77,9 +95,8 @@ class LangchainSummarizer(Summarizer):
         langchain_documents = self._chunker.split_documents([document])
         logger.debug("Summarizing %d chunk(s)...", len(langchain_documents))
 
-        # Fan out with concurrency, bounded by your semaphore inside _summarize_chunk
-        tasks = [asyncio.create_task(self._summarize_chunk(doc.page_content, config)) for doc in langchain_documents]
-        outputs = await asyncio.gather(*tasks)
+        max_concurrency = self._parse_max_concurrency(config)
+        outputs = await self._summarize_documents(langchain_documents, config, max_concurrency=max_concurrency)
 
         if len(outputs) == 1:
             return outputs[0]
@@ -92,6 +109,34 @@ class LangchainSummarizer(Summarizer):
             len(merged),
         )
         return await self._summarize_chunk(merged, config)
+
+    async def _summarize_documents(
+        self,
+        documents: list[Document],
+        config: RunnableConfig,
+        *,
+        max_concurrency: Optional[int],
+    ) -> list[SummarizerOutput]:
+        """Summarize a set of already-chunked documents.
+
+        Notes
+        -----
+        This optionally limits task fan-out using a per-call semaphore (max_concurrency).
+        The actual LLM call concurrency is always bounded by the instance semaphore held
+        inside `_summarize_chunk`.
+        """
+        if max_concurrency == 1:
+            return [await self._summarize_chunk(doc.page_content, config) for doc in documents]
+
+        limiter: asyncio.Semaphore | None = asyncio.Semaphore(max_concurrency) if max_concurrency is not None else None
+
+        async def _run(doc: Document) -> SummarizerOutput:
+            if limiter is None:
+                return await self._summarize_chunk(doc.page_content, config)
+            async with limiter:
+                return await self._summarize_chunk(doc.page_content, config)
+
+        return await asyncio.gather(*(_run(doc) for doc in documents))
 
     def _create_chain(self) -> Runnable:
         return self._langfuse_manager.get_base_prompt(self.__class__.__name__) | self._langfuse_manager.get_base_llm(

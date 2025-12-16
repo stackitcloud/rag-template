@@ -257,6 +257,8 @@ frontend:
 
 The following values should be adjusted for the deployment:
 
+> ⓘ INFO: If the backend pod gets `OOMKilled` (exit code `137`) on local k3d/Tilt setups, reduce `backend.workers` (each uvicorn worker is a separate Python process), disable reranking `RERANKER_ENABLED: false` or pin a smaller Flashrank model (e.g. `RERANKER_MODEL: ms-marco-TinyBERT-L-2-v2`), and/or increase the memory available to Docker/k3d.
+
 ```yaml
 backend:
   secrets:

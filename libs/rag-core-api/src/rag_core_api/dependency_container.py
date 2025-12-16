@@ -130,7 +130,9 @@ class DependencyContainer(DeclarativeContainer):
         vectorstore=vectorstore,
     )
 
-    flashrank_reranker = Singleton(FlashrankRerank, top_n=reranker_settings.k_documents)
+    flashrank_reranker = Singleton(
+        FlashrankRerank, top_n=reranker_settings.k_documents, score_threshold=reranker_settings.min_relevance_score
+    )
     reranker = Singleton(FlashrankReranker, flashrank_reranker)
 
     information_pieces_uploader = Singleton(DefaultInformationPiecesUploader, vector_database)
@@ -170,6 +172,9 @@ class DependencyContainer(DeclarativeContainer):
         CompositeRetriever,
         List(image_retriever, table_retriever, text_retriever, summary_retriever),
         reranker,
+        reranker_settings.enabled,
+        retriever_settings.total_k_documents,
+        reranker_settings.k_documents,
     )
 
     information_piece_mapper = Singleton(InformationPieceMapper)

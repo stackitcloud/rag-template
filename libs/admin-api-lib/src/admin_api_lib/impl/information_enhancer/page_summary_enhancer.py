@@ -46,9 +46,7 @@ class PageSummaryEnhancer(SummaryEnhancer):
         page = piece.metadata.get("page", self.DEFAULT_PAGE_NR)
 
         # For paged documents (PDF/docling/etc.) keep per-page summaries even if a shared document URL exists.
-        if isinstance(page, int):
-            return ("page_number", document_url, page)
-        elif isinstance(page, str) and page!="Unknown Title":
+        if isinstance(page, int) or (isinstance(page, str) and page != "Unknown Title"):
             return ("page_number", document_url, page)
 
         # For sources like sitemaps/confluence, `page` can be a non-unique title (or missing),

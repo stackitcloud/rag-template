@@ -3,12 +3,11 @@
 import logging
 from typing import Optional
 
-from langchain.prompts import ChatPromptTemplate
 from langchain_core.language_models.llms import LLM
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.model import TextPromptClient
-from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +81,7 @@ class LangfuseManager:
             langfuse_prompt = self._langfuse.get_prompt(base_prompt_name, type="chat")
             return langfuse_prompt
         except NotFoundError:
-            logger.info(f"Prompt '{base_prompt_name}' not found in Langfuse. Creating new chat prompt.")
+            logger.info("Prompt '%s' not found in Langfuse. Creating new chat prompt.", base_prompt_name)
 
             local_prompt = self._managed_prompts[base_prompt_name]
             chat_messages = self._convert_chat_prompt_to_langfuse_format(local_prompt)
@@ -103,11 +102,8 @@ class LangfuseManager:
             langfuse_prompt = self._langfuse.get_prompt(base_prompt_name, type="chat")
             return langfuse_prompt
 
-        except Exception as error:
-            logger.error(
-                f"Error occurred while getting prompt template from langfuse. Error: {error}",
-                extra={"error": error},
-            )
+        except Exception:
+            logger.exception("Error occurred while getting prompt template from langfuse")
             return None
 
     def get_base_llm(self, name: str) -> LLM:
@@ -166,7 +162,7 @@ class LangfuseManager:
                     role = message[0]
                     content = message[1] if len(message) > 1 else ""
                 else:
-                    logger.warning(f"Unexpected message format: {message}")
+                    logger.warning("Unexpected message format: %s", message)
                     continue
 
                 if role == "system":

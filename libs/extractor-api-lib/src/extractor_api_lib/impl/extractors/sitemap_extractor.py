@@ -42,6 +42,7 @@ class SitemapExtractor(InformationExtractor):
 
     @property
     def extractor_type(self) -> ExtractorTypes:
+        """Get the type of the extractor."""
         return ExtractorTypes.SITEMAP
 
     @property

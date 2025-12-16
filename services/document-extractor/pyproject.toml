@@ -12,6 +12,10 @@ docstring-quotes = '"""'
 multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
+per-file-ignores = """
+  ./tests/*: S101,
+  **/__init__.py: D104,
+"""
 
 [tool.black]
 line-length = 120
@@ -43,21 +47,28 @@ skip_gitignore = true
 max-line-length = 120
 
 [tool.poetry]
-name = "pdfextractor_server"
-version = "0.0.0"
-description = "Extracts the content of pdf  documents."
-authors = ["STACKIT Data and AI Consulting <data-ai-consulting@stackit.cloud>"]
+name = "extractor_server"
+version = "v3.4.0"
+description = "This example demonstrates the usage of the extractor-api-lib."
+authors = [
+    "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
+]
+maintainers = [
+    "Andreas Klos <andreas.klos@stackit.cloud>",
+]
 readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = ">=3.13,<3.14"
 extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.2.0"
 pytest = "^8.0.1"
 black = "^25.1.0"
-flake8-black = "^0.3.6"
+flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 coverage = "^7.8.0"
 flake8-quotes = "^3.4.0"
@@ -77,8 +88,8 @@ flake8-simplify = "^0.22.0"
 flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
-# flake8-logging-format = "^2024.24.12"
-# flake8-docstrings = "^1.7.0"
+flake8-logging-format = "^2024.24.12"
+flake8-docstrings = "^1.7.0"
 
 [tool.poetry.group.tests.dependencies]
 httpx = "^0.28.1"
@@ -86,3 +97,8 @@ httpx = "^0.28.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"

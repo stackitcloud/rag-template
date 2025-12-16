@@ -33,6 +33,7 @@ class PageSummaryEnhancer(SummaryEnhancer):
         meta = {key: value for key, value in page_pieces[0].metadata.items() if key != self.BASE64_IMAGE_KEY}
         meta["id"] = sha256(str.encode(full_page_content)).hexdigest()
         meta["related"] = meta["related"] + [piece.metadata["id"] for piece in page_pieces]
+        meta["related"] = list(set(meta["related"]))
         meta["type"] = ContentType.SUMMARY.value
 
         return Document(metadata=meta, page_content=summary)

@@ -52,10 +52,6 @@
 {{- printf "%s-langfuse-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "configmap.pdfextractorName" -}}
-{{- printf "%s-pdfextractor-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "configmap.adminBackendName" -}}
 {{- printf "%s-admin-backend-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -74,11 +70,21 @@
 
 # image
 {{- define "adminBackend.fullImageName" -}}
-{{- printf "%s:%s" .Values.adminBackend.image.repository .Values.adminBackend.image.tag | trimSuffix ":" }}
+{{- $tag := default .Chart.AppVersion .Values.adminBackend.image.tag -}}
+{{- printf "%s:%s" .Values.adminBackend.image.repository $tag | trimSuffix ":" }}
 {{- end -}}
 
 {{- define "extractor.fullImageName" -}}
-{{- printf "%s:%s" .Values.extractor.image.repository .Values.extractor.image.tag | trimSuffix ":" }}
+{{- $tag := default .Chart.AppVersion .Values.extractor.image.tag -}}
+{{- printf "%s:%s" .Values.extractor.image.repository $tag | trimSuffix ":" }}
+{{- end -}}
+
+{{- define "extractor.huggingfaceCacheDir" -}}
+{{- default "/tmp/hf-cache" .Values.extractor.huggingfaceCacheDir -}}
+{{- end -}}
+
+{{- define "extractor.modelscopeCacheDir" -}}
+{{- default "/var/modelscope" .Values.extractor.modelscopeCacheDir -}}
 {{- end -}}
 
 # ingress

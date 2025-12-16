@@ -1,7 +1,8 @@
 {{- define "adminFrontend.fullImageName" -}}
 {{- if .Values.adminFrontend.image -}}
     {{- if .Values.adminFrontend.image.repository -}}
-        {{- printf "%s:%s" .Values.adminFrontend.image.repository .Values.adminFrontend.image.tag | trimSuffix ":" }}
+        {{- $tag := default .Chart.AppVersion .Values.adminFrontend.image.tag -}}
+        {{- printf "%s:%s" .Values.adminFrontend.image.repository $tag | trimSuffix ":" }}
     {{- else -}}
         {{ required "A valid .Values.adminFrontend.image.repository entry required!" . }}
     {{- end -}}

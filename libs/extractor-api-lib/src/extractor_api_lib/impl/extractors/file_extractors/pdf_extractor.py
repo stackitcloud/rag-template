@@ -17,7 +17,6 @@ from langdetect import detect
 import camelot
 
 
-from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
@@ -53,7 +52,6 @@ class PDFExtractor(InformationFileExtractor):
     def __init__(
         self,
         file_service: FileService,
-        pdf_extractor_settings: PDFExtractorSettings,
         dataframe_converter: DataframeConverter,
     ):
         """Initialize the PDFExtractor.
@@ -62,14 +60,11 @@ class PDFExtractor(InformationFileExtractor):
         ----------
         file_service : FileService
             Handler for downloading the file to extract content from and upload results to if required.
-        pdf_extractor_settings : PDFExtractorSettings
-            Settings for the pdf extractor.
         dataframe_converter: DataframeConverter
             Converter for dataframe tables to a search and saveable format.
         """
         super().__init__(file_service=file_service)
         self._dataframe_converter = dataframe_converter
-        self._settings = pdf_extractor_settings
         self.old_image_id = None
         self._lang_map = {
             "en": "eng",
@@ -154,8 +149,8 @@ class PDFExtractor(InformationFileExtractor):
                     )
                     pdf_elements += new_pdf_elements
 
-        logger.info(f"Extraction completed. Found {len(pdf_elements)} information pieces.")
-        return pdf_elements
+            logger.info("Extraction completed. Found %d information pieces.", len(pdf_elements))
+            return pdf_elements
 
     def _is_text_based(self, page: Page) -> bool:
         """Classify whether a page is text-based, scanned.
@@ -200,8 +195,8 @@ class PDFExtractor(InformationFileExtractor):
                 table_df = pd.DataFrame(table_data)
                 try:
                     converted_table = self._dataframe_converter.convert(table_df)
-                except TypeError as e:
-                    logger.error(f"Error while converting table to string: {e}")
+                except TypeError:
+                    logger.exception("Error while converting table to string")
                     continue
                 if not converted_table.strip():
                     continue
@@ -213,10 +208,13 @@ class PDFExtractor(InformationFileExtractor):
                         converted_table,
                         ContentType.TABLE,
                         information_id=hash_datetime(),
+                        additional_meta={
+                            "origin_extractor": "custom_pdf_extractor",
+                        },
                     )
                 )
-        except Exception as e:
-            logger.warning(f"Failed to find tables on page {page_index}: {e}")
+        except Exception:
+            logger.warning("Failed to find tables on page %d", page_index, exc_info=True)
 
         return table_elements
 
@@ -318,22 +316,23 @@ class PDFExtractor(InformationFileExtractor):
                                         "table_method": "camelot",
                                         "accuracy": table.accuracy,
                                         "table_index": i,
+                                        "origin_extractor": "custom_pdf_extractor",
                                     },
                                 )
                             )
-                    except Exception as e:
-                        logger.warning(f"Failed to convert Camelot table {i + 1}: {e}")
+                    except Exception:
+                        logger.warning("Failed to convert Camelot table %d", i + 1, exc_info=True)
 
-        except Exception as e:
-            logger.debug(f"Camelot table extraction failed for page {page_index}: {e}")
+        except Exception:
+            logger.debug("Camelot table extraction failed for page %d", page_index, exc_info=True)
 
         return table_elements
 
     def _extract_text_from_text_page(self, page: Page) -> str:
         try:
             return page.extract_text() or ""
-        except Exception as e:
-            logger.warning(f"Failed to extract text with pdfplumber: {e}")
+        except Exception:
+            logger.warning("Failed to extract text with pdfplumber.", exc_info=True)
             return ""
 
     def _extract_content_from_page(
@@ -450,6 +449,9 @@ class PDFExtractor(InformationFileExtractor):
                         full_content,
                         ContentType.TEXT,
                         information_id=hash_datetime(),
+                        additional_meta={
+                            "origin_extractor": "custom_pdf_extractor",
+                        },
                     )
                 )
 

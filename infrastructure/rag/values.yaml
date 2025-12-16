@@ -75,7 +75,7 @@ backend:
     image:
       repository: ghcr.io/stackitcloud/rag-template/mcp-server
       pullPolicy: Always
-      tag: "v2.2.2"
+      tag: ""
 
   name: backend
   replicaCount: 1
@@ -83,7 +83,7 @@ backend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/rag-backend
     pullPolicy: Always
-    tag: "v2.2.2"
+    tag: ""
 
   command:
   - "poetry"
@@ -131,6 +131,7 @@ backend:
   service:
     type: ClusterIP
     port: 8080
+    annotations: {}
 
   pythonPathEnv:
     PYTHONPATH: src
@@ -198,6 +199,14 @@ backend:
     stackitEmbedder:
       STACKIT_EMBEDDER_MODEL: "intfloat/e5-mistral-7b-instruct"
       STACKIT_EMBEDDER_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
+      # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
+      STACKIT_EMBEDDER_MAX_RETRIES: "5"
+      STACKIT_EMBEDDER_RETRY_BASE_DELAY: "0.5"
+      STACKIT_EMBEDDER_RETRY_MAX_DELAY: "600"
+      STACKIT_EMBEDDER_BACKOFF_FACTOR: "2"
+      STACKIT_EMBEDDER_ATTEMPT_CAP: "6"
+      STACKIT_EMBEDDER_JITTER_MIN: "0.05"
+      STACKIT_EMBEDDER_JITTER_MAX: "0.25"
     ollama:
       OLLAMA_MODEL: "llama3.2:3b-instruct-fp16"
       OLLAMA_BASE_URL: "http://rag-ollama:11434"
@@ -223,7 +232,7 @@ frontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/frontend
     pullPolicy: Always
-    tag: "v2.2.2"
+    tag: ""
 
   service:
     type: ClusterIP
@@ -258,7 +267,7 @@ adminBackend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-backend
     pullPolicy: Always
-    tag: "v2.2.2"
+    tag: ""
 
   command:
   - "poetry"
@@ -321,11 +330,27 @@ adminBackend:
     summarizer:
       SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
       SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
+      # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
+      SUMMARIZER_MAX_RETRIES: "5"
+      SUMMARIZER_RETRY_BASE_DELAY: "0.5"
+      SUMMARIZER_RETRY_MAX_DELAY: "600"
+      SUMMARIZER_BACKOFF_FACTOR: "2"
+      SUMMARIZER_ATTEMPT_CAP: "6"
+      SUMMARIZER_JITTER_MIN: "0.05"
+      SUMMARIZER_JITTER_MAX: "0.25"
     ragapi:
       RAG_API_HOST: "http://backend:8080"
     chunker:
+      # Select which chunker implementation to use. Supported values: "semantic", "recursive"
+      # Defaults to "semantic" which leverages sentence-aware rebalancing.
+      CHUNKER_CLASS_TYPE_CHUNKER_TYPE: "recursive"
       CHUNKER_MAX_SIZE: 1000
-      CHUNKER_OVERLAP: 300
+      CHUNKER_OVERLAP: 100
+      # The following settings for the Chunker are only used when CHUNKER_CLASS_TYPE_CHUNKER_TYPE is set to "semantic".
+      CHUNKER_BREAKPOINT_THRESHOLD_TYPE: "percentile"
+      CHUNKER_BREAKPOINT_THRESHOLD_AMOUNT: 95
+      CHUNKER_BUFFER_SIZE: 1
+      CHUNKER_MIN_SIZE: 200
     keyValueStore:
       USECASE_KEYVALUE_PORT: 6379
       USECASE_KEYVALUE_HOST: "rag-keydb"
@@ -338,7 +363,7 @@ extractor:
   image:
     repository: ghcr.io/stackitcloud/rag-template/document-extractor
     pullPolicy: Always
-    tag: "v2.2.2"
+    tag: ""
 
   command:
   - "poetry"
@@ -379,6 +404,9 @@ extractor:
 
   pythonPathEnv:
     PYTHONPATH: src
+  huggingfaceCacheDir: /tmp/hf-cache
+  # Directory inside the container to use as writable cache for ModelScope / OCR models
+  modelscopeCacheDir: /var/modelscope
 
 adminFrontend:
   name: admin-frontend
@@ -386,7 +414,7 @@ adminFrontend:
   image:
     repository: ghcr.io/stackitcloud/rag-template/admin-frontend
     pullPolicy: Always
-    tag: "v2.2.2"
+    tag: ""
 
   service:
     type: ClusterIP
@@ -442,12 +470,17 @@ shared:
 
 
   envs:
-    pdfExtractor:
-      PDF_EXTRACTOR_DIAGRAMS_FOLDER_NAME: "connection_diagrams"
-      PDF_EXTRACTOR_FOOTER_HEIGHT: 155
     s3:
       S3_ENDPOINT: http://rag-minio:9000
       S3_BUCKET: documents
+    retryDecorator:
+      RETRY_DECORATOR_MAX_RETRIES: "5"
+      RETRY_DECORATOR_RETRY_BASE_DELAY: "0.5"
+      RETRY_DECORATOR_RETRY_MAX_DELAY: "600"
+      RETRY_DECORATOR_BACKOFF_FACTOR: "2"
+      RETRY_DECORATOR_ATTEMPT_CAP: "6"
+      RETRY_DECORATOR_JITTER_MIN: "0.05"
+      RETRY_DECORATOR_JITTER_MAX: "0.25"
     usecase:
 
 
@@ -467,14 +500,14 @@ langfuse:
     web:
       image:
         repository: langfuse/langfuse
-        tag: "3.106.3"
+        tag: "3.115.0"
         pullPolicy: Always
 
     # Worker deployment configuration
     worker:
       image:
         repository: langfuse/langfuse-worker
-        tag: "3.106.3"
+        tag: "3.115.0"
         pullPolicy: Always
       port: 3030
 

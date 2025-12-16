@@ -13,7 +13,6 @@ import pdfplumber
 from pdf2image import convert_from_path
 
 from extractor_api_lib.impl.extractors.file_extractors.pdf_extractor import PDFExtractor
-from extractor_api_lib.impl.settings.pdf_extractor_settings import PDFExtractorSettings
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
@@ -26,11 +25,6 @@ class TestPDFExtractor:
     """Test class for PDFExtractor."""
 
     @pytest.fixture
-    def mock_pdf_extractor_settings(self):
-        """Create mock PDF extractor settings."""
-        return MagicMock(spec=PDFExtractorSettings)
-
-    @pytest.fixture
     def mock_dataframe_converter(self):
         """Create a mock dataframe converter."""
         converter = MagicMock(spec=DataframeConverter)
@@ -38,11 +32,10 @@ class TestPDFExtractor:
         return converter
 
     @pytest.fixture
-    def pdf_extractor(self, mock_file_service, mock_pdf_extractor_settings, mock_dataframe_converter):
+    def pdf_extractor(self, mock_file_service, mock_dataframe_converter):
         """Create a PDFExtractor instance for testing."""
         return PDFExtractor(
             file_service=mock_file_service,
-            pdf_extractor_settings=mock_pdf_extractor_settings,
             dataframe_converter=mock_dataframe_converter,
         )
 
@@ -292,7 +285,6 @@ This subsection covers data collection procedures.
     @pytest.mark.integration
     def test_extract_text_from_scanned_page(self, pdf_extractor, test_pdf_files):
         """Test text extraction from scanned pages using OCR with real PDF."""
-
         # Use the actual scanned test PDF
         scanned_pdf_path = test_pdf_files["scanned"]
 
@@ -551,8 +543,8 @@ More content here."""
             text_count = sum(1 for elem in result if elem.type == ContentType.TEXT)
             table_count = sum(1 for elem in result if elem.type == ContentType.TABLE)
 
-            logger.info(f"  Text elements: {text_count}")
-            logger.info(f"  Table elements: {table_count}")
+            logger.info("  Text elements: %d", text_count)
+            logger.info("  Table elements: %d", table_count)
 
             # Verify metadata completeness
             for i, element in enumerate(result):

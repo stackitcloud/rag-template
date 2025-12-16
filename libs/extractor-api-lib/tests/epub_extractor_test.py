@@ -19,6 +19,7 @@ class TestEpubExtractor:
 
     @pytest.fixture
     def mapper(self) -> LangchainDocument2InformationPiece:
+        """Create a LangchainDocument2InformationPiece instance for testing."""
         return LangchainDocument2InformationPiece()
 
     @pytest.fixture
@@ -38,6 +39,7 @@ class TestEpubExtractor:
 
     @pytest.mark.asyncio
     async def test_extract_content_success(self, epub_extractor):
+        """Test successful content extraction from an EPUB file."""
         page_content = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam"
 
         test_data_dir = Path(__file__).parent / "test_data"

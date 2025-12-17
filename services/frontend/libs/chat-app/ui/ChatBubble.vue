@@ -13,10 +13,12 @@ const isCopied = ref(false);
 let copyTimeoutId: number | undefined;
 
 const copyMessage = async () => {
-  const text = messageRef.value?.innerText ?? "";
-  if (!text.trim()) return;
+  const rawText = props.rawText ?? "";
+  const renderedText = messageRef.value?.innerText ?? "";
+  const textToCopy = rawText || renderedText;
+  if (!textToCopy.trim()) return;
 
-  const ok = await copyToClipboard(text);
+  const ok = await copyToClipboard(textToCopy);
   if (!ok) return;
 
   isCopied.value = true;
@@ -111,8 +113,8 @@ const revealSource = async (anchorId: string) => {
           <button
             type="button"
             class="chat-bubble-copy-button shrink-0"
-            :title="isCopied ? 'Copied!' : 'Copy to clipboard'"
-            :aria-label="isCopied ? 'Copied' : 'Copy message to clipboard'"
+            :title="isCopied ? 'Copied!' : 'Copy markdown to clipboard'"
+            :aria-label="isCopied ? 'Copied' : 'Copy markdown message to clipboard'"
             @click="copyMessage"
           >
             <OnyxIcon :icon="isCopied ? iconCheck : iconCopy" :size="16" />

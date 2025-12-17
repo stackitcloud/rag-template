@@ -13,7 +13,7 @@ const isCopied = ref(false);
 let copyTimeoutId: number | undefined;
 
 const copyMessage = async () => {
-  const text = messageRef.value?.innerText ?? "";
+  const text = props.rawText ?? messageRef.value?.innerText ?? "";
   if (!text.trim()) return;
 
   const ok = await copyToClipboard(text);

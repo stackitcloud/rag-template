@@ -1,7 +1,4 @@
-import { marked } from 'marked';
-import { newUid } from "./uuid.util";
 import { iconCheck, iconCopy } from "@sit-onyx/icons";
-import { COPY_FEEDBACK_DURATION_MS, copyToClipboard } from "./clipboard.utils";
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import diff from "highlight.js/lib/languages/diff";
@@ -12,6 +9,9 @@ import sql from "highlight.js/lib/languages/sql";
 import typescript from "highlight.js/lib/languages/typescript";
 import xml from "highlight.js/lib/languages/xml";
 import yaml from "highlight.js/lib/languages/yaml";
+import { marked } from 'marked';
+import { COPY_FEEDBACK_DURATION_MS, copyToClipboard } from "./clipboard.utils";
+import { newUid } from "./uuid.util";
 
 const escapeHtml = (value: string): string =>
     value

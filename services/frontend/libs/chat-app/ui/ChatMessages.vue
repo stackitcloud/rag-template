@@ -30,6 +30,7 @@ const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
   const mapped: ChatBubbleModel = {
     id: message.id,
     text: message.text,
+    rawText: message.rawText,
     name,
     backgroundColor,
     anchorIds,
@@ -42,6 +43,7 @@ const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
 
   if (message.hasError) {
     mapped.text = t("chat.error.requestError");
+    mapped.rawText = mapped.text;
     mapped.textColor = "text-error";
   }
 
@@ -74,6 +76,7 @@ onUpdated(async () => {
         :key="message.id"
         :id="message.id"
         :text="message.text"
+        :rawText="message.rawText"
         :time="message.time"
         :avatarSrc="message.avatarSrc"
         :name="message.name"

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { iconCircleInformation, iconCloudArrowUp, iconGlobe, iconX } from '@sit-onyx/icons';
 import { OnyxIcon } from '@shared/ui';
 import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
+import { iconCircleInformation, iconCloudArrowUp, iconGlobe, iconX } from '@sit-onyx/icons';
 import { computed, ref } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useDocumentsStore } from '../data-access/+state/documents.store';

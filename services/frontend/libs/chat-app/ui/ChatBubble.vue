@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ChatBubbleModel } from "../models/chat-bubble.model";
-import { iconCheck, iconCopy, iconFile } from "@sit-onyx/icons";
 import { OnyxIcon } from "@shared/ui";
+import { COPY_FEEDBACK_DURATION_MS, copyToClipboard } from "@shared/utils";
+import { iconCheck, iconCopy, iconFile } from "@sit-onyx/icons";
 import { nextTick, ref } from "vue";
 import { useChatStore } from "../data-access/+state/chat.store";
-import { COPY_FEEDBACK_DURATION_MS, copyToClipboard } from "@shared/utils";
+import { ChatBubbleModel } from "../models/chat-bubble.model";
 
 const props = defineProps<ChatBubbleModel>();
 const chatStore = useChatStore();
@@ -13,7 +13,7 @@ const isCopied = ref(false);
 let copyTimeoutId: number | undefined;
 
 const copyMessage = async () => {
-  const text = props.rawText ?? messageRef.value?.innerText ?? "";
+  const text = messageRef.value?.innerText ?? "";
   if (!text.trim()) return;
 
   const ok = await copyToClipboard(text);
@@ -24,8 +24,9 @@ const copyMessage = async () => {
   copyTimeoutId = window.setTimeout(() => {
     isCopied.value = false;
     copyTimeoutId = undefined;
-  }, COPY_FEEDBACK_DURATION_MS);
-		};
+  },
+  COPY_FEEDBACK_DURATION_MS);
+};
 
 const scrollReveal = (anchorId: string) => {
   const item = document.getElementById(anchorId);

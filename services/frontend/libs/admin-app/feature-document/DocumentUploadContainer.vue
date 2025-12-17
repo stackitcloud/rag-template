@@ -27,24 +27,24 @@ const confluenceUrl = ref('');
 const maxPages = ref<number>();
 const confluenceCql = ref('');
 
-	// sitemap configuration refs
-	const sitemapName = ref('');
-	const sitemapWebPath = ref('');
-	const sitemapFilterUrls = ref('');
-	const sitemapHeaderTemplate = ref('');
-	const sitemapParser = ref<'docusaurus' | 'astro' | 'generic' | undefined>(undefined);
+  // sitemap configuration refs
+  const sitemapName = ref('');
+  const sitemapWebPath = ref('');
+  const sitemapFilterUrls = ref('');
+  const sitemapHeaderTemplate = ref('');
+  const sitemapParser = ref<'docusaurus' | 'astro' | 'generic' | undefined>(undefined);
 
-	const error = computed(() => store.error);
+  const error = computed(() => store.error);
 
-	type SitemapParser = 'docusaurus' | 'astro' | 'generic';
-	const isSitemapParser = (value: unknown): value is SitemapParser =>
-			value === 'docusaurus' || value === 'astro' || value === 'generic';
+  type SitemapParser = 'docusaurus' | 'astro' | 'generic';
+  const isSitemapParser = (value: unknown): value is SitemapParser =>
+      value === 'docusaurus' || value === 'astro' || value === 'generic';
 
-	const uploadDocuments = (files: File[]) => {
-	    if (files.some(file => !isAllowedDocumentType(file.name, file.type))) {
-	        isInvalidFileType.value = true;
-	        return;
-	    }
+  const uploadDocuments = (files: File[]) => {
+      if (files.some(file => !isAllowedDocumentType(file.name, file.type))) {
+          isInvalidFileType.value = true;
+          return;
+      }
 
     isInvalidFileType.value = false;
     store.uploadDocuments(files);
@@ -89,21 +89,21 @@ const handleConfluenceUpload = () => {
     });
 }
 
-	const handleSitemapUpload = () => {
-	    const parser = sitemapParser.value;
-	    if (parser !== undefined && !isSitemapParser(parser)) {
-	        store.error = 'sitemap';
-	        return;
-	    }
-	    // send configured parameters to backend
-	    store.loadSitemap({
-	        name: sitemapName.value,
-	        webPath: sitemapWebPath.value,
-	        filterUrls: sitemapFilterUrls.value,
-	        headerTemplate: sitemapHeaderTemplate.value,
-	        parser,
-	    });
-	}
+  const handleSitemapUpload = () => {
+      const parser = sitemapParser.value;
+      if (parser !== undefined && !isSitemapParser(parser)) {
+          store.error = 'sitemap';
+          return;
+      }
+      // send configured parameters to backend
+      store.loadSitemap({
+          name: sitemapName.value,
+          webPath: sitemapWebPath.value,
+          filterUrls: sitemapFilterUrls.value,
+          headerTemplate: sitemapHeaderTemplate.value,
+          parser,
+      });
+  }
 
 const clearError = () => {
     store.error = null

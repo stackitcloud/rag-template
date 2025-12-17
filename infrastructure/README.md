@@ -303,8 +303,6 @@ backend:
       RETRIEVER_IMAGE_K_DOCUMENTS: 10
     # Optional: Adjust Reranker settings for your use-case
     reranker:
-      RERANKER_TYPE: flashrank # Options: "flashrank", "none"
-      RERANKER_MODEL: "ms-marco-TinyBERT-L-2-v2"
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
     # Error messages that get returned in case of special events.

@@ -160,7 +160,7 @@ backend:
 
   envs:
     stackitVllm:
-      STACKIT_VLLM_MODEL: openai/gpt-oss-120b
+      STACKIT_VLLM_MODEL: cortecs/Llama-3.3-70B-Instruct-FP8-Dynamic
       STACKIT_VLLM_BASE_URL: https://api.openai-compat.model-serving.eu01.onstackit.cloud/v1
     database:
       VECTOR_DB_COLLECTION_NAME: rag-db
@@ -221,10 +221,6 @@ backend:
     fakeEmbedder:
       FAKE_EMBEDDER_SIZE: 386
     reranker:
-      # "flashrank" (default) reranks results; "none" disables reranking to save memory.
-      RERANKER_TYPE: flashrank
-      # Explicitly pin a small model (e.g. ms-marco-TinyBERT-L-2-v2) to avoid OOM on local k3d/Tilt setups.
-      RERANKER_MODEL: "ms-marco-MultiBERT-L-12"
       RERANKER_K_DOCUMENTS: 5
       RERANKER_MIN_RELEVANCE_SCORE: 0.001
       RERANKER_ENABLED: true
@@ -338,11 +334,11 @@ adminBackend:
       SUMMARIZER_MAXIMUM_INPUT_SIZE: "8000"
       SUMMARIZER_MAXIMUM_CONCURRENCY: "10"
       # Retry settings (optional). If omitted, fall back to shared RETRY_DECORATOR_* values.
-      SUMMARIZER_MAX_RETRIES: "11"
+      SUMMARIZER_MAX_RETRIES: "5"
       SUMMARIZER_RETRY_BASE_DELAY: "0.5"
       SUMMARIZER_RETRY_MAX_DELAY: "600"
       SUMMARIZER_BACKOFF_FACTOR: "2"
-      SUMMARIZER_ATTEMPT_CAP: "11"
+      SUMMARIZER_ATTEMPT_CAP: "6"
       SUMMARIZER_JITTER_MIN: "0.05"
       SUMMARIZER_JITTER_MAX: "0.25"
     ragapi:
@@ -412,13 +408,6 @@ extractor:
 
   pythonPathEnv:
     PYTHONPATH: src
-
-  envs:
-    sitemap:
-      # Controls how HTML pages are parsed when loading from an XML sitemap.
-      # Options: "docusaurus" (default), "astro", "generic"
-      # Note: https://docs.stackit.cloud is built with Astro/Starlight -> use "astro".
-      SITEMAP_PARSER: astro
   huggingfaceCacheDir: /tmp/hf-cache
   # Directory inside the container to use as writable cache for ModelScope / OCR models
   modelscopeCacheDir: /var/modelscope
@@ -496,11 +485,11 @@ shared:
       S3_ENDPOINT: http://rag-minio:9000
       S3_BUCKET: documents
     retryDecorator:
-      RETRY_DECORATOR_MAX_RETRIES: "11"
+      RETRY_DECORATOR_MAX_RETRIES: "5"
       RETRY_DECORATOR_RETRY_BASE_DELAY: "0.5"
       RETRY_DECORATOR_RETRY_MAX_DELAY: "600"
       RETRY_DECORATOR_BACKOFF_FACTOR: "2"
-      RETRY_DECORATOR_ATTEMPT_CAP: "11"
+      RETRY_DECORATOR_ATTEMPT_CAP: "6"
       RETRY_DECORATOR_JITTER_MIN: "0.05"
       RETRY_DECORATOR_JITTER_MAX: "0.25"
     usecase:

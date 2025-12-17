@@ -5,7 +5,6 @@ from dependency_injector.containers import DeclarativeContainer
 from dependency_injector.providers import (  # noqa: WOT001
     Configuration,
     List,
-    Object,
     Selector,
     Singleton,
 )

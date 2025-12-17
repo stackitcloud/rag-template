@@ -19,7 +19,8 @@ const escapeHtml = (value: string): string =>
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+        .replace(/'/g, "&#39;")
+        .replace(/`/g, "&#96;");
 
 const terraformLanguage = (hljsApi: typeof hljs) => ({
     name: "Terraform",

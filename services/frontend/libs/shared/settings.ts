@@ -44,6 +44,10 @@ const defaultSettings: AppSettings = {
 const envStr = (val: unknown | undefined, fallback: string): string => {
   if (typeof val !== 'string') return fallback;
   const v = val.trim();
+  // In production builds we often use placeholder values like "VITE_API_URL" so a runtime
+  // script can replace them. Treat such placeholders as "unset" to keep sensible defaults
+  // when the runtime replacement wasn't executed or the env var is intentionally omitted.
+  if (/^VITE_[A-Z0-9_]+$/.test(v)) return fallback;
   return v.length > 0 ? v : fallback;
 };
 
@@ -76,10 +80,13 @@ export const settings: AppSettings = {
     },
     theme: {
       default: envStr(import.meta.env.VITE_UI_THEME_DEFAULT, defaultSettings.ui.theme.default),
-      options:
-        typeof import.meta.env.VITE_UI_THEME_OPTIONS === 'string' && import.meta.env.VITE_UI_THEME_OPTIONS.trim()
-          ? import.meta.env.VITE_UI_THEME_OPTIONS.split(',').map((s) => s.trim()).filter(Boolean)
-          : defaultSettings.ui.theme.options,
+      options: (() => {
+        const raw = envStr(import.meta.env.VITE_UI_THEME_OPTIONS, "");
+        const parsed = raw
+          ? raw.split(",").map((s) => s.trim()).filter(Boolean)
+          : [];
+        return parsed.length > 0 ? parsed : defaultSettings.ui.theme.options;
+      })(),
     },
   },
   features: {

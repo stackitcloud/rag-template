@@ -112,7 +112,7 @@ export const useChatStore = defineStore("chat", () => {
       });
 
       chatDocuments.value.push(...documents);
-    } catch (error) {
+    } catch {
       updateLatestMessage({
         hasError: true,
         dateTime: new Date(),

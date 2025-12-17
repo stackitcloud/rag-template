@@ -24,8 +24,8 @@ All customization is done through environment variables that can be set at build
 | `VITE_UI_LOGO_PATH` | Common path to the main navigation logo (fallback for both light/dark) | "/assets/navigation-logo.svg" | "/assets/my-logo.png" |
 | `VITE_UI_LOGO_PATH_LIGHT` | Path to logo used in light mode (falls back to `VITE_UI_LOGO_PATH`) | — | "/assets/logo-light.svg" |
 | `VITE_UI_LOGO_PATH_DARK` | Path to logo used in dark mode (falls back to `VITE_UI_LOGO_PATH`) | — | "/assets/logo-dark.svg" |
-| `VITE_UI_THEME_DEFAULT` | Default theme when user first visits | "light" | "dark" |
-| `VITE_UI_THEME_OPTIONS` | Available theme options (comma-separated) | "light,dark" | "light,dark,auto" |
+| `VITE_UI_THEME_DEFAULT` | Default theme when user first visits | "dark" | "light" |
+| `VITE_UI_THEME_OPTIONS` | Available theme options (comma-separated) | "light,dark" | "light" |
 
 ### Bot Name Customization
 
@@ -93,8 +93,8 @@ The logo appears in the navigation header of both chat and admin applications. Y
 
 **Fallback order:**
 
-- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo.svg))
-- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo.svg))
+- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo-light.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo-light.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo-light.svg))
+- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo-dark.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo-dark.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo-dark.svg))
 
 **Examples:**
 
@@ -113,8 +113,8 @@ The application supports a flexible theme system with user preference persistenc
 
 **Available Themes:**
 
-- `light`: Light mode (default)
-- `dark`: Dark mode
+- `light`: Light mode
+- `dark`: Dark mode (default)
 
 **Theme Configuration:**
 
@@ -139,7 +139,7 @@ The application supports a flexible theme system with user preference persistenc
 
 - Theme preference is saved in browser's localStorage
 - Theme persists across browser sessions
-- Theme toggle button appears only when multiple options are available
+- The built-in theme toggle is shown only when both `light` and `dark` are available
 - Manual theme switching overrides the default setting
 
 ## Development Setup
@@ -284,9 +284,12 @@ Bot names and messages support internationalization:
 
 ### Bot Name Not Updating
 
-- **Issue**: Bot name shows as `{bot_name}` instead of actual name
-- **Cause**: Vue computed property not accessed correctly
-- **Solution**: Use `initialMessage.value` instead of `initialMessage` in the store
+- **Issue**: Bot name stays at the default or shows a placeholder value (e.g. `VITE_BOT_NAME`)
+- **Cause**: Runtime env replacement did not run (Vite env vars are build-time by default)
+- **Solutions**:
+  - Ensure `services/frontend/.env.production` contains placeholders for the variables you want to replace (this repo includes `VITE_BOT_NAME`, `VITE_UI_*`, etc.)
+  - Ensure the container runs `env.sh` after copying the built files into `/usr/share/nginx/html`
+  - Verify the variable is set in the container environment (Kubernetes `ConfigMap`/`Secret`, Docker `-e`, etc.)
 
 ### Logo Not Loading / Wrong for Theme
 
@@ -312,6 +315,7 @@ Bot names and messages support internationalization:
 - **Issue**: Customization works in development but not production
 - **Cause**: Vite environment variables are build-time only
 - **Solutions**:
+  - Ensure the variables exist as placeholders at build time (see `services/frontend/.env.production`)
   - For Docker: Ensure `env.sh` script runs after copying files
   - For Kubernetes: Use ConfigMap/Secret with proper mounting
   - Verify environment variables are set in container

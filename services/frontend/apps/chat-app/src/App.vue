@@ -6,13 +6,6 @@ import { iconArrowSmallUpRightTop } from "@sit-onyx/icons";
 
 const { t } = useI18n();
 const adminURL = import.meta.env.VITE_ADMIN_URL;
-
-import { onMounted } from "vue";
-import { useThemeStore } from "@shared/store/theme.store";
-onMounted(() => {
-  // Initialize theme
-  const themeStore = useThemeStore();
-});
 </script>
 
 <template>

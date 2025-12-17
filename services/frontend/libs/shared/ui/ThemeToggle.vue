@@ -7,6 +7,12 @@ import OnyxIcon from "./OnyxIcon.vue";
 const themeStore = useThemeStore();
 
 const isDarkMode = computed(() => themeStore.currentTheme === "dark");
+const canToggle = computed(
+  () =>
+    themeStore.availableThemes.includes("light") &&
+    themeStore.availableThemes.includes("dark") &&
+    themeStore.availableThemes.length > 1,
+);
 
 const toggleTheme = () => {
   themeStore.setTheme(isDarkMode.value ? "light" : "dark");
@@ -15,6 +21,7 @@ const toggleTheme = () => {
 
 <template>
   <button
+    v-if="canToggle"
     @click="toggleTheme"
     class="btn btn-circle btn-ghost hover:bg-base-200"
     :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"

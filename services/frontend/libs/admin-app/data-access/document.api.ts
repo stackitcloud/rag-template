@@ -114,7 +114,7 @@ export class DocumentAPI {
                     // Validate JSON format
                     JSON.parse(config.headerTemplate);
                     payload.push({ key: 'header_template', value: config.headerTemplate });
-                } catch (jsonError) {
+                } catch {
                     throw new Error('Header template must be valid JSON format');
                 }
             }

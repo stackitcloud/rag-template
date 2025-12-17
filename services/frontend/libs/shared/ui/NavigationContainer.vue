@@ -13,7 +13,7 @@ const logoSrc = computed(() =>
 </script>
 
 <template>
-  <div class="bg-primary flex p-4">
+  <div class="bg-base-100 text-base-content flex p-4 border-b border-base-300">
     <div class="flex-1">
       <img :src="logoSrc" class="w-32" />
     </div>

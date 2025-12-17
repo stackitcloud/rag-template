@@ -14,7 +14,7 @@ export const mapToChatRequestModel = (session_id: string, message: string, histo
     history: {
         messages: historyList.filter(o => !o.hasError).map((o) => ({
             role: o.role,
-            message: o.text
+            message: o.rawText ?? o.text
         } as ChatHistoryMessage))
     }
 });

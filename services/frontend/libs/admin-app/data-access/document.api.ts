@@ -9,20 +9,21 @@ axios.defaults.auth = {
 
 // confluence configuration interface
 export interface ConfluenceConfig {
-  spaceKey?: string;
-  cql?: string;
-  token: string;
-  url: string;
-  maxPages?: number;
-  name: string;
+    spaceKey?: string;
+    cql?: string;
+    token: string;
+    url: string;
+    maxPages?: number;
+    name: string;
 }
 
 // sitemap configuration interface
 export interface SitemapConfig {
-  webPath: string;
-  filterUrls: string;
-  headerTemplate: string;
-  name: string;
+    webPath: string;
+    filterUrls: string;
+    headerTemplate: string;
+    name: string;
+    parser?: 'docusaurus' | 'astro' | 'generic';
 }
 
 export class DocumentAPI {
@@ -90,6 +91,14 @@ export class DocumentAPI {
                 { key: 'web_path', value: config.webPath }
             ];
 
+            if (config.parser) {
+                const allowedParsers = new Set(['docusaurus', 'astro', 'generic']);
+                if (!allowedParsers.has(config.parser)) {
+                    throw new Error(`Unsupported sitemap parser: ${config.parser}`);
+                }
+                payload.push({ key: 'sitemap_parser', value: config.parser });
+            }
+
             // add filter_urls only if provided
             if (config.filterUrls && config.filterUrls.trim()) {
                 // Convert multiline string to array and filter out empty lines
@@ -109,7 +118,7 @@ export class DocumentAPI {
                     // Validate JSON format
                     JSON.parse(config.headerTemplate);
                     payload.push({ key: 'header_template', value: config.headerTemplate });
-                } catch (jsonError) {
+                } catch {
                     throw new Error('Header template must be valid JSON format');
                 }
             }

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-// import { ArrowTopRightOnSquareIcon, DocumentIcon } from "@heroicons/vue/24/outline";
 import { ChatDocumentItemModel } from "../models/chat-document-item.model";
 
 const data = defineProps<ChatDocumentItemModel>();

@@ -24,7 +24,7 @@ const groupedDocuments = computed((): Record<string, ChatDocumentItemModel[]> =>
 });
 </script>
 <template>
-    <SideBarContainer :header="t('chat.sources')">
+    <SideBarContainer :header="t('chat.sources')" :showBorder="false">
         <div v-if="isNotEmpty(groupedDocuments)">
             <ChatDocumentGroup v-for="(documents, title, index) in groupedDocuments" :key="index"
                 :title="title" :source="documents[0].source">

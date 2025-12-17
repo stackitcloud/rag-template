@@ -12,6 +12,12 @@
                     "libs/admin-app/**/*.{ts,tsx,js,jsx,vue,d.ts}"
                 ]
             }
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "options": {
+                "configFile": "libs/admin-app/vite.config.mts"
+            }
         }
     }
 }

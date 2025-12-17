@@ -42,7 +42,7 @@ export interface SitemapConfig {
   filterUrls: string;
   headerTemplate: string;
   name: string;
-  parser?: 'auto' | 'docusaurus' | 'astro' | 'generic';
+    parser?: 'docusaurus' | 'astro' | 'generic';
 }
 
 export class DocumentAPI {
@@ -110,7 +110,7 @@ export class DocumentAPI {
                 { key: 'web_path', value: config.webPath }
             ];
 
-            if (config.parser && config.parser !== 'auto') {
+            if (config.parser) {
                 payload.push({ key: 'sitemap_parser', value: config.parser });
             }
 

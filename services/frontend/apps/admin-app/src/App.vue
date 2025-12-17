@@ -6,34 +6,7 @@ import { useI18n } from "vue-i18n";
 import { iconArrowSmallUpRightTop } from "@sit-onyx/icons";
 
 const { t } = useI18n();
-const isPlaceholderEnvValue = (value: unknown): boolean =>
-  typeof value === "string" && /^VITE_[A-Z0-9_]+$/.test(value.trim());
-
-const inferChatURLFromLocation = (): string => {
-  if (typeof window === "undefined") return "/";
-
-  const { protocol, hostname, port } = window.location;
-
-  if (hostname === "localhost" && port === "4300") {
-    return `${protocol}//${hostname}:4200`;
-  }
-
-  const inferredHostname = hostname.startsWith("admin.")
-    ? hostname.slice("admin.".length)
-    : hostname;
-
-  const inferredPort = port ? `:${port}` : "";
-  return `${protocol}//${inferredHostname}${inferredPort}`;
-};
-
-const chatURL = computed(() => {
-  const configuredChatURL = import.meta.env.VITE_CHAT_URL;
-  if (!configuredChatURL || isPlaceholderEnvValue(configuredChatURL)) {
-    return inferChatURLFromLocation();
-  }
-
-  return String(configuredChatURL).trim();
-});
+const chatURL = import.meta.env.VITE_CHAT_URL;
 </script>
 
 <template>

@@ -32,7 +32,7 @@ const sitemapName = ref('');
 const sitemapWebPath = ref('');
 const sitemapFilterUrls = ref('');
 const sitemapHeaderTemplate = ref('');
-const sitemapParser = ref<'auto' | 'docusaurus' | 'astro' | 'generic'>('auto');
+const sitemapParser = ref<'docusaurus' | 'astro' | 'generic' | undefined>(undefined);
 
 const error = computed(() => store.error);
 
@@ -219,7 +219,7 @@ const getErrorMessage = (errorType: string) => {
                       <input v-model="sitemapWebPath" type="url" placeholder="Sitemap URL (required)" class="input input-bordered w-full" required />
                       <label for="sitemapParser" class="sr-only">Parser</label>
                       <select id="sitemapParser" v-model="sitemapParser" class="select select-bordered w-full">
-                        <option value="auto">{{ t('documents.sitemapParserAuto') }}</option>
+                                                <option :value="undefined">{{ t('documents.sitemapParserAuto') }}</option>
                         <option value="astro">{{ t('documents.sitemapParserAstro') }}</option>
                         <option value="docusaurus">{{ t('documents.sitemapParserDocusaurus') }}</option>
                         <option value="generic">{{ t('documents.sitemapParserGeneric') }}</option>

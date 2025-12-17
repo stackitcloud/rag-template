@@ -156,16 +156,16 @@ export const initializeMarkdown = () => {
 
         if (!(await copyToClipboard(codeText))) return;
 
-        const existingTimeout = copyButton.dataset.copyTimeoutId;
+        const existingTimeout = copyButton.dataset["copyTimeoutId"];
         if (existingTimeout) {
             clearTimeout(Number(existingTimeout));
         }
 
         copyButton.classList.add('is-copied');
-        copyButton.dataset.copyTimeoutId = String(
+        copyButton.dataset["copyTimeoutId"] = String(
             window.setTimeout(() => {
                 copyButton.classList.remove('is-copied');
-                delete copyButton.dataset.copyTimeoutId;
+                delete copyButton.dataset["copyTimeoutId"];
             }, 1500),
         );
     });

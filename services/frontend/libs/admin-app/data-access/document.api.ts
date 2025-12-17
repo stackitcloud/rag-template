@@ -2,27 +2,27 @@ import axios, { AxiosProgressEvent } from 'axios';
 import { DocumentModel } from "../models/document.model.ts";
 
 axios.defaults.baseURL = import.meta.env.VITE_ADMIN_URL + "/api";
-  axios.defaults.auth = {
+axios.defaults.auth = {
     username: import.meta.env.VITE_AUTH_USERNAME,
     password: import.meta.env.VITE_AUTH_PASSWORD
-  };
+};
 
 // confluence configuration interface
 export interface ConfluenceConfig {
-  spaceKey?: string;
-  cql?: string;
-  token: string;
-  url: string;
-  maxPages?: number;
-  name: string;
+    spaceKey?: string;
+    cql?: string;
+    token: string;
+    url: string;
+    maxPages?: number;
+    name: string;
 }
 
 // sitemap configuration interface
 export interface SitemapConfig {
-  webPath: string;
-  filterUrls: string;
-  headerTemplate: string;
-  name: string;
+    webPath: string;
+    filterUrls: string;
+    headerTemplate: string;
+    name: string;
     parser?: 'docusaurus' | 'astro' | 'generic';
 }
 
@@ -92,6 +92,10 @@ export class DocumentAPI {
             ];
 
             if (config.parser) {
+                const allowedParsers = new Set(['docusaurus', 'astro', 'generic']);
+                if (!allowedParsers.has(config.parser)) {
+                    throw new Error(`Unsupported sitemap parser: ${config.parser}`);
+                }
                 payload.push({ key: 'sitemap_parser', value: config.parser });
             }
 

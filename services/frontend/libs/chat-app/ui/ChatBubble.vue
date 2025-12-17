@@ -4,40 +4,13 @@ import { iconCheck, iconCopy, iconFile } from "@sit-onyx/icons";
 import { OnyxIcon } from "@shared/ui";
 import { nextTick, ref } from "vue";
 import { useChatStore } from "../data-access/+state/chat.store";
+import { COPY_FEEDBACK_DURATION_MS, copyToClipboard } from "@shared/utils";
 
 const props = defineProps<ChatBubbleModel>();
 const chatStore = useChatStore();
 const messageRef = ref<HTMLElement>();
 const isCopied = ref(false);
 let copyTimeoutId: number | undefined;
-
-const copyToClipboard = async (text: string): Promise<boolean> => {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch (_err) {
-    // fallback below
-  }
-
-  try {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.left = "-9999px";
-    textarea.style.top = "0";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    const ok = document.execCommand("copy");
-    document.body.removeChild(textarea);
-    return ok;
-  } catch (_err) {
-    return false;
-  }
-};
 
 const copyMessage = async () => {
   const text = messageRef.value?.innerText ?? "";
@@ -51,8 +24,8 @@ const copyMessage = async () => {
   copyTimeoutId = window.setTimeout(() => {
     isCopied.value = false;
     copyTimeoutId = undefined;
-  }, 1500);
-	};
+  }, COPY_FEEDBACK_DURATION_MS);
+		};
 
 const scrollReveal = (anchorId: string) => {
   const item = document.getElementById(anchorId);

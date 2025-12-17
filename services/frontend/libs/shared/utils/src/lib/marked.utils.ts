@@ -1,6 +1,7 @@
 import { marked } from 'marked';
 import { newUid } from "./uuid.util";
 import { iconCheck, iconCopy } from "@sit-onyx/icons";
+import { COPY_FEEDBACK_DURATION_MS, copyToClipboard } from "./clipboard.utils";
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import diff from "highlight.js/lib/languages/diff";
@@ -84,6 +85,49 @@ const highlightCodeBlock = (code: string, language: string | undefined): string 
     }
 };
 
+let isMarkdownClickHandlerRegistered = false;
+
+const showDialog = (modalId: string) => {
+    const modal = document.getElementById(modalId) as HTMLDialogElement | null;
+    if (modal?.showModal) {
+        modal.showModal();
+    }
+};
+
+const onMarkdownDocumentClick = async (event: MouseEvent) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+
+    const imageTarget = target.closest('.image-modal-trigger') as HTMLElement | null;
+    if (imageTarget) {
+        const modalId = imageTarget.getAttribute('data-modal-id');
+        if (modalId) showDialog(modalId);
+        return;
+    }
+
+    const copyButton = target.closest('.chat-code-copy-button') as HTMLButtonElement | null;
+    if (!copyButton) return;
+
+    const codeBlock = copyButton.closest('.chat-code-block');
+    const codeElement = codeBlock?.querySelector('pre > code');
+    const codeText = codeElement?.textContent ?? '';
+
+    if (!(await copyToClipboard(codeText))) return;
+
+    const existingTimeout = copyButton.dataset["copyTimeoutId"];
+    if (existingTimeout) {
+        clearTimeout(Number(existingTimeout));
+    }
+
+    copyButton.classList.add('is-copied');
+    copyButton.dataset["copyTimeoutId"] = String(
+        window.setTimeout(() => {
+            copyButton.classList.remove('is-copied');
+            delete copyButton.dataset["copyTimeoutId"];
+        }, COPY_FEEDBACK_DURATION_MS),
+    );
+};
+
 export const initializeMarkdown = () => {
     const renderer = new marked.Renderer();
 
@@ -101,74 +145,10 @@ export const initializeMarkdown = () => {
         return `<div class="chat-code-block"><div class="chat-code-block__header"><div class="chat-code-block__header-left"><span class="chat-code-block__dots" aria-hidden="true"><span></span><span></span><span></span></span><span class="chat-code-block__lang" aria-hidden="true" data-language="${languageLabel}"></span></div><button type="button" class="chat-code-copy-button" title="Copy to clipboard" aria-label="Copy code to clipboard" data-copied="Copied!"><span class="chat-copy-icon chat-copy-icon--copy" aria-hidden="true">${iconCopy}</span><span class="chat-copy-icon chat-copy-icon--check" aria-hidden="true">${iconCheck}</span></button></div><pre><code class="hljs${languageClass}">${highlighted}</code></pre></div>`;
     };
 
-    const toggleModal = (modalId: string) => {
-        const modal: any = document.getElementById(modalId);
-        if (modal) {
-            modal.showModal();
-        }
-    };
-
-    const copyToClipboard = async (text: string): Promise<boolean> => {
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            }
-        } catch (_err) {
-            // fallback below
-        }
-
-        try {
-            const textarea = document.createElement("textarea");
-            textarea.value = text;
-            textarea.setAttribute("readonly", "");
-            textarea.style.position = "fixed";
-            textarea.style.left = "-9999px";
-            textarea.style.top = "0";
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            const ok = document.execCommand("copy");
-            document.body.removeChild(textarea);
-            return ok;
-        } catch (_err) {
-            return false;
-        }
-    };
-
-    document.addEventListener('click', async (event: MouseEvent) => {
-        const target = event.target instanceof Element ? event.target : null;
-        if (!target) return;
-
-        const imageTarget = target.closest('.image-modal-trigger') as HTMLElement | null;
-        if (imageTarget) {
-            const modalId = imageTarget.getAttribute('data-modal-id');
-            if (modalId) toggleModal(modalId);
-            return;
-        }
-
-        const copyButton = target.closest('.chat-code-copy-button') as HTMLButtonElement | null;
-        if (!copyButton) return;
-
-        const codeBlock = copyButton.closest('.chat-code-block');
-        const codeElement = codeBlock?.querySelector('pre > code');
-        const codeText = codeElement?.textContent ?? '';
-
-        if (!(await copyToClipboard(codeText))) return;
-
-        const existingTimeout = copyButton.dataset["copyTimeoutId"];
-        if (existingTimeout) {
-            clearTimeout(Number(existingTimeout));
-        }
-
-        copyButton.classList.add('is-copied');
-        copyButton.dataset["copyTimeoutId"] = String(
-            window.setTimeout(() => {
-                copyButton.classList.remove('is-copied');
-                delete copyButton.dataset["copyTimeoutId"];
-            }, 1500),
-        );
-    });
+    if (!isMarkdownClickHandlerRegistered && typeof document !== "undefined") {
+        document.addEventListener('click', onMarkdownDocumentClick);
+        isMarkdownClickHandlerRegistered = true;
+    }
 
     renderer.image = (href, title, text) => {
         const imageId = newUid();

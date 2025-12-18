@@ -35,52 +35,62 @@
   name: "light";
   default: true;
 
-  /* --- BRAND / ACTION COLORS ---------------------------------
-     Used by: .btn-primary, .bg-primary, .text-primary, borders, etc.
-     Primary = main brand/action color for CTAs & highlights.
-     Primary-content = text/icon color that sits on top of Primary.
-  ---------------------------------------------------------------- */
-  --color-primary: #f8f9fa;            /* primary brand/CTA (light gray) */
-  --color-primary-content: #0a1e2d;    /* readable text on primary */
+  /* Matches STACKIT docs (digits light) */
+  --color-primary: #00c3cd;
+  --color-primary-content: #091a26;
 
-  /* Secondary = supporting brand color (chips, subtle accents) */
-  --color-secondary: #ffffff;          /* secondary brand shade */
-  --color-secondary-content: #575756;  /* text on secondary */
+  --color-secondary: #ccf3f5;
+  --color-secondary-content: #162938;
 
-  /* Accent = special emphasis (FABs, badges, links you want to pop) */
-  --color-accent: #00c3cd;             /* spacemint accent */
-  --color-accent-content: #ffffff;     /* text on accent */
+  --color-accent: #00c3cd;
+  --color-accent-content: #091a26;
 
-  /* --- NEUTRALS -------------------------------------------------
-     Neutral = unsaturated UI bits (dividers, cards, muted buttons)
-  ---------------------------------------------------------------- */
-  --color-neutral: #b2b2b2;            /* neutral surfaces/controls */
-  --color-neutral-content: #0a1e2d;    /* text/icons on neutral */
+  --color-neutral: #162938;
+  --color-neutral-content: #f8f9fa;
 
-  /* --- BASE / SURFACES ------------------------------------------
-     Base tokens define background “levels” and default text:
-       base-100  = page/background (blank surfaces)
-       base-200  = slightly raised surfaces (cards/containers)
-       base-300  = higher elevation (borders/dividers)
-       base-content = default text color on base-* backgrounds
-     Used by: bg-base-100/200/300, text-base-content, etc.
-  ---------------------------------------------------------------- */
-  --color-base-100: #ffffff;           /* page background */
-  --color-base-200: #EDEDED;           /* cards/secondary surfaces */
-  --color-base-300: #DADADA;           /* borders/dividers/elevations */
-  --color-base-content: #333333;       /* default text on base-* */
+  --color-base-100: #ffffff;
+  --color-base-200: #f0f2f4;
+  --color-base-300: #e7eaed;
+  --color-base-content: #162938;
 
-  /* --- FEEDBACK / STATUS ---------------------------------------
-     Used by: bg-info/success/warning/error, alert components, badges
-     “*-content” is the on-color text/icon for readability.
-  ---------------------------------------------------------------- */
-  --color-info: #00c3cd;               /* info: tips, non-blocking hints */
-  --color-success: #00c387;            /* success: confirmations */
-  --color-warning: #fafc00;            /* warning: cautions */
-  --color-error: #ff0555;              /* error: failures/validation */
+  --color-info: #127481;
+  --color-info-content: #f8f9fa;
 
-  /* (Optional) You can add variables like --scrollbar-track / thumb
-     and reference them in your own CSS if you need custom scrollbars. */
+  --color-success: #45a85d;
+  --color-success-content: #091a26;
+
+  --color-warning: #e3774c;
+  --color-warning-content: #091a26;
+
+  --color-error: #dc1f1f;
+  --color-error-content: #f8f9fa;
+
+  /* Custom CSS variables used by the apps */
+  --scrollbar-track: #ffffff;
+  --scrollbar-thumb: rgba(22, 41, 56, 0.35);
+  --base-200-highlight: #ccf3f5;
+
+  /* Compatibility: keep daisyUI v4-style fallback variables used in custom CSS */
+  --fallback-p: var(--color-primary);
+  --fallback-pc: var(--color-primary-content);
+  --fallback-s: var(--color-secondary);
+  --fallback-sc: var(--color-secondary-content);
+  --fallback-a: var(--color-accent);
+  --fallback-ac: var(--color-accent-content);
+  --fallback-n: var(--color-neutral);
+  --fallback-nc: var(--color-neutral-content);
+  --fallback-b1: var(--color-base-100);
+  --fallback-b2: var(--color-base-200);
+  --fallback-b3: var(--color-base-300);
+  --fallback-bc: var(--color-base-content);
+  --fallback-in: var(--color-info);
+  --fallback-inc: var(--color-info-content);
+  --fallback-su: var(--color-success);
+  --fallback-suc: var(--color-success-content);
+  --fallback-wa: var(--color-warning);
+  --fallback-wac: var(--color-warning-content);
+  --fallback-er: var(--color-error);
+  --fallback-erc: var(--color-error-content);
 }
 
 /* ===========================================================
@@ -93,31 +103,62 @@
   name: "dark";
   prefersdark: true;
 
-  /* Brand/action colors still drive .btn-primary, bg-primary, etc. */
-  --color-primary: #0a1e2d;            /* primary brand (dark mode) */
-  --color-primary-content: #ffffff;    /* readable text on primary */
+  /* Matches STACKIT docs (digits dark) */
+  --color-primary: #00c3cd;
+  --color-primary-content: #091a26;
 
-  --color-secondary: #575756;          /* secondary brand */
-  --color-secondary-content: #ffffff;
+  --color-secondary: #165e6c;
+  --color-secondary-content: #e7eaed;
 
-  --color-accent: #00c3cd;             /* accent pop */
-  --color-accent-content: #ffffff;
+  --color-accent: #00c3cd;
+  --color-accent-content: #091a26;
 
-  /* Neutral tones for outlines, subtle fills, components */
-  --color-neutral: #B2B2B2;
-  --color-neutral-content: #ffffff;
+  --color-neutral: #162938;
+  --color-neutral-content: #e7eaed;
 
-  /* Dark surfaces: page & elevations */
-  --color-base-100: #1e1e1e;           /* main background */
-  --color-base-200: #2d2d2d;           /* cards/containers */
-  --color-base-300: #3d3d3d;           /* borders/dividers */
-  --color-base-content: #f5f5f5;       /* default body text */
+  --color-base-100: #091a26;
+  --color-base-200: #233542;
+  --color-base-300: #2c3d4a;
+  --color-base-content: #e7eaed;
 
-  /* Status colors stay consistent across modes */
-  --color-info: #00c3cd;
-  --color-success: #00c387;
-  --color-warning: #fafc00;
-  --color-error: #ff0555;
+  --color-info: #66dbe1;
+  --color-info-content: #091a26;
+
+  --color-success: #51cf66;
+  --color-success-content: #091a26;
+
+  --color-warning: #e3774c;
+  --color-warning-content: #091a26;
+
+  --color-error: #e34c4c;
+  --color-error-content: #091a26;
+
+  /* Custom CSS variables used by the apps */
+  --scrollbar-track: #091a26;
+  --scrollbar-thumb: rgba(231, 234, 237, 0.25);
+  --base-200-highlight: #165e6c;
+
+  /* Compatibility: keep daisyUI v4-style fallback variables used in custom CSS */
+  --fallback-p: var(--color-primary);
+  --fallback-pc: var(--color-primary-content);
+  --fallback-s: var(--color-secondary);
+  --fallback-sc: var(--color-secondary-content);
+  --fallback-a: var(--color-accent);
+  --fallback-ac: var(--color-accent-content);
+  --fallback-n: var(--color-neutral);
+  --fallback-nc: var(--color-neutral-content);
+  --fallback-b1: var(--color-base-100);
+  --fallback-b2: var(--color-base-200);
+  --fallback-b3: var(--color-base-300);
+  --fallback-bc: var(--color-base-content);
+  --fallback-in: var(--color-info);
+  --fallback-inc: var(--color-info-content);
+  --fallback-su: var(--color-success);
+  --fallback-suc: var(--color-success-content);
+  --fallback-wa: var(--color-warning);
+  --fallback-wac: var(--color-warning-content);
+  --fallback-er: var(--color-error);
+  --fallback-erc: var(--color-error-content);
 }
 
 /* ===========================================================

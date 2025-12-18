@@ -3,7 +3,7 @@ import DocumentContainer from "./DocumentContainer.vue";
 import DocumentUploadContainer from "./DocumentUploadContainer.vue";
 import { useDocumentsStore } from "../data-access/+state/documents.store";
 import { useI18n } from "vue-i18n";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { DocumentModel } from "../models/document.model";
 
 const { t } = useI18n();

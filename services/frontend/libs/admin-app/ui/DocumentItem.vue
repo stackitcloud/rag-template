@@ -1,16 +1,20 @@
 <script lang="ts" setup>
 import {
-  ArrowPathIcon,
-  ArrowUpTrayIcon,
-  CheckCircleIcon,
-  DocumentIcon,
-  ExclamationTriangleIcon,
-  TrashIcon,
-} from "@heroicons/vue/24/outline";
-import { computed, ref } from "vue";
+  iconCircleCheck,
+  iconSync,
+  iconTrash,
+  iconTriangleWarning,
+  iconUpload,
+} from "@sit-onyx/icons";
+import { OnyxIcon } from "@shared/ui";
+import { computed, nextTick, ref, watch } from "vue";
 import { DocumentModel } from "../models/document.model";
+import { getDocumentIcon } from "../utils/document-icon.utils";
 
 const showDeleteModal = ref(false);
+const cancelButtonRef = ref<HTMLButtonElement | null>(null);
+const deleteButtonRef = ref<HTMLButtonElement | null>(null);
+const previouslyFocusedElement = ref<HTMLElement | null>(null);
 
 const props = defineProps<{
   data: DocumentModel;
@@ -23,10 +27,10 @@ const isProcessing = computed(() => props.data.status === PROCESSING_STATE);
 const canDelete = computed(() => !isProcessing.value);
 
 const statusClasses = {
-  UPLOADING: "text-blue-500",
-  PROCESSING: "text-amber-500",
-  READY: "text-green-500",
-  ERROR: "text-red-500",
+  UPLOADING: "text-info",
+  PROCESSING: "text-warning",
+  READY: "text-success",
+  ERROR: "text-error",
 };
 
 const statusText = {
@@ -36,8 +40,13 @@ const statusText = {
   ERROR: "Error",
 };
 
+const documentIcon = computed(() => getDocumentIcon(props.data.name));
+
 const confirmDelete = () => {
   if (!canDelete.value) return; // Guard against accidental triggers
+  if (typeof document !== "undefined") {
+    previouslyFocusedElement.value = document.activeElement as HTMLElement | null;
+  }
   showDeleteModal.value = true;
 };
 
@@ -49,6 +58,44 @@ const executeDelete = () => {
   props.deleteDocument(props.data.name);
   showDeleteModal.value = false;
 };
+
+const focusCancel = () => {
+  cancelButtonRef.value?.focus();
+};
+
+const focusDelete = () => {
+  deleteButtonRef.value?.focus();
+};
+
+const onModalKeydown = (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    cancelDelete();
+    return;
+  }
+
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    event.preventDefault();
+    if (typeof document === "undefined") return;
+    const activeElement = document.activeElement;
+    if (activeElement === cancelButtonRef.value) {
+      focusDelete();
+    } else {
+      focusCancel();
+    }
+  }
+};
+
+watch(showDeleteModal, async (isOpen) => {
+  if (isOpen) {
+    await nextTick();
+    focusCancel();
+    return;
+  }
+
+  await nextTick();
+  previouslyFocusedElement.value?.focus?.();
+});
 </script>
 
 <template>
@@ -57,7 +104,7 @@ const executeDelete = () => {
   >
     <!-- Document icon -->
     <div class="flex items-center justify-center text-center w-10">
-      <DocumentIcon class="w-8 h-8 opacity-60" />
+      <OnyxIcon :icon="documentIcon" :size="32" class="opacity-60" />
     </div>
 
     <!-- Document info -->
@@ -77,16 +124,16 @@ const executeDelete = () => {
       :class="statusClasses[props.data.status]"
     >
       <div v-if="props.data.status === 'UPLOADING'">
-        <ArrowUpTrayIcon class="w-5 h-5" />
+        <OnyxIcon :icon="iconUpload" :size="20" />
       </div>
       <div v-else-if="props.data.status === 'PROCESSING'">
-        <ArrowPathIcon class="w-5 h-5 rotating" />
+        <OnyxIcon :icon="iconSync" :size="20" class="rotating" />
       </div>
       <div v-else-if="props.data.status === 'READY'">
-        <CheckCircleIcon class="w-5 h-5" />
+        <OnyxIcon :icon="iconCircleCheck" :size="20" />
       </div>
       <div v-else>
-        <ExclamationTriangleIcon class="w-5 h-5" />
+        <OnyxIcon :icon="iconTriangleWarning" :size="20" />
       </div>
       <span class="text-xs font-medium hidden sm:inline">{{
         statusText[props.data.status]
@@ -103,7 +150,7 @@ const executeDelete = () => {
         class="btn btn-sm btn-ghost btn-circle opacity-60 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Delete document"
       >
-        <TrashIcon class="w-4 h-4" :class="canDelete ? 'text-error' : 'opacity-40'" />
+        <OnyxIcon :icon="iconTrash" :size="16" :class="canDelete ? 'text-error' : 'opacity-40'" />
       </button>
     </div>
   </div>
@@ -111,6 +158,7 @@ const executeDelete = () => {
   <!-- Delete confirmation modal -->
   <div
     v-if="showDeleteModal"
+    @keydown.capture="onModalKeydown"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     role="dialog"
     aria-modal="true"
@@ -124,8 +172,22 @@ const executeDelete = () => {
         >? This action cannot be undone.
       </p>
       <div class="flex justify-end gap-2">
-        <button @click="cancelDelete" class="btn btn-ghost">Cancel</button>
-        <button @click="executeDelete" class="btn btn-error">Delete</button>
+        <button
+          ref="cancelButtonRef"
+          type="button"
+          @click="cancelDelete"
+          class="btn btn-ghost modal-action-button modal-action-button--cancel"
+        >
+          Cancel
+        </button>
+        <button
+          ref="deleteButtonRef"
+          type="button"
+          @click="executeDelete"
+          class="btn btn-error modal-action-button modal-action-button--delete"
+        >
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -134,6 +196,21 @@ const executeDelete = () => {
 <style scoped>
 .rotating {
   animation: rotationAnimation 2s linear infinite;
+}
+
+.btn.modal-action-button:focus,
+.btn.modal-action-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--fallback-b1, oklch(var(--b1) / 1)),
+    0 0 0 4px var(--fallback-p, oklch(var(--p) / 1));
+}
+
+.btn.modal-action-button--delete:focus,
+.btn.modal-action-button--delete:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--fallback-b1, oklch(var(--b1) / 1)),
+    0 0 0 4px var(--fallback-er, oklch(var(--er) / 1));
 }
 @keyframes rotationAnimation {
   0% {

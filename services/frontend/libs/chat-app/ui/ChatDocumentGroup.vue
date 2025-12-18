@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
+import { iconArrowSmallUpRightTop } from "@sit-onyx/icons";
+import { OnyxIcon } from "@shared/ui";
 import { ChatDocumentGroupModel } from "../models/chat-document-group.model";
 
 const data = defineProps<ChatDocumentGroupModel>();
@@ -15,7 +16,7 @@ const data = defineProps<ChatDocumentGroupModel>();
             <h2 class="font-medium mb-1">
                 <a class="font-bold font-underline hover:opacity-75 flex items-center gap-2" :href="data.source" target="_blank">
                     {{ data.title }}
-                    <ArrowTopRightOnSquareIcon class="text-sm text-primary cursor-pointer h-4 w-4" />
+                    <OnyxIcon :icon="iconArrowSmallUpRightTop" :size="16" class="text-sm text-primary cursor-pointer" />
                 </a>
             </h2>
             <slot></slot>

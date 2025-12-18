@@ -1,4 +1,4 @@
-import axios, { AxiosProgressEvent } from "axios";
+import type { AxiosProgressEvent } from "axios";
 import { DocumentModel } from "../models/document.model";
 import { newUid } from "@shared/utils";
 

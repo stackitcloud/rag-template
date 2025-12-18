@@ -5,6 +5,8 @@ dist
 tmp
 /out-tsc
 
+**/.npm-cache
+
 # dependencies
 node_modules
 

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
+  import { RouterView } from "vue-router";
 import { NavigationContainer, OnyxIcon } from "@shared/ui";
-import { iconArrowSmallUpRightTop } from "@sit-onyx/icons";
 import { useI18n } from "vue-i18n";
-import { RouterView } from "vue-router";
+import { iconArrowSmallUpRightTop } from "@sit-onyx/icons";
 
 const { t } = useI18n();
 const chatURL = import.meta.env.VITE_CHAT_URL;

@@ -140,6 +140,10 @@
 {{- printf "%s-source-uploader-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "configmap.extractorSitemapName" -}}
+{{- printf "%s-extractor-sitemap-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 # image
 {{- define "adminBackend.fullImageName" -}}
 {{- $tag := default .Chart.AppVersion .Values.adminBackend.image.tag -}}

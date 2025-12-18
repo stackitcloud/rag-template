@@ -293,6 +293,8 @@ frontend:
 
 The following values should be adjusted for the deployment:
 
+> ⓘ INFO: If the backend pod gets `OOMKilled` (exit code `137`) on local k3d/Tilt setups, reduce `backend.workers` (each uvicorn worker is a separate Python process), disable reranking `RERANKER_ENABLED: false` or pin a smaller Flashrank model (e.g. `RERANKER_MODEL: ms-marco-TinyBERT-L-2-v2`), and/or increase the memory available to Docker/k3d.
+
 ```yaml
 backend:
   secrets:
@@ -345,7 +347,8 @@ backend:
     retriever:
       RETRIEVER_THRESHOLD: 0.3
       RETRIEVER_K_DOCUMENTS: 10
-      RETRIEVER_TOTAL_K: 7
+      # Canonical global cap (previously RETRIEVER_TOTAL_K / RETRIEVER_OVERALL_K_DOCUMENTS)
+      RETRIEVER_TOTAL_K_DOCUMENTS: 7
       RETRIEVER_SUMMARY_THRESHOLD: 0.3
       RETRIEVER_SUMMARY_K_DOCUMENTS: 10
       RETRIEVER_TABLE_THRESHOLD: 0.3
@@ -545,7 +548,7 @@ Afterwards, the services are accessible from [http://rag.localhost](http://rag.l
 
 Note: The command above has only been tested on *Ubuntu 22.04 LTS*.
 
-On *Windows* you can adjust the hosts file as described [here](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
+On *Windows* you can adjust the hosts file as described in the DigitalOcean guide on [editing the Windows hosts file](https://docs.digitalocean.com/products/paperspace/machines/how-to/edit-windows-hosts-file/).
 
 ### 2.2 Production Setup Instructions
 
@@ -555,7 +558,7 @@ For deployment of the *NGINX Ingress Controller* and a cert-manager, the followi
 
 [base-setup](server-setup/base-setup/Chart.yaml)
 
-The email [here](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
+The email in the [cert-issuer template](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
 
 ## 3. Contributing
 

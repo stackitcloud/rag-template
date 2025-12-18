@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { RouterView } from "vue-router";
+import { RouterView } from "vue-router";
 import { NavigationContainer, OnyxIcon } from "@shared/ui";
 import { useI18n } from "vue-i18n";
 import { iconArrowSmallUpRightTop } from "@sit-onyx/icons";

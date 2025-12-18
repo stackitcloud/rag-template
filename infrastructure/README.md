@@ -184,7 +184,7 @@ Default values for the deployment are provided in the `rag/values.yaml` file und
 
 **Dev helper via Kustomize/Tilt**  
 For local development you can let Tilt generate Langfuse init secrets automatically:
-- Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `.env.langfuse` and fill it with the Langfuse init env values.
+- Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `infrastructure/kustomize/langfuse/.env.langfuse` and fill it with the Langfuse init env values.
 - Tilt runs Kustomize on `infrastructure/kustomize/langfuse` and applies the resulting `langfuse-init-secrets` (hash disabled) before Helm resources.
 - This is dev-only. For production, create/manage secrets with your secret manager and set `secretKeyRef.name` in `values.yaml` to your managed secret.
 

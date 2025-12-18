@@ -479,8 +479,8 @@ value_override = [
     # secrets env
     "shared.secrets.s3.accessKey.value=%s" % os.environ["S3_ACCESS_KEY_ID"],
     "shared.secrets.s3.secretKey.value=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
-    "shared.secrets.basicAuthUser.value=%s" % os.environ["BASIC_AUTH_USER"],
-    "shared.secrets.basicAuthPassword.value=%s" % os.environ["BASIC_AUTH_PASSWORD"],
+    "shared.secrets.basicAuth.user.value=%s" % os.environ["BASIC_AUTH_USER"],
+    "shared.secrets.basicAuth.password.value=%s" % os.environ["BASIC_AUTH_PASSWORD"],
     "backend.secrets.langfuse.publicKey.value=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "backend.secrets.langfuse.secretKey.value=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     "backend.secrets.ragas.openaiApikey.value=%s" % os.environ["RAGAS_OPENAI_API_KEY"],

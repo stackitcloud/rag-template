@@ -113,7 +113,7 @@ spec:
           - configMapRef:
               name: {{ template "configmap.extractorSitemapName" . }}
           - secretRef:
-              name: {{ template "secret.s3Name" . }}
+              name: {{ template "secret.s3RefName" . }}
         {{- $hfCacheDir := include "extractor.huggingfaceCacheDir" . }}
         env:
           - name: PYTHONPATH

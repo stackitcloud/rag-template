@@ -166,18 +166,20 @@ class SitemapExtractor(InformationExtractor):
                 except (json.JSONDecodeError, TypeError):
                     sitemap_loader_parameters[x.key] = x.value
             elif x.key == "continue_on_failure":
-                if isinstance(x.value, bool):
-                    sitemap_loader_parameters[x.key] = x.value
-                elif isinstance(x.value, str):
-                    normalized = x.value.strip().lower()
-                    if normalized in ("true", "1", "yes", "y", "on"):
-                        sitemap_loader_parameters[x.key] = True
-                    elif normalized in ("false", "0", "no", "n", "off"):
-                        sitemap_loader_parameters[x.key] = False
-                    else:
-                        sitemap_loader_parameters[x.key] = x.value
-                else:
-                    sitemap_loader_parameters[x.key] = x.value
+                sitemap_loader_parameters[x.key] = self._normalize_boolean(x.value)
             else:
                 sitemap_loader_parameters[x.key] = int(x.value) if x.value.isdigit() else x.value
         return sitemap_loader_parameters, parser_override
+
+    def _normalize_boolean(self, value: str) -> Optional[bool]:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in ("true", "1", "yes", "y", "on"):
+                return True
+            if normalized in ("false", "0", "no", "n", "off"):
+                return False
+        if isinstance(value, (int, float)):
+            return bool(value)
+        return None

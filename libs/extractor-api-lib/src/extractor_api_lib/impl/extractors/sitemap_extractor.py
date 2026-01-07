@@ -118,6 +118,9 @@ class SitemapExtractor(InformationExtractor):
         if meta_function is not None:
             sitemap_loader_parameters["meta_function"] = meta_function
 
+        if "continue_on_failure" not in sitemap_loader_parameters:
+            sitemap_loader_parameters["continue_on_failure"] = True
+
         document_loader = SitemapLoader(**sitemap_loader_parameters)
         documents = []
         try:
@@ -161,6 +164,19 @@ class SitemapExtractor(InformationExtractor):
                 try:
                     sitemap_loader_parameters[x.key] = json.loads(x.value)
                 except (json.JSONDecodeError, TypeError):
+                    sitemap_loader_parameters[x.key] = x.value
+            elif x.key == "continue_on_failure":
+                if isinstance(x.value, bool):
+                    sitemap_loader_parameters[x.key] = x.value
+                elif isinstance(x.value, str):
+                    normalized = x.value.strip().lower()
+                    if normalized in ("true", "1", "yes", "y", "on"):
+                        sitemap_loader_parameters[x.key] = True
+                    elif normalized in ("false", "0", "no", "n", "off"):
+                        sitemap_loader_parameters[x.key] = False
+                    else:
+                        sitemap_loader_parameters[x.key] = x.value
+                else:
                     sitemap_loader_parameters[x.key] = x.value
             else:
                 sitemap_loader_parameters[x.key] = int(x.value) if x.value.isdigit() else x.value

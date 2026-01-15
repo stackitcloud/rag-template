@@ -11,6 +11,24 @@ publish_lib() {
     echo "Missing $path" >&2
     exit 1
   fi
+  local pyproject="$path/pyproject.toml"
+  if [ -f "$pyproject" ]; then
+    python - "$pyproject" "$version" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+pyproject = Path(sys.argv[1])
+version = sys.argv[2]
+text = pyproject.read_text()
+pattern = r'^(\s*rag-core-lib\s*=\s*)\{[^\n]*path\s*=\s*"[^"]+"[^\n]*\}\s*$'
+replacement = r'\1"=={}"'.format(version)
+new_text = re.sub(pattern, replacement, text, flags=re.M)
+if new_text != text:
+    pyproject.write_text(new_text)
+    print(f"Rewrote rag-core-lib path dependency in {pyproject} to =={version}")
+PY
+  fi
   echo "Publishing $lib ($version) to ${repo_flag:-pypi default}"
   (cd "$path" && poetry version "$version" && poetry build && poetry publish $repo_flag)
 }

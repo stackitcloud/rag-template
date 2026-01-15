@@ -4,6 +4,7 @@
 dist
 tmp
 /out-tsc
+**/.npm-cache
 
 **/.npm-cache
 

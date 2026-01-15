@@ -174,8 +174,8 @@ jobs:
             "admin-backend services/admin-backend/Dockerfile ."
             "document-extractor services/document-extractor/Dockerfile ."
             "mcp-server services/mcp-server/Dockerfile ."
-            "frontend services/frontend/apps/chat-app/Dockerfile services/frontend"
-            "admin-frontend services/frontend/apps/admin-app/Dockerfile services/frontend"
+            "frontend services/frontend/apps/chat-app/Dockerfile ."
+            "admin-frontend services/frontend/apps/admin-app/Dockerfile ."
           )
           for entry in "${images[@]}"; do
             IFS=" " read -r name dockerfile context <<<"$entry"

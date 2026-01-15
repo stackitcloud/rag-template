@@ -46,6 +46,15 @@ jobs:
         id: ver
         run: |
           set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.pre_version || '' }}"
+            if [ -n "$VERSION" ]; then
+              CLEAN_VERSION="${{ github.event.inputs.clean_version }}"
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
           TITLE="${{ github.event.pull_request.title }}"
           VERSION=$(echo "$TITLE" | sed -nE 's/.*prepare ([0-9]+\.[0-9]+\.[0-9]+(\.post[0-9]+)?).*/\1/p' || true)
           if [ -z "$VERSION" ]; then

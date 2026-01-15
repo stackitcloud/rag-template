@@ -32,7 +32,7 @@ permissions:
 jobs:
   publish-pre:
     name: Publish pre-release to TestPyPI (core-first)
-    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'prepare-release') }}
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'prepare-release') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.ver.outputs.version }}

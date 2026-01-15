@@ -1,4 +1,4 @@
-FROM node:21-slim as builder
+FROM node:22-slim as builder
 
 WORKDIR /usr/src/app
 

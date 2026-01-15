@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 python:3.13-bookworm AS build
 
-ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
-ENV POETRY_VIRTUALENVS_CREATE=false \
+ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
+    POETRY_VIRTUALENVS_CREATE=false \
     POETRY_VIRTUALENVS_IN_PROJECT=false \
     VIRTUAL_ENV=/opt/.venv \
     PATH=/opt/.venv/bin:$PATH \
@@ -23,8 +23,10 @@ COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock ./
 
 # Copy the required lib dependencies
 COPY libs/rag-core-api/pyproject.toml libs/rag-core-api/poetry.lock /app/libs/rag-core-api/
+COPY libs/rag-core-api/README.md /app/libs/rag-core-api/README.md
 COPY libs/rag-core-api/src /app/libs/rag-core-api/src
 COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/README.md
 COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
 
 RUN mkdir -p log && chmod 700 log \

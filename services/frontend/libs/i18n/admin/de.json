@@ -14,6 +14,14 @@
     "confluenceLoadDescription": "Geben Sie Ihre Confluence-Zugangsdaten an und wählen Sie einen Space-Key oder einen CQL-Filter",
     "confluenceQueryHint": "Lassen Sie die Felder leer, um den gesamten Bereich zu laden, oder geben Sie einen Confluence Query Language (CQL) Ausdruck zum Filtern der Seiten ein",
     "loadConfluence": "Laden starten",
+    "sitemapUpload": "Sitemap",
+    "sitemapLoadTitle": "Inhalte aus einer Sitemap laden",
+    "sitemapLoadDescription": "Geben Sie eine Sitemap-URL ein, um Inhalte aus allen verlinkten Seiten zu extrahieren und zu laden",
+    "sitemapParserAuto": "Parser: Automatisch (Server-Standard verwenden)",
+    "sitemapParserAstro": "Parser: Astro / Starlight",
+    "sitemapParserDocusaurus": "Parser: Docusaurus",
+    "sitemapParserGeneric": "Parser: Generisch",
+    "loadSitemap": "Sitemap laden",
     "fileTypeNotAllowedTitle": "Dateityp nicht erlaubt",
   "fileTypeNotAllowedDescription": "Erlaubte Dateitypen:",
     "select": "Auswählen",
@@ -26,6 +34,9 @@
     "confluenceError": "Laden aus Confluence fehlgeschlagen",
     "confluenceNotConfigured": "Confluence ist nicht konfiguriert",
     "confluenceLocked": "Confluence Loader ist beschäftigt. Versuchen Sie es später erneut",
+    "sitemapError": "Laden aus Sitemap fehlgeschlagen",
+    "sitemapNotConfigured": "Sitemap ist nicht konfiguriert",
+    "sitemapLocked": "Sitemap Loader ist beschäftigt. Versuchen Sie es später erneut",
     "unknownError": "Ein unbekannter Fehler ist aufgetreten"
   }
 }

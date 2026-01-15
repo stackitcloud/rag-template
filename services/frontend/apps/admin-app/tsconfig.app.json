@@ -14,6 +14,5 @@
     "src/**/*.ts",
     "**/*.vue",
     "env.d.ts",
-    "vite.config.mts"
   ]
 }

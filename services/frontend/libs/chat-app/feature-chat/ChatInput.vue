@@ -2,7 +2,8 @@
 import { useI18n } from 'vue-i18n'
 import { onMounted, ref, computed } from 'vue'
 import { useChatStore } from "../data-access/+state/chat.store"
-import { PaperAirplaneIcon } from '@heroicons/vue/24/outline'
+import { iconSend } from '@sit-onyx/icons'
+import { OnyxIcon } from '@shared/ui'
 
 const chatStore = useChatStore()
 const { t } = useI18n()
@@ -76,7 +77,7 @@ onMounted(() => {
       </div>
 
       <div v-else class="flex gap-2 justify-center items-center">
-        <PaperAirplaneIcon class="w-4 h-4" />
+        <OnyxIcon :icon="iconSend" :size="16" />
       </div>
     </button>
   </div>

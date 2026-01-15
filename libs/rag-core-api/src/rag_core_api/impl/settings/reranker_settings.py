@@ -12,6 +12,10 @@ class RerankerSettings(BaseSettings):
     ----------
     k_documents : int
         The number of documents to return after reranking (default 5).
+    min_relevance_score : float
+        Minimum relevance threshold to return (default 0.001).
+    enabled : bool
+        A flag indicating whether the reranker is enabled (default True).
     """
 
     class Config:
@@ -21,3 +25,5 @@ class RerankerSettings(BaseSettings):
         case_sensitive = False
 
     k_documents: int = Field(default=5)
+    min_relevance_score: float = Field(default=0.001)
+    enabled: bool = Field(default=True)

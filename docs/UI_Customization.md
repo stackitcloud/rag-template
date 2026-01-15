@@ -8,15 +8,42 @@ Note: In this document, “frontend” refers to the folder at services/frontend
 
 The RAG Template frontend supports several customization options:
 
-- **Bot Name**: Customize the AI assistant's name in chat messages
-- **Logo/Branding**: Replace the default logo with your organization's branding
-- **Theme System**: Switch between light and dark modes with user preference persistence
+- **Bot name** and **initial message**
+- **Logos** for light and dark mode
+- **Brand colors and themes** (Tailwind v4 + daisyUI v5)
+
+## Quick Start (Most Common Rebranding)
+
+If you just want to rename/rebrand the UI, these are the usual knobs:
+
+1. **Bot display name**: set `VITE_BOT_NAME`
+2. **Welcome message text**: edit `services/frontend/libs/i18n/chat/en.json` → `chat.initialMessage` (keep `{bot_name}`)
+3. **Navigation logo**: set `VITE_UI_LOGO_PATH_LIGHT` / `VITE_UI_LOGO_PATH_DARK` and add the files under each app’s `public/assets/`
+4. **Brand colors**: edit `services/frontend/libs/ui-styles/src/tailwind.css` (daisyUI theme tokens)
+5. **App titles + favicons**: edit `services/frontend/apps/*/index.html` and `services/frontend/apps/*/public/favicon.ico`
+
+## How Configuration Works (Build-Time vs Runtime)
+
+Vite apps are **static builds**. By default, all `VITE_*` variables are read at **build time** and baked into the built JS/CSS.
+
+This repository also supports **runtime overrides** in container deployments:
+
+- `services/frontend/.env.production` contains placeholder values like `VITE_BOT_NAME=VITE_BOT_NAME`
+- `services/frontend/env.sh` replaces those placeholder strings inside built `*.js`/`*.css` files at startup
+
+That replacement only happens if you **run `env.sh` against the directory that nginx serves** (default: `/usr/share/nginx/html`).
+
+| Scenario | Where to set `VITE_BOT_NAME` | When it takes effect |
+|---|---|---|
+| Local dev (`npm run chat:serve`) | `services/frontend/.env.development` (or `.env.development.local`) | on server restart |
+| Static hosting (S3, nginx without `env.sh`) | build environment or `services/frontend/.env.production` with real values | at build time |
+| Docker/Kubernetes (with `env.sh`) | container env vars + `env.sh` run at startup (in `infrastructure/rag/values.yaml` set `frontend.envs.vite.VITE_BOT_NAME`) | at container startup |
 
 ## Configuration Options
 
 ### Environment Variables
 
-All customization is done through environment variables that can be set at build time or runtime:
+UI rebranding uses `VITE_*` environment variables (see “Build-Time vs Runtime” above):
 
 | Variable | Description | Default Value | Example |
 |----------|-------------|---------------|---------|
@@ -24,43 +51,29 @@ All customization is done through environment variables that can be set at build
 | `VITE_UI_LOGO_PATH` | Common path to the main navigation logo (fallback for both light/dark) | "/assets/navigation-logo.svg" | "/assets/my-logo.png" |
 | `VITE_UI_LOGO_PATH_LIGHT` | Path to logo used in light mode (falls back to `VITE_UI_LOGO_PATH`) | — | "/assets/logo-light.svg" |
 | `VITE_UI_LOGO_PATH_DARK` | Path to logo used in dark mode (falls back to `VITE_UI_LOGO_PATH`) | — | "/assets/logo-dark.svg" |
-| `VITE_UI_THEME_DEFAULT` | Default theme when user first visits | "light" | "dark" |
-| `VITE_UI_THEME_OPTIONS` | Available theme options (comma-separated) | "light,dark" | "light,dark,auto" |
+| `VITE_UI_THEME_DEFAULT` | Default theme when user first visits | "dark" | "light" |
+| `VITE_UI_THEME_OPTIONS` | Available theme options (comma-separated) | "light,dark" | "light" |
 
-### Bot Name Customization
+### Bot Name & Welcome Message
 
-The bot name appears in the initial welcome message in the chat interface.
+The bot name is read from `VITE_BOT_NAME` (see `services/frontend/libs/shared/settings.ts`) and is used in:
 
-**Default Message:**
+- the sender name for assistant chat bubbles (`services/frontend/libs/chat-app/ui/ChatMessages.vue`)
+- the first “welcome” message when a chat session starts (`services/frontend/libs/chat-app/data-access/+state/chat.store.ts`)
 
-```text
-Hi 👋, I'm your AI Assistant Knowledge Agent, here to support you with any questions regarding the provided documents!
-```
+#### Change the bot name
 
-**Setting Custom Bot Name:**
+- **Local development**: set `VITE_BOT_NAME` in `services/frontend/.env.development` (or create `services/frontend/.env.development.local`) and restart `npm run chat:serve`.
+- **Build-time (no runtime injection)**: set `VITE_BOT_NAME` in your environment before building (for example `VITE_BOT_NAME="Acme Assistant" npm -C services/frontend run chat:build`).
+- **Runtime (Docker/Kubernetes)**: set `VITE_BOT_NAME` in the container environment and ensure `services/frontend/env.sh` runs (see “Docker Deployment” / “Kubernetes/Helm Deployment” below).
 
-1. **Development Environment:**
+#### Change the welcome message text
 
-   ```bash
-   # In your .env file
-   VITE_BOT_NAME=DocBot
-   ```
+Edit the translation string and keep `{bot_name}` for interpolation:
 
-2. **Docker/Production:**
-
-   ```bash
-   # Environment variable
-   export VITE_BOT_NAME="Your Custom Bot Name"
-   ```
-
-3. **Kubernetes/Helm:**
-
-   ```yaml
-   # In your values.yaml or deployment
-   env:
-     - name: VITE_BOT_NAME
-       value: "Corporate Knowledge Assistant"
-   ```
+Files:
+- `services/frontend/libs/i18n/chat/en.json`
+- `services/frontend/libs/i18n/chat/de.json`
 
 ### Logo Customization
 
@@ -93,8 +106,8 @@ The logo appears in the navigation header of both chat and admin applications. Y
 
 **Fallback order:**
 
-- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo.svg))
-- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo.svg))
+- Light: `VITE_UI_LOGO_PATH_LIGHT` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo-light.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo-light.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo-light.svg))
+- Dark: `VITE_UI_LOGO_PATH_DARK` → `VITE_UI_LOGO_PATH` → `/assets/navigation-logo-dark.svg` (default asset exists in both apps: [chat](../services/frontend/apps/chat-app/public/assets/navigation-logo-dark.svg), [admin](../services/frontend/apps/admin-app/public/assets/navigation-logo-dark.svg))
 
 **Examples:**
 
@@ -107,16 +120,57 @@ VITE_UI_LOGO_PATH_DARK=/assets/company-logo-dark.svg
 VITE_UI_LOGO_PATH=/assets/company-logo.svg
 ```
 
-### Theme System
+### Other Rebranding Assets
 
-The application supports a flexible theme system with user preference persistence.
+#### Chat avatars (user + assistant)
 
-**Available Themes:**
+The chat bubbles use static avatar files by default:
 
-- `light`: Light mode (default)
-- `dark`: Dark mode
+- `services/frontend/apps/chat-app/public/assets/ai-avatar.svg`
+- `services/frontend/apps/chat-app/public/assets/user.svg`
 
-**Theme Configuration:**
+Replace those files (keep the same filenames), or update the constants in `services/frontend/libs/chat-app/ui/ChatMessages.vue`.
+
+#### Favicons
+
+- `services/frontend/apps/chat-app/public/favicon.ico`
+- `services/frontend/apps/admin-app/public/favicon.ico`
+
+#### Browser tab titles
+
+- `services/frontend/apps/chat-app/index.html` (`<title>`)
+- `services/frontend/apps/admin-app/index.html` (`<title>`)
+
+### Theme System (Tailwind v4 + daisyUI v5)
+
+The frontend uses Tailwind v4 with daisyUI v5. In the following, we describe how to customize the theme using central CSS (recommended for brand colors shared by both apps):
+
+- File: `services/frontend/libs/ui-styles/src/tailwind.css`
+- This file loads Tailwind v4 and defines daisyUI themes via CSS `@plugin` blocks.
+- Themes are defined in two blocks:
+  - `light`: Light mode
+  - `dark`: Dark mode (default via `VITE_UI_THEME_DEFAULT`)
+- Update semantic tokens under the `@plugin "daisyui/theme"` blocks, for example:
+
+```css
+--color-primary: #a90303;            /* CTA/buttons */
+--color-primary-content: #ffffff;    /* readable text on primary */
+--color-base-100: #ffffff;           /* page background */
+--color-base-200: #EDEDED;           /* cards */
+```
+
+Common class ↔ token mapping:
+
+- `btn btn-primary`, `bg-primary`, `text-primary` → `--color-primary` / `--color-primary-content`
+- `bg-secondary`, `text-secondary-content` → `--color-secondary` / `--color-secondary-content`
+- `bg-base-100/200/300`, `border-base-300`, `text-base-content` → `--color-base-*` / `--color-base-content`
+
+Custom CSS variables used by this repo are also defined per theme in `tailwind.css`:
+
+- `--scrollbar-track` / `--scrollbar-thumb` (scrollbar styling)
+- `--base-200-highlight` (highlight “jump to source” anchors)
+
+Theme behavior:
 
 1. **Set Default Theme:**
 
@@ -139,14 +193,29 @@ The application supports a flexible theme system with user preference persistenc
 
 - Theme preference is saved in browser's localStorage
 - Theme persists across browser sessions
-- Theme toggle button appears only when multiple options are available
+- The built-in theme toggle is shown only when both `light` and `dark` are available
 - Manual theme switching overrides the default setting
+- Theme selection is stored under `localStorage["app-theme"]` and applied via `html[data-theme]`
+
+### Markdown / Chat Content Styling
+
+Chat answers, user prompts, and citations are rendered from Markdown via `marked` (see `services/frontend/libs/shared/utils/src/lib/marked.utils.ts`) and styled via global CSS in `services/frontend/libs/shared/global.css`.
+
+Rebrandable bits:
+
+- Code blocks: `--chat-code-*` variables and `.chat-code-block*` styles
+- Typography: `.prose` overrides keep headings/links readable across themes
 
 ## Development Setup
 
 ### Local Development
 
-1. **Create/modify `.env` file in frontend directory** (services/frontend/.env):
+Vite reads env files from `services/frontend/`. Common ones:
+
+- `services/frontend/.env.development` / `services/frontend/.env.development.local` (local dev)
+- `services/frontend/.env.production` / `services/frontend/.env.production.local` (production build)
+
+1. **Create/modify an env file** (recommended: `services/frontend/.env.development.local`):
 
    ```bash
    # Bot customization
@@ -173,31 +242,42 @@ The application supports a flexible theme system with user preference persistenc
 
 ### Docker Deployment
 
-For Docker deployments, the frontend uses a special script (services/frontend/env.sh) to replace environment variables at runtime:
+The app Docker images are built from:
 
-1. **Set environment variables in your container:**
+- `services/frontend/apps/chat-app/Dockerfile`
+- `services/frontend/apps/admin-app/Dockerfile`
 
-   ```dockerfile
-   ENV VITE_BOT_NAME="Production Assistant"
-   ENV VITE_UI_LOGO_PATH_LIGHT="/assets/prod-logo-light.svg"
-   ENV VITE_UI_LOGO_PATH_DARK="/assets/prod-logo-dark.svg"
-   ENV VITE_UI_THEME_DEFAULT="light"
-   ```
+These images contain:
 
-1. **The env.sh script automatically replaces variables** in built JS/CSS files when the container starts. See [services/frontend/env.sh](../services/frontend/env.sh).
+- built files under `/app/frontend` (read-only)
+- `env.sh` at `/app/env.sh`
+- nginx serving `/usr/share/nginx/html`
+
+To use runtime variables in Docker, you must ensure the container runs:
+
+```sh
+cp -r /app/frontend/. /usr/share/nginx/html && /bin/sh /app/env.sh
+```
+
+before nginx serves the files (otherwise placeholders like `VITE_BOT_NAME` will remain).
+
+See `services/frontend/env.sh` for details, including `TARGET_DIR` override.
 
 ### Kubernetes/Helm Deployment
 
-1. **Configure in your Helm values.yaml** (example chart values at [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml)):
+The Helm chart wires env vars via `frontend.envs.vite` into a ConfigMap and mounts a writable `/usr/share/nginx/html`. It also runs the copy + `env.sh` step (see `infrastructure/rag/templates/frontend/deployment.yaml`).
+
+1. **Configure in your Helm `values.yaml`** (example values at [infrastructure/rag/values.yaml](../infrastructure/rag/values.yaml)):
 
    ```yaml
    frontend:
-     env:
-       VITE_BOT_NAME: "Enterprise Knowledge Bot"
-       VITE_UI_LOGO_PATH_LIGHT: "/assets/enterprise-logo-light.svg"
-       VITE_UI_LOGO_PATH_DARK: "/assets/enterprise-logo-dark.svg"
-       VITE_UI_THEME_DEFAULT: "dark"
-       VITE_UI_THEME_OPTIONS: "light,dark"
+     envs:
+       vite:
+         VITE_BOT_NAME: "Enterprise Knowledge Bot"
+         VITE_UI_LOGO_PATH_LIGHT: "/assets/enterprise-logo-light.svg"
+         VITE_UI_LOGO_PATH_DARK: "/assets/enterprise-logo-dark.svg"
+         VITE_UI_THEME_DEFAULT: "dark"
+         VITE_UI_THEME_OPTIONS: "light,dark"
    ```
 
 2. **Or use ConfigMap:**
@@ -217,41 +297,30 @@ For Docker deployments, the frontend uses a special script (services/frontend/en
 
 ### Adding Custom Themes
 
-To add custom themes beyond light/dark:
+This repo is optimized for `light`/`dark` theming. You can still add a custom theme, but note:
 
-1. **Update the settings configuration** in [services/frontend/libs/shared/settings.ts](../services/frontend/libs/shared/settings.ts):
+- The built-in UI toggle only switches between `light` and `dark` (`services/frontend/libs/shared/ui/ThemeToggle.vue`).
+- If you want a custom theme without adding a theme picker, set `VITE_UI_THEME_OPTIONS` to a single theme and the toggle will disappear.
 
-   ```typescript
-   // frontend/libs/shared/settings.ts
-   const defaultSettings: AppSettings = {
-     ui: {
-       theme: {
-         default: "light",
-         options: ["light", "dark", "custom"], // Add your theme
-       },
-     },
-   };
-   ```
+To add a custom theme, define it in `services/frontend/libs/ui-styles/src/tailwind.css`:
 
-1. **Configure DaisyUI themes** in [services/frontend/tailwind.config.js](../services/frontend/tailwind.config.js):
+CSS (Tailwind v4):
 
-   ```javascript
-   module.exports = {
-     daisyui: {
-       themes: [
-         "light",
-         "dark",
-         {
-           custom: {
-             "primary": "#your-color",
-             "secondary": "#your-color",
-             // ... more theme colors
-           }
-         }
-       ],
-     },
-   };
-   ```
+```css
+@plugin "daisyui/theme" {
+  name: "brand-red";
+  --color-primary: #a90303;
+  --color-primary-content: #ffffff;
+  /* ... other tokens ... */
+}
+```
+
+Then select it via env vars:
+
+```bash
+VITE_UI_THEME_DEFAULT=brand-red
+VITE_UI_THEME_OPTIONS=brand-red
+```
 
 ### Internationalization
 
@@ -284,9 +353,12 @@ Bot names and messages support internationalization:
 
 ### Bot Name Not Updating
 
-- **Issue**: Bot name shows as `{bot_name}` instead of actual name
-- **Cause**: Vue computed property not accessed correctly
-- **Solution**: Use `initialMessage.value` instead of `initialMessage` in the store
+- **Issue**: Bot name stays at the default or shows a placeholder value (e.g. `VITE_BOT_NAME`)
+- **Cause**: Runtime env replacement did not run (Vite env vars are build-time by default)
+- **Solutions**:
+  - Ensure `services/frontend/.env.production` contains placeholders for the variables you want to replace (this repo includes `VITE_BOT_NAME`, `VITE_UI_*`, etc.)
+  - Ensure the container runs `env.sh` after copying the built files into `/usr/share/nginx/html`
+  - Verify the variable is set in the container environment (Kubernetes `ConfigMap`/`Secret`, Docker `-e`, etc.)
 
 ### Logo Not Loading / Wrong for Theme
 
@@ -312,6 +384,7 @@ Bot names and messages support internationalization:
 - **Issue**: Customization works in development but not production
 - **Cause**: Vite environment variables are build-time only
 - **Solutions**:
+  - Ensure the variables exist as placeholders at build time (see `services/frontend/.env.production`)
   - For Docker: Ensure `env.sh` script runs after copying files
   - For Kubernetes: Use ConfigMap/Secret with proper mounting
   - Verify environment variables are set in container

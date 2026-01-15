@@ -1,0 +1,182 @@
+/* -----------------------------------------------------------
+   Central Tailwind v4 + daisyUI v5 config for the whole monorepo
+   - Tailwind v4 is configured in CSS (not tailwind.config.js)
+   - daisyUI v5 themes + tokens are defined here with readable CSS variables
+   Docs: Tailwind v4 CSS-first config, @source, Vite plugin; daisyUI v5 themes/variables
+   ----------------------------------------------------------- */
+
+/* Load Tailwind v4 (this replaces @tailwind base/components/utilities) */
+@import "tailwindcss" source(none);
+/* ^ source(none) disables auto scanning so we can be explicit below. Useful in monorepos. */
+
+/* Tell Tailwind **exactly** where to scan for class names in this workspace */
+@source "../../../apps/chat-app/src";
+@source "../../../apps/admin-app/src";
+@source "../../"; /* all libs under services/frontend/libs */
+
+/* Load plugins the v4 way (from CSS) */
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  /* Enable built-in themes; make light default and dark follow OS preference */
+  themes: light --default, dark --prefersdark;
+  /* Scope theme variables to <html> */
+  root: "html";
+  /* Silence daisyUI logs in dev console */
+  logs: false;
+}
+
+/* ===========================================================
+   THEME: LIGHT
+   Tip: These semantic tokens power utilities like:
+     bg-primary, text-primary, border-primary, btn-primary, etc.
+   See: daisyUI “Colors”, “Utilities & variables”, “Themes”
+   =========================================================== */
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+
+  /* Matches STACKIT docs (digits light) */
+  --color-primary: #00c3cd;
+  --color-primary-content: #091a26;
+
+  --color-secondary: #ccf3f5;
+  --color-secondary-content: #162938;
+
+  --color-accent: #00c3cd;
+  --color-accent-content: #091a26;
+
+  --color-neutral: #162938;
+  --color-neutral-content: #f8f9fa;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f0f2f4;
+  --color-base-300: #e7eaed;
+  --color-base-content: #162938;
+
+  --color-info: #127481;
+  --color-info-content: #f8f9fa;
+
+  --color-success: #45a85d;
+  --color-success-content: #091a26;
+
+  --color-warning: #e3774c;
+  --color-warning-content: #091a26;
+
+  --color-error: #dc1f1f;
+  --color-error-content: #f8f9fa;
+
+  /* Custom CSS variables used by the apps */
+  --scrollbar-track: #ffffff;
+  --scrollbar-thumb: rgba(22, 41, 56, 0.35);
+  --base-200-highlight: #ccf3f5;
+
+  /* Compatibility: keep daisyUI v4-style fallback variables used in custom CSS */
+  --fallback-p: var(--color-primary);
+  --fallback-pc: var(--color-primary-content);
+  --fallback-s: var(--color-secondary);
+  --fallback-sc: var(--color-secondary-content);
+  --fallback-a: var(--color-accent);
+  --fallback-ac: var(--color-accent-content);
+  --fallback-n: var(--color-neutral);
+  --fallback-nc: var(--color-neutral-content);
+  --fallback-b1: var(--color-base-100);
+  --fallback-b2: var(--color-base-200);
+  --fallback-b3: var(--color-base-300);
+  --fallback-bc: var(--color-base-content);
+  --fallback-in: var(--color-info);
+  --fallback-inc: var(--color-info-content);
+  --fallback-su: var(--color-success);
+  --fallback-suc: var(--color-success-content);
+  --fallback-wa: var(--color-warning);
+  --fallback-wac: var(--color-warning-content);
+  --fallback-er: var(--color-error);
+  --fallback-erc: var(--color-error-content);
+}
+
+/* ===========================================================
+   THEME: DARK
+   Mirrors light theme semantics, tuned for dark surfaces.
+   Note: <html> will automatically use this when OS is in dark mode
+   because we set --prefersdark on the dark theme above.
+   =========================================================== */
+@plugin "daisyui/theme" {
+  name: "dark";
+  prefersdark: true;
+
+  /* Matches STACKIT docs (digits dark) */
+  --color-primary: #00c3cd;
+  --color-primary-content: #091a26;
+
+  --color-secondary: #165e6c;
+  --color-secondary-content: #e7eaed;
+
+  --color-accent: #00c3cd;
+  --color-accent-content: #091a26;
+
+  --color-neutral: #162938;
+  --color-neutral-content: #e7eaed;
+
+  --color-base-100: #091a26;
+  --color-base-200: #233542;
+  --color-base-300: #2c3d4a;
+  --color-base-content: #e7eaed;
+
+  --color-info: #66dbe1;
+  --color-info-content: #091a26;
+
+  --color-success: #51cf66;
+  --color-success-content: #091a26;
+
+  --color-warning: #e3774c;
+  --color-warning-content: #091a26;
+
+  --color-error: #e34c4c;
+  --color-error-content: #091a26;
+
+  /* Custom CSS variables used by the apps */
+  --scrollbar-track: #091a26;
+  --scrollbar-thumb: rgba(231, 234, 237, 0.25);
+  --base-200-highlight: #165e6c;
+
+  /* Compatibility: keep daisyUI v4-style fallback variables used in custom CSS */
+  --fallback-p: var(--color-primary);
+  --fallback-pc: var(--color-primary-content);
+  --fallback-s: var(--color-secondary);
+  --fallback-sc: var(--color-secondary-content);
+  --fallback-a: var(--color-accent);
+  --fallback-ac: var(--color-accent-content);
+  --fallback-n: var(--color-neutral);
+  --fallback-nc: var(--color-neutral-content);
+  --fallback-b1: var(--color-base-100);
+  --fallback-b2: var(--color-base-200);
+  --fallback-b3: var(--color-base-300);
+  --fallback-bc: var(--color-base-content);
+  --fallback-in: var(--color-info);
+  --fallback-inc: var(--color-info-content);
+  --fallback-su: var(--color-success);
+  --fallback-suc: var(--color-success-content);
+  --fallback-wa: var(--color-warning);
+  --fallback-wac: var(--color-warning-content);
+  --fallback-er: var(--color-error);
+  --fallback-erc: var(--color-error-content);
+}
+
+/* ===========================================================
+   SAFELIST (v4 way)
+   If you generate classes dynamically (from JSON/DB), list them here
+   so Tailwind includes them even if they’re not found in source files.
+   =========================================================== */
+@source inline("w-32 w-40 h-5 w-5 flex flex-1 items-center gap-2 p-4 md:container md:mx-auto btn btn-primary btn-circle btn-ghost bg-primary hover:bg-white/20 hover:bg-base-300");
+
+/* ===========================================================
+   HOW TO USE (quick cheatsheet)
+   - Buttons:      btn btn-primary         (uses --color-primary)
+   - Surfaces:     bg-base-100             (page background)
+                   bg-base-200/300         (cards/elevations)
+                   text-base-content       (default text on base-*)
+   - Brand text:   text-primary            (headlines/links you want to brand)
+   - Status:       bg-success / text-error / border-warning
+   - Dark mode:    automatic via prefers-color-scheme; to force:
+                     <html data-theme="light"> or data-theme="dark"
+   References: daisyUI Colors & Themes docs; Utilities & variables
+   =========================================================== */

@@ -1,5 +1,6 @@
 **/.nx/*
 *.tgz
+**/_poetry
 */Chart.lock
 helm-chart/charts/admin-backend-0.0.1.tgz
 helm-chart/charts/adminfrontend-0.0.1.tgz
@@ -159,3 +160,6 @@ dmypy.json
 cython_debug/
 
 **/.DS_Store
+
+# Nx workspace caches (frontend uses a nested Nx workspace)
+**/.nx/

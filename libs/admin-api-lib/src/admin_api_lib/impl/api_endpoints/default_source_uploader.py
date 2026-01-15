@@ -149,7 +149,11 @@ class DefaultSourceUploader(SourceUploader):
                 )
             )
         except asyncio.TimeoutError:
-            logger.error("Upload of %s timed out after %s seconds", source_name, timeout)
+            logger.error(
+                "Upload of %s timed out after %s seconds (increase SOURCE_UPLOADER_TIMEOUT to allow longer ingestions)",
+                source_name,
+                timeout,
+            )
             self._key_value_store.upsert(source_name, Status.ERROR)
         except Exception:
             logger.exception("Error while uploading %s", source_name)

@@ -6,7 +6,7 @@ import { useI18n } from "vue-i18n";
 import { ChatBubbleModel } from "../models/chat-bubble.model";
 import { ChatMessageModel } from "../models/chat-message.model";
 import ChatBubble from "./ChatBubble.vue";
-const USER_AVATAR = "/assets/user.svg";
+const USER_AVATAR = "/assets/user.svg?v=2";
 const AI_AVATAR = "/assets/ai-avatar.svg";
 
 const chatContainer = ref<HTMLElement>();
@@ -16,22 +16,11 @@ const props = defineProps<{
   messages: Array<ChatMessageModel>;
 }>();
 
-const isDarkTheme = (): boolean =>
-  typeof document !== "undefined" &&
-  document.documentElement.getAttribute("data-theme") === "dark";
-
 const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
   const isHuman = message.role === "user";
-  const backgroundColor = isHuman ? "bg-base-200" : "bg-primary";
-  const dark = isDarkTheme();
-  // Use base-content for light theme so text renders black; use white only in dark theme
-  const textColor = isHuman
-    ? "text-black"
-    : dark
-      ? "text-white"
-      : "text-base-content";
-  // Apply typography dark variant only in dark theme
-  const proseDark = dark ? "prose-dark" : "";
+  const backgroundColor = isHuman ? "bg-base-200" : "bg-secondary";
+  const textColor = isHuman ? "text-base-content" : "text-secondary-content";
+  const proseDark = "";
   const avatarSrc = isHuman ? USER_AVATAR : AI_AVATAR;
   const align = isHuman ? "right" : "left";
   const time = message.dateTime ? extractTime(message.dateTime) : undefined;
@@ -41,6 +30,7 @@ const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
   const mapped: ChatBubbleModel = {
     id: message.id,
     text: message.text,
+    rawText: message.rawText,
     name,
     backgroundColor,
     anchorIds,
@@ -53,6 +43,7 @@ const mapToChatBubble = (message: ChatMessageModel): ChatBubbleModel => {
 
   if (message.hasError) {
     mapped.text = t("chat.error.requestError");
+    mapped.rawText = mapped.text;
     mapped.textColor = "text-error";
   }
 
@@ -85,6 +76,7 @@ onUpdated(async () => {
         :key="message.id"
         :id="message.id"
         :text="message.text"
+        :rawText="message.rawText"
         :time="message.time"
         :avatarSrc="message.avatarSrc"
         :name="message.name"

@@ -115,8 +115,8 @@ pypandoc-binary = "^1.15"
 starlette = ">=0.49.1"
 markitdown = {version = "^0.1.3", extras = ["all"]}
 docling = "2.61.2"
-torch =      { version = "2.9.0+cpu",  source = "pytorch_cpu" }
-torchvision = { version = "0.24.0+cpu", source = "pytorch_cpu" }
+torch =      { version = "^2.9.0+cpu",  source = "pytorch_cpu" }
+torchvision = { version = "^0.24.1+cpu", source = "pytorch_cpu" }
 transformers = ">=4.53.3,<5.0.0"
 pypandoc = ">=1.6.2"
 pypandoc_binary = ">=1.6.2"

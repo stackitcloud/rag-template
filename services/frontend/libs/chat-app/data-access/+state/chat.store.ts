@@ -20,6 +20,7 @@ export const useChatStore = defineStore("chat", () => {
   const chatDocuments = ref<ChatDocumentModel[]>([]);
   const isLoading = ref(false);
   const hasError = ref(false);
+  const isSourcesPanelOpen = ref(true);
 
   // Use the global i18n instance set up in the app
   const t = i18n.global.t;
@@ -43,10 +44,11 @@ export const useChatStore = defineStore("chat", () => {
   };
   const lastMessage = () => chatHistory.value[chatHistory.value.length - 1];
 
-  function addHistory(prompt: string) {
+  function addHistory(prompt: { raw: string; html: string }) {
     chatHistory.value.push({
       id: newUid(),
-      text: prompt,
+      text: prompt.html,
+      rawText: prompt.raw,
       role: "user",
     });
 
@@ -92,7 +94,7 @@ export const useChatStore = defineStore("chat", () => {
       const requestMessages = prepareInferenceRequest(prompt);
 
       const promptAsMd = await marked(prompt);
-      addHistory(promptAsMd);
+      addHistory({ raw: prompt, html: promptAsMd });
 
       const response = await ChatAPI.callInference(requestMessages);
 
@@ -107,11 +109,12 @@ export const useChatStore = defineStore("chat", () => {
       updateLatestMessage({
         dateTime: new Date(),
         text: textAsMd,
+        rawText: response.answer,
         anchorIds: documents.map((o) => o.index),
       });
 
       chatDocuments.value.push(...documents);
-    } catch (error) {
+    } catch {
       updateLatestMessage({
         hasError: true,
         dateTime: new Date(),
@@ -123,12 +126,26 @@ export const useChatStore = defineStore("chat", () => {
 
   const initiateConversation = (id: string) => {
     conversationId.value = id;
+    const initialMessage = getInitialMessage();
     chatHistory.value.push({
       id: newUid(),
-      text: getInitialMessage(),
+      text: initialMessage,
+      rawText: initialMessage,
       role: "assistant",
       skipAPI: true,
     });
+  };
+
+  const openSourcesPanel = () => {
+    isSourcesPanelOpen.value = true;
+  };
+
+  const closeSourcesPanel = () => {
+    isSourcesPanelOpen.value = false;
+  };
+
+  const toggleSourcesPanel = () => {
+    isSourcesPanelOpen.value = !isSourcesPanelOpen.value;
   };
 
   return {
@@ -137,7 +154,11 @@ export const useChatStore = defineStore("chat", () => {
     isLoading,
     hasError,
     conversationId,
+    isSourcesPanelOpen,
     callInference,
     initiateConversation,
+    openSourcesPanel,
+    closeSourcesPanel,
+    toggleSourcesPanel,
   };
 });

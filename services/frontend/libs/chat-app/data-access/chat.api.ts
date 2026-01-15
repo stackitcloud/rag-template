@@ -3,7 +3,9 @@ import { ChatRequestModel } from "../models/chat-request.model";
 import { ChatResponseModel } from "../models/chat-response.model";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-if (import.meta.env.VITE_CHAT_AUTH_ENABLED) {
+const isChatAuthEnabled =
+  String(import.meta.env.VITE_CHAT_AUTH_ENABLED).toLowerCase() === 'true';
+if (isChatAuthEnabled) {
   axios.defaults.auth = {
       username: import.meta.env.VITE_AUTH_USERNAME,
       password: import.meta.env.VITE_AUTH_PASSWORD

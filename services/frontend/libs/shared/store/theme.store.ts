@@ -1,28 +1,43 @@
 import { defineStore } from "pinia";
-import { ref, watch, computed } from "vue";
+import { ref, computed } from "vue";
 import { settings } from "../settings";
 
 export const useThemeStore = defineStore("theme", () => {
   const THEME_STORAGE_KEY = "app-theme";
-  type Theme = "light" | "dark" | "system"; // Define allowed theme values
-  const availableThemes: Theme[] = settings.ui.theme.options as Theme[];
-  const currentTheme = ref(loadSavedTheme());
+  type Theme = string;
+
+  const availableThemes: Theme[] = (Array.isArray(settings.ui.theme.options) ? settings.ui.theme.options : [])
+    .map((t) => (typeof t === "string" ? t.trim() : ""))
+    .filter(Boolean);
+
+  const defaultTheme: Theme =
+    availableThemes.includes(settings.ui.theme.default) && settings.ui.theme.default.trim()
+      ? settings.ui.theme.default
+      : availableThemes[0] ?? settings.ui.theme.default ?? "dark";
+
+  const currentTheme = ref<Theme>(loadSavedTheme());
 
   function isValidTheme(theme: string): theme is Theme {
-    return availableThemes.includes(theme as Theme);
+    return availableThemes.includes(theme);
   }
 
-  function loadSavedTheme() {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    return savedTheme && isValidTheme(savedTheme)
-      ? savedTheme
-      : settings.ui.theme.default;
+  function loadSavedTheme(): Theme {
+    try {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      return savedTheme && isValidTheme(savedTheme) ? savedTheme : defaultTheme;
+    } catch {
+      return defaultTheme;
+    }
   }
 
   function setTheme(theme: string) {
     if (!isValidTheme(theme)) return;
     currentTheme.value = theme;
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // ignore
+    }
     applyTheme(theme);
   }
 

@@ -5,7 +5,7 @@ ARG DEPENDENCY_GROUP=prod
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv
 ENV POETRY_VIRTUALENVS_CREATE=false \
     POETRY_VIRTUALENVS_IN_PROJECT=false \
-    VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH}} \
+    VIRTUAL_ENV=${POETRY_VIRTUALENVS_PATH} \
     PATH=${POETRY_VIRTUALENVS_PATH}/bin:$PATH \
     POETRY_VERSION=2.1.3
 
@@ -26,6 +26,7 @@ COPY services/document-extractor/pyproject.toml services/document-extractor/poet
 
 # Copy the extractor-api-lib dependency (needed for both prod and prod-local)
 COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
+COPY libs/extractor-api-lib/README.md /app/libs/extractor-api-lib/README.md
 COPY libs/extractor-api-lib/src /app/libs/extractor-api-lib/src
 
 RUN mkdir -p log && chmod 700 log \

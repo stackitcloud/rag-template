@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { CloudArrowUpIcon, GlobeAltIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { OnyxIcon } from '@shared/ui';
 import { allowedDocumentAccepts, allowedDocumentDisplayNames, isAllowedDocumentType } from '@shared/utils';
+import { iconCircleInformation, iconCloudArrowUp, iconGlobe, iconX } from '@sit-onyx/icons';
 import { computed, ref } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useDocumentsStore } from '../data-access/+state/documents.store';
@@ -26,19 +27,24 @@ const confluenceUrl = ref('');
 const maxPages = ref<number>();
 const confluenceCql = ref('');
 
-// sitemap configuration refs
-const sitemapName = ref('');
-const sitemapWebPath = ref('');
-const sitemapFilterUrls = ref('');
-const sitemapHeaderTemplate = ref('');
+  // sitemap configuration refs
+  const sitemapName = ref('');
+  const sitemapWebPath = ref('');
+  const sitemapFilterUrls = ref('');
+  const sitemapHeaderTemplate = ref('');
+  const sitemapParser = ref<'docusaurus' | 'astro' | 'generic' | undefined>(undefined);
 
-const error = computed(() => store.error);
+  const error = computed(() => store.error);
 
-const uploadDocuments = (files: File[]) => {
-    if (files.some(file => !isAllowedDocumentType(file.name, file.type))) {
-        isInvalidFileType.value = true;
-        return;
-    }
+  type SitemapParser = 'docusaurus' | 'astro' | 'generic';
+  const isSitemapParser = (value: unknown): value is SitemapParser =>
+      value === 'docusaurus' || value === 'astro' || value === 'generic';
+
+  const uploadDocuments = (files: File[]) => {
+      if (files.some(file => !isAllowedDocumentType(file.name, file.type))) {
+          isInvalidFileType.value = true;
+          return;
+      }
 
     isInvalidFileType.value = false;
     store.uploadDocuments(files);
@@ -83,15 +89,21 @@ const handleConfluenceUpload = () => {
     });
 }
 
-const handleSitemapUpload = () => {
-    // send configured parameters to backend
-    store.loadSitemap({
-        name: sitemapName.value,
-        webPath: sitemapWebPath.value,
-        filterUrls: sitemapFilterUrls.value,
-        headerTemplate: sitemapHeaderTemplate.value
-    });
-}
+  const handleSitemapUpload = () => {
+      const parser = sitemapParser.value;
+      if (parser !== undefined && !isSitemapParser(parser)) {
+          store.error = 'sitemap';
+          return;
+      }
+      // send configured parameters to backend
+      store.loadSitemap({
+          name: sitemapName.value,
+          webPath: sitemapWebPath.value,
+          filterUrls: sitemapFilterUrls.value,
+          headerTemplate: sitemapHeaderTemplate.value,
+          parser,
+      });
+  }
 
 const clearError = () => {
     store.error = null
@@ -130,14 +142,14 @@ const getErrorMessage = (errorType: string) => {
             <div v-if="error" role="alert"
                 class="alert alert-error mb-4 slide-in-down flex justify-between items-center">
                 <div class="flex items-center">
-                    <InformationCircleIcon class="w-6 h-6 mr-2" />
+                    <OnyxIcon :icon="iconCircleInformation" :size="24" class="mr-2" />
                     <div>
                         <h3 class="font-bold">{{ t('documents.errorOccurred') }}</h3>
                         <div class="text-sm">{{ getErrorMessage(error) }}</div>
                     </div>
                 </div>
                 <button @click="clearError" class="btn btn-ghost btn-sm">
-                    <XMarkIcon class="w-5 h-5" />
+                    <OnyxIcon :icon="iconX" :size="20" />
                 </button>
             </div>
 
@@ -162,7 +174,7 @@ const getErrorMessage = (errorType: string) => {
                 :class="{'bg-base-200': isDragOver}" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
                 @drop.prevent="onDrop">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
-                    <CloudArrowUpIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <OnyxIcon :icon="iconCloudArrowUp" :size="40" class="mb-4 text-primary" />
                     <p class="mb-1 font-bold text-cente">{{ t('documents.uploadSelectTitle') }}</p>
                     <p class="text-xs opacity-50">{{ t('documents.uploadSelectDescription') }} {{ allowedFileTypesLabel }}</p>
 
@@ -177,7 +189,7 @@ const getErrorMessage = (errorType: string) => {
             <div v-else-if="uploadMethod === 'confluence'"
                 class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
-                    <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <OnyxIcon :icon="iconGlobe" :size="40" class="mb-4 text-primary" />
                     <p class="mb-1 font-bold">{{ t('documents.confluenceLoadTitle') }}</p>
                     <!-- configuration inputs -->
                     <div class="space-y-2 mb-4 w-full max-w-sm">
@@ -206,7 +218,7 @@ const getErrorMessage = (errorType: string) => {
             <div v-else-if="uploadMethod === 'sitemap'"
                 class="flex flex-col m-auto justify-center items-center w-full h-112 bg-base-100 rounded-box border border-base-300">
                 <div class="flex flex-col justify-center items-center pt-5 pb-6">
-                    <GlobeAltIcon class="w-10 h-10 mb-4 text-accent-content" />
+                    <OnyxIcon :icon="iconGlobe" :size="40" class="mb-4 text-primary" />
                     <p class="mb-1 font-bold">{{ t('documents.sitemapLoadTitle') }}</p>
                     <!-- configuration inputs -->
                     <div class="space-y-2 mb-4 w-full max-w-sm">
@@ -214,6 +226,13 @@ const getErrorMessage = (errorType: string) => {
                       <input id="sitemapName" v-model="sitemapName" type="text" placeholder="Name" class="input input-bordered w-full" required/>
                       <label for="sitemapWebPath" class="sr-only">Sitemap URL</label>
                       <input v-model="sitemapWebPath" type="url" placeholder="Sitemap URL (required)" class="input input-bordered w-full" required />
+                      <label for="sitemapParser" class="sr-only">Parser</label>
+                      <select id="sitemapParser" v-model="sitemapParser" class="select select-bordered w-full">
+                                                <option :value="undefined">{{ t('documents.sitemapParserAuto') }}</option>
+                        <option value="astro">{{ t('documents.sitemapParserAstro') }}</option>
+                        <option value="docusaurus">{{ t('documents.sitemapParserDocusaurus') }}</option>
+                        <option value="generic">{{ t('documents.sitemapParserGeneric') }}</option>
+                      </select>
                       <label for="sitemapFilterUrls" class="sr-only">Filter URLs</label>
                       <textarea v-model="sitemapFilterUrls" placeholder="Filter URLs (optional) - one regex pattern per line" class="textarea textarea-bordered w-full" rows="3"></textarea>
                       <label for="sitemapHeaderTemplate" class="sr-only">Headers JSON</label>
@@ -236,7 +255,7 @@ const getErrorMessage = (errorType: string) => {
             <!-- Invalid file type message -->
             <div role="alert" v-if="isInvalidFileType" @click="isInvalidFileType = false"
                 class="alert alert-warning cursor-pointer mb-2 slide-in-down">
-                <InformationCircleIcon class="w-6 h-6" />
+                <OnyxIcon :icon="iconCircleInformation" :size="24" class="mr-2" />
                 <div>
                     <h3 class="font-bold">{{ t('documents.fileTypeNotAllowedTitle') }}</h3>
                     <div class="text-xs">{{ t('documents.fileTypeNotAllowedDescription') }} {{ allowedFileTypesLabel }}</div>

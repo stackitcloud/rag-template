@@ -63,6 +63,9 @@ repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
+extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
+torch = { version = "^2.9.0+cpu", source = "pytorch_cpu" }
+torchvision = { version = "^0.24.1+cpu", source = "pytorch_cpu" }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"

@@ -135,8 +135,57 @@ jobs:
           poetry cache clear --all pypi -n || true
           poetry cache clear --all testpypi -n || true
 
+      - name: Add TestPyPI supplemental source for dry-run locking
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import tomlkit
+
+          repo_root = Path(".").resolve()
+          pyprojects = [
+              repo_root / "libs" / "rag-core-lib" / "pyproject.toml",
+              repo_root / "libs" / "rag-core-api" / "pyproject.toml",
+              repo_root / "libs" / "admin-api-lib" / "pyproject.toml",
+              repo_root / "libs" / "extractor-api-lib" / "pyproject.toml",
+              repo_root / "services" / "rag-backend" / "pyproject.toml",
+              repo_root / "services" / "admin-backend" / "pyproject.toml",
+              repo_root / "services" / "document-extractor" / "pyproject.toml",
+              repo_root / "services" / "mcp-server" / "pyproject.toml",
+          ]
+
+          def ensure_testpypi_source(path: Path) -> None:
+              if not path.exists():
+                  return
+              doc = tomlkit.parse(path.read_text())
+              tool = doc.get("tool") or tomlkit.table()
+              poetry = tool.get("poetry") or tomlkit.table()
+              sources = poetry.get("source")
+              if sources is None:
+                  sources = tomlkit.aot()
+                  poetry["source"] = sources
+
+              for src in sources:
+                  if src.get("name") == "testpypi":
+                      src["url"] = "https://test.pypi.org/legacy/"
+                      src["priority"] = "supplemental"
+                      break
+              else:
+                  src = tomlkit.table()
+                  src.add("name", "testpypi")
+                  src.add("url", "https://test.pypi.org/legacy/")
+                  src.add("priority", "supplemental")
+                  sources.append(src)
+
+              tool["poetry"] = poetry
+              doc["tool"] = tool
+              path.write_text(tomlkit.dumps(doc))
+
+          for pyproject in pyprojects:
+              ensure_testpypi_source(pyproject)
+          PY
+
       - name: Refresh lib lockfiles
-        if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           VERSION: ${{ steps.versions.outputs.clean_version }}
         run: |
@@ -157,7 +206,6 @@ jobs:
           done
 
       - name: Refresh service lockfiles
-        if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           VERSION: ${{ steps.versions.outputs.clean_version }}
         run: |

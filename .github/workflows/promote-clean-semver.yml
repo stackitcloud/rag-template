@@ -149,15 +149,11 @@ jobs:
               "admin-api-lib",
               "extractor-api-lib",
           }
-          pyprojects = [
+          lib_pyprojects = [
               repo_root / "libs" / "rag-core-lib" / "pyproject.toml",
               repo_root / "libs" / "rag-core-api" / "pyproject.toml",
               repo_root / "libs" / "admin-api-lib" / "pyproject.toml",
               repo_root / "libs" / "extractor-api-lib" / "pyproject.toml",
-              repo_root / "services" / "rag-backend" / "pyproject.toml",
-              repo_root / "services" / "admin-backend" / "pyproject.toml",
-              repo_root / "services" / "document-extractor" / "pyproject.toml",
-              repo_root / "services" / "mcp-server" / "pyproject.toml",
           ]
 
           def get_table(doc, path):
@@ -193,7 +189,6 @@ jobs:
 
               for table_path in [
                   ["tool", "poetry", "dependencies"],
-                  ["tool", "poetry", "group", "prod", "dependencies"],
               ]:
                   deps = get_table(doc, table_path)
                   if deps is None:
@@ -219,7 +214,7 @@ jobs:
               if changed:
                   pyproject.write_text(tomlkit.dumps(doc))
 
-          for pyproject in pyprojects:
+          for pyproject in lib_pyprojects:
               ensure_testpypi_source(pyproject)
           PY
 

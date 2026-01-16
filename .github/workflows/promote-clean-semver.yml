@@ -136,6 +136,7 @@ jobs:
           poetry cache clear --all testpypi -n || true
 
       - name: Refresh lib lockfiles
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           VERSION: ${{ steps.versions.outputs.clean_version }}
         run: |
@@ -156,6 +157,7 @@ jobs:
           done
 
       - name: Refresh service lockfiles
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           VERSION: ${{ steps.versions.outputs.clean_version }}
         run: |

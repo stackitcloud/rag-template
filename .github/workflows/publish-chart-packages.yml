@@ -101,6 +101,7 @@ jobs:
   deploy-pages:
     needs: publish
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
     permissions:
       pages: write
       id-token: write

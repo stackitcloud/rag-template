@@ -1,8 +1,7 @@
 name: publish-chart-packages
 on:
-  pull_request:
+  push:
     branches: [main]
-    types: [closed]
   workflow_dispatch:
     inputs:
       chart_version:
@@ -16,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
   packages: write
   pages: write
   id-token: write
@@ -24,11 +24,28 @@ env:
   OCI_REGISTRY: ghcr.io
 
 jobs:
-  publish:
+  gate:
     runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'chart-bump'))
-      || github.event_name == 'workflow_dispatch'
+    outputs:
+      allow: ${{ steps.allow_manual.outputs.allow || steps.allow_push.outputs.allow }}
+    steps:
+      - name: Allow manual run
+        id: allow_manual
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo "allow=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check chart-bump label on merged PR
+        id: allow_push
+        if: ${{ github.event_name == 'push' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python tools/allow_chart_bump.py
+
+  publish:
+    needs: gate
+    runs-on: ubuntu-latest
+    if: ${{ needs.gate.outputs.allow == 'true' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -101,7 +118,7 @@ jobs:
   deploy-pages:
     needs: publish
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+    if: ${{ needs.publish.result == 'success' }}
     permissions:
       pages: write
       id-token: write

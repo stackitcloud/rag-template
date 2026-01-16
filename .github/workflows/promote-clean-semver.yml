@@ -135,7 +135,7 @@ jobs:
           poetry cache clear --all pypi -n || true
           poetry cache clear --all testpypi -n || true
 
-      - name: Add TestPyPI supplemental source for dry-run locking
+      - name: Add TestPyPI source for dry-run locking
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
         run: |
           python - <<'PY'
@@ -143,6 +143,12 @@ jobs:
           import tomlkit
 
           repo_root = Path(".").resolve()
+          internal_libs = {
+              "rag-core-lib",
+              "rag-core-api",
+              "admin-api-lib",
+              "extractor-api-lib",
+          }
           pyprojects = [
               repo_root / "libs" / "rag-core-lib" / "pyproject.toml",
               repo_root / "libs" / "rag-core-api" / "pyproject.toml",
@@ -154,10 +160,18 @@ jobs:
               repo_root / "services" / "mcp-server" / "pyproject.toml",
           ]
 
-          def ensure_testpypi_source(path: Path) -> None:
-              if not path.exists():
+          def get_table(doc, path):
+              ref = doc
+              for key in path:
+                  if key not in ref:
+                      return None
+                  ref = ref[key]
+              return ref
+
+          def ensure_testpypi_source(pyproject: Path) -> None:
+              if not pyproject.exists():
                   return
-              doc = tomlkit.parse(path.read_text())
+              doc = tomlkit.parse(pyproject.read_text())
               tool = doc.get("tool") or tomlkit.table()
               poetry = tool.get("poetry") or tomlkit.table()
               sources = poetry.get("source")
@@ -165,21 +179,45 @@ jobs:
                   sources = tomlkit.aot()
                   poetry["source"] = sources
 
+              changed = False
               for src in sources:
                   if src.get("name") == "testpypi":
-                      src["url"] = "https://test.pypi.org/legacy/"
-                      src["priority"] = "supplemental"
                       break
               else:
                   src = tomlkit.table()
                   src.add("name", "testpypi")
-                  src.add("url", "https://test.pypi.org/legacy/")
+                  src.add("url", "https://test.pypi.org/simple/")
                   src.add("priority", "supplemental")
                   sources.append(src)
+                  changed = True
+
+              for table_path in [
+                  ["tool", "poetry", "dependencies"],
+                  ["tool", "poetry", "group", "prod", "dependencies"],
+              ]:
+                  deps = get_table(doc, table_path)
+                  if deps is None:
+                      continue
+                  for name in internal_libs:
+                      if name not in deps:
+                          continue
+                      val = deps[name]
+                      if isinstance(val, str):
+                          it = tomlkit.inline_table()
+                          it.add("version", val)
+                          it.add("source", "testpypi")
+                          deps[name] = it
+                          changed = True
+                      elif hasattr(val, "get"):
+                          if "path" in val:
+                              continue
+                          val["source"] = "testpypi"
+                          changed = True
 
               tool["poetry"] = poetry
               doc["tool"] = tool
-              path.write_text(tomlkit.dumps(doc))
+              if changed:
+                  pyproject.write_text(tomlkit.dumps(doc))
 
           for pyproject in pyprojects:
               ensure_testpypi_source(pyproject)

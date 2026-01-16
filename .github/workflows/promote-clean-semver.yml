@@ -57,11 +57,16 @@ jobs:
             echo "CLEAN_VERSION is required (input or artifact)" >&2
             exit 1
           fi
+          # Allow optional leading "v" in input (e.g., v3.5.5)
+          CLEAN_VERSION="${CLEAN_VERSION#v}"
+          CLEAN_VERSION="${CLEAN_VERSION#V}"
+          CLEAN_VERSION_TAG="v${CLEAN_VERSION}"
           if echo "$CLEAN_VERSION" | grep -q '\.post'; then
             echo "CLEAN_VERSION must be clean semver (no .post): $CLEAN_VERSION" >&2
             exit 1
           fi
           echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          echo "clean_version_tag=$CLEAN_VERSION_TAG" >> $GITHUB_OUTPUT
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -152,7 +157,7 @@ jobs:
 
       - name: Bump Chart appVersion to clean version (leave chart version for manual chart publish)
         env:
-          APP_VERSION: ${{ steps.versions.outputs.clean_version }}
+          APP_VERSION: ${{ steps.versions.outputs.clean_version_tag }}
         run: |
           python tools/bump_chart_versions.py --app-version "$APP_VERSION" --mode app-only
 

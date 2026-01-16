@@ -19,18 +19,19 @@ def _to_chart_version(app_version: str) -> str:
     - Fallback: if an unexpected format is provided, try to keep a valid semver
       by extracting the leading MAJOR.MINOR.PATCH.
     """
+    normalized = app_version.lstrip("vV")
     # Case 1: our prepare-release format "X.Y.Z.post<digits>"
-    m = re.fullmatch(r"(?P<base>\d+\.\d+\.\d+)\.post(?P<ts>\d+)", app_version)
+    m = re.fullmatch(r"(?P<base>\d+\.\d+\.\d+)\.post(?P<ts>\d+)", normalized)
     if m:
         return f"{m.group('base')}-post.{m.group('ts')}"
 
     # Case 2: already valid semver (optionally with pre-release or build metadata)
-    if re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", app_version):
-        return app_version
+    if re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", normalized):
+        return normalized
 
     # Fallback: keep only the base version if present
-    base = re.match(r"(\d+\.\d+\.\d+)", app_version)
-    return base.group(1) if base else app_version
+    base = re.match(r"(\d+\.\d+\.\d+)", normalized)
+    return base.group(1) if base else normalized
 
 
 def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str):
@@ -43,7 +44,7 @@ def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str):
         if mode == "chart-only":
             if not app_version:
                 raise ValueError("chart-only mode requires chart_version provided via app_version argument")
-            data['version'] = str(app_version)
+            data['version'] = _to_chart_version(str(app_version))
         else:
             data['version'] = _to_chart_version(str(app_version))
     chart_path.write_text(yaml.safe_dump(data, sort_keys=False))

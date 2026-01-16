@@ -135,7 +135,7 @@ jobs:
           poetry cache clear --all pypi -n || true
           poetry cache clear --all testpypi -n || true
 
-      - name: Refresh lib lockfiles (minimal update)
+      - name: Refresh lib lockfiles
         env:
           VERSION: ${{ steps.versions.outputs.clean_version }}
         run: |
@@ -144,12 +144,12 @@ jobs:
               echo "Locking $lib"
               (
                 cd "$lib"
-                poetry lock --no-update -v || (
+                poetry lock -v || (
                   echo "Lock failed, clearing caches and retrying...";
                   poetry cache clear --all pypi -n || true;
                   poetry cache clear --all testpypi -n || true;
                   sleep 10;
-                  poetry lock --no-update -v
+                  poetry lock -v
                 )
               )
             fi
@@ -164,12 +164,12 @@ jobs:
               echo "Locking $svc"
               (
                 cd "$svc"
-                poetry lock --no-update -v || (
+                poetry lock -v || (
                   echo "Lock failed, clearing caches and retrying...";
                   poetry cache clear --all pypi -n || true;
                   poetry cache clear --all testpypi -n || true;
                   sleep 10;
-                  poetry lock --no-update -v
+                  poetry lock -v
                 )
               )
             fi

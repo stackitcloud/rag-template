@@ -135,6 +135,26 @@ jobs:
           poetry cache clear --all pypi -n || true
           poetry cache clear --all testpypi -n || true
 
+      - name: Refresh lib lockfiles (minimal update)
+        env:
+          VERSION: ${{ steps.versions.outputs.clean_version }}
+        run: |
+          for lib in libs/rag-core-lib libs/rag-core-api libs/admin-api-lib libs/extractor-api-lib; do
+            if [ -f "$lib/pyproject.toml" ]; then
+              echo "Locking $lib"
+              (
+                cd "$lib"
+                poetry lock --no-update -v || (
+                  echo "Lock failed, clearing caches and retrying...";
+                  poetry cache clear --all pypi -n || true;
+                  poetry cache clear --all testpypi -n || true;
+                  sleep 10;
+                  poetry lock --no-update -v
+                )
+              )
+            fi
+          done
+
       - name: Refresh service lockfiles
         env:
           VERSION: ${{ steps.versions.outputs.clean_version }}
@@ -144,12 +164,12 @@ jobs:
               echo "Locking $svc"
               (
                 cd "$svc"
-                poetry lock -v || (
+                poetry lock --no-update -v || (
                   echo "Lock failed, clearing caches and retrying...";
                   poetry cache clear --all pypi -n || true;
                   poetry cache clear --all testpypi -n || true;
                   sleep 10;
-                  poetry lock -v
+                  poetry lock --no-update -v
                 )
               )
             fi
@@ -175,5 +195,6 @@ jobs:
             services/**/poetry.lock
             infrastructure/**/Chart.yaml
             libs/**/pyproject.toml
+            libs/**/poetry.lock
           labels: refresh-locks
           token: ${{ secrets.PR_AUTOMATION_TOKEN }}

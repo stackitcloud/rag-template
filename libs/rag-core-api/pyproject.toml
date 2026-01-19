@@ -77,6 +77,10 @@ black = "^25.1.0"
 flake8-logging-format = "^2024.24.12"
 flake8-docstrings = "^1.7.0"
 
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "explicit"
 
 [tool.flake8]
 exclude= [".eggs", "src/rag_core_api/models", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
@@ -138,9 +142,3 @@ log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = ["src", "tests"]
 testpaths = ["tests"]
-
-# Prefer PyPI, but allow resolving from TestPyPI for internal libs
-[[tool.poetry.source]]
-name = "testpypi"
-url = "https://test.pypi.org/simple/"
-priority = "explicit"

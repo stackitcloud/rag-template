@@ -135,10 +135,10 @@ jobs:
           poetry cache clear --all pypi -n || true
           poetry cache clear --all testpypi -n || true
 
-      - name: Add TestPyPI source for dry-run locking
+      - name: Force rag-core-lib from TestPyPI for dry-run locking
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
         run: |
-          python tools/add_testpypi_source.py
+          python tools/set_rag_core_lib_testpypi_source.py
 
       - name: Refresh lib lockfiles
         env:

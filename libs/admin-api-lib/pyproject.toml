@@ -131,3 +131,10 @@ log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = "src"
 testpaths = "src/tests"
+
+
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "explicit"

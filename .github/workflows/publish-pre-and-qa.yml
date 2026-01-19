@@ -130,10 +130,32 @@ jobs:
           retention-days: 5
 
   qa-verify:
-    name: Build QA images and update Argo deployment repo
+    name: Build QA images (${{ matrix.name }})
     runs-on: ubuntu-latest
     needs: publish-pre
     if: ${{ needs.publish-pre.result == 'success' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: rag-backend
+            dockerfile: services/rag-backend/Dockerfile
+            context: .
+          - name: admin-backend
+            dockerfile: services/admin-backend/Dockerfile
+            context: .
+          - name: document-extractor
+            dockerfile: services/document-extractor/Dockerfile
+            context: .
+          - name: mcp-server
+            dockerfile: services/mcp-server/Dockerfile
+            context: .
+          - name: frontend
+            dockerfile: services/frontend/apps/chat-app/Dockerfile
+            context: .
+          - name: admin-frontend
+            dockerfile: services/frontend/apps/admin-app/Dockerfile
+            context: .
     env:
       PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
     steps:
@@ -146,8 +168,6 @@ jobs:
           missing=()
           [ -z "${{ secrets.STACKIT_REGISTRY_USERNAME }}" ] && missing+=("STACKIT_REGISTRY_USERNAME")
           [ -z "${{ secrets.STACKIT_REGISTRY_PASSWORD }}" ] && missing+=("STACKIT_REGISTRY_PASSWORD")
-          [ -z "${{ secrets.DEPLOY_REPO_URL }}" ] && missing+=("DEPLOY_REPO_URL")
-          [ -z "${{ secrets.DEPLOY_REPO_TOKEN }}" ] && missing+=("DEPLOY_REPO_TOKEN")
           [ -z "${{ secrets.QA_IMAGE_REGISTRY }}" ] && echo "QA_IMAGE_REGISTRY not set, defaulting to registry.onstackit.cloud/qa-rag-template"
           if [ ${#missing[@]} -gt 0 ]; then
             echo "Missing required secrets: ${missing[*]}" >&2
@@ -172,26 +192,41 @@ jobs:
         run: |
           echo "$STACKIT_REGISTRY_PASSWORD" | docker login registry.onstackit.cloud -u "$STACKIT_REGISTRY_USERNAME" --password-stdin
 
-      - name: Build and push QA images
+      - name: Build and push QA image
         env:
           IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           set -euo pipefail
-          images=(
-            "rag-backend services/rag-backend/Dockerfile ."
-            "admin-backend services/admin-backend/Dockerfile ."
-            "document-extractor services/document-extractor/Dockerfile ."
-            "mcp-server services/mcp-server/Dockerfile ."
-            "frontend services/frontend/apps/chat-app/Dockerfile ."
-            "admin-frontend services/frontend/apps/admin-app/Dockerfile ."
-          )
-          for entry in "${images[@]}"; do
-            IFS=" " read -r name dockerfile context <<<"$entry"
-            ref="$IMAGE_REGISTRY/$name:$IMAGE_TAG"
-            echo "Building and pushing $ref (Dockerfile=$dockerfile context=$context)"
-            docker buildx build --platform linux/amd64 -t "$ref" -f "$dockerfile" "$context" --push
-          done
+          ref="$IMAGE_REGISTRY/${{ matrix.name }}:$IMAGE_TAG"
+          echo "Building and pushing $ref (Dockerfile=${{ matrix.dockerfile }} context=${{ matrix.context }})"
+          docker buildx build --platform linux/amd64 -t "$ref" -f "${{ matrix.dockerfile }}" "${{ matrix.context }}" --push
+
+  update-qa-deploy:
+    name: Update QA deployment repo
+    runs-on: ubuntu-latest
+    needs: [publish-pre, qa-verify]
+    if: ${{ needs.publish-pre.result == 'success' && needs.qa-verify.result == 'success' }}
+    env:
+      PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
+    steps:
+      - name: Validate QA secrets are present
+        run: |
+          missing=()
+          [ -z "${{ secrets.DEPLOY_REPO_URL }}" ] && missing+=("DEPLOY_REPO_URL")
+          [ -z "${{ secrets.DEPLOY_REPO_TOKEN }}" ] && missing+=("DEPLOY_REPO_TOKEN")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing required secrets: ${missing[*]}" >&2
+            exit 1
+          fi
+
+      - name: Set image registry and version
+        env:
+          QA_IMAGE_REGISTRY: ${{ secrets.QA_IMAGE_REGISTRY }}
+        run: |
+          IMAGE_REGISTRY="${QA_IMAGE_REGISTRY:-registry.onstackit.cloud/qa-rag-template}"
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${PRE_RELEASE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Checkout deployment repo
         env:

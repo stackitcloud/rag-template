@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import pathlib
-import sys
 import re
+import sys
 
-import yaml
+from ruamel.yaml import YAML
+from ruamel.yaml.scalarstring import DoubleQuotedScalarString, SingleQuotedScalarString
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -34,20 +35,38 @@ def _to_chart_version(app_version: str) -> str:
     return base.group(1) if base else normalized
 
 
+def _preserve_style(old_value, new_value: str):
+    if isinstance(old_value, DoubleQuotedScalarString):
+        return DoubleQuotedScalarString(new_value)
+    if isinstance(old_value, SingleQuotedScalarString):
+        return SingleQuotedScalarString(new_value)
+    return new_value
+
+
 def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str):
-    data = yaml.safe_load(chart_path.read_text())
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    yaml.width = 4096
+
+    data = yaml.load(chart_path.read_text())
+    if data is None:
+        return
+
     if mode in ("app-and-chart", "app-only"):
         if not app_version:
             raise ValueError("app_version is required for mode app-and-chart or app-only")
-        data['appVersion'] = str(app_version)
+        old_app = data.get("appVersion")
+        data["appVersion"] = _preserve_style(old_app, str(app_version))
+
     if mode in ("app-and-chart", "chart-only"):
-        if mode == "chart-only":
-            if not app_version:
-                raise ValueError("chart-only mode requires chart_version provided via app_version argument")
-            data['version'] = _to_chart_version(str(app_version))
-        else:
-            data['version'] = _to_chart_version(str(app_version))
-    chart_path.write_text(yaml.safe_dump(data, sort_keys=False))
+        if mode == "chart-only" and not app_version:
+            raise ValueError("chart-only mode requires chart_version provided via app_version argument")
+        chart_version = _to_chart_version(str(app_version))
+        old_version = data.get("version")
+        data["version"] = _preserve_style(old_version, chart_version)
+
+    with chart_path.open("w") as handle:
+        yaml.dump(data, handle)
 
 
 def main():

@@ -42,11 +42,15 @@ wait_for_index() {
   for _ in $(seq 1 60); do
     json_ok=false
     simple_ok=false
-    if curl -fsSL "$base_url/pypi/$name/json" | jq -e --arg v "$version" '.releases[$v] | length > 0' >/dev/null; then
-      json_ok=true
+    if curl -fsSL "$base_url/pypi/$name/json" -o /tmp/"$name".json; then
+      if jq -e --arg v "$version" '.releases[$v] | length > 0' /tmp/"$name".json >/dev/null; then
+        json_ok=true
+      fi
     fi
-    if curl -fsSL "$base_url/simple/$name/" | grep -q "$version"; then
-      simple_ok=true
+    if curl -fsSL "$base_url/simple/$name/" -o /tmp/"$name".html; then
+      if grep -q "$version" /tmp/"$name".html; then
+        simple_ok=true
+      fi
     fi
     if [ "$json_ok" = true ] && [ "$simple_ok" = true ]; then
       echo "$name==$version visible on $label"

@@ -73,7 +73,7 @@ class FileStatusKeyValueStore:
             ssl_cert_reqs = cert_reqs_map.get(settings.ssl_cert_reqs.lower(), settings.ssl_cert_reqs)
 
         ssl_kwargs: dict[str, Any] = {
-            "ssl": True,
+            "ssl": settings.use_ssl,
             "ssl_check_hostname": settings.ssl_check_hostname,
         }
         if ssl_cert_reqs is not None:

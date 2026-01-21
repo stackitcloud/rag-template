@@ -1,3 +1,4 @@
+.env.langfuse
 **/cr-secret.yaml
 **/customer-values.yaml
 **/auth

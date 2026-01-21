@@ -231,12 +231,20 @@ jobs:
       - name: Setup Git credentials securely
         env:
           DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
+          DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
         run: |
           set -euo pipefail
-          # Configure git credential helper to use memory store
-          git config --global credential.helper cache
-          # Store credentials in memory (will be cleared after workflow)
-          echo "https://x-access-token:${DEPLOY_REPO_TOKEN}@hstackit-solutions.git.onstackit.cloud" | git credential approve
+          # Extract domain from repo URL
+          DOMAIN=$(echo "$DEPLOY_REPO_URL" | sed -E 's|https?://([^/]+)/.*|\1|')
+          # Configure git credential helper to use cache
+          git config --global credential.helper 'cache --timeout=300'
+          # Create credential entry for the specific domain
+          cat <<EOF | git credential approve
+                protocol=https
+                host=${DOMAIN}
+                username=git
+                password=${DEPLOY_REPO_TOKEN}
+                EOF
 
       - name: Checkout deployment repo
         env:

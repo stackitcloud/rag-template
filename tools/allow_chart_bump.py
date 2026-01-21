@@ -6,17 +6,19 @@ import os
 import re
 import sys
 import urllib.request
+from typing import Any
 
 
 API_VERSION = "2022-11-28"
+API_TIMEOUT_SECONDS = 30
 
 
-def github_request(url: str, token: str, accept: str | None = None):
+def github_request(url: str, token: str, accept: str | None = None) -> Any:
     req = urllib.request.Request(url)
     req.add_header("Authorization", f"Bearer {token}")
     req.add_header("Accept", accept or "application/vnd.github+json")
     req.add_header("X-GitHub-Api-Version", API_VERSION)
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=API_TIMEOUT_SECONDS) as resp:
         return json.load(resp)
 
 

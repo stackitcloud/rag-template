@@ -58,7 +58,7 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Login to GHCR for Helm OCI
-        run: echo ${{ secrets.PR_AUTOMATION_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: printf "%s" "${{ secrets.PR_AUTOMATION_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Determine chart version
         id: meta

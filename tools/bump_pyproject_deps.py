@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+"""Bump internal library versions and update service dependency pins.
+
+This script is used by GitHub Actions release automation.
+"""
+
 import argparse
 import pathlib
-import re
 import sys
-from typing import Any, List, Optional
+from typing import Any
 
 import tomlkit
 
@@ -34,26 +38,34 @@ SERVICE_PINS = {
 
 
 def replace_version_line(text: str, new_version: str) -> str:
-    lines = text.splitlines(keepends=True)
-    in_tool_poetry = False
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith('[tool.poetry]'):
-            in_tool_poetry = True
-            continue
-        if in_tool_poetry and stripped.startswith('[') and not stripped.startswith('[tool.poetry]'):
-            # left the section without finding version; stop scanning section
-            break
-        if in_tool_poetry and stripped.startswith('version'):
-            # Replace only the version value, keep indentation and spacing
-            lines[i] = re.sub(r'version\s*=\s*"[^"]*"', f'version = "{new_version}"', line)
-            return ''.join(lines)
-    # If no version line found, append it to the [tool.poetry] section
-    out = ''.join(lines)
-    return out + f"\n[tool.poetry]\nversion = \"{new_version}\"\n"
+    """Set tool.poetry.version in a pyproject.toml text.
+
+    Parameters
+    ----------
+    text : str
+        TOML document text.
+    new_version : str
+        Version to write into `[tool.poetry]`.
+
+    Returns
+    -------
+    str
+        Updated TOML text.
+    """
+    doc = tomlkit.parse(text)
+    tool = doc.get("tool")
+    if tool is None:
+        doc["tool"] = tomlkit.table()
+        tool = doc["tool"]
+    poetry = tool.get("poetry")
+    if poetry is None:
+        tool["poetry"] = tomlkit.table()
+        poetry = tool["poetry"]
+    poetry["version"] = str(new_version)
+    return tomlkit.dumps(doc)
 
 
-def _get_table(doc: tomlkit.TOMLDocument, path: List[str]) -> Optional[Any]:
+def _get_table(doc: tomlkit.TOMLDocument, path: list[str]) -> Any | None:
     ref: Any = doc
     for key in path:
         try:
@@ -65,7 +77,7 @@ def _get_table(doc: tomlkit.TOMLDocument, path: List[str]) -> Optional[Any]:
     return ref
 
 
-def bump(version: str, bump_libs: bool = True, bump_service_pins: bool = True):
+def bump(version: str, bump_libs: bool = True, bump_service_pins: bool = True) -> None:
     # 1) bump libs versions (textual, non-destructive)
     if bump_libs:
         for file in LIBS_VERSION_FILES:
@@ -97,11 +109,11 @@ def bump(version: str, bump_libs: bool = True, bump_service_pins: bool = True):
             file.write_text(tomlkit.dumps(doc))
 
 
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument('--version', required=True)
-    ap.add_argument('--bump-libs', action='store_true', help='Bump versions in internal libs only')
-    ap.add_argument('--bump-service-pins', action='store_true', help='Bump service dependency pins only')
+    ap.add_argument("--version", required=True)
+    ap.add_argument("--bump-libs", action="store_true", help="Bump versions in internal libs only")
+    ap.add_argument("--bump-service-pins", action="store_true", help="Bump service dependency pins only")
     args = ap.parse_args()
 
     # Backward compatibility: if neither flag is provided, do both
@@ -109,7 +121,8 @@ def main():
     bump_service_pins = args.bump_service_pins or (not args.bump_libs and not args.bump_service_pins)
 
     bump(args.version, bump_libs=bump_libs, bump_service_pins=bump_service_pins)
+    return 0
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    raise SystemExit(main())

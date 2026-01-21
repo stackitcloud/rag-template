@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
+"""Ensure internal libs depend on rag-core-lib from the TestPyPI source.
+
+This helper is used by CI workflows when building lockfiles in a dry-run mode
+against TestPyPI.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Mapping
 
 import tomlkit
+from tomlkit.items import InlineTable, Table
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -16,16 +24,40 @@ LIB_PYPROJECTS = [
 RAG_CORE_LIB = "rag-core-lib"
 
 
-def get_dependencies(doc: tomlkit.TOMLDocument):
-    ref = doc
+def get_dependencies(doc: tomlkit.TOMLDocument) -> Table | None:
+    """Return `[tool.poetry.dependencies]` table if present.
+
+    Parameters
+    ----------
+    doc : tomlkit.TOMLDocument
+        Parsed TOML document.
+
+    Returns
+    -------
+    tomlkit.items.Table | None
+        Dependencies table or None if the path doesn't exist.
+    """
+    ref: object = doc
     for key in ["tool", "poetry", "dependencies"]:
-        if key not in ref:
+        if not isinstance(ref, Mapping) or key not in ref:
             return None
         ref = ref[key]
-    return ref
+    return ref if isinstance(ref, Table) else None
 
 
 def set_rag_core_lib_source(pyproject: Path) -> bool:
+    """Set `rag-core-lib` dependency to use the TestPyPI source.
+
+    Parameters
+    ----------
+    pyproject : pathlib.Path
+        Path to a pyproject.toml.
+
+    Returns
+    -------
+    bool
+        True if the file was updated, False if nothing was changed.
+    """
     if not pyproject.exists():
         return False
 
@@ -36,7 +68,7 @@ def set_rag_core_lib_source(pyproject: Path) -> bool:
 
     val = deps[RAG_CORE_LIB]
     if isinstance(val, str):
-        it = tomlkit.inline_table()
+        it: InlineTable = tomlkit.inline_table()
         it.add("version", val)
         it.add("source", "testpypi")
         deps[RAG_CORE_LIB] = it
@@ -53,6 +85,13 @@ def set_rag_core_lib_source(pyproject: Path) -> bool:
 
 
 def main() -> int:
+    """Update all internal lib pyproject files.
+
+    Returns
+    -------
+    int
+        Process exit code.
+    """
     for pyproject in LIB_PYPROJECTS:
         set_rag_core_lib_source(pyproject)
     return 0

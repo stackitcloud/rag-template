@@ -11,7 +11,20 @@ import yaml
 
 
 def ensure(mapping: Dict[str, Any], key: str) -> Dict[str, Any]:
-    """Ensure key exists and is a dict."""
+    """Ensure key exists and is a dict.
+
+    Parameters
+    ----------
+    mapping : dict[str, Any]
+        Mapping to mutate.
+    key : str
+        Key that must exist.
+
+    Returns
+    -------
+    dict[str, Any]
+        The mapping at `mapping[key]`.
+    """
     if key not in mapping or mapping[key] is None:
         mapping[key] = {}
     if not isinstance(mapping[key], dict):
@@ -20,6 +33,17 @@ def ensure(mapping: Dict[str, Any], key: str) -> Dict[str, Any]:
 
 
 def update_values(values_path: Path, image_registry: str, image_tag: str) -> None:
+    """Update image override blocks in a Helm values file.
+
+    Parameters
+    ----------
+    values_path : pathlib.Path
+        Path to the values YAML file.
+    image_registry : str
+        Registry prefix (e.g. "registry.onstackit.cloud/qa-rag-template").
+    image_tag : str
+        Tag/version to set.
+    """
     if values_path.exists():
         data = yaml.safe_load(values_path.read_text(encoding="utf-8")) or {}
     else:
@@ -49,6 +73,7 @@ def update_values(values_path: Path, image_registry: str, image_tag: str) -> Non
 
 
 def main() -> None:
+    """CLI entrypoint."""
     parser = argparse.ArgumentParser(description="Update image overrides in a values file.")
     parser.add_argument("--values-file", required=True, help="Path to values-qa.yaml in deployment repo")
     parser.add_argument("--image-registry", required=True, help="Image registry base (e.g. registry.onstackit.cloud/qa-rag-template)")

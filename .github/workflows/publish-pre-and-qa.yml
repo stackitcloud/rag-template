@@ -210,6 +210,10 @@ jobs:
     env:
       PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Validate QA secrets are present
         run: |
           missing=()
@@ -228,16 +232,24 @@ jobs:
           echo "IMAGE_REGISTRY=${IMAGE_REGISTRY}" >> "$GITHUB_ENV"
           echo "IMAGE_TAG=${PRE_RELEASE_VERSION}" >> "$GITHUB_ENV"
 
+      - name: Setup Git credentials securely
+        env:
+          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Configure git credential helper to use memory store
+          git config --global credential.helper cache
+          # Store credentials in memory (will be cleared after workflow)
+          echo "https://x-access-token:${DEPLOY_REPO_TOKEN}@github.com" | git credential approve
+
       - name: Checkout deployment repo
         env:
           DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
           DEPLOY_REPO_BRANCH: ${{ secrets.DEPLOY_REPO_BRANCH || 'main' }}
-          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/deploy-repo
-          AUTH_URL="${DEPLOY_REPO_URL/https:\/\//https://${DEPLOY_REPO_TOKEN}@}"
-          git clone --depth 1 --branch "${DEPLOY_REPO_BRANCH:-main}" "$AUTH_URL" /tmp/deploy-repo
+          git clone --depth 1 --branch "${DEPLOY_REPO_BRANCH}" "$DEPLOY_REPO_URL" /tmp/deploy-repo
 
       - name: Update values file in deployment repo
         env:
@@ -256,8 +268,6 @@ jobs:
       - name: Commit and push deployment repo changes
         env:
           DEPLOY_REPO_BRANCH: ${{ secrets.DEPLOY_REPO_BRANCH || 'main' }}
-          DEPLOY_REPO_TOKEN: ${{ secrets.DEPLOY_REPO_TOKEN }}
-          DEPLOY_REPO_URL: ${{ secrets.DEPLOY_REPO_URL }}
           DEPLOY_GIT_USER_NAME: ${{ secrets.DEPLOY_GIT_USER_NAME || 'github-actions' }}
           DEPLOY_GIT_USER_EMAIL: ${{ secrets.DEPLOY_GIT_USER_EMAIL || 'github-actions@users.noreply.github.com' }}
         run: |
@@ -271,5 +281,11 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update QA images to ${IMAGE_TAG}"
-          AUTH_URL="${DEPLOY_REPO_URL/https:\/\//https://${DEPLOY_REPO_TOKEN}@}"
-          git push "$AUTH_URL" "HEAD:${DEPLOY_REPO_BRANCH:-main}"
+          git push origin "HEAD:${DEPLOY_REPO_BRANCH}"
+
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          # Clear git credential cache
+          git credential-cache exit 2>/dev/null || true
+          git config --global --unset credential.helper || true

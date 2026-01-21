@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
+"""Bump Helm chart versions.
+
+This helper updates `Chart.yaml` files under `infrastructure/*/Chart.yaml`.
+It preserves quoting style where possible.
+"""
+
 import argparse
 import pathlib
 import re
 import sys
+from typing import Any
 
 from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import DoubleQuotedScalarString, SingleQuotedScalarString
@@ -35,7 +42,7 @@ def _to_chart_version(app_version: str) -> str:
     return base.group(1) if base else normalized
 
 
-def _preserve_style(old_value, new_value: str):
+def _preserve_style(old_value: Any, new_value: str) -> Any:
     if isinstance(old_value, DoubleQuotedScalarString):
         return DoubleQuotedScalarString(new_value)
     if isinstance(old_value, SingleQuotedScalarString):
@@ -43,12 +50,27 @@ def _preserve_style(old_value, new_value: str):
     return new_value
 
 
-def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str):
+def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str) -> None:
+    """Update a Chart.yaml file.
+
+    Parameters
+    ----------
+    chart_path : pathlib.Path
+        Path to Chart.yaml.
+    app_version : str
+        Version string used as input. Depending on mode, this is used to set
+        `appVersion` and/or compute the chart `version`.
+    mode : str
+        One of: "app-and-chart", "app-only", "chart-only".
+    """
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.width = 4096
 
-    data = yaml.load(chart_path.read_text())
+    try:
+        data = yaml.load(chart_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(f"Failed to parse YAML from {chart_path}: {exc}") from exc
     if data is None:
         return
 
@@ -65,30 +87,42 @@ def bump_chart(chart_path: pathlib.Path, app_version: str, mode: str):
         old_version = data.get("version")
         data["version"] = _preserve_style(old_version, chart_version)
 
-    with chart_path.open("w") as handle:
-        yaml.dump(data, handle)
+    try:
+        with chart_path.open("w", encoding="utf-8") as handle:
+            yaml.dump(data, handle)
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(f"Failed to write YAML to {chart_path}: {exc}") from exc
 
 
-def main():
+def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument('--app-version', help='App version to set (required for app-and-chart/app-only)')
-    p.add_argument('--chart-version', help='Chart version to set (required for chart-only)')
+    p.add_argument("--app-version", help="App version to set (required for app-and-chart/app-only)")
+    p.add_argument("--chart-version", help="Chart version to set (required for chart-only)")
     p.add_argument(
-        '--mode',
-        choices=['app-and-chart', 'app-only', 'chart-only'],
-        default='app-and-chart',
-        help='app-and-chart: bump appVersion and chart version; app-only: bump only appVersion; chart-only: bump only chart version'
+        "--mode",
+        choices=["app-and-chart", "app-only", "chart-only"],
+        default="app-and-chart",
+        help=(
+            "app-and-chart: bump appVersion and chart version; "
+            "app-only: bump only appVersion; "
+            "chart-only: bump only chart version"
+        ),
     )
     args = p.parse_args()
 
     app_version = args.app_version
-    if args.mode == 'chart-only':
+    if args.mode == "chart-only":
         app_version = args.chart_version
 
-    charts = list((ROOT / 'infrastructure').glob('*/Chart.yaml'))
-    for ch in charts:
-        bump_chart(ch, app_version, args.mode)
+    charts = list((ROOT / "infrastructure").glob("*/Chart.yaml"))
+    try:
+        for ch in charts:
+            bump_chart(ch, app_version, args.mode)
+    except Exception as exc:  # noqa: BLE001
+        print(str(exc), file=sys.stderr)
+        return 1
+    return 0
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -147,16 +147,35 @@ backend:
       port: 8080
 
   secrets:
-    basicAuth: ""
     langfuse:
-      publicKey: "pk-lf"
-      secretKey: "sk-lf"
+      publicKey:
+        value: "pk-lf"
+        secretKeyRef:
+          name: ""
+          key: "LANGFUSE_PUBLIC_KEY"
+      secretKey:
+        value: "sk-lf"
+        secretKeyRef:
+          name: ""
+          key: "LANGFUSE_SECRET_KEY"
     stackitEmbedder:
-      apiKey: ""
+      apiKey:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "STACKIT_EMBEDDER_API_KEY"
     stackitVllm:
-      apiKey: "sk-123"
+      apiKey:
+        value: "sk-123"
+        secretKeyRef:
+          name: ""
+          key: "STACKIT_VLLM_API_KEY"
     ragas:
-      openaiApikey: ""
+      openaiApikey:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "RAGAS_OPENAI_API_KEY"
 
   envs:
     stackitVllm:
@@ -249,11 +268,6 @@ frontend:
       pathType: ImplementationSpecific
       port: 8080
 
-  secrets:
-    viteAuth:
-      VITE_AUTH_USERNAME: ""
-      VITE_AUTH_PASSWORD: ""
-
   envs:
     vite:
       VITE_CHAT_AUTH_ENABLED: true
@@ -326,8 +340,18 @@ adminBackend:
       pathType: ImplementationSpecific
       port: 8080
 
-  minio:
-    enabled: true
+  secrets:
+    keyValueStore:
+      username:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "USECASE_KEYVALUE_USERNAME"
+      password:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "USECASE_KEYVALUE_PASSWORD"
 
   envs:
     summarizer:
@@ -357,6 +381,12 @@ adminBackend:
     keyValueStore:
       USECASE_KEYVALUE_PORT: 6379
       USECASE_KEYVALUE_HOST: "rag-keydb"
+      USECASE_KEYVALUE_USE_SSL: true
+      USECASE_KEYVALUE_SSL_CERT_REQS: ""
+      USECASE_KEYVALUE_SSL_CA_CERTS: ""
+      USECASE_KEYVALUE_SSL_CERTFILE: ""
+      USECASE_KEYVALUE_SSL_KEYFILE: ""
+      USECASE_KEYVALUE_SSL_CHECK_HOSTNAME: true
     sourceUploader:
       # Large sitemap ingestions (per-page summaries) can take > 1 hour.
       SOURCE_UPLOADER_TIMEOUT: 3600
@@ -474,10 +504,34 @@ shared:
       issuerKind: ClusterIssuer
 
   secrets:
+    basicAuth:
+      auth:
+        value: "" # Optional: precomputed htpasswd line (e.g., "user:$apr1$..."); overrides inline user/pass hashing.
+        secretKeyRef:
+          name: ""
+          key: "auth"
+      user:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "BASIC_AUTH_USER"
+      password:
+        value: ""
+        secretKeyRef:
+          name: ""
+          key: "BASIC_AUTH_PASSWORD"
     s3:
-      accessKey: "admin"
-      secretKey: "adminpassword"
-    usecase:
+      accessKey:
+        value: "admin"
+        secretKeyRef:
+          name: ""
+          key: "S3_ACCESS_KEY_ID"
+      secretKey:
+        value: "adminpassword"
+        secretKeyRef:
+          name: ""
+          key: "S3_SECRET_ACCESS_KEY"
+    usecase: {}
 
 
   envs:
@@ -501,6 +555,9 @@ langfuse:
     # Used to hash API keys
     salt:
       value: "changeme"
+      secretKeyRef:
+        name: ""
+        key: ""
 
     # Authentication settings
     features:
@@ -527,25 +584,50 @@ langfuse:
       url: http://localhost:3000
       secret:
         value: "changeme"
+        secretKeyRef:
+          name: ""
+          key: ""
 
     # Additional environment variables (only for init values)
     additionalEnv:
     - name: LANGFUSE_INIT_ORG_ID
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_ORG_ID"
     - name: LANGFUSE_INIT_PROJECT_ID
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_PROJECT_ID"
     - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_PROJECT_PUBLIC_KEY"
     - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_PROJECT_SECRET_KEY"
     - name: LANGFUSE_INIT_USER_EMAIL
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_USER_EMAIL"
     - name: LANGFUSE_INIT_USER_NAME
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_USER_NAME"
     - name: LANGFUSE_INIT_USER_PASSWORD
-      value: ""
+      valueFrom:
+        secretKeyRef:
+          name: "langfuse-init-secrets"
+          key: "LANGFUSE_INIT_USER_PASSWORD"
 
     # Additional init containers
+    # NOTE: for production deployment use the host uri of the external PostgreSQL instance here
     extraInitContainers:
     - name: wait-for-postgres
       image: busybox
@@ -553,12 +635,13 @@ langfuse:
       - sh
       - -c
       - |
-        until nc -z rag-postgresql 5432; do
-          echo "Waiting for PostgreSQL to be ready..."
-          sleep 2
-        done
-      # Define a reasonable timeout in case PostgreSQL fails to come up
-      timeoutSeconds: 300
+        timeout 300 sh -c '
+          until nc -z rag-postgresql 5432; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+          done
+        '
+      # Stop waiting after 5 minutes if PostgreSQL never comes up.
 
   # PostgreSQL Configuration (use external PostgreSQL)
   postgresql:
@@ -569,6 +652,9 @@ langfuse:
       username: postgres
       password: postgres
       database: langfuse
+      existingSecret: "" # NOTE: for production use existing secret to fetch password
+      secretKeys:
+        userPasswordKey: password
 
   # Redis Configuration (external KeyDB)
   redis:
@@ -578,6 +664,8 @@ langfuse:
     auth:
       username: "default"
       password: ""
+      existingSecret: "" # NOTE: for production use existing secret to fetch password
+      existingSecretPasswordKey: ""
 
   # ClickHouse Configuration (external ClickHouse)
   clickhouse:
@@ -588,6 +676,8 @@ langfuse:
     auth:
       username: "default"
       password: "changeme"
+      existingSecret: "" # NOTE: for production use existing secret to fetch password
+      existingSecretKey: ""
     migration:
       url: "clickhouse://rag-clickhouse:9000"
       ssl: false
@@ -618,8 +708,14 @@ langfuse:
     forcePathStyle: true
     accessKeyId:
       value: "admin"
+      secretKeyRef:
+        name: ""
+        key: ""
     secretAccessKey:
       value: "adminpassword"
+      secretKeyRef:
+        name: ""
+        key: ""
     eventUpload:
       enabled: true
       bucket: "langfuse"
@@ -628,8 +724,14 @@ langfuse:
       forcePathStyle: true
       accessKeyId:
         value: "admin"
+        secretKeyRef:
+          name: ""
+          key: ""
       secretAccessKey:
         value: "adminpassword"
+        secretKeyRef:
+          name: ""
+      key: ""
 
 minio:
   image:
@@ -670,3 +772,9 @@ keydb:
   multiMaster: "no"
   activeReplicas: "no"
   nodes: 1
+  # Authentication for the bundled KeyDB chart and the admin backend client.
+  password: "" # Inline password for development. Leave empty to disable auth or prefer existingSecret for production.
+  existingSecret: "" # Optional existing secret containing the KeyDB password.
+  existingSecretPasswordKey: "password"
+  auth:
+    username: "default"

@@ -1,3 +1,6 @@
+**/tools/_poetry
+
+**/.env.langfuse
 **/.nx/*
 *.tgz
 **/_poetry

@@ -236,15 +236,13 @@ jobs:
           set -euo pipefail
           # Extract domain from repo URL
           DOMAIN=$(echo "$DEPLOY_REPO_URL" | sed -E 's|https?://([^/]+)/.*|\1|')
+
           # Configure git credential helper to use cache
           git config --global credential.helper 'cache --timeout=300'
+
           # Create credential entry for the specific domain
-          cat <<EOF | git credential approve
-                protocol=https
-                host=${DOMAIN}
-                username=git
-                password=${DEPLOY_REPO_TOKEN}
-                EOF
+          printf "protocol=https\nhost=%s\nusername=git\npassword=%s\n" "$DOMAIN" "$DEPLOY_REPO_TOKEN" | git credential approve
+
 
       - name: Checkout deployment repo
         env:

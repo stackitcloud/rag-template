@@ -14,15 +14,17 @@ repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-rag-core-api = { path = "../../libs/rag-core-api", develop = true}
+setuptools = "<80.9"
+propcache = "0.4.1"
 
-[tool.poetry.group.dev.dependencies]
-debugpy = "^1.8.14"
+[tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"
+coverage = "^7.8.0"
+
+[tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
-coverage = "^7.8.0"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
 flake8-annotations-complexity = "^0.1.0"
@@ -42,6 +44,11 @@ flake8-simplify = "^0.22.0"
 flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
+rag-core-api = {path = "../../libs/rag-core-api", develop = true}
+rag-core-lib = {path = "../../libs/rag-core-lib", develop = true}
 
 [build-system]
 requires = ["poetry-core"]
@@ -63,7 +70,8 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./tests/*: S101,
+  ./main.py: D100,
+  ./tests/*: S101,D100,D103,D104,
   **/__init__.py: D104,
 """
 
@@ -97,3 +105,19 @@ skip_gitignore = true
 
 [tool.pylint]
 max-line-length = 120
+
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+
+[tool.poetry.group.prod.dependencies]
+rag-core-api = "==3.4.0"
+rag-core-lib = "==3.4.0"
+
+[tool.poetry.group.prod-local.dependencies]
+# Use local path for Tilt/development with production Dockerfile
+rag-core-api = {path = "../../libs/rag-core-api"}
+rag-core-lib = {path = "../../libs/rag-core-lib"}

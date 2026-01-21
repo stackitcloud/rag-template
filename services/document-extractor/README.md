@@ -7,7 +7,8 @@ The following endpoints are provided by the *documents_extractor*:
 # Requirements
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
 In addition to python libraries the following system packages are required:
-```
+
+```shell
 build-essential
 make
 ffmpeg
@@ -15,7 +16,11 @@ poppler-utils
 tesseract-ocr
 tesseract-ocr-deu
 tesseract-ocr-eng
+libleptonica-dev
+pkg-config
 ```
+
+The Tesseract data path is set via `TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata` in both prod and dev images.
 
 # Endpoints
 
@@ -30,5 +35,4 @@ The following types of information will be extracted:
 
 A detailed explanation of the deployment can be found in the [project README](../../README.md).
 The *helm-chart* used for the deployment can be found in the [infrastructure directory](../../infrastructure/).
-
 

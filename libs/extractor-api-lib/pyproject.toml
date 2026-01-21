@@ -87,7 +87,6 @@ uvicorn = "^0.37.0"
 dependency-injector = "^4.46.0"
 pydantic-settings = "^2.9.1"
 boto3 = "^1.38.10"
-debugpy = "^1.8.14"
 python-multipart = "^0.0.20"
 oauthlib = "^3.2.2"
 requests-oauthlib = "^2.0.0"
@@ -122,10 +121,13 @@ transformers = ">=4.53.3,<5.0.0"
 pypandoc = ">=1.6.2"
 pypandoc_binary = ">=1.6.2"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
 pytest-asyncio = "^0.26.0"
 coverage = "^7.8.0"
+httpx = "^0.28.1"
+
+[tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
@@ -150,8 +152,8 @@ black = "^25.1.0"
 flake8-logging-format = "^2024.24.12"
 flake8-docstrings = "^1.7.0"
 
-[tool.poetry.group.tests.dependencies]
-httpx = "^0.28.1"
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
 
 [tool.pytest.ini_options]
 log_cli = true

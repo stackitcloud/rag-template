@@ -24,13 +24,14 @@ jinja2 = "^3.1.6"
 starlette = ">=0.49.1"
 authlib = "^1.6.4"
 
-[tool.poetry.group.dev.dependencies]
-debugpy = "^1.8.1"
+[tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"
+coverage = "^7.5.4"
+
+[tool.poetry.group.lint.dependencies]
 flake8 = "^7.1.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
-coverage = "^7.5.4"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
 flake8-annotations-complexity = "^0.1.0"
@@ -51,13 +52,16 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
 [tool.flake8]
-exclude= [".eggs", "./src/rag_backend_client", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist"]
+exclude= [".eggs", "./src/rag_backend_client", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
 statistics = true
 show-source = false
 max-complexity = 8
@@ -124,4 +128,3 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests"
 ]
-

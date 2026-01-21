@@ -18,8 +18,9 @@ per-file-ignores = """
   ./src/admin_backend/impl/admin_api.py: B008,
   ./src/admin_backend/dependency_container.py: CCE002,CCE001,
   ./src/admin_backend/apis/admin_api_base.py: WOT001,
-  ./tests/*: S101,
+  ./tests/*: S101,D100,D103,D104,
   **/__init__.py: D104,
+  ./main.py: D100,
 """
 
 [tool.black]
@@ -65,13 +66,14 @@ readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/stackitcloud/rag-template"
 
-[tool.poetry.group.dev.dependencies]
-debugpy = "^1.8.14"
+[tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"
+coverage = "^7.8.0"
+
+[tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
-coverage = "^7.8.0"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
 flake8-annotations-complexity = "^0.1.0"
@@ -92,10 +94,31 @@ flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
 
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
+admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}
+rag-core-lib = {path = "../../libs/rag-core-lib", develop = true}
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-admin-api-lib = {path = "../../libs/admin-api-lib", develop = true}
+setuptools = "<80.9"
+
+[tool.poetry.group.prod.dependencies]
+admin-api-lib = "==3.4.0"
+rag-core-lib = "==3.4.0"
+
+[tool.poetry.group.prod-local.dependencies]
+# Use local path for Tilt/development with production Dockerfile
+admin-api-lib = {path = "../../libs/admin-api-lib"}
+rag-core-lib = {path = "../../libs/rag-core-lib"}
+
+# Prefer PyPI, but allow resolving from TestPyPI for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+

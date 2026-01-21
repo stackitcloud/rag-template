@@ -13,8 +13,9 @@ multiline-quotes = '"""'
 dictionaries = ["en_US", "python", "technical", "pandas"]
 ban-relative-imports = true
 per-file-ignores = """
-  ./tests/*: S101,
+  ./tests/*: S101,D100,D103,D104,
   **/__init__.py: D104,
+  ./main.py: D100,
 """
 
 [tool.black]
@@ -66,13 +67,16 @@ extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 torch = { version = "^2.9.0+cpu", source = "pytorch_cpu" }
 torchvision = { version = "^0.24.1+cpu", source = "pytorch_cpu" }
 
-[tool.poetry.group.dev.dependencies]
-flake8 = "^7.2.0"
+[tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"
+coverage = "^7.8.0"
+httpx = "^0.28.1"
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.2.0"
 black = "^25.1.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
-coverage = "^7.8.0"
 flake8-quotes = "^3.4.0"
 flake8-return = "^1.2.0"
 flake8-annotations-complexity = "^0.1.0"
@@ -93,12 +97,27 @@ flake8-tidy-imports = "^4.10.0"
 flake8-logging-format = "^2024.24.12"
 flake8-docstrings = "^1.7.0"
 
-[tool.poetry.group.tests.dependencies]
-httpx = "^0.28.1"
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
+extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# Prefer PyPI, then TestPyPI as fallback for internal libs
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
+[tool.poetry.group.prod.dependencies]
+# Try PyPI first, then TestPyPI automatically due to supplemental priority
+extractor-api-lib = "==3.4.0"
+
+[tool.poetry.group.prod-local.dependencies]
+# Use local path for Tilt/development with production Dockerfile
+extractor-api-lib = {path = "../../libs/extractor-api-lib"}
 
 [[tool.poetry.source]]
 name = "pytorch_cpu"

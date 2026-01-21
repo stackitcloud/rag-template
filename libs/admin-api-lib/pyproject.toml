@@ -74,10 +74,12 @@ known_local_folder = ["admin_api_lib", "rag_core_lib"]
 [tool.pylint]
 max-line-length = 120
 
-[tool.poetry.group.dev.dependencies]
-debugpy = "^1.8.14"
+[tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
+pytest-asyncio = "^1.0.0"
 coverage = "^7.8.0"
+
+[tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
@@ -101,7 +103,9 @@ flake8-tidy-imports = "^4.10.0"
 black = "^25.1.0"
 flake8-logging-format = "^2024.24.12"
 flake8-docstrings = "^1.7.0"
-pytest-asyncio = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
 
 [tool.poetry.dependencies]
 rag-core-lib = {path = "../rag-core-lib"}

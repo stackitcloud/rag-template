@@ -5,17 +5,13 @@ on:
     types: [closed]
   workflow_dispatch:
     inputs:
-      clean_version:
-        description: "Clean semver to promote (no .post)"
-        required: true
-        type: string
       ref:
         description: "Git ref to use (defaults to main)"
         required: false
         type: string
       pre_version:
-        description: "Pre-release version (optional, for bookkeeping)"
-        required: false
+        description: "Override release version (e.g., 3.5.0.postYYYYMMDDHHMMSS). If empty, semantic-release dry-run is used."
+        required: true
         type: string
       dry_run:
         description: "If true, skip publishing to PyPI (only TestPyPI)"

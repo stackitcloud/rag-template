@@ -45,7 +45,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION="${{ github.event.inputs.pre_version || '' }}"
             if [ -n "$VERSION" ]; then
-              CLEAN_VERSION="${{ github.event.inputs.clean_version }}"
+              CLEAN_VERSION="${VERSION%%.post*}"
               echo "version=$VERSION" >> $GITHUB_OUTPUT
               echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
               exit 0

@@ -13,11 +13,6 @@ on:
         description: "Override release version (e.g., 3.5.0.postYYYYMMDDHHMMSS). If empty, semantic-release dry-run is used."
         required: true
         type: string
-      dry_run:
-        description: "If true, skip publishing to PyPI (only TestPyPI)"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -134,24 +129,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        #   - name: rag-backend
-        #     dockerfile: services/rag-backend/Dockerfile
-        #     context: .
-        #   - name: admin-backend
-        #     dockerfile: services/admin-backend/Dockerfile
-        #     context: .
-        #   - name: document-extractor
-        #     dockerfile: services/document-extractor/Dockerfile
-        #     context: .
-        #   - name: mcp-server
-        #     dockerfile: services/mcp-server/Dockerfile
-        #     context: .
+          - name: rag-backend
+            dockerfile: services/rag-backend/Dockerfile
+            context: .
+          - name: admin-backend
+            dockerfile: services/admin-backend/Dockerfile
+            context: .
+          - name: document-extractor
+            dockerfile: services/document-extractor/Dockerfile
+            context: .
+          - name: mcp-server
+            dockerfile: services/mcp-server/Dockerfile
+            context: .
           - name: frontend
             dockerfile: services/frontend/apps/chat-app/Dockerfile
             context: .
-        #   - name: admin-frontend
-        #     dockerfile: services/frontend/apps/admin-app/Dockerfile
-        #     context: .
+          - name: admin-frontend
+            dockerfile: services/frontend/apps/admin-app/Dockerfile
+            context: .
     env:
       PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
     steps:

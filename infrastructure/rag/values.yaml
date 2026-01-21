@@ -627,6 +627,7 @@ langfuse:
           key: "LANGFUSE_INIT_USER_PASSWORD"
 
     # Additional init containers
+    # NOTE: for production deployment use the host uri of the external PostgreSQL instance here
     extraInitContainers:
     - name: wait-for-postgres
       image: busybox
@@ -635,7 +636,7 @@ langfuse:
       - -c
       - |
         timeout 300 sh -c '
-          until nc -z f17fdc4e-c4da-4cc5-ba3a-0fbe63303957.postgresql.eu01.onstackit.cloud 5432; do
+          until nc -z rag-postgresql 5432; do
             echo "Waiting for PostgreSQL to be ready..."
             sleep 2
           done

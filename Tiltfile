@@ -484,6 +484,7 @@ value_override = [
     "backend.secrets.langfuse.publicKey.value=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
     "backend.secrets.langfuse.secretKey.value=%s" % os.environ["LANGFUSE_SECRET_KEY"],
     "backend.secrets.ragas.openaiApikey.value=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
+    "adminBackend.envs.keyValueStore.USECASE_KEYVALUE_USE_SSL=false",
     # variables
     "shared.debug.backend.enabled=%s" % backend_debug,
     "features.frontend.enabled=true",

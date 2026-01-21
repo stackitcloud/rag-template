@@ -67,6 +67,8 @@ All settings are powered by `pydantic-settings`, so you can use environment vari
 - `SUMMARIZER_MAXIMUM_INPUT_SIZE`, `SUMMARIZER_MAXIMUM_CONCURRENCY`, `SUMMARIZER_MAX_RETRIES`, etc. – tune summariser limits and retry behaviour.
 - `SOURCE_UPLOADER_TIMEOUT` – adjust how long non-file source ingestions wait before timing out.
 - `USECASE_KEYVALUE_HOST` / `USECASE_KEYVALUE_PORT` – configure the KeyDB/Redis instance that persists document status.
+- `USECASE_KEYVALUE_USERNAME` / `USECASE_KEYVALUE_PASSWORD` – optional credentials for authenticating against KeyDB/Redis.
+- `USECASE_KEYVALUE_USE_SSL`, `USECASE_KEYVALUE_SSL_CERT_REQS`, `USECASE_KEYVALUE_SSL_CA_CERTS`, `USECASE_KEYVALUE_SSL_CERTFILE`, `USECASE_KEYVALUE_SSL_KEYFILE`, `USECASE_KEYVALUE_SSL_CHECK_HOSTNAME` – optional TLS settings for managed Redis deployments (e.g., STACKIT Redis or other SSL-only endpoints).
 
 The Helm chart forwards these values through `adminBackend.envs.*`, keeping deployments declarative. Local development can rely on `.env` as described in the repository root README.
 

@@ -368,6 +368,14 @@ local_resource(
     allow_parallel=True,
 )
 
+# Dev-only Langfuse init secrets via Kustomize (stable name, no hash suffix)
+langfuse_kustomize_dir = "./infrastructure/kustomize/langfuse"
+langfuse_env_file = "%s/.env.langfuse" % langfuse_kustomize_dir
+if os.path.exists(langfuse_env_file):
+    watch_file(langfuse_env_file)
+    watch_file("%s/kustomization.yaml" % langfuse_kustomize_dir)
+    k8s_yaml(kustomize(langfuse_kustomize_dir))
+
 ########################################################################################################################
 ################################## build document extractor image and do live update ##############################################
 ########################################################################################################################
@@ -528,14 +536,14 @@ docker_build(
 ########################################################################################################################
 value_override = [
     # secrets env
-    "shared.secrets.s3.accessKey=%s" % os.environ["S3_ACCESS_KEY_ID"],
-    "shared.secrets.s3.secretKey=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
-    "backend.secrets.basicAuth=%s" % os.environ["BASIC_AUTH"],
-    "backend.secrets.langfuse.publicKey=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
-    "backend.secrets.langfuse.secretKey=%s" % os.environ["LANGFUSE_SECRET_KEY"],
-    "backend.secrets.ragas.openaiApikey=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
-    "frontend.secrets.viteAuth.VITE_AUTH_USERNAME=%s" % os.environ["VITE_AUTH_USERNAME"],
-    "frontend.secrets.viteAuth.VITE_AUTH_PASSWORD=%s" % os.environ["VITE_AUTH_PASSWORD"],
+    "shared.secrets.s3.accessKey.value=%s" % os.environ["S3_ACCESS_KEY_ID"],
+    "shared.secrets.s3.secretKey.value=%s" % os.environ["S3_SECRET_ACCESS_KEY"],
+    "shared.secrets.basicAuth.user.value=%s" % os.environ["BASIC_AUTH_USER"],
+    "shared.secrets.basicAuth.password.value=%s" % os.environ["BASIC_AUTH_PASSWORD"],
+    "backend.secrets.langfuse.publicKey.value=%s" % os.environ["LANGFUSE_PUBLIC_KEY"],
+    "backend.secrets.langfuse.secretKey.value=%s" % os.environ["LANGFUSE_SECRET_KEY"],
+    "backend.secrets.ragas.openaiApikey.value=%s" % os.environ["RAGAS_OPENAI_API_KEY"],
+    "adminBackend.envs.keyValueStore.USECASE_KEYVALUE_USE_SSL=false",
     # variables
     "shared.debug.backend.enabled=%s" % backend_debug,
     "features.frontend.enabled=true",
@@ -546,21 +554,6 @@ value_override = [
     "features.mcp.enabled=true",
     # ingress host names
     "backend.ingress.host.name=rag.localhost",
-    # langfuse
-    "langfuse.langfuse.additionalEnv[0].name=LANGFUSE_INIT_ORG_ID",
-    "langfuse.langfuse.additionalEnv[0].value=\"%s\"" % os.environ["LANGFUSE_INIT_ORG_ID"],
-    "langfuse.langfuse.additionalEnv[1].name=LANGFUSE_INIT_PROJECT_ID",
-    "langfuse.langfuse.additionalEnv[1].value=\"%s\"" % os.environ["LANGFUSE_INIT_PROJECT_ID"],
-    "langfuse.langfuse.additionalEnv[2].name=LANGFUSE_INIT_PROJECT_PUBLIC_KEY",
-    "langfuse.langfuse.additionalEnv[2].value=%s" % os.environ["LANGFUSE_INIT_PROJECT_PUBLIC_KEY"],
-    "langfuse.langfuse.additionalEnv[3].name=LANGFUSE_INIT_PROJECT_SECRET_KEY",
-    "langfuse.langfuse.additionalEnv[3].value=%s" % os.environ["LANGFUSE_INIT_PROJECT_SECRET_KEY"],
-    "langfuse.langfuse.additionalEnv[4].name=LANGFUSE_INIT_USER_EMAIL",
-    "langfuse.langfuse.additionalEnv[4].value=%s" % os.environ["LANGFUSE_INIT_USER_EMAIL"],
-    "langfuse.langfuse.additionalEnv[5].name=LANGFUSE_INIT_USER_PASSWORD",
-    "langfuse.langfuse.additionalEnv[5].value=%s" % os.environ["LANGFUSE_INIT_USER_PASSWORD"],
-    "langfuse.langfuse.additionalEnv[6].name=LANGFUSE_INIT_USER_NAME",
-    "langfuse.langfuse.additionalEnv[6].value=%s" % os.environ["LANGFUSE_INIT_USER_NAME"],
 ]
 
 def has_confluence_config():
@@ -591,13 +584,13 @@ if has_confluence_config():
 
 if os.environ.get("STACKIT_VLLM_API_KEY", False):
     stackit_vllm_settings = [
-        "backend.secrets.stackitVllm.apiKey=%s" % os.environ["STACKIT_VLLM_API_KEY"],
+        "backend.secrets.stackitVllm.apiKey.value=%s" % os.environ["STACKIT_VLLM_API_KEY"],
     ]
     value_override.extend(stackit_vllm_settings)
 
 if os.environ.get("STACKIT_EMBEDDER_API_KEY", False):
     stackit_embedder_settings = [
-        "backend.secrets.stackitEmbedder.apiKey=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
+        "backend.secrets.stackitEmbedder.apiKey.value=%s" % os.environ["STACKIT_EMBEDDER_API_KEY"],
     ]
     value_override.extend(stackit_embedder_settings)
 

@@ -138,24 +138,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: rag-backend
-            dockerfile: services/rag-backend/Dockerfile
-            context: .
-          - name: admin-backend
-            dockerfile: services/admin-backend/Dockerfile
-            context: .
-          - name: document-extractor
-            dockerfile: services/document-extractor/Dockerfile
-            context: .
-          - name: mcp-server
-            dockerfile: services/mcp-server/Dockerfile
-            context: .
+        #   - name: rag-backend
+        #     dockerfile: services/rag-backend/Dockerfile
+        #     context: .
+        #   - name: admin-backend
+        #     dockerfile: services/admin-backend/Dockerfile
+        #     context: .
+        #   - name: document-extractor
+        #     dockerfile: services/document-extractor/Dockerfile
+        #     context: .
+        #   - name: mcp-server
+        #     dockerfile: services/mcp-server/Dockerfile
+        #     context: .
           - name: frontend
             dockerfile: services/frontend/apps/chat-app/Dockerfile
             context: .
-          - name: admin-frontend
-            dockerfile: services/frontend/apps/admin-app/Dockerfile
-            context: .
+        #   - name: admin-frontend
+        #     dockerfile: services/frontend/apps/admin-app/Dockerfile
+        #     context: .
     env:
       PRE_RELEASE_VERSION: ${{ needs.publish-pre.outputs.version }}
     steps:
@@ -240,7 +240,7 @@ jobs:
           # Configure git credential helper to use memory store
           git config --global credential.helper cache
           # Store credentials in memory (will be cleared after workflow)
-          echo "https://x-access-token:${DEPLOY_REPO_TOKEN}@github.com" | git credential approve
+          echo "https://x-access-token:${DEPLOY_REPO_TOKEN}@hstackit-solutions.git.onstackit.cloud" | git credential approve
 
       - name: Checkout deployment repo
         env:

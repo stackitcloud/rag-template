@@ -22,7 +22,7 @@ dependency-injector = "^4.46.0"
 python-dateutil = "^2.9.0.post0"
 jinja2 = "^3.1.6"
 starlette = ">=0.49.1"
-authlib = "^1.6.4"
+authlib = "^1.6.6"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"

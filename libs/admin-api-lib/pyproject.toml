@@ -18,6 +18,11 @@ license = "Apache-2.0"
 repository = "https://github.com/stackitcloud/rag-template"
 homepage = "https://pypi.org/project/admin-api-lib"
 
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "explicit"
+
 [tool.flake8]
 exclude= [".eggs", "./libs/*", "./src/admin_api_lib/models/*", "./src/admin_api_lib/rag_backend_client/*", "./src/admin_api_lib/extractor_api_client/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py"]
 statistics = true

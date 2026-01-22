@@ -23,6 +23,12 @@ name = "pytorch_cpu"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "explicit"
 
+
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "explicit"
+
 [tool.flake8]
 exclude = [".eggs", "./src/extractor_api_lib/models/*", ".git", ".hg", ".mypy_cache", ".tox", ".venv", ".devcontainer", "venv", "_build", "buck-out", "build", "dist", "**/__init__.py", "tests/test_data/generate_test_pdfs.py"]
 statistics = true
@@ -115,8 +121,8 @@ pypandoc-binary = "^1.15"
 starlette = ">=0.49.1"
 markitdown = {version = "^0.1.3", extras = ["all"]}
 docling = "2.61.2"
-torch =      { version = "^2.9.0+cpu",  source = "pytorch_cpu" }
-torchvision = { version = "^0.24.1+cpu", source = "pytorch_cpu" }
+torch =      { version = "^2.9.0",  source = "pytorch_cpu" }
+torchvision = { version = "^0.24.1", source = "pytorch_cpu" }
 transformers = ">=4.53.3,<5.0.0"
 pypandoc = ">=1.6.2"
 pypandoc_binary = ">=1.6.2"
@@ -160,3 +166,4 @@ log_cli = true
 log_cli_level = "DEBUG"
 pythonpath = "src"
 testpaths = "src/tests"
+

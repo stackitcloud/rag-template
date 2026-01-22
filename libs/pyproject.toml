@@ -47,6 +47,7 @@ max-line-length = 120
 name = "rag_libs"
 version = "v3.4.0"
 description = "The libraries for building robust RAG."
+package-mode = false
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
 ]

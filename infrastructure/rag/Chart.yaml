@@ -6,7 +6,7 @@ description: |
   ask question about their content and the rag will answer them.
 type: application
 version: 3.4.0
-appVersion: "v3.4.0"
+appVersion: "v4.0.0"
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s

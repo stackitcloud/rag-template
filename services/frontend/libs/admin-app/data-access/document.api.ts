@@ -24,6 +24,7 @@ export interface SitemapConfig {
     headerTemplate: string;
     name: string;
     parser?: 'docusaurus' | 'astro' | 'generic';
+    continueOnFailure?: boolean;
 }
 
 export class DocumentAPI {
@@ -97,6 +98,10 @@ export class DocumentAPI {
                     throw new Error(`Unsupported sitemap parser: ${config.parser}`);
                 }
                 payload.push({ key: 'sitemap_parser', value: config.parser });
+            }
+
+            if (typeof config.continueOnFailure === 'boolean') {
+                payload.push({ key: 'continue_on_failure', value: String(config.continueOnFailure) });
             }
 
             // add filter_urls only if provided

@@ -23,6 +23,8 @@
     "sitemapParserAstro": "Parser: Astro / Starlight",
     "sitemapParserDocusaurus": "Parser: Docusaurus",
     "sitemapParserGeneric": "Parser: Generic",
+    "sitemapContinueOnFailure": "Continue on failure",
+    "sitemapContinueOnFailureHint": "Skip pages that fail to load instead of aborting the crawl",
     "loadSitemap": "Load Sitemap",
     "select": "Select",
     "chat": "Start chat",

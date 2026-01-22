@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "admin-api-lib"
-version = "v3.4.0"
+version = "4.0.0.post20260122141916"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",

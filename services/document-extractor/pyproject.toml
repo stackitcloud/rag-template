@@ -116,9 +116,11 @@ name = "pytorch_cpu"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "explicit"
 
+
 [tool.poetry.group.prod.dependencies]
 # Try PyPI first, then TestPyPI automatically due to supplemental priority
-extractor-api-lib = "==3.4.0"
+extractor-api-lib = "==4.0.0"
+
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "admin-api-lib"
-version = "4.0.0.post20260122141916"
+version = "4.0.0"
 description = "The admin backend is responsible for the document management. This includes deletion, upload and returning the source document."
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
@@ -113,7 +113,7 @@ flake8-docstrings = "^1.7.0"
 debugpy = "^1.8.14"
 
 [tool.poetry.dependencies]
-rag-core-lib = {path = "../rag-core-lib"}
+rag-core-lib = "==4.0.0"
 python = "^3.13"
 uvicorn = "^0.37.0"
 fastapi = "^0.121.2"

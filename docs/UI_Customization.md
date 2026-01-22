@@ -20,7 +20,7 @@ If you just want to rename/rebrand the UI, these are the usual knobs:
 2. **Welcome message text**: edit `services/frontend/libs/i18n/chat/en.json` → `chat.initialMessage` (keep `{bot_name}`)
 3. **Navigation logo**: set `VITE_UI_LOGO_PATH_LIGHT` / `VITE_UI_LOGO_PATH_DARK` and add the files under each app’s `public/assets/`
 4. **Brand colors**: edit `services/frontend/libs/ui-styles/src/tailwind.css` (daisyUI theme tokens)
-5. **App titles + favicons**: edit `services/frontend/apps/*/index.html` and `services/frontend/apps/*/public/favicon.ico`
+5. **App titles + favicons**: edit `services/frontend/apps/*/index.html` and `services/frontend/apps/*/public/favicon.svg`
 
 ## How Configuration Works (Build-Time vs Runtime)
 
@@ -133,8 +133,8 @@ Replace those files (keep the same filenames), or update the constants in `servi
 
 #### Favicons
 
-- `services/frontend/apps/chat-app/public/favicon.ico`
-- `services/frontend/apps/admin-app/public/favicon.ico`
+- `services/frontend/apps/chat-app/public/favicon.svg`
+- `services/frontend/apps/admin-app/public/favicon.svg`
 
 #### Browser tab titles
 

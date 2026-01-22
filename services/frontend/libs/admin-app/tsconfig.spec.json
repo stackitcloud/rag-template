@@ -10,9 +10,8 @@
     "**/*.tsx",
     "**/*.vue",
     "**/*.d.ts",
-    "vite.config.mts",
+    "vite.config.ts",
     "**/*.{test,spec}.ts",
     "**/*.{test,spec}.tsx"
   ]
 }
-

@@ -1,23 +1,20 @@
 */.gitignore
-# Ignore node_modules directory
-frontend/node_modules/
 
-frontend/.nx/cache/
+# Node/Nx artifacts (keep build contexts small)
+**/node_modules
+**/.nx
 
-# Ignore package-lock.json or yarn.lock file
-frontend/package-lock.json
-frontend/yarn.lock
+# Frontend build outputs and logs
+services/frontend/dist
+services/frontend/tmp
+services/frontend/coverage
+services/frontend/apps/*/dist
+services/frontend/*.log
 
-# Ignore any build artifacts or compiled files
-frontend/dist/
-frontend/build/
-frontend/*.log
-
-# Ignore python envs and compiled python files
+# Python envs and compiled python files
 */venv
 */.venv
 */.env
 */*.pyc
-
 
 **/.notebooks

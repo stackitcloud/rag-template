@@ -1,0 +1,50 @@
+FROM --platform=linux/amd64 python:3.13-bookworm
+
+# Dev image: source-based, fast iteration
+ENV POETRY_VIRTUALENVS_PATH=/app/services/admin-backend/.venv
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
+ENV POETRY_VERSION=2.1.3
+
+WORKDIR /app
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       build-essential make \
+    && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
+    && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*
+ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
+
+# Copy lockfiles first for caching
+COPY services/admin-backend/pyproject.toml services/admin-backend/poetry.lock ./services/admin-backend/
+COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock ./libs/rag-core-lib/
+COPY libs/admin-api-lib/pyproject.toml libs/admin-api-lib/poetry.lock ./libs/admin-api-lib/
+
+# Copy minimal lib structure for poetry to recognize local packages
+COPY libs/rag-core-lib/src ./libs/rag-core-lib/src
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/
+COPY libs/admin-api-lib/src ./libs/admin-api-lib/src
+COPY libs/admin-api-lib/README.md /app/libs/admin-api-lib/
+
+# Install deps (with dev extras) without packaging
+RUN poetry config virtualenvs.create false \
+    && cd ./services/admin-backend && poetry install --no-interaction --no-ansi --no-root --with dev
+
+WORKDIR /app/services/admin-backend
+RUN mkdir -p log && chmod 700 log \
+    && touch /app/services/admin-backend/log/logfile.log && chmod 600 /app/services/admin-backend/log/logfile.log
+
+ENV PYTHONPATH="/app/services/admin-backend/src:/app/libs/rag-core-lib/src"
+
+# Create non-root user
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
+
+# Ensure nonroot user owns the entire /app directory for live updates
+RUN chown -R nonroot:nonroot /app
+
+# Copy sources last
+COPY --chown=nonroot:nonroot services/admin-backend /app/services/admin-backend
+
+USER nonroot
+
+# Entrypoint handled externally

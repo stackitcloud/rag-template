@@ -21,6 +21,8 @@
     "sitemapParserAstro": "Parser: Astro / Starlight",
     "sitemapParserDocusaurus": "Parser: Docusaurus",
     "sitemapParserGeneric": "Parser: Generisch",
+    "sitemapContinueOnFailure": "Bei Fehlern fortfahren",
+    "sitemapContinueOnFailureHint": "Fehlgeschlagene Seiten überspringen, statt den Crawl abzubrechen",
     "loadSitemap": "Sitemap laden",
     "fileTypeNotAllowedTitle": "Dateityp nicht erlaubt",
   "fileTypeNotAllowedDescription": "Erlaubte Dateitypen:",

@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:24-slim as builder
+FROM node:22-slim as builder
 
 WORKDIR /usr/src/app
 
@@ -10,7 +10,7 @@ COPY ./services/frontend .
 
 RUN npm run admin:build
 
-FROM --platform=linux/amd64 nginx:alpine3.20-slim
+FROM nginx:alpine3.20-slim
 
 WORKDIR /app
 
@@ -18,8 +18,6 @@ COPY --from=builder /usr/src/app/dist/apps/admin-app /app/frontend
 COPY --from=builder /usr/src/app/dist/libs /app/frontend/libs
 
 COPY ./services/frontend/default.nginx.conf /etc/nginx/conf.d/default.conf
-
-
 COPY ./services/frontend/env.sh /app/env.sh
 
 EXPOSE 8080

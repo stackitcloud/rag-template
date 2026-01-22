@@ -1,0 +1,49 @@
+FROM --platform=linux/amd64 python:3.13-bookworm
+
+# Dev image: source-based, fast iteration
+ENV POETRY_VIRTUALENVS_PATH=/app/services/rag-backend/.venv
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
+ENV POETRY_VERSION=2.1.3
+
+WORKDIR /app
+
+# Base tools for building native deps and running make/linters
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       build-essential make \
+    && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
+    && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*
+ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
+
+# Copy lockfiles first for better layer caching
+COPY services/rag-backend/pyproject.toml services/rag-backend/poetry.lock /app/services/rag-backend/
+COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
+COPY libs/rag-core-api/pyproject.toml libs/rag-core-api/poetry.lock /app/libs/rag-core-api/
+
+# Copy minimal lib structure for poetry to recognize local packages
+COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/
+COPY libs/rag-core-api/src /app/libs/rag-core-api/src
+COPY libs/rag-core-api/README.md /app/libs/rag-core-api/
+
+# Install third-party dependencies (dev extras) without packaging the projects themselves
+RUN poetry config virtualenvs.create false \
+    && cd /app/services/rag-backend && poetry install --no-interaction --no-ansi --no-root --with dev --without prod
+
+# Prepare runtime
+WORKDIR /app/services/rag-backend
+RUN mkdir -p log && chmod 700 log \
+    && touch /app/services/rag-backend/log/logfile.log && chmod 600 /app/services/rag-backend/log/logfile.log
+
+# Make sources available (no package install); use PYTHONPATH for local libs
+ENV PYTHONPATH="/app/services/rag-backend/src:/app/libs/rag-core-api/src:/app/libs/rag-core-lib/src"
+
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
+
+RUN chown -R nonroot:nonroot /app
+COPY --chown=nonroot:nonroot services/rag-backend /app/services/rag-backend
+
+USER nonroot
+
+# Entrypoint is managed by Helm/Tilt; keeping default

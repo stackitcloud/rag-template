@@ -182,6 +182,12 @@ Default values for the deployment are provided in the `rag/values.yaml` file und
 >
 >All values containing `...` are placeholders and have to be replaced with real values.
 
+**Dev helper via Kustomize/Tilt**
+For local development you can let Tilt generate Langfuse init secrets automatically:
+- Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `infrastructure/kustomize/langfuse/.env.langfuse` and fill it with the Langfuse init env values.
+- Tilt runs Kustomize on `infrastructure/kustomize/langfuse` and applies the resulting `langfuse-init-secrets` (hash disabled) before Helm resources.
+- This is dev-only. For production, create/manage secrets with your secret manager and set `secretKeyRef.name` in `values.yaml` to your managed secret.
+
 ### 1.2 Qdrant
 
 The deployment of the Qdrant can be disabled by setting the following value in the helm-chart:
@@ -214,10 +220,31 @@ adminBackend:
     keyValueStore:
       USECASE_KEYVALUE_HOST: ... # Your Redis host (e.g., redis.yourdomain.com)
       USECASE_KEYVALUE_PORT: 6379
+      # Optional TLS settings for managed Redis
+      USECASE_KEYVALUE_USE_SSL: false # <- must be true for production deployment
+      USECASE_KEYVALUE_SSL_CHECK_HOSTNAME: true
+  secrets:
+    keyValueStore:
+      username:
+        value: "" # Optional inline username; prefer secretKeyRef in production
+        secretKeyRef:
+          name: "" # Existing secret containing the username
+          key: "USECASE_KEYVALUE_USERNAME"
+      password:
+        value: "" # Optional inline password; prefer secretKeyRef in production
+        secretKeyRef:
+          name: "" # Existing secret containing the password
+          key: "USECASE_KEYVALUE_PASSWORD"
 
 features:
   keydb:
     enabled: false # Disable KeyDB for production
+keydb:
+  password: "" # Optional inline password for the bundled KeyDB chart
+  existingSecret: "" # Name of an existing secret that stores the KeyDB password
+  existingSecretPasswordKey: "password" # Key within the existing secret
+  auth:
+    username: "default" # Username that the admin backend uses when auth is enabled
 
 langfuse:
   valkey:
@@ -233,6 +260,20 @@ langfuse:
 The following values should be adjusted for the deployment:
 
 ```yaml
+shared:
+  secrets:
+    # Required: Basic authentication used by backend/admin ingress and frontend auth modal
+    basicAuthUser:
+      value: ... # Username for basic auth
+      secretKeyRef:
+        name: "" # Optionally reference an existing secret instead of an inline value
+        key: "BASIC_AUTH_USER"
+    basicAuthPassword:
+      value: ... # Password for basic auth
+      secretKeyRef:
+        name: ""
+        key: "BASIC_AUTH_PASSWORD"
+
 frontend:
   envs:
     vite:
@@ -246,11 +287,9 @@ frontend:
     host:
       name: ... # Your domain name (e.g., rag.yourdomain.com)
 
-  secrets:
-    viteAuth:
-      # Required: Credentials for backend authentication
-      VITE_AUTH_USERNAME: ... # Username for basic auth
-      VITE_AUTH_PASSWORD: ... # Password for basic auth
+# In production, ensure a secret named "vite-auth" exists with keys
+# VITE_AUTH_USERNAME and VITE_AUTH_PASSWORD set to your basic auth creds.
+# (For local/dev, the chart can generate it from shared.secrets.)
 ```
 
 ### 1.5 Backend
@@ -262,24 +301,42 @@ The following values should be adjusted for the deployment:
 ```yaml
 backend:
   secrets:
-    # Required: Basic authentication for the backend API
-    basicAuth: ... # Set your basic auth credentials
-
+    # Basic auth is configured under shared.secrets (see frontend section)
     # Required: Langfuse API keys for observability
     langfuse:
-      publicKey: ... # Your Langfuse public key
-      secretKey: ... # Your Langfuse secret key
+      publicKey:
+        value: ... # Your Langfuse public key
+        secretKeyRef:
+          name: "" # Optionally reference an existing secret instead of an inline value
+          key: "LANGFUSE_PUBLIC_KEY"
+      secretKey:
+        value: ... # Your Langfuse secret key
+        secretKeyRef:
+          name: ""
+          key: "LANGFUSE_SECRET_KEY"
 
     # Required: API keys for your chosen LLM provider
     # STACKIT LLM provider
     stackitEmbedder:
-      apiKey: ... # Your STACKIT embedder API key
+      apiKey:
+        value: ... # Your STACKIT embedder API key
+        secretKeyRef:
+          name: ""
+          key: "STACKIT_EMBEDDER_API_KEY"
     stackitVllm:
-      apiKey: ... # Your STACKIT vLLM API key
+      apiKey:
+        value: ... # Your STACKIT vLLM API key
+        secretKeyRef:
+          name: ""
+          key: "STACKIT_VLLM_API_KEY"
 
     # Optional: Only needed if using RAGAS evaluation with OpenAI
     ragas:
-      openaiApikey: ... # Your OpenAI API key for RAGAS evaluation
+      openaiApikey:
+        value: ... # Your OpenAI API key for RAGAS evaluation
+        secretKeyRef:
+          name: ""
+          key: "RAGAS_OPENAI_API_KEY"
 
   envs:
     # Required: Choose your LLM and embedder providers
@@ -313,13 +370,15 @@ backend:
       ERROR_MESSAGES_NO_ANSWER_FOUND: "I'm sorry, I couldn't find an answer with the context provided."
     # Settings for the evaluation. You can specify the datasetname, as well as the path (in the container) where the dataset is located.
     langfuse:
-      LANGFUSE_DATASET_NAME: "test_ds"
+      LANGFUSE_DATASET_NAME: "rag_test_ds"
       LANGFUSE_DATASET_FILENAME: "/app/test_data.json"
 
     ragas:
       RAGAS_IS_DEBUG: false
       RAGAS_MODEL: "gpt-4o-mini"
       RAGAS_USE_OPENAI: true
+      RAGAS_TIMEOUT: 60
+      RAGAS_EVALUATION_DATASET_NAME: "eval-data"
       RAGAS_MAX_CONCURRENCY: "5"
 
   ingress:

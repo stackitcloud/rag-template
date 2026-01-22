@@ -183,7 +183,7 @@ poetry add --lock <package>
 ```
 insisde of the package directory in order to add new packages. This will automatically update the `pyproject.toml` and the `poetry.lock`.
 
-System requirements have to manually be added to the `Dockerfile`.
+System requirements have to manually be added to the relevant `Dockerfile`/`Dockerfile.dev` for each service (and `libs/Dockerfile` for library tooling).
 
 ### 1.3 Usage
 This example of the rag-template includes a WebUI for document-management, as well as for the chat.
@@ -208,35 +208,46 @@ For local deployment, a few env variables need to be provided by an `.env` file 
 The `.env` needs to contain the following values:
 
 ```dotenv
-BASIC_AUTH=Zm9vOiRhcHIxJGh1VDVpL0ZKJG10elZQUm1IM29JQlBVMlZ4YkpUQy8K
+# Basic auth (used by backend/admin ingress and the frontend prompt)
+BASIC_AUTH_USER=...
+BASIC_AUTH_PASSWORD=...
 
 S3_ACCESS_KEY_ID=...
 S3_SECRET_ACCESS_KEY=...
 
-VITE_AUTH_USERNAME=...
-VITE_AUTH_PASSWORD=...
-
-RAGAS_OPENAI_API_KEY=...
-
-STACKIT_VLLM_API_KEY=...
-STACKIT_EMBEDDER_API_KEY=...
-
-# ONLY necessary, if no init values are set. if init values are set,
-# the following two values should match the init values or be commented out
-# or be created via the langfuse UI.
 LANGFUSE_PUBLIC_KEY=pk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 LANGFUSE_SECRET_KEY=sk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
+# Optional keys
+RAGAS_OPENAI_API_KEY=...
+STACKIT_VLLM_API_KEY=...
+STACKIT_EMBEDDER_API_KEY=...
+
+# Optional Langfuse init values (omit if you already created a project/user)
+LANGFUSE_INIT_ORG_ID=...
+LANGFUSE_INIT_PROJECT_ID=...
+LANGFUSE_INIT_PROJECT_PUBLIC_KEY=...
+LANGFUSE_INIT_PROJECT_SECRET_KEY=...
+LANGFUSE_INIT_USER_EMAIL=...
+LANGFUSE_INIT_USER_NAME=...
+LANGFUSE_INIT_USER_PASSWORD=...
+
 ```
 
-This results in a basic auth with username=`foo` and password=`bar`.
+Using the defaults in `.env.template` results in a basic auth with username=`foo` and password=`bar`.
 
 > 📝 NOTE: All values containing `...` are placeholders and have to be replaced with real values.
-> This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to on of the following values:
+> This deployment comes with multiple options. You change `backend.envs.ragClassTypes.RAG_CLASS_TYPE_LLM_TYPE` in the Helm values to one of the following values:
 >
 > - `stackit`: Uses an OpenAI compatible LLM, like the STACKIT model serving service.
 > - `ollama`: Uses ollama as an LLM provider.
 >
+
+##### Langfuse init secret (dev-only, Tilt + Kustomize)
+
+- Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `infrastructure/kustomize/langfuse/.env.langfuse` and fill in your Langfuse init values (org/project/user and API keys) before starting Tilt.
+- Tilt runs Kustomize automatically to create a stable `langfuse-init-secrets` secret before Helm applies manifests.
+- Use this helper only for local/dev. For production, manage secrets via your usual mechanism and point `secretKeyRef.name` in `values.yaml` to your precreated secrets.
 
 #### 1.4.1 Environment Variables Setup
 
@@ -269,12 +280,39 @@ cd infrastructure/rag;helm dependency update; cd ../..
 
 After the initial build of the helm chart *Tilt* is able to update the files.
 
+##### Development vs Production Mode
+
+The template supports two deployment modes for local development:
+
+- **Production Mode** (default): Uses production Dockerfiles with local library dependencies for realistic testing
+- **Development Mode**: Uses development Dockerfiles with live code updates for fast iteration
+
 The following will tear up the microservices in *k3d*.
 For the following steps, it is assumed your current working directory is the root of the git-repository.
+
+**Production Mode (default):**
 
 ```shell
 tilt up
 ```
+
+**Development Mode:**
+
+```shell
+tilt up -- --dev=true
+```
+
+##### Docker File Structure
+
+Each service now has separate Docker files optimized for different use cases:
+
+- `Dockerfile`: Production-optimized builds with multi-stage architecture and security hardening
+- `Dockerfile.dev`: Development-optimized builds with faster build times and development tools
+
+The Tilt configuration automatically selects the appropriate Dockerfile based on the mode:
+
+- Production mode uses `Dockerfile` with local library dependencies (`prod-local` group)
+- Development mode uses `Dockerfile.dev` with live code updates and development dependencies
 
 Environment variables are loaded from `.env` file in the root of this git-repository.
 
@@ -282,12 +320,19 @@ The *Tilt* UI is available at [http://localhost:10350/](http://localhost:10350/)
 
 If you want to access *Qdrant* etc. just click the resource in the UI. In the upper corner will be the link, to access the resource.
 
+##### Debugging
 >  📝 NOTE: For frontend live updates with Tilt see [Frontend live updates with Tilt](./services/frontend/README.md#live-updates-with-tilt)
 
 To enable debugging, start tilt with the following command:
 
 ```shell
 tilt up -- --debug=true
+```
+
+It is recommended to combine debugging with development mode:
+
+```shell
+tilt up -- --debug=true --dev=true
 ```
 
 The backend will wait until your debugger is connected before it will fully start.
@@ -414,10 +459,12 @@ A detailed explanation of, how to access a service via ingress, can be found in 
 ### 2.1 Server provisioning
 
 The RAG template requires *at least*:
- - A Kubernetes Cluster
- - S3 ObjectStorage
+
+- A Kubernetes Cluster
+- S3 ObjectStorage
 
 Provided is an example Terraform script, using the [STACKIT Terrraform Provider](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs):
+
 ```terraform
 resource "stackit_ske_project" "rag-ske" {
   project_id = var.stackit_project_id
@@ -475,12 +522,11 @@ Further requirements for the server can be found in the [infrastructure README](
 
 A detailed description regarding the configuration of Langfuse can be found in the [infrastructure README](./infrastructure/README.md).
 
-
 ## 3. Build and Test
+
 The example `Tiltfile` provides a triggered linting and testing.
 The linting-settings can be changed in the `services/rag-backend/pyproject.toml` file under section `tool.flake8`.
 
 ## 4. Contribution Guidelines
 
 In order to contribute please consult the [CONTRIBUTING.md](./CONTRIBUTING.md).
-

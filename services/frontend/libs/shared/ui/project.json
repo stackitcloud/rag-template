@@ -8,9 +8,8 @@
     "test": {
       "executor": "@nx/vite:test",
       "options": {
-        "configFile": "libs/shared/ui/vite.config.mts"
+        "configFile": "libs/shared/ui/vite.config.ts"
       }
     }
   }
 }
-

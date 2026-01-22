@@ -6,6 +6,8 @@ tmp
 /out-tsc
 **/.npm-cache
 
+**/.npm-cache
+
 # dependencies
 node_modules
 
@@ -38,4 +40,4 @@ testem.log
 .DS_Store
 Thumbs.db
 
-.nx/cache
+.nx/

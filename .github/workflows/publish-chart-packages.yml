@@ -17,8 +17,6 @@ permissions:
   contents: write
   pull-requests: read
   packages: write
-  pages: write
-  id-token: write
 
 env:
   OCI_REGISTRY: ghcr.io
@@ -101,7 +99,7 @@ jobs:
           helm show chart "$PKG" | grep -E "^version: "
           helm push "$PKG" oci://$OCI_REGISTRY/${{ github.repository_owner }}/charts
 
-      - name: Build Helm repo index for Pages
+      - name: Build Helm repo index for gh-pages
         env:
           CHART_VERSION: ${{ steps.meta.outputs.chart_version }}
         run: |
@@ -109,25 +107,22 @@ jobs:
           PKG=$(ls dist/*.tgz)
           REPO="${GITHUB_REPOSITORY#*/}"
           BASE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO}"
-          helm repo index dist --url "$BASE_URL"
+          if git ls-remote --exit-code origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages:gh-pages
+            if git show gh-pages:index.yaml > dist/index.yaml 2>/dev/null; then
+              helm repo index dist --url "$BASE_URL" --merge dist/index.yaml
+            else
+              helm repo index dist --url "$BASE_URL"
+            fi
+          else
+            helm repo index dist --url "$BASE_URL"
+          fi
           echo "Index generated for $BASE_URL"
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish Helm repo to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
-
-  deploy-pages:
-    needs: publish
-    runs-on: ubuntu-latest
-    if: ${{ needs.publish.result == 'success' }}
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: dist
+          keep_files: true

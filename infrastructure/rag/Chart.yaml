@@ -5,12 +5,12 @@ description: |
   form rag. rag is an application, where you can upload your own documents and
   ask question about their content and the rag will answer them.
 type: application
-version: 3.4.0
-appVersion: "v3.4.0"
+version: 4.0.0
+appVersion: "v4.0.0"
 dependencies:
 - name: langfuse
   repository: https://langfuse.github.io/langfuse-k8s
-  version: "1.5.4"
+  version: "1.5.13"
   condition: features.langfuse.enabled
 - name: qdrant
   version: 1.15.5

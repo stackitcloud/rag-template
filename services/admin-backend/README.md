@@ -1,39 +1,44 @@
 # Admin backend
 
-The main job of the admin-backend is file handling. Upload and deletion of files should be triggered here.
+The main job of the admin-backend is file and source handling. Upload and deletion of files and non-file sources (for example Confluence or sitemaps) should be triggered here.
 
 The following endpoints are provided by the *admin-backend*:
-- `/delete_document/{id}`: Deletes the file from storage and vector database. The `id` can be retrieved from the `/all_documents` endpoint.
-- `/document_reference/{id}`: Returns the document.
-- `/all_documents`: Return the id and status of all available documents currently stored.
-- `/upload_documents`: Endpoint to upload PDF files.
+- `/delete_document/{identification}`: Deletes the file/source from storage (if applicable) and the vector database. The `identification` can be retrieved from the `/all_documents_status` endpoint.
+- `/document_reference/{identification}`: Returns the stored document (files only).
+- `/all_documents_status`: Return the `identification` and status of all available sources.
+- `/upload_file`: Endpoint to upload files (PDF, Office, etc.).
+- `/upload_source`: Endpoint to upload non-file sources such as Confluence or sitemaps.
 
 # Requirements
 
 All required python libraries can be found in the [pyproject.toml](pyproject.toml) file.
-The admin-backend uses the base Dockerfile of the [libs](../../libs/) and share the system requirements with this library.
+The admin-backend ships its own `Dockerfile`/`Dockerfile.dev` and depends on the [admin-api-lib](../../libs/admin-api-lib/) and [rag-core-lib](../../libs/rag-core-lib/) packages. See the Dockerfiles for system package requirements.
 
 # Endpoints
 
-## `/delete_document/{id}`
+## `/delete_document/{identification}`
 
-Will delete the document from the connected storage system and will send a request to the `backend` to delete all related Documents from the vector database.
+Will delete the document/source from the connected storage system (if applicable) and will send a request to the `backend` to delete all related documents from the vector database.
 
-## `/document_reference/{id}`
+## `/document_reference/{identification}`
 
-Will return the source document stored in the connected storage system.
+Will return the source document stored in the connected storage system. Non-file sources (for example Confluence or sitemaps) are not stored and therefore cannot be returned here.
 
-## `/all_documents`
+## `/all_documents_status`
 
-Will return a list of all available documents in the connected storage.
+Will return a list of all available sources and their current status.
 
 > **Note**:
 > Might list Documents which are still being processed and are not available yet for chatting.
 
-## `/upload_documents`
+## `/upload_file`
 
-PDF files can be uploaded here. This endpoint will process the document in a background and will extract information using the [document-extractor](../document-extractor/).
-The extracted information will be summarized using LLM. The summary, as well as the unrefined extracted document, will be uploaded to the [rag-backend](../rag-backend/).
+Files can be uploaded here. This endpoint processes the document in the background and extracts information using the [document-extractor](../document-extractor/).
+The extracted information is summarized using an LLM. The summary, as well as the extracted content, will be uploaded to the [rag-backend](../rag-backend/).
+
+## `/upload_source`
+
+Non-file sources can be uploaded here (for example Confluence spaces or sitemaps). The admin backend forwards the source parameters to the [document-extractor](../document-extractor/) and ingests the extracted content into the [rag-backend](../rag-backend/).
 
 ## Deployment
 

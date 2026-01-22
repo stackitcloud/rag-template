@@ -33,6 +33,7 @@ const confluenceCql = ref('');
   const sitemapFilterUrls = ref('');
   const sitemapHeaderTemplate = ref('');
   const sitemapParser = ref<'docusaurus' | 'astro' | 'generic' | undefined>(undefined);
+  const sitemapContinueOnFailure = ref(true);
 
   const error = computed(() => store.error);
 
@@ -102,6 +103,7 @@ const handleConfluenceUpload = () => {
           filterUrls: sitemapFilterUrls.value,
           headerTemplate: sitemapHeaderTemplate.value,
           parser,
+          continueOnFailure: sitemapContinueOnFailure.value,
       });
   }
 
@@ -237,6 +239,15 @@ const getErrorMessage = (errorType: string) => {
                       <textarea v-model="sitemapFilterUrls" placeholder="Filter URLs (optional) - one regex pattern per line" class="textarea textarea-bordered w-full" rows="3"></textarea>
                       <label for="sitemapHeaderTemplate" class="sr-only">Headers JSON</label>
                       <textarea v-model="sitemapHeaderTemplate" placeholder="Headers (optional) - JSON format: {&quot;Authorization&quot;: &quot;Bearer token&quot;}" class="textarea textarea-bordered w-full" rows="2"></textarea>
+                      <label class="flex items-center justify-between text-sm">
+                        <span>{{ t('documents.sitemapContinueOnFailure') }}</span>
+                        <input
+                          v-model="sitemapContinueOnFailure"
+                          type="checkbox"
+                          class="checkbox checkbox-sm"
+                          :title="t('documents.sitemapContinueOnFailureHint')"
+                        />
+                      </label>
                     </div>
                     <p class="text-xs opacity-50 mb-4">{{ t('documents.sitemapLoadDescription') }}</p>
                     <button class="btn btn-sm btn-accent" @click="handleSitemapUpload">

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rag
+
+secretGenerator:
+  - name: langfuse-init-secrets
+    envs:
+      - .env.langfuse
+    type: Opaque
+    options:
+      # Keep a stable name so Helm/Tilt can reference the secret directly.
+      disableNameSuffixHash: true

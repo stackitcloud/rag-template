@@ -1,0 +1,44 @@
+FROM --platform=linux/amd64 python:3.13-bookworm
+
+# Dev image for document-extractor
+ENV POETRY_VIRTUALENVS_PATH=/app/services/document-extractor/.venv
+ENV VIRTUAL_ENV="${POETRY_VIRTUALENVS_PATH}"
+ENV POETRY_VERSION=2.1.3
+
+WORKDIR /app
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       build-essential make ffmpeg poppler-utils \
+       tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \
+       libleptonica-dev pkg-config \
+    && python3 -m venv "${POETRY_VIRTUALENVS_PATH}" \
+    && ${POETRY_VIRTUALENVS_PATH}/bin/pip install "poetry==${POETRY_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*
+ENV PATH="${POETRY_VIRTUALENVS_PATH}/bin:$PATH"
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+
+# Copy lockfiles first
+COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock /app/services/document-extractor/
+COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
+
+COPY libs/extractor-api-lib/src ./libs/extractor-api-lib/src
+COPY libs/extractor-api-lib/README.md /app/libs/extractor-api-lib/
+
+# Install third-party deps for service and lib (with dev extras)
+RUN poetry config virtualenvs.create false \
+    && cd /app/services/document-extractor && poetry install --no-interaction --no-ansi --no-root --with dev --without prod
+
+WORKDIR /app/services/document-extractor
+RUN mkdir -p log && chmod 700 log \
+    && touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
+
+ENV PYTHONPATH="/app/services/document-extractor/src:/app/libs/extractor-api-lib/src"
+
+# Create non-root user
+RUN adduser --disabled-password --gecos "" --uid 10001 nonroot
+
+RUN chown -R nonroot:nonroot /app
+COPY --chown=nonroot:nonroot services/document-extractor /app/services/document-extractor
+
+USER nonroot

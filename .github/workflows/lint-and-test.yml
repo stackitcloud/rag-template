@@ -12,6 +12,12 @@ env:
 
 jobs:
   changes:
+    if: >-
+      ${{
+        !contains(github.event.pull_request.labels.*.name, 'prepare-release') &&
+        !contains(github.event.pull_request.labels.*.name, 'refresh-locks') &&
+        !contains(github.event.pull_request.labels.*.name, 'chart-bump')
+      }}
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
@@ -27,7 +33,7 @@ jobs:
 
       - name: Detect changes
         id: changes
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         with:
           filters: |
             services:
@@ -81,7 +87,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $IMAGE_NAME --build-arg dev=1 -f services/${{ matrix.service }}/Dockerfile .
+          docker build -t $IMAGE_NAME -f services/${{ matrix.service }}/Dockerfile.dev .
 
       - name: Run linting
         run: |
@@ -104,7 +110,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set Docker Image Names
+      - name: Set Docker Image Name
         run: |
           echo "LINT_IMAGE_NAME=${{ matrix.library }}-lint:${{ needs.sanitize-branch-name.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
           echo "TEST_IMAGE_NAME=${{ matrix.library }}-test:${{ needs.sanitize-branch-name.outputs.sanitized_ref }}-${{ github.run_number }}" >> $GITHUB_ENV
@@ -112,7 +118,8 @@ jobs:
 
       - name: Build lint image
         run: |
-          docker build -t $LINT_IMAGE_NAME --build-arg TEST=0 -f libs/Dockerfile libs
+          docker build -t $LINT_IMAGE_NAME --build-arg DIRECTORY=${{ matrix.library }} --build-arg TEST=0 -f libs/Dockerfile libs
+
 
       - name: Run linting
         run: |

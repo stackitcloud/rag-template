@@ -15,14 +15,14 @@
 ## Introduction
 
 This repository contains the frontend applications built using Vue 3 within an NX monorepo architecture.
-Seperated in 2 appilcations `chat-app` and `admin-app`
+Separated into two applications: `chat-app` and `admin-app`.
 
 ## How to run it
 
 ### Prepare
 
-- Node : Version >22.12.0
-- Fomatter : Vue-Official & Basic Ts formatter
+- Node: >=18.0.0 (see `package.json` engines)
+- Formatter: Vue-Official & Basic TS formatter
 
 Install all dependencies for both apps
 ```shell
@@ -34,11 +34,11 @@ npm install
 To serve one of the application, you can run this command at the root of your workspace.
 
 ```shell
-// runs the chat app on http://localhost:4200
-npx nx serve chat-app:serve
+# runs the chat app on http://localhost:4200
+npm run chat:serve
 
-// runs the admin app on http://localhost:4300
-npx nx serve admin-app:serve
+# runs the admin app on http://localhost:4300
+npm run admin:serve
 ```
 
 ### Live updates with Tilt
@@ -66,7 +66,7 @@ npm run test
 - **vue-i18n**: Internationalization
 - **vue-router**: Routing
 - **daisyUI**: Tailwind based CSS framework
-- **heroicons**: Hand-crafted SVG icons (by Tailwind CSS)
+- **@sit-onyx/icons**: Icon set (used via `OnyxIcon`)
 - **cypress**: End-to-end testing framework
 - **vite**: Local development server
 
@@ -80,7 +80,7 @@ npm run test
 
 ## Theming
 
-To change the theme, open the `tailwind.config.js` file and refer to the available color configuration options for DaisyUI at https://daisyui.com/docs/colors/
+To change the theme, edit `libs/ui-styles/src/tailwind.css` (Tailwind v4 + daisyUI v5 via CSS `@plugin` blocks).
 
 ## Environment variables
 
@@ -88,6 +88,11 @@ To change the theme, open the `tailwind.config.js` file and refer to the availab
 - VITE_API_URL = The URL for the backend
 - VITE_ADMIN_URL = The URL where the admin frontend is running
 - VITE_CHAT_URL = The URL where the chat frontend is running
+
+### Authentication
+- VITE_AUTH_USERNAME = Basic auth username used by the frontend
+- VITE_AUTH_PASSWORD = Basic auth password used by the frontend
+- VITE_CHAT_AUTH_ENABLED = Enable the auth prompt in the chat app (true/false)
 
 ### UI Customization
 - VITE_BOT_NAME = The AI assistant's display name (default: "Knowledge Agent")
@@ -101,14 +106,14 @@ For detailed UI customization instructions, see [UI Customization Guide](../../d
 
 > Important:
 >
-> The environment variables are not used after the docker-image is build.
-> When using the `Dockerfile` to run the frontend you have to copy the build frontend from `/app/frontend` to `/usr/share/nginx/html` and run the `/app/env.sh` script.
+> Vite `VITE_*` env vars are build-time by default. The provided Docker images (see `apps/chat-app/Dockerfile` and `apps/admin-app/Dockerfile`) use placeholder replacement at runtime via `env.sh`.
+> To apply runtime env vars, copy the built files from `/app/frontend` to `/usr/share/nginx/html` and run `/app/env.sh` before nginx serves the files.
 >
 > This can be done with the following command:
 >
 > ```bash
 > cp -r /app/frontend/. /usr/share/nginx/html
-> /bin/sh -c /app/env.sh
+> /bin/sh /app/env.sh
 > ```
 >
 > This is a workaround for the inability of Vite to use env-vars at runtime.

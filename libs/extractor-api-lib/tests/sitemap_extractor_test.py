@@ -269,7 +269,10 @@ class TestSitemapExtractor:
 
         # Verify
         assert len(result) == 1
-        mock_sitemap_loader_class.assert_called_once_with(web_path="https://example.com/sitemap.xml")
+        mock_sitemap_loader_class.assert_called_once_with(
+            web_path="https://example.com/sitemap.xml",
+            continue_on_failure=True,
+        )
 
     @pytest.mark.asyncio
     @patch("extractor_api_lib.impl.extractors.sitemap_extractor.SitemapLoader")
@@ -428,8 +431,8 @@ class TestSitemapExtractor:
 
         # Verify
         assert result == []
-        # Should still call SitemapLoader but with no additional parameters
-        mock_sitemap_loader_class.assert_called_once_with()
+        # Should still call SitemapLoader but with default failure handling
+        mock_sitemap_loader_class.assert_called_once_with(continue_on_failure=True)
 
     @pytest.mark.asyncio
     @patch("extractor_api_lib.impl.extractors.sitemap_extractor.SitemapLoader")
@@ -441,7 +444,7 @@ class TestSitemapExtractor:
             kwargs=[
                 KeyValuePair(key="web_path", value="https://example.com/sitemap.xml"),
                 KeyValuePair(key="max_depth", value="3"),  # Will be converted to int
-                KeyValuePair(key="continue_on_failure", value="true"),  # Will remain string
+                KeyValuePair(key="continue_on_failure", value="true"),  # Will be converted to bool
                 KeyValuePair(key="filter_urls", value='["pattern1", "pattern2"]'),  # Will be parsed as JSON
                 KeyValuePair(
                     key="header_template", value='{"Authorization": "Bearer token123"}'
@@ -462,7 +465,7 @@ class TestSitemapExtractor:
         call_args = mock_sitemap_loader_class.call_args[1]
         assert call_args["web_path"] == "https://example.com/sitemap.xml"
         assert call_args["max_depth"] == 3  # Converted to int
-        assert call_args["continue_on_failure"] == "true"  # Remained string
+        assert call_args["continue_on_failure"] is True  # Converted to bool
         assert call_args["filter_urls"] == ["pattern1", "pattern2"]  # Parsed JSON
         assert call_args["header_template"] == {"Authorization": "Bearer token123"}  # Parsed JSON
         assert call_args["custom_param"] == "custom_value"  # Remained string

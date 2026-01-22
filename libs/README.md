@@ -328,6 +328,7 @@ For sitemap sources, additional parameters can be provided, e.g.:
 - `web_path`: The URL of the XML sitemap to crawl
 - `filter_urls`: JSON array of URL patterns to filter pages (optional)
 - `header_template`: JSON object for custom HTTP headers (optional)
+- `continue_on_failure`: Whether to skip pages that fail to load instead of aborting the crawl (optional, default: `true`)
 
 Technically, all parameters of the `SitemapLoader` from LangChain can be provided.
 

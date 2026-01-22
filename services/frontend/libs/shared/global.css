@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* # Assumptions: No other stylesheet depends on the old Tailwind directives because they now live in ui-styles/src/tailwind.css. */
+@import "../ui-styles/src/tailwind.css";
 
 html,
 body,
@@ -49,6 +48,47 @@ main {
   --chat-code-header-bg: #2f363d;
   --chat-code-border: rgba(255, 255, 255, 0.18);
   --chat-code-button-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+/* Typography (Tailwind Typography plugin) */
+.prose {
+  color: inherit;
+}
+
+.prose :where(h1, h2, h3, h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: inherit;
+}
+
+.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: var(--fallback-in, var(--color-info));
+}
+
+.prose :where(strong):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: inherit;
+}
+
+.prose :where(ol > li)::marker,
+.prose :where(ul > li)::marker {
+  color: inherit;
+}
+
+.prose :where(li):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: inherit;
+}
+
+.prose :where(blockquote):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  color: inherit;
+}
+
+.prose :where(code):not(:where(pre code, [class~="not-prose"], [class~="not-prose"] *)) {
+  color: inherit;
+}
+
+.prose
+  :where(code):not(:where(pre code, [class~="not-prose"], [class~="not-prose"] *))::before,
+.prose
+  :where(code):not(:where(pre code, [class~="not-prose"], [class~="not-prose"] *))::after {
+  content: "";
 }
 
 /* Chat text styles */

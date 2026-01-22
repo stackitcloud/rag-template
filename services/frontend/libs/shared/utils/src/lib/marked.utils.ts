@@ -132,8 +132,19 @@ const onMarkdownDocumentClick = async (event: MouseEvent) => {
 export const initializeMarkdown = () => {
     const renderer = new marked.Renderer();
 
-    renderer.table = (header, body) => {
-        return `<table class="table table-xs">${header}${body}</table>`;
+    // Preserve default behavior while injecting our own CSS classes.
+    const anyRenderer = renderer as unknown as Record<string, any>;
+    const originalTable = anyRenderer['table']?.bind(renderer) as ((...args: any[]) => string) | undefined;
+    anyRenderer['table'] = (...args: any[]): string => {
+        // Marked >= v16 provides a token argument; older versions pass (header, body)
+        if (args.length === 1 && typeof args[0] === 'object') {
+            const html = originalTable ? originalTable(args[0]) : '';
+            return html
+                ? html.replace('<table>', '<table class="table table-xs">')
+                : '<table class="table table-xs"></table>';
+        }
+        const [header, body] = args as [string, string];
+        return `<table class="table table-xs">${header ?? ''}${body ?? ''}</table>`;
     };
 
     renderer.code = (code, infostring) => {
@@ -151,18 +162,34 @@ export const initializeMarkdown = () => {
         isMarkdownClickHandlerRegistered = true;
     }
 
-    renderer.image = (href, title, text) => {
+    anyRenderer['image'] = (...args: any[]): string => {
+        let href: string | undefined = '';
+        let title: string | null = null;
+        let text: string | undefined = '';
+        // token form
+        if (args.length === 1 && typeof args[0] === 'object') {
+            const token = args[0] as { href?: string; title?: string | null; text?: string };
+            href = token.href;
+            title = token.title ?? null;
+            text = token.text;
+        } else {
+            // legacy form (href, title, text)
+            [href, title, text] = args as [string, string | null, string];
+        }
         const imageId = newUid();
+        const titleAttr = title ? ` title="${title}"` : '';
+        const src = href ?? '';
+        const alt = text ?? '';
         return `
         <div class="py-2 mb-1">
-            <img src="${href}" alt="${text}" title="${title}" class="cursor-pointer w-full image-modal-trigger" data-modal-id="${imageId}"/>
+            <img src="${src}" alt="${alt}"${titleAttr} class="cursor-pointer w-full image-modal-trigger" data-modal-id="${imageId}"/>
         </div>
-        <dialog id="${imageId}" className="modal" style="width:80%;">
-            <div className="modal-box w-full">
+        <dialog id="${imageId}" class="modal" style="width:80%;">
+            <div class="modal-box w-full">
             <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
-            <img src="${href}" alt="${text}" class="w-full min-w-96"/>
+            <img src="${src}" alt="${alt}" class="w-full min-w-96"/>
             </div>
         </dialog>
            `;

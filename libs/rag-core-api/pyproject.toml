@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "v3.4.0"
+version = "4.0.0.post20260122141916"
 description = "The rag-core-api contains the API layer for the RAG template for document retrieval, question answering, knowledge base management in the vector database and more."
 packages = [{ include = "rag_core_api", from = "src" }]
 authors = [

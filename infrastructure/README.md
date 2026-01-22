@@ -182,7 +182,7 @@ Default values for the deployment are provided in the `rag/values.yaml` file und
 >
 >All values containing `...` are placeholders and have to be replaced with real values.
 
-**Dev helper via Kustomize/Tilt**  
+**Dev helper via Kustomize/Tilt**
 For local development you can let Tilt generate Langfuse init secrets automatically:
 - Copy `infrastructure/kustomize/langfuse/.env.langfuse.template` to `infrastructure/kustomize/langfuse/.env.langfuse` and fill it with the Langfuse init env values.
 - Tilt runs Kustomize on `infrastructure/kustomize/langfuse` and applies the resulting `langfuse-init-secrets` (hash disabled) before Helm resources.
@@ -220,6 +220,9 @@ adminBackend:
     keyValueStore:
       USECASE_KEYVALUE_HOST: ... # Your Redis host (e.g., redis.yourdomain.com)
       USECASE_KEYVALUE_PORT: 6379
+      # Optional TLS settings for managed Redis
+      USECASE_KEYVALUE_USE_SSL: false # <- must be true for production deployment
+      USECASE_KEYVALUE_SSL_CHECK_HOSTNAME: true
   secrets:
     keyValueStore:
       username:

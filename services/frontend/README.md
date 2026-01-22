@@ -15,14 +15,14 @@
 ## Introduction
 
 This repository contains the frontend applications built using Vue 3 within an NX monorepo architecture.
-Seperated in 2 appilcations `chat-app` and `admin-app`
+Separated into two applications: `chat-app` and `admin-app`.
 
 ## How to run it
 
 ### Prepare
 
-- Node : Version >22.12.0
-- Fomatter : Vue-Official & Basic Ts formatter
+- Node: >=18.0.0 (see `package.json` engines)
+- Formatter: Vue-Official & Basic TS formatter
 
 Install all dependencies for both apps
 ```shell
@@ -34,11 +34,11 @@ npm install
 To serve one of the application, you can run this command at the root of your workspace.
 
 ```shell
-// runs the chat app on http://localhost:4200
-npx nx serve chat-app:serve
+# runs the chat app on http://localhost:4200
+npm run chat:serve
 
-// runs the admin app on http://localhost:4300
-npx nx serve admin-app:serve
+# runs the admin app on http://localhost:4300
+npm run admin:serve
 ```
 
 ### Live updates with Tilt
@@ -88,6 +88,11 @@ To change the theme, edit `libs/ui-styles/src/tailwind.css` (Tailwind v4 + daisy
 - VITE_API_URL = The URL for the backend
 - VITE_ADMIN_URL = The URL where the admin frontend is running
 - VITE_CHAT_URL = The URL where the chat frontend is running
+
+### Authentication
+- VITE_AUTH_USERNAME = Basic auth username used by the frontend
+- VITE_AUTH_PASSWORD = Basic auth password used by the frontend
+- VITE_CHAT_AUTH_ENABLED = Enable the auth prompt in the chat app (true/false)
 
 ### UI Customization
 - VITE_BOT_NAME = The AI assistant's display name (default: "Knowledge Agent")

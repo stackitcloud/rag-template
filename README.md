@@ -183,7 +183,7 @@ poetry add --lock <package>
 ```
 insisde of the package directory in order to add new packages. This will automatically update the `pyproject.toml` and the `poetry.lock`.
 
-System requirements have to manually be added to the `Dockerfile`.
+System requirements have to manually be added to the relevant `Dockerfile`/`Dockerfile.dev` for each service (and `libs/Dockerfile` for library tooling).
 
 ### 1.3 Usage
 This example of the rag-template includes a WebUI for document-management, as well as for the chat.
@@ -237,7 +237,7 @@ LANGFUSE_INIT_USER_PASSWORD=...
 Using the defaults in `.env.template` results in a basic auth with username=`foo` and password=`bar`.
 
 > 📝 NOTE: All values containing `...` are placeholders and have to be replaced with real values.
-> This deployment comes with multiple options. You change the `global.config.envs.rag_class_types.RAG_CLASS_TYPE_LLM_TYPE` in the helm-deployment to on of the following values:
+> This deployment comes with multiple options. You change `backend.envs.ragClassTypes.RAG_CLASS_TYPE_LLM_TYPE` in the Helm values to one of the following values:
 >
 > - `stackit`: Uses an OpenAI compatible LLM, like the STACKIT model serving service.
 > - `ollama`: Uses ollama as an LLM provider.

@@ -119,6 +119,11 @@ jobs:
           fi
           echo "Index generated for $BASE_URL"
 
+      - name: Allow chart archives in gh-pages
+        run: |
+          set -euo pipefail
+          printf "%s\n" ".DS_Store" > dist/.gitignore
+
       - name: Publish Helm repo to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

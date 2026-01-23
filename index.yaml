@@ -3,7 +3,7 @@ entries:
   rag:
   - apiVersion: v2
     appVersion: v4.0.0
-    created: "2026-01-23T18:28:13.4580818Z"
+    created: "2026-01-23T19:31:18.808475472Z"
     dependencies:
     - condition: features.langfuse.enabled
       name: langfuse
@@ -30,7 +30,7 @@ entries:
     description: 'This helm chart deploys a front- and backend microservice. Together,
       those components form rag. rag is an application, where you can upload your
       own documents and ask question about their content and the rag will answer them. '
-    digest: 67e04fd67e8b407dfbf7e6eb233b5bda0ee45fa423d70c5821f3116f858474b4
+    digest: 7d958375e149032a99e9548bfd8c8540fb5b1e7d6f3d4c35740eafa1c905fdbe
     name: rag
     type: application
     urls:
@@ -106,4 +106,4 @@ entries:
     urls:
     - https://stackitcloud.github.io/rag-template/rag-3.3.0.tgz
     version: 3.3.0
-generated: "2026-01-23T18:28:13.426450245Z"
+generated: "2026-01-23T19:31:18.777498102Z"

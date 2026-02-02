@@ -73,7 +73,11 @@ async def test_handle_source_upload_success(mocks):
 
     key_value_store.upsert.assert_any_call("source1", Status.READY)
     rag_api.upload_information_piece.assert_called_once_with([dummy_rag_piece])
-    document_deleter.adelete_document.assert_awaited_once_with("source1", remove_from_key_value_store=False)
+    document_deleter.adelete_document.assert_awaited_once_with(
+        "source1",
+        remove_from_key_value_store=False,
+        remove_from_storage=False,
+    )
 
 
 @pytest.mark.asyncio

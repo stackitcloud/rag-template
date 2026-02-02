@@ -41,7 +41,12 @@ class DefaultDocumentDeleter(DocumentDeleter):
         self._rag_api = rag_api
         self._key_value_store = key_value_store
 
-    async def adelete_document(self, identification: str, remove_from_key_value_store: bool = True) -> None:
+    async def adelete_document(
+        self,
+        identification: str,
+        remove_from_key_value_store: bool = True,
+        remove_from_storage: bool = True,
+    ) -> None:
         """
         Asynchronously delete a document identified by the given identification string.
 
@@ -57,6 +62,8 @@ class DefaultDocumentDeleter(DocumentDeleter):
             The unique identifier of the document to be deleted.
         remove_from_key_value_store : bool, optional
             If True, the document will also be removed from the key-value store (default is True).
+        remove_from_storage : bool, optional
+            If True, the document will also be removed from the file storage (default is True).
 
         Raises
         ------
@@ -67,12 +74,13 @@ class DefaultDocumentDeleter(DocumentDeleter):
         error_messages = ""
         # Delete the document from file service and vector database
         logger.debug("Deleting existing document: %s", identification)
-        try:
-            if remove_from_key_value_store:
-                self._key_value_store.remove(identification)
-            self._file_service.delete_file(identification)
-        except Exception as e:
-            error_messages += f"Error while deleting {identification} from file storage\n {str(e)}\n"
+        if remove_from_key_value_store:
+            self._key_value_store.remove(identification)
+        if remove_from_storage:
+            try:
+                self._file_service.delete_file(identification)
+            except Exception as e:
+                error_messages += f"Error while deleting {identification} from file storage\n {str(e)}\n"
         try:
             self._rag_api.remove_information_piece(
                 DeleteRequest(metadata=[KeyValuePair(key="document", value=json.dumps(identification))])

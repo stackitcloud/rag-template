@@ -78,7 +78,11 @@ class DefaultDocumentDeleter(DocumentDeleter):
             self._key_value_store.remove(identification)
         if remove_from_storage:
             try:
-                self._file_service.delete_file(identification)
+                storage_key = self._storage_key_from_identification(identification)
+                if storage_key:
+                    self._file_service.delete_file(storage_key)
+                else:
+                    logger.debug("Skipping file storage deletion for non-file source: %s", identification)
             except Exception as e:
                 error_messages += f"Error while deleting {identification} from file storage\n {str(e)}\n"
         try:
@@ -90,3 +94,12 @@ class DefaultDocumentDeleter(DocumentDeleter):
             error_messages += f"Error while deleting {identification} from vector db\n{str(e)}"
         if error_messages:
             raise HTTPException(404, error_messages)
+
+    @staticmethod
+    def _storage_key_from_identification(identification: str) -> str | None:
+        if identification.startswith("file:"):
+            storage_key = identification[len("file:") :]
+            return storage_key or None
+        if ":" in identification:
+            return None
+        return identification or None

@@ -1,18 +1,5 @@
-"""Module for the settings of the S3 storage."""
+"""Re-export core S3 settings."""
 
-from pydantic_settings import BaseSettings
+from rag_core_lib.impl.settings.s3_settings import S3Settings
 
-
-class S3Settings(BaseSettings):
-    """Contains settings regarding the S3 storage."""
-
-    class Config:
-        """Config class for reading Fields from env."""
-
-        env_prefix = "S3_"
-        case_sensitive = False
-
-    secret_access_key: str
-    access_key_id: str
-    endpoint: str
-    bucket: str
+__all__ = ["S3Settings"]

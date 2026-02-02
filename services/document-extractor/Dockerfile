@@ -28,6 +28,9 @@ COPY services/document-extractor/pyproject.toml services/document-extractor/poet
 COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
 COPY libs/extractor-api-lib/README.md /app/libs/extractor-api-lib/README.md
 COPY libs/extractor-api-lib/src /app/libs/extractor-api-lib/src
+COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/README.md
+COPY libs/rag-core-lib/src /app/libs/rag-core-lib/src
 
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
@@ -58,6 +61,9 @@ ARG DEPENDENCY_GROUP=prod
 COPY --from=build --chown=nonroot:nonroot \
     /app/libs/extractor-api-lib \
     /tmp/conditional-libs/extractor-api-lib
+COPY --from=build --chown=nonroot:nonroot \
+    /app/libs/rag-core-lib \
+    /tmp/conditional-libs/rag-core-lib
 
 # Move libraries to final location only if using prod-local
 RUN if [ "$DEPENDENCY_GROUP" = "prod-local" ]; then \

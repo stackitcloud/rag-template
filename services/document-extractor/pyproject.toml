@@ -100,6 +100,7 @@ flake8-docstrings = "^1.7.0"
 [tool.poetry.group.dev.dependencies]
 debugpy = "^1.8.14"
 extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
+rag-core-lib = {path = "../../libs/rag-core-lib", develop = true}
 
 [build-system]
 requires = ["poetry-core"]
@@ -120,8 +121,10 @@ priority = "explicit"
 [tool.poetry.group.prod.dependencies]
 # Try PyPI first, then TestPyPI automatically due to supplemental priority
 extractor-api-lib = "==4.0.0"
+rag-core-lib = "==4.0.0"
 
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile
 extractor-api-lib = {path = "../../libs/extractor-api-lib"}
+rag-core-lib = {path = "../../libs/rag-core-lib"}

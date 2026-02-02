@@ -394,7 +394,7 @@ extractor_docker_build_config = {
     "ref": document_extractor_full_image_name,
     "context": ".",
     "dockerfile": extractor_dockerfile,
-    "ignore": IGNORE_BASE + libs_ignore_except(["extractor-api-lib"]),
+    "ignore": IGNORE_BASE + libs_ignore_except(["extractor-api-lib", "rag-core-lib"]),
 }
 
 # Add build args and live_update based on dev mode
@@ -402,6 +402,7 @@ if dev_mode:
     extractor_docker_build_config["live_update"] = [
         sync(extractor_context, "/app/services/document-extractor"),
         sync(core_library_context +"/extractor-api-lib", "/app/libs/extractor-api-lib"),
+        sync(core_library_context +"/rag-core-lib", "/app/libs/rag-core-lib"),
     ]
 else:
     # Use prod-local for Tilt with production Dockerfile

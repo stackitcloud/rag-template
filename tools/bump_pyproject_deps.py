@@ -21,6 +21,19 @@ LIBS_VERSION_FILES = [
     ROOT / 'libs' / 'extractor-api-lib' / 'pyproject.toml',
 ]
 
+# Internal library dependency pins to keep in sync with lib versions
+LIB_DEP_PINS = {
+    ROOT / 'libs' / 'rag-core-api' / 'pyproject.toml': {
+        'tool.poetry.dependencies.rag-core-lib': '=={v}',
+    },
+    ROOT / 'libs' / 'admin-api-lib' / 'pyproject.toml': {
+        'tool.poetry.dependencies.rag-core-lib': '=={v}',
+    },
+    ROOT / 'libs' / 'extractor-api-lib' / 'pyproject.toml': {
+        'tool.poetry.dependencies.rag-core-lib': '=={v}',
+    },
+}
+
 # Service pins to update after libs are published
 SERVICE_PINS = {
     ROOT / 'services' / 'rag-backend' / 'pyproject.toml': {
@@ -85,6 +98,27 @@ def bump(version: str, bump_libs: bool = True, bump_service_pins: bool = True) -
             new_txt = replace_version_line(txt, version)
             file.write_text(new_txt)
             print(f"Updated {file} -> tool.poetry.version = {version}")
+
+        # Keep internal lib dependency pins aligned with the bumped version.
+        for file, mapping in LIB_DEP_PINS.items():
+            txt = file.read_text()
+            doc = tomlkit.parse(txt)
+            deps = _get_table(doc, [
+                'tool', 'poetry', 'dependencies'
+            ])
+            if deps is None or not hasattr(deps, '__contains__'):
+                print(f"Skip {file}: dependencies table not found")
+                file.write_text(tomlkit.dumps(doc))
+                continue
+            for dotted, template in mapping.items():
+                pkg = dotted.split('.')[-1]
+                if pkg in deps:
+                    val = template.format(v=version)
+                    deps[pkg] = val
+                    print(f"Pinned {file} -> {pkg} = {val}")
+                else:
+                    print(f"Skip {file}: {pkg} not present in dependencies")
+            file.write_text(tomlkit.dumps(doc))
 
     # 2) bump service pins only inside [tool.poetry.group.prod.dependencies]
     if bump_service_pins:

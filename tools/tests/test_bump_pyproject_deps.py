@@ -94,3 +94,41 @@ def test_bump_updates_internal_lib_dependency_pins(tmp_path: Path, monkeypatch) 
     assert rag_core_api_doc["tool"]["poetry"]["dependencies"]["rag-core-lib"] == "==4.1.0"
     assert admin_api_doc["tool"]["poetry"]["dependencies"]["rag-core-lib"] == "==4.1.0"
     assert extractor_api_doc["tool"]["poetry"]["dependencies"]["rag-core-lib"] == "==4.1.0"
+
+
+def test_bump_updates_service_pins(tmp_path: Path, monkeypatch) -> None:
+    service_pyproject = tmp_path / "document-extractor.toml"
+    service_pyproject.write_text(
+        "\n".join(
+            [
+                "[tool.poetry]",
+                "name = \"extractor-server\"",
+                "version = \"0.1.0\"",
+                "",
+                "[tool.poetry.group.prod.dependencies]",
+                "extractor-api-lib = \"==4.0.0\"",
+                "rag-core-lib = \"==4.0.0\"",
+                "",
+            ]
+        )
+        + "\n"
+    )
+
+    monkeypatch.setattr(
+        bump_pyproject_deps,
+        "SERVICE_PINS",
+        {
+            service_pyproject: {
+                "tool.poetry.group.prod.dependencies.extractor-api-lib": "=={v}",
+                "tool.poetry.group.prod.dependencies.rag-core-lib": "=={v}",
+            }
+        },
+    )
+
+    bump_pyproject_deps.bump("4.1.0", bump_libs=False, bump_service_pins=True)
+
+    doc = tomlkit.parse(service_pyproject.read_text())
+    deps = doc["tool"]["poetry"]["group"]["prod"]["dependencies"]
+
+    assert deps["extractor-api-lib"] == "==4.1.0"
+    assert deps["rag-core-lib"] == "==4.1.0"

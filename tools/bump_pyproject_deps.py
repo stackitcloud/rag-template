@@ -46,6 +46,7 @@ SERVICE_PINS = {
     },
     ROOT / 'services' / 'document-extractor' / 'pyproject.toml': {
         'tool.poetry.group.prod.dependencies.extractor-api-lib': '=={v}',
+        'tool.poetry.group.prod.dependencies.rag-core-lib': '=={v}',
     },
 }
 

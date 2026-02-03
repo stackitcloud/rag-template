@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-lib"
-version = "4.0.0"
+version = "4.1.0.post20260203075550"
 description = "The rag-core-lib contains the shared components of at least two of the rag libs."
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",

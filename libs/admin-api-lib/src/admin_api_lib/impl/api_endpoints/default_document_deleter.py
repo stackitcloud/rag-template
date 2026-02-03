@@ -41,7 +41,21 @@ class DefaultDocumentDeleter(DocumentDeleter):
         self._rag_api = rag_api
         self._key_value_store = key_value_store
 
-    async def adelete_document(self, identification: str, remove_from_key_value_store: bool = True) -> None:
+    @staticmethod
+    def _storage_key_from_identification(identification: str) -> str | None:
+        if identification.startswith("file:"):
+            storage_key = identification[len("file:") :]
+            return storage_key or None
+        if ":" in identification:
+            return None
+        return identification or None
+
+    async def adelete_document(
+        self,
+        identification: str,
+        remove_from_key_value_store: bool = True,
+        remove_from_storage: bool = True,
+    ) -> None:
         """
         Asynchronously delete a document identified by the given identification string.
 
@@ -57,6 +71,8 @@ class DefaultDocumentDeleter(DocumentDeleter):
             The unique identifier of the document to be deleted.
         remove_from_key_value_store : bool, optional
             If True, the document will also be removed from the key-value store (default is True).
+        remove_from_storage : bool, optional
+            If True, the document will also be removed from the file storage (default is True).
 
         Raises
         ------
@@ -67,12 +83,12 @@ class DefaultDocumentDeleter(DocumentDeleter):
         error_messages = ""
         # Delete the document from file service and vector database
         logger.debug("Deleting existing document: %s", identification)
-        try:
-            if remove_from_key_value_store:
-                self._key_value_store.remove(identification)
-            self._file_service.delete_file(identification)
-        except Exception as e:
-            error_messages += f"Error while deleting {identification} from file storage\n {str(e)}\n"
+        if remove_from_key_value_store:
+            self._key_value_store.remove(identification)
+
+        if remove_from_storage:
+            error_messages = self._delete_from_storage(identification, error_messages)
+
         try:
             self._rag_api.remove_information_piece(
                 DeleteRequest(metadata=[KeyValuePair(key="document", value=json.dumps(identification))])
@@ -82,3 +98,14 @@ class DefaultDocumentDeleter(DocumentDeleter):
             error_messages += f"Error while deleting {identification} from vector db\n{str(e)}"
         if error_messages:
             raise HTTPException(404, error_messages)
+
+    def _delete_from_storage(self, identification: str, error_messages: str) -> str:
+        try:
+            storage_key = self._storage_key_from_identification(identification)
+            if storage_key:
+                self._file_service.delete_file(storage_key)
+            else:
+                logger.debug("Skipping file storage deletion for non-file source: %s", identification)
+        except Exception as e:
+            error_messages += f"Error while deleting {identification} from file storage\n {str(e)}\n"
+        return error_messages

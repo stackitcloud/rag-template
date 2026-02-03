@@ -23,11 +23,14 @@ RUN poetry config virtualenvs.create false
 RUN if [ "$TEST" = "1" ]; then \
         rm ../poetry.lock; rm ../pyproject.toml; \
         # Install rag-core-lib dependencies if testing libraries that depend on it \
-        if [ "${DIRECTORY}" = "admin-api-lib" ] || [ "${DIRECTORY}" = "rag-core-api" ]; then \
+        if [ "${DIRECTORY}" = "admin-api-lib" ] || [ "${DIRECTORY}" = "rag-core-api" ] || [ "${DIRECTORY}" = "extractor-api-lib" ]; then \
             cd ../rag-core-lib && poetry install --with dev,test; \
             cd ../${DIRECTORY}; \
         fi; \
         poetry install --with dev,test; \
+        if [ "${DIRECTORY}" = "admin-api-lib" ] || [ "${DIRECTORY}" = "rag-core-api" ] || [ "${DIRECTORY}" = "extractor-api-lib" ]; then \
+            pip install -e ../rag-core-lib; \
+        fi; \
     else \
         poetry install --with dev,lint; \
     fi

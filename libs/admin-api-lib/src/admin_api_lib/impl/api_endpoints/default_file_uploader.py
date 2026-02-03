@@ -188,7 +188,11 @@ class DefaultFileUploader(FileUploader):
             # Replace old document
             # deletion is allowed to fail
             with suppress(Exception):
-                await self._document_deleter.adelete_document(source_name, remove_from_key_value_store=False)
+                await self._document_deleter.adelete_document(
+                    source_name,
+                    remove_from_key_value_store=False,
+                    remove_from_storage=False,
+                )
 
             # Run blocking RAG API call in thread pool to avoid blocking event loop
             await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)

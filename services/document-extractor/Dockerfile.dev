@@ -21,9 +21,12 @@ ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 # Copy lockfiles first
 COPY services/document-extractor/pyproject.toml services/document-extractor/poetry.lock /app/services/document-extractor/
 COPY libs/extractor-api-lib/pyproject.toml libs/extractor-api-lib/poetry.lock /app/libs/extractor-api-lib/
+COPY libs/rag-core-lib/pyproject.toml libs/rag-core-lib/poetry.lock /app/libs/rag-core-lib/
 
 COPY libs/extractor-api-lib/src ./libs/extractor-api-lib/src
 COPY libs/extractor-api-lib/README.md /app/libs/extractor-api-lib/
+COPY libs/rag-core-lib/src ./libs/rag-core-lib/src
+COPY libs/rag-core-lib/README.md /app/libs/rag-core-lib/
 
 # Install third-party deps for service and lib (with dev extras)
 RUN poetry config virtualenvs.create false \
@@ -33,7 +36,7 @@ WORKDIR /app/services/document-extractor
 RUN mkdir -p log && chmod 700 log \
     && touch /app/services/document-extractor/log/logfile.log && chmod 600 /app/services/document-extractor/log/logfile.log
 
-ENV PYTHONPATH="/app/services/document-extractor/src:/app/libs/extractor-api-lib/src"
+ENV PYTHONPATH="/app/services/document-extractor/src:/app/libs/extractor-api-lib/src:/app/libs/rag-core-lib/src"
 
 # Create non-root user
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot

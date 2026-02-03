@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "rag-core-api"
-version = "4.1.0.post20260203075550"
+version = "4.1.1003"
 description = "The rag-core-api contains the API layer for the RAG template for document retrieval, question answering, knowledge base management in the vector database and more."
 packages = [{ include = "rag_core_api", from = "src" }]
 authors = [
@@ -20,7 +20,7 @@ homepage = "https://pypi.org/project/rag-core-api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-rag-core-lib = "==4.0.0"
+rag-core-lib = {version = "==4.1.1003", source = "testpypi"}
 uvicorn = "^0.37.0"
 langchain-qdrant = "^1.1.0"
 dependency-injector = "^4.46.0"

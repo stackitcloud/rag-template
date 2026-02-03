@@ -108,8 +108,8 @@ python = "^3.13"
 setuptools = "<80.9"
 
 [tool.poetry.group.prod.dependencies]
-admin-api-lib = "==4.0.0"
-rag-core-lib = "==4.0.0"
+admin-api-lib = "==4.1.1003"
+rag-core-lib = "==4.1.1003"
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile

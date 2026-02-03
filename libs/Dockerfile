@@ -28,6 +28,9 @@ RUN if [ "$TEST" = "1" ]; then \
             cd ../${DIRECTORY}; \
         fi; \
         poetry install --with dev,test; \
+        if [ "${DIRECTORY}" = "admin-api-lib" ] || [ "${DIRECTORY}" = "rag-core-api" ] || [ "${DIRECTORY}" = "extractor-api-lib" ]; then \
+            pip install -e ../rag-core-lib; \
+        fi; \
     else \
         poetry install --with dev,lint; \
     fi

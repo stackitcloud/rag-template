@@ -5,7 +5,7 @@ description: |
   form rag. rag is an application, where you can upload your own documents and
   ask question about their content and the rag will answer them.
 type: application
-version: 4.0.0
+version: 4.1.0
 appVersion: "v4.1.1"
 dependencies:
 - name: langfuse

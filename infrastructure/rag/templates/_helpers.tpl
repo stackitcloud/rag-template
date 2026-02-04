@@ -15,7 +15,11 @@
 {{- end -}}
 
 {{- define "secret.usecaseName" -}}
+{{- if .Values.shared.secrets.usecaseExistingSecretName -}}
+{{- .Values.shared.secrets.usecaseExistingSecretName | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
 {{- printf "%s-usecase-secret" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/* Resolve basic auth credentials from inline values or referenced secrets. */}}

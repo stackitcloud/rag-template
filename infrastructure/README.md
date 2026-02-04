@@ -459,6 +459,16 @@ shared:
       USECASE_SECRET_ENV_VAR: ...
 ```
 
+If you manage the usecase secret via External Secrets Operator, create the Secret in the target namespace and point the chart to it:
+
+```yaml
+shared:
+  secrets:
+    usecaseExistingSecretName: "my-usecase-secret"
+```
+
+When `usecaseExistingSecretName` is set, the chart will not create the usecase secret and will reference the existing one instead.
+
 ## 2. Requirements and Setup Instructions
 
 The following section describes the requirements for the infrastructure setup and provides instructions for the local and production setup.

@@ -531,6 +531,7 @@ shared:
         secretKeyRef:
           name: ""
           key: "S3_SECRET_ACCESS_KEY"
+    usecaseExistingSecretName: "" # Optional: existing Secret name (e.g., from ESO). If set, chart will not create usecase secret.
     usecase: {}
 
 

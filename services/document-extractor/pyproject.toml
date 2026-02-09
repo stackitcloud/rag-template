@@ -62,10 +62,10 @@ license = "Apache-2.0"
 repository = "https://github.com/stackitcloud/rag-template"
 
 [tool.poetry.dependencies]
-python = ">=3.14,<3.15"
+python = ">=3.13,<3.14"
 extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
-torch = { version = "^2.9.0", source = "pytorch_cpu" }
-torchvision = { version = "^0.25.0", source = "pytorch_cpu" }
+torch = { version = "^2.9.0+cpu", source = "pytorch_cpu" }
+torchvision = { version = "^0.24.1+cpu", source = "pytorch_cpu" }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"
@@ -121,8 +121,8 @@ priority = "explicit"
 
 [tool.poetry.group.prod.dependencies]
 # Try PyPI first, then TestPyPI automatically due to supplemental priority
-extractor-api-lib = "==4.1.1003"
-rag-core-lib = "==4.1.1003"
+extractor-api-lib = "==4.1.1"
+rag-core-lib = "==4.1.1"
 
 
 

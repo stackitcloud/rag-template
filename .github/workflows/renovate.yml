@@ -35,5 +35,5 @@ jobs:
         env:
           LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
           RENOVATE_DRY_RUN: ${{ inputs.dryRun || false }}
-          RENOVATE_BASE_BRANCH_PATTERNS: deps-main
+          RENOVATE_BASE_BRANCH_PATTERNS: main
           TZ: Europe/Berlin

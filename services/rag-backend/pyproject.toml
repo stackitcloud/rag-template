@@ -16,6 +16,8 @@ repository = "https://github.com/stackitcloud/rag-template"
 python = "^3.13"
 setuptools = "<80.11"
 propcache = "0.4.1"
+aiohttp = "^3.13.3"
+marshmallow = "^3.26.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.1"

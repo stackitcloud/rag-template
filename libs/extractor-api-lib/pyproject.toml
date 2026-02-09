@@ -109,7 +109,7 @@ partial = "^1.0"
 pyyaml = "^6.0.2"
 numpy = "^2.2.5"
 docx2txt = "^0.9"
-unstructured = {extras = ["docx", "pptx"], version = "0.18.15"}
+unstructured = {extras = ["docx", "pptx"], version = "0.18.18"}
 html5lib = "^1.1"
 langchain-community = "^0.4.1"
 atlassian-python-api = "^4.0.3"

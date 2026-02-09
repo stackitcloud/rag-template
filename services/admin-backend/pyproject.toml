@@ -89,7 +89,7 @@ flake8-pytest-style = "^2.0.0"
 pep8-naming = "^0.15.1"
 flake8-eol = "^0.0.8"
 flake8-exceptions = "^0.0.1a0"
-flake8-simplify = "^0.22.0"
+flake8-simplify = "^0.30.0"
 flake8-wot = "^0.2.0"
 flake8-function-order = "^0.0.5"
 flake8-tidy-imports = "^4.10.0"
@@ -105,11 +105,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-setuptools = "<80.9"
+setuptools = "<80.11"
 
 [tool.poetry.group.prod.dependencies]
-admin-api-lib = "==4.1.1"
-rag-core-lib = "==4.1.1"
+admin-api-lib = "==4.1.1003"
+rag-core-lib = "==4.1.1003"
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile

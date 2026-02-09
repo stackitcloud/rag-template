@@ -569,14 +569,14 @@ langfuse:
     web:
       image:
         repository: langfuse/langfuse
-        tag: "3.115.0"
+        tag: "3.150.0"
         pullPolicy: Always
 
     # Worker deployment configuration
     worker:
       image:
         repository: langfuse/langfuse-worker
-        tag: "3.115.0"
+        tag: "3.150.0"
         pullPolicy: Always
       port: 3030
 

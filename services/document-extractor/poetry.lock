@@ -394,14 +394,14 @@ typing-extensions = ">=4.6.0"
 
 [[package]]
 name = "azure-core"
-version = "1.36.0"
+version = "1.38.0"
 description = "Microsoft Azure Core Library for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev", "prod", "prod-local"]
 files = [
-    {file = "azure_core-1.36.0-py3-none-any.whl", hash = "sha256:fee9923a3a753e94a259563429f3644aaf05c486d45b1215d098115102d91d3b"},
-    {file = "azure_core-1.36.0.tar.gz", hash = "sha256:22e5605e6d0bf1d229726af56d9e92bc37b6e726b141a18be0b4d424131741b7"},
+    {file = "azure_core-1.38.0-py3-none-any.whl", hash = "sha256:ab0c9b2cd71fecb1842d52c965c95285d3cfb38902f6766e4a471f1cd8905335"},
+    {file = "azure_core-1.38.0.tar.gz", hash = "sha256:8194d2682245a3e4e3151a667c686464c3786fed7918b394d035bdcd61bb5993"},
 ]
 
 [package.dependencies]
@@ -1565,6 +1565,7 @@ html5lib = "^1.1"
 langchain-community = "^0.4.1"
 langchain-core = "^1.0.7"
 lxml = "^5.4.0"
+mammoth = "^1.11.0"
 markdownify = "^1.1.0"
 markitdown = {version = "^0.1.3", extras = ["all"]}
 numpy = "^2.2.5"
@@ -3111,23 +3112,25 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.4.43"
+version = "0.6.9"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev", "prod", "prod-local"]
 files = [
-    {file = "langsmith-0.4.43-py3-none-any.whl", hash = "sha256:c97846a0b15061bc15844aac32fd1ce4a8e50983905f80a0d6079bb41b112ae3"},
-    {file = "langsmith-0.4.43.tar.gz", hash = "sha256:75c2468ab740438adfb32af8595ad8837c3af2bd1cdaf057d534182c5a07407a"},
+    {file = "langsmith-0.6.9-py3-none-any.whl", hash = "sha256:86ba521e042397f6fbb79d63991df9d5f7b6a6dd6a6323d4f92131291478dcff"},
+    {file = "langsmith-0.6.9.tar.gz", hash = "sha256:aae04cec6e6d8e133f63ba71c332ce0fbd2cda95260db7746ff4c3b6a3c41db1"},
 ]
 
 [package.dependencies]
 httpx = ">=0.23.0,<1"
 orjson = {version = ">=3.9.14", markers = "platform_python_implementation != \"PyPy\""}
 packaging = ">=23.2"
-pydantic = ">=1,<3"
+pydantic = ">=2,<3"
 requests = ">=2.0.0"
 requests-toolbelt = ">=1.0.0"
+uuid-utils = ">=0.12.0,<1.0"
+xxhash = ">=3.0.0"
 zstandard = ">=0.23.0"
 
 [package.extras]
@@ -3325,14 +3328,14 @@ python-dotenv = ">=1.0.1"
 
 [[package]]
 name = "mammoth"
-version = "1.10.0"
+version = "1.11.0"
 description = "Convert Word documents from docx to simple and clean HTML and Markdown"
 optional = false
 python-versions = ">=3.7"
 groups = ["main", "dev", "prod", "prod-local"]
 files = [
-    {file = "mammoth-1.10.0-py2.py3-none-any.whl", hash = "sha256:a1c87d5b98ca30230394267f98614b58b14b50f8031dc33ac9a535c6ab04eb99"},
-    {file = "mammoth-1.10.0.tar.gz", hash = "sha256:cb6fbba41ccf8b5502859c457177d87a833fef0e0b1d4e6fd23ec372fe892c30"},
+    {file = "mammoth-1.11.0-py2.py3-none-any.whl", hash = "sha256:c077ab0d450bd7c0c6ecd529a23bf7e0fa8190c929e28998308ff4eada3f063b"},
+    {file = "mammoth-1.11.0.tar.gz", hash = "sha256:a0f59e442f34d5b6447f4b0999306cbf3e67aaabfa8cb516f878fb1456744637"},
 ]
 
 [package.dependencies]
@@ -3380,14 +3383,14 @@ six = ">=1.15,<2"
 
 [[package]]
 name = "markitdown"
-version = "0.1.3"
+version = "0.1.4"
 description = "Utility tool for converting various files to Markdown"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev", "prod", "prod-local"]
 files = [
-    {file = "markitdown-0.1.3-py3-none-any.whl", hash = "sha256:08d9a25770979d78f60dcc0afcb868de6799608e4db65342b2e03304fb091251"},
-    {file = "markitdown-0.1.3.tar.gz", hash = "sha256:b0d9127c3373a68274dede6af6c9bb0684b78ce364c727c4c304da97a20d6fd9"},
+    {file = "markitdown-0.1.4-py3-none-any.whl", hash = "sha256:d7f3805716b22545f693d355e28e89584226c0614b3b80b7c4a3f825f068492d"},
+    {file = "markitdown-0.1.4.tar.gz", hash = "sha256:e72a481d1a50c82ff744e85e3289f79a940c5d0ad5ffa2b37c33de814c195bb1"},
 ]
 
 [package.dependencies]
@@ -3398,13 +3401,13 @@ charset-normalizer = "*"
 defusedxml = "*"
 lxml = {version = "*", optional = true, markers = "extra == \"all\""}
 magika = ">=0.6.1,<0.7.0"
-mammoth = {version = ">=1.10.0,<1.11.0", optional = true, markers = "extra == \"all\""}
+mammoth = {version = ">=1.11.0,<1.12.0", optional = true, markers = "extra == \"all\""}
 markdownify = "*"
 olefile = {version = "*", optional = true, markers = "extra == \"all\""}
 onnxruntime = {version = "<=1.20.1", markers = "sys_platform == \"win32\""}
 openpyxl = {version = "*", optional = true, markers = "extra == \"all\""}
 pandas = {version = "*", optional = true, markers = "extra == \"all\""}
-pdfminer-six = {version = "*", optional = true, markers = "extra == \"all\""}
+pdfminer-six = {version = ">=20251107", optional = true, markers = "extra == \"all\""}
 pydub = {version = "*", optional = true, markers = "extra == \"all\""}
 python-pptx = {version = "*", optional = true, markers = "extra == \"all\""}
 requests = "*"
@@ -3413,10 +3416,10 @@ xlrd = {version = "*", optional = true, markers = "extra == \"all\""}
 youtube-transcript-api = {version = ">=1.0.0,<1.1.0", optional = true, markers = "extra == \"all\""}
 
 [package.extras]
-all = ["azure-ai-documentintelligence", "azure-identity", "lxml", "mammoth (>=1.10.0,<1.11.0)", "olefile", "openpyxl", "pandas", "pdfminer-six", "pydub", "python-pptx", "speechrecognition", "xlrd", "youtube-transcript-api (>=1.0.0,<1.1.0)"]
+all = ["azure-ai-documentintelligence", "azure-identity", "lxml", "mammoth (>=1.11.0,<1.12.0)", "olefile", "openpyxl", "pandas", "pdfminer-six (>=20251107)", "pydub", "python-pptx", "speechrecognition", "xlrd", "youtube-transcript-api (>=1.0.0,<1.1.0)"]
 audio-transcription = ["pydub", "speechrecognition"]
 az-doc-intel = ["azure-ai-documentintelligence", "azure-identity"]
-docx = ["lxml", "mammoth"]
+docx = ["lxml", "mammoth (>=1.11.0,<1.12.0)"]
 outlook = ["olefile"]
 pdf = ["pdfminer-six"]
 pptx = ["python-pptx"]
@@ -3542,14 +3545,14 @@ files = [
 
 [[package]]
 name = "marshmallow"
-version = "3.26.1"
+version = "3.26.2"
 description = "A lightweight library for converting complex datatypes to and from native Python datatypes."
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev", "prod", "prod-local"]
 files = [
-    {file = "marshmallow-3.26.1-py3-none-any.whl", hash = "sha256:3350409f20a70a7e4e11a27661187b77cdcaeb20abca41c1454fe33636bea09c"},
-    {file = "marshmallow-3.26.1.tar.gz", hash = "sha256:e6d8affb6cb61d39d26402096dc0aee12d5a26d490a121f118d2e81dc0719dc6"},
+    {file = "marshmallow-3.26.2-py3-none-any.whl", hash = "sha256:013fa8a3c4c276c24d26d84ce934dc964e2aa794345a0f8c7e5a7191482c8a73"},
+    {file = "marshmallow-3.26.2.tar.gz", hash = "sha256:bbe2adb5a03e6e3571b573f42527c6fe926e17467833660bebd11593ab8dfd57"},
 ]
 
 [package.dependencies]
@@ -4931,22 +4934,22 @@ files = [
 
 [[package]]
 name = "protobuf"
-version = "6.33.1"
+version = "6.33.5"
 description = ""
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev", "prod", "prod-local"]
 files = [
-    {file = "protobuf-6.33.1-cp310-abi3-win32.whl", hash = "sha256:f8d3fdbc966aaab1d05046d0240dd94d40f2a8c62856d41eaa141ff64a79de6b"},
-    {file = "protobuf-6.33.1-cp310-abi3-win_amd64.whl", hash = "sha256:923aa6d27a92bf44394f6abf7ea0500f38769d4b07f4be41cb52bd8b1123b9ed"},
-    {file = "protobuf-6.33.1-cp39-abi3-macosx_10_9_universal2.whl", hash = "sha256:fe34575f2bdde76ac429ec7b570235bf0c788883e70aee90068e9981806f2490"},
-    {file = "protobuf-6.33.1-cp39-abi3-manylinux2014_aarch64.whl", hash = "sha256:f8adba2e44cde2d7618996b3fc02341f03f5bc3f2748be72dc7b063319276178"},
-    {file = "protobuf-6.33.1-cp39-abi3-manylinux2014_s390x.whl", hash = "sha256:0f4cf01222c0d959c2b399142deb526de420be8236f22c71356e2a544e153c53"},
-    {file = "protobuf-6.33.1-cp39-abi3-manylinux2014_x86_64.whl", hash = "sha256:8fd7d5e0eb08cd5b87fd3df49bc193f5cfd778701f47e11d127d0afc6c39f1d1"},
-    {file = "protobuf-6.33.1-cp39-cp39-win32.whl", hash = "sha256:023af8449482fa884d88b4563d85e83accab54138ae098924a985bcbb734a213"},
-    {file = "protobuf-6.33.1-cp39-cp39-win_amd64.whl", hash = "sha256:df051de4fd7e5e4371334e234c62ba43763f15ab605579e04c7008c05735cd82"},
-    {file = "protobuf-6.33.1-py3-none-any.whl", hash = "sha256:d595a9fd694fdeb061a62fbe10eb039cc1e444df81ec9bb70c7fc59ebcb1eafa"},
-    {file = "protobuf-6.33.1.tar.gz", hash = "sha256:97f65757e8d09870de6fd973aeddb92f85435607235d20b2dfed93405d00c85b"},
+    {file = "protobuf-6.33.5-cp310-abi3-win32.whl", hash = "sha256:d71b040839446bac0f4d162e758bea99c8251161dae9d0983a3b88dee345153b"},
+    {file = "protobuf-6.33.5-cp310-abi3-win_amd64.whl", hash = "sha256:3093804752167bcab3998bec9f1048baae6e29505adaf1afd14a37bddede533c"},
+    {file = "protobuf-6.33.5-cp39-abi3-macosx_10_9_universal2.whl", hash = "sha256:a5cb85982d95d906df1e2210e58f8e4f1e3cdc088e52c921a041f9c9a0386de5"},
+    {file = "protobuf-6.33.5-cp39-abi3-manylinux2014_aarch64.whl", hash = "sha256:9b71e0281f36f179d00cbcb119cb19dec4d14a81393e5ea220f64b286173e190"},
+    {file = "protobuf-6.33.5-cp39-abi3-manylinux2014_s390x.whl", hash = "sha256:8afa18e1d6d20af15b417e728e9f60f3aa108ee76f23c3b2c07a2c3b546d3afd"},
+    {file = "protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl", hash = "sha256:cbf16ba3350fb7b889fca858fb215967792dc125b35c7976ca4818bee3521cf0"},
+    {file = "protobuf-6.33.5-cp39-cp39-win32.whl", hash = "sha256:a3157e62729aafb8df6da2c03aa5c0937c7266c626ce11a278b6eb7963c4e37c"},
+    {file = "protobuf-6.33.5-cp39-cp39-win_amd64.whl", hash = "sha256:8f04fa32763dcdb4973d537d6b54e615cc61108c7cb38fe59310c3192d29510a"},
+    {file = "protobuf-6.33.5-py3-none-any.whl", hash = "sha256:69915a973dd0f60f31a08b8318b73eab2bd6a392c79184b3612226b0a3f8ec02"},
+    {file = "protobuf-6.33.5.tar.gz", hash = "sha256:6ddcac2a081f8b7b9642c09406bc6a4290128fce5f471cddd165960bb9119e5c"},
 ]
 
 [[package]]
@@ -5923,6 +5926,7 @@ develop = true
 [package.dependencies]
 boto3 = "^1.38.10"
 deprecated = "^1.2.18"
+filelock = "^3.20.3"
 flashrank = "^0.2.10"
 langchain = "^1.0.8"
 langchain-community = "^0.4.1"
@@ -5930,6 +5934,7 @@ langchain-core = "^1.0.7"
 langchain-openai = "^1.0.3"
 langfuse = "^3.10.1"
 langgraph-checkpoint = ">=3.0.0,<4.0.0"
+marshmallow = "^3.26.2"
 oauthlib = "^3.2.2"
 openai = "^1.77.0"
 pydantic = "^2.11.4"
@@ -8285,4 +8290,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "f653d11f1a5770dae878d73cca29f334f0fe4f4b424f2e1c9952504885cbb06c"
+content-hash = "8252062bebb3ffc9cfdeb0b8d2c136186acdd779f94ca95521f6a1ec91f51ae3"

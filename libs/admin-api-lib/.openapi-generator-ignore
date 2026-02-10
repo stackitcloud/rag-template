@@ -32,3 +32,9 @@ setup.cfg
 .gitignore
 docker-compose.yaml
 .openapi-generator/FILES
+
+# These files are hand-maintained in this repo (DI wiring and impl loading)
+src/admin_api_lib/main.py
+src/admin_api_lib/apis/admin_api.py
+src/admin_api_lib/apis/admin_api_base.py
+src/admin_api_lib/security_api.py

@@ -137,11 +137,6 @@ export const useDocumentsStore = defineStore("chat", () => {
 
   const deleteDocument = async (documentId: string) => {
     try {
-      // Prevent deletion if the document is currently processing
-      const doc = allDocuments.value?.find((d) => d.name === documentId);
-      if (doc?.status === "PROCESSING") {
-        return; // No-op while processing
-      }
       await DocumentAPI.deleteDocument(documentId);
       await loadDocuments();
     } catch (err) {

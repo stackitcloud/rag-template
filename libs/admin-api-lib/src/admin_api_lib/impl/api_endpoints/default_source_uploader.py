@@ -7,7 +7,6 @@ from contextlib import suppress
 
 from pydantic import StrictStr
 from fastapi import status, HTTPException
-from langchain_core.documents import Document
 
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
 from admin_api_lib.extractor_api_client.openapi_client.models.extraction_parameters import ExtractionParameters
@@ -20,16 +19,17 @@ from admin_api_lib.api_endpoints.source_uploader import SourceUploader
 from admin_api_lib.chunker.chunker import Chunker
 from admin_api_lib.models.status import Status
 from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_api_lib.impl.api_endpoints.upload_pipeline_mixin import (
+    UploadCancelledError,
+    UploadPipelineMixin,
+)
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
 from admin_api_lib.utils.utils import sanitize_document_name
-from admin_api_lib.rag_backend_client.openapi_client.models.information_piece import (
-    InformationPiece as RagInformationPiece,
-)
 
 logger = logging.getLogger(__name__)
 
 
-class DefaultSourceUploader(SourceUploader):
+class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
     """The DefaultSourceUploader is responsible for uploading source files for content extraction."""
 
     def __init__(
@@ -74,6 +74,11 @@ class DefaultSourceUploader(SourceUploader):
         self._background_threads = []
         self._settings = settings
 
+    def cancel_upload(self, identification: str) -> None:
+        """Mark an in-flight source upload as cancelled."""
+        self._key_value_store.cancel_run(identification)
+        logger.info("Cancellation requested for source upload: %s", identification)
+
     async def upload_source(
         self,
         source_type: StrictStr,
@@ -101,13 +106,20 @@ class DefaultSourceUploader(SourceUploader):
         self._prune_background_threads()
 
         source_name = f"{source_type}:{sanitize_document_name(name)}"
+        run_id: str | None = None
+        thread_started = False
         try:
             self._check_if_already_in_processing(source_name)
+            run_id = self._key_value_store.start_run(source_name)
             self._key_value_store.upsert(source_name, Status.PROCESSING)
 
-            thread = Thread(target=self._thread_worker, args=(source_name, source_type, kwargs, self._settings.timeout))
+            thread = Thread(
+                target=self._thread_worker,
+                args=(source_name, source_type, kwargs, self._settings.timeout, run_id),
+            )
             thread.start()
             self._background_threads.append(thread)
+            thread_started = True
         except ValueError as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -115,6 +127,9 @@ class DefaultSourceUploader(SourceUploader):
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.exception("Error while uploading %s", source_name)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        finally:
+            if run_id is not None and not thread_started:
+                self._key_value_store.finish_run(source_name, run_id)
 
     def _check_if_already_in_processing(self, source_name: str) -> None:
         """
@@ -138,17 +153,43 @@ class DefaultSourceUploader(SourceUploader):
         if any(s == Status.PROCESSING for s in existing):
             raise ValueError(f"Document {source_name} is already in processing state")
 
-    def _thread_worker(self, source_name, source_type, kwargs, timeout):
+    async def _aextract_information_pieces(
+        self,
+        source_name: str,
+        source_type: StrictStr,
+        kwargs: list[KeyValuePair],
+    ) -> list:
+        """Extract information pieces for a source from the extractor service."""
+        information_pieces = await asyncio.to_thread(
+            self._extractor_api.extract_from_source,
+            ExtractionParameters(
+                source_type=source_type, document_name=source_name, kwargs=[x.to_dict() for x in kwargs]
+            ),
+        )
+        if not information_pieces:
+            logger.error("No information pieces found in the document: %s", source_name)
+            raise RuntimeError("No information pieces found")
+        return information_pieces
+
+    def _thread_worker(self, source_name, source_type, kwargs, timeout, run_id: str):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
             loop.run_until_complete(
                 asyncio.wait_for(
-                    self._handle_source_upload(source_name=source_name, source_type=source_type, kwargs=kwargs),
+                    self._handle_source_upload(
+                        source_name=source_name,
+                        source_type=source_type,
+                        kwargs=kwargs,
+                        run_id=run_id,
+                    ),
                     timeout=timeout,
                 )
             )
         except asyncio.TimeoutError:
+            if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+                logger.info("Timed out worker for %s ignored because upload was cancelled.", source_name)
+                return
             logger.error(
                 "Upload of %s timed out after %s seconds (increase SOURCE_UPLOADER_TIMEOUT to allow longer ingestions)",
                 source_name,
@@ -156,57 +197,67 @@ class DefaultSourceUploader(SourceUploader):
             )
             self._key_value_store.upsert(source_name, Status.ERROR)
         except Exception:
+            if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+                logger.info("Worker exception for %s ignored because upload was cancelled.", source_name)
+                return
             logger.exception("Error while uploading %s", source_name)
             self._key_value_store.upsert(source_name, Status.ERROR)
         finally:
             loop.close()
+            self._key_value_store.finish_run(source_name, run_id)
 
     async def _handle_source_upload(
         self,
         source_name: str,
         source_type: StrictStr,
         kwargs: list[KeyValuePair],
+        run_id: str | None = None,
     ):
         try:
-            # Run blocking extractor API call in thread pool to avoid blocking event loop
-            information_pieces = await asyncio.to_thread(
-                self._extractor_api.extract_from_source,
-                ExtractionParameters(
-                    source_type=source_type, document_name=source_name, kwargs=[x.to_dict() for x in kwargs]
-                ),
-            )
+            if run_id is None:
+                run_id = self._key_value_store.start_run(source_name)
+            self._assert_not_cancelled(source_name, run_id)
+            information_pieces = await self._aextract_information_pieces(source_name, source_type, kwargs)
+            self._assert_not_cancelled(source_name, run_id)
 
-            if not information_pieces:
-                self._key_value_store.upsert(source_name, Status.ERROR)
-                logger.error("No information pieces found in the document: %s", source_name)
-                raise Exception("No information pieces found")
-            documents: list[Document] = []
-            for piece in information_pieces:
-                documents.append(self._information_mapper.extractor_information_piece2document(piece))
-
-            # Run blocking chunker call in thread pool to avoid blocking event loop
-            chunked_documents = await asyncio.to_thread(self._chunker.chunk, documents)
+            documents = self._map_information_pieces(information_pieces)
+            chunked_documents = await self._achunk_documents(documents)
+            self._assert_not_cancelled(source_name, run_id)
 
             # limit concurrency to avoid spawning multiple threads per call
             enhanced_documents = await self._information_enhancer.ainvoke(
                 chunked_documents, config={"max_concurrency": 1}
             )
+            self._assert_not_cancelled(source_name, run_id)
 
-            rag_information_pieces: list[RagInformationPiece] = []
-            for doc in enhanced_documents:
-                rag_information_pieces.append(self._information_mapper.document2rag_information_piece(doc))
+            rag_information_pieces = [
+                self._information_mapper.document2rag_information_piece(doc) for doc in enhanced_documents
+            ]
 
-            with suppress(Exception):
-                await self._document_deleter.adelete_document(
-                    source_name,
-                    remove_from_key_value_store=False,
-                    remove_from_storage=False,
-                )
+            await self._abest_effort_replace_existing(source_name)
 
+            self._assert_not_cancelled(source_name, run_id)
             # Run blocking RAG API call in thread pool to avoid blocking event loop
             await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
+
+            if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+                await self._abest_effort_cleanup_cancelled(source_name)
+                logger.info("Upload for %s finished after cancellation request; cleaned up artifacts.", source_name)
+                return
+
             self._key_value_store.upsert(source_name, Status.READY)
             logger.info("Source uploaded successfully: %s", source_name)
+        except UploadCancelledError:
+            with suppress(Exception):
+                self._key_value_store.remove(source_name)
+            logger.info("Upload cancelled for %s.", source_name)
         except Exception:
+            if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+                logger.info("Upload for %s stopped because cancellation was requested.", source_name)
+                return
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.exception("Error while uploading %s", source_name)
+        finally:
+            # Best-effort cleanup for direct calls/tests; thread worker also calls finish_run.
+            if run_id is not None:
+                self._key_value_store.finish_run(source_name, run_id)

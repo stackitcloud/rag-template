@@ -46,6 +46,8 @@ class AdminApi(BaseAdminApi):
         self,
         identification: str,
         document_deleter: DocumentDeleter = Depends(Provide[DependencyContainer.document_deleter]),
+        file_uploader: FileUploader = Depends(Provide[DependencyContainer.file_uploader]),
+        source_uploader: SourceUploader = Depends(Provide[DependencyContainer.source_uploader]),
     ) -> None:
         """
         Delete a document asynchronously.
@@ -62,6 +64,8 @@ class AdminApi(BaseAdminApi):
         -------
         None
         """
+        file_uploader.cancel_upload(identification)
+        source_uploader.cancel_upload(identification)
         await document_deleter.adelete_document(identification)
 
     @inject

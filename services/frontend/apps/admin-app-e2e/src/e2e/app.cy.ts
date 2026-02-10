@@ -4,7 +4,7 @@ describe('When the App is loaded', () => {
     cy.get('[data-testid="document-view"]').should('exist');
   });
 
-  it('should disable delete for processing documents', () => {
+  it('should enable delete for processing and ready documents', () => {
     // Stub the backend response for documents
     cy.intercept('GET', '**/all_documents_status', [
       { name: 'Doc-A.pdf', status: 'PROCESSING' },
@@ -16,7 +16,7 @@ describe('When the App is loaded', () => {
 
     // The list renders items with id equal to document name
     cy.get('#Doc-A.pdf').within(() => {
-      cy.get('[data-testid="document-delete-btn"]').should('be.disabled');
+      cy.get('[data-testid="document-delete-btn"]').should('not.be.disabled');
     });
 
     cy.get('#Doc-B.pdf').within(() => {

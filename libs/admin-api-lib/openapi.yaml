@@ -1,378 +1,366 @@
-openapi: 3.1.0
+openapi: 3.0.2
 info:
-    title: admin-api-lib
-    version: 1.0.0
-    description: >-
-        The API is used for the communication between the admin frontend and the admin backend in the
-        rag project.
+  description: The API is used for the communication between the admin frontend and
+    the admin backend in the rag project.
+  title: admin-api-lib
+  version: 1.0.0
 servers:
-    -
-        url: /api
+- url: /api
 paths:
-    '/delete_document/{identification}':
-        delete:
-            tags:
-                - admin
-            parameters:
-                -
-                    style: simple
-                    explode: false
-                    name: identification
-                    schema:
-                        title: Identification
-                        description: ''
-                        type: string
-                    in: path
-                    required: true
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema: {}
-                    description: Deleted
-                '422':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HTTPValidationError'
-                    description: Validation Error
-                '500':
-                    description: Internal server error
-            operationId: delete_document
-            summary: Delete Document
-            description: |-
-                Asynchronously deletes a document based on the provided identification.
+  /delete_document/{identification}:
+    delete:
+      description: |-
+        Asynchronously deletes a document based on the provided identification.
 
-                Parameters
-                ----------
-                identification : str
-                    The unique identifier of the document to be deleted.
+        If an upload/ingestion for this document is currently running (status `PROCESSING`),
+        the backend will request cancellation and perform best-effort cleanup so the document
+        can be re-uploaded. Cancellation is cooperative: a currently running extraction step
+        may still finish, but cancelled uploads will not publish new READY/ERROR status or
+        re-upload data after cancellation.
 
-                Returns
-                -------
-                None
-    '/document_reference/{identification}':
-        get:
-            tags:
-                - admin
-            parameters:
-                -
-                    style: simple
-                    explode: false
-                    name: identification
-                    description: Identifier of the document.
-                    schema:
-                        title: Identification
-                        description: Identifier of the document.
-                        type: string
-                    in: path
-                    required: true
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                format: binary
-                                title: Response 200 Document Reference Document Reference  Identification  Get
-                                type: string
-                    description: Returns the pdf in binary form.
-                '400':
-                    content:
-                        application/json:
-                            schema:
-                                title: Response 400 Document Reference Document Reference  Identification  Get
-                                type: string
-                    description: Bad request
-                '404':
-                    content:
-                        application/json:
-                            schema:
-                                title: Response 404 Document Reference Document Reference  Identification  Get
-                                type: string
-                    description: Document not found.
-                '422':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/HTTPValidationError'
-                    description: Validation Error
-                '500':
-                    content:
-                        application/json:
-                            schema:
-                                title: Response 500 Document Reference Document Reference  Identification  Get
-                                type: string
-                    description: Internal server error
-            operationId: document_reference
-            summary: Document Reference Id Get
-            description: |-
-                Asynchronously retrieve a document reference by its identification.
+        Parameters
+        ----------
+        identification : str
+            The unique identifier of the document to be deleted.
 
-                Parameters
-                ----------
-                identification : str
-                    The unique identifier for the document reference.
+        Returns
+        -------
+        None
+      operationId: delete_document
+      parameters:
+      - explode: false
+        in: path
+        name: identification
+        required: true
+        schema:
+          description: ""
+          title: Identification
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Deleted
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+        "500":
+          description: Internal server error
+      summary: Delete Document
+      tags:
+      - admin
+  /document_reference/{identification}:
+    get:
+      description: |-
+        Asynchronously retrieve a document reference by its identification.
 
-                Returns
-                -------
-                Response
-                    The response object containing the document reference details.
-    /all_documents_status:
-        get:
-            tags:
-                - admin
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/DocumentStatus'
-                    description: List of document links
-                '500':
-                    description: Internal server error
-            operationId: get_all_documents_status
-            summary: Get All Documents Status
-            description: |-
-                Asynchronously retrieves the status of all documents.
+        Parameters
+        ----------
+        identification : str
+            The unique identifier for the document reference.
 
-                Returns
-                -------
-                list[DocumentStatus]
-                    A list containing the status of all documents.
-    /upload_file:
-        post:
-            requestBody:
-                content:
-                    multipart/form-data:
-                        schema:
-                            $ref: '#/components/schemas/Body_upload_file_upload_file_post'
-                required: true
-            tags:
-                - admin
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema: {}
-                    description: ok
-                '400':
-                    description: Bad request
-                '422':
-                    description: Unprocessable Content
-                '500':
-                    description: Internal server error
-            operationId: upload_file
-            summary: Upload File
-            description: Uploads user selected sources.
-    /upload_source:
-        post:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            description: ''
-                            type: array
-                            items:
-                                $ref: '#/components/schemas/KeyValuePair'
-            tags:
-                - admin
-            parameters:
-                -
-                    style: form
-                    explode: true
-                    name: source_type
-                    schema:
-                        title: Type
-                        description: ''
-                        type: string
-                    in: query
-                    required: false
-                -
-                    style: form
-                    explode: true
-                    name: name
-                    schema:
-                        title: Name
-                        description: ''
-                        type: string
-                    in: query
-                    required: false
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema: {}
-                    description: ok
-                '400':
-                    description: Bad request
-                '422':
-                    description: Unprocessable Content
-                '500':
-                    description: Internal server error
-            operationId: upload_source
-            summary: Upload Source
-            description: Uploads user selected sources.
+        Returns
+        -------
+        Response
+            The response object containing the document reference details.
+      operationId: document_reference
+      parameters:
+      - description: Identifier of the document.
+        explode: false
+        in: path
+        name: identification
+        required: true
+        schema:
+          description: Identifier of the document.
+          title: Identification
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                format: binary
+                title: Response 200 Document Reference Document Reference  Identification  Get
+                type: string
+          description: Returns the pdf in binary form.
+        "400":
+          content:
+            application/json:
+              schema:
+                title: Response 400 Document Reference Document Reference  Identification  Get
+                type: string
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                title: Response 404 Document Reference Document Reference  Identification  Get
+                type: string
+          description: Document not found.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+        "500":
+          content:
+            application/json:
+              schema:
+                title: Response 500 Document Reference Document Reference  Identification  Get
+                type: string
+          description: Internal server error
+      summary: Document Reference Id Get
+      tags:
+      - admin
+  /all_documents_status:
+    get:
+      description: |-
+        Asynchronously retrieves the status of all documents.
+
+        Returns
+        -------
+        list[DocumentStatus]
+            A list containing the status of all documents.
+      operationId: get_all_documents_status
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/DocumentStatus'
+                type: array
+          description: List of document links
+        "500":
+          description: Internal server error
+      summary: Get All Documents Status
+      tags:
+      - admin
+  /upload_file:
+    post:
+      description: Uploads user selected sources.
+      operationId: upload_file
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_file_upload_file_post'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: ok
+        "400":
+          description: Bad request
+        "422":
+          description: Unprocessable Content
+        "500":
+          description: Internal server error
+      summary: Upload File
+      tags:
+      - admin
+  /upload_source:
+    post:
+      description: Uploads user selected sources.
+      operationId: upload_source
+      parameters:
+      - explode: true
+        in: query
+        name: source_type
+        required: false
+        schema:
+          description: ""
+          title: Type
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          description: ""
+          title: Name
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ""
+              items:
+                $ref: '#/components/schemas/KeyValuePair'
+              type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: ok
+        "400":
+          description: Bad request
+        "422":
+          description: Unprocessable Content
+        "500":
+          description: Internal server error
+      summary: Upload Source
+      tags:
+      - admin
 components:
-    schemas:
-        Body_upload_file_upload_file_post:
-            title: Body_upload_file_upload_file_post
-            required:
-                - file
-            properties:
-                file:
-                    format: binary
-                    title: File
-                    type: string
-        DocumentStatus:
-            title: DocumentStatus
-            description: DocumentStatus
-            required:
-                - name
-                - status
-            properties:
-                name:
-                    title: Name
-                    type: string
-                status:
-                    $ref: '#/components/schemas/Status'
-            example:
-                name: name
-                status: UPLOADING
-        HTTPValidationError:
-            title: HTTPValidationError
-            description: HTTPValidationError
-            properties:
-                detail:
-                    nullable: true
-                    title: detail
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/ValidationError'
-            example:
-                detail:
-                    -
-                        msg: msg
-                        loc:
-                            -
-                                anyof_schema_1_validator: anyof_schema_1_validator
-                                actual_instance: ''
-                                any_of_schemas:
-                                    - any_of_schemas
-                                    - any_of_schemas
-                                anyof_schema_2_validator: 0
-                            -
-                                anyof_schema_1_validator: anyof_schema_1_validator
-                                actual_instance: ''
-                                any_of_schemas:
-                                    - any_of_schemas
-                                    - any_of_schemas
-                                anyof_schema_2_validator: 0
-                        type: type
-                    -
-                        msg: msg
-                        loc:
-                            -
-                                anyof_schema_1_validator: anyof_schema_1_validator
-                                actual_instance: ''
-                                any_of_schemas:
-                                    - any_of_schemas
-                                    - any_of_schemas
-                                anyof_schema_2_validator: 0
-                            -
-                                anyof_schema_1_validator: anyof_schema_1_validator
-                                actual_instance: ''
-                                any_of_schemas:
-                                    - any_of_schemas
-                                    - any_of_schemas
-                                anyof_schema_2_validator: 0
-                        type: type
-        KeyValuePair:
-            title: KeyValuePair
-            description: KeyValuePair
-            required:
-                - key
-                - value
-            properties:
-                key:
-                    title: Key
-                    type: string
-                value:
-                    title: Value
-                    type: string
-            example:
-                value: value
-                key: key
-        Status:
-            title: Status
-            description: allowed enum values
-            enum:
-                - UPLOADING
-                - PROCESSING
-                - READY
-                - ERROR
+  schemas:
+    Body_upload_file_upload_file_post:
+      properties:
+        file:
+          format: binary
+          title: File
+          type: string
+      required:
+      - file
+      title: Body_upload_file_upload_file_post
+    DocumentStatus:
+      description: DocumentStatus
+      example:
+        name: name
+        status: UPLOADING
+      properties:
+        name:
+          title: Name
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+      required:
+      - name
+      - status
+      title: DocumentStatus
+    HTTPValidationError:
+      description: HTTPValidationError
+      example:
+        detail:
+        - msg: msg
+          loc:
+          - anyof_schema_1_validator: anyof_schema_1_validator
+            actual_instance: ""
+            any_of_schemas:
+            - any_of_schemas
+            - any_of_schemas
+            anyof_schema_2_validator: 0
+          - anyof_schema_1_validator: anyof_schema_1_validator
+            actual_instance: ""
+            any_of_schemas:
+            - any_of_schemas
+            - any_of_schemas
+            anyof_schema_2_validator: 0
+          type: type
+        - msg: msg
+          loc:
+          - anyof_schema_1_validator: anyof_schema_1_validator
+            actual_instance: ""
+            any_of_schemas:
+            - any_of_schemas
+            - any_of_schemas
+            anyof_schema_2_validator: 0
+          - anyof_schema_1_validator: anyof_schema_1_validator
+            actual_instance: ""
+            any_of_schemas:
+            - any_of_schemas
+            - any_of_schemas
+            anyof_schema_2_validator: 0
+          type: type
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          nullable: true
+          type: array
+      title: HTTPValidationError
+    KeyValuePair:
+      description: KeyValuePair
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          title: Key
+          type: string
+        value:
+          title: Value
+          type: string
+      required:
+      - key
+      - value
+      title: KeyValuePair
+    Status:
+      description: allowed enum values
+      enum:
+      - UPLOADING
+      - PROCESSING
+      - READY
+      - ERROR
+      title: Status
+      type: string
+    ValidationError:
+      description: ValidationError
+      example:
+        msg: msg
+        loc:
+        - anyof_schema_1_validator: anyof_schema_1_validator
+          actual_instance: ""
+          any_of_schemas:
+          - any_of_schemas
+          - any_of_schemas
+          anyof_schema_2_validator: 0
+        - anyof_schema_1_validator: anyof_schema_1_validator
+          actual_instance: ""
+          any_of_schemas:
+          - any_of_schemas
+          - any_of_schemas
+          anyof_schema_2_validator: 0
+        type: type
+      properties:
+        loc:
+          items:
+            $ref: '#/components/schemas/ValidationErrorLocInner'
+          type: array
+        msg:
+          title: Msg
+          type: string
+        type:
+          title: Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    ValidationErrorLocInner:
+      description: ValidationErrorLocInner
+      example:
+        anyof_schema_1_validator: anyof_schema_1_validator
+        actual_instance: ""
+        any_of_schemas:
+        - any_of_schemas
+        - any_of_schemas
+        anyof_schema_2_validator: 0
+      properties:
+        anyof_schema_1_validator:
+          nullable: true
+          title: anyof_schema_1_validator
+          type: string
+        anyof_schema_2_validator:
+          nullable: true
+          title: anyof_schema_2_validator
+          type: integer
+        actual_instance: {}
+        any_of_schemas:
+          items:
             type: string
-        ValidationError:
-            title: ValidationError
-            description: ValidationError
-            required:
-                - loc
-                - msg
-                - type
-            properties:
-                loc:
-                    title: loc
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/ValidationErrorLocInner'
-                msg:
-                    title: Msg
-                    type: string
-                type:
-                    title: Type
-                    type: string
-            example:
-                msg: msg
-                loc:
-                    -
-                        anyof_schema_1_validator: anyof_schema_1_validator
-                        actual_instance: ''
-                        any_of_schemas:
-                            - any_of_schemas
-                            - any_of_schemas
-                        anyof_schema_2_validator: 0
-                    -
-                        anyof_schema_1_validator: anyof_schema_1_validator
-                        actual_instance: ''
-                        any_of_schemas:
-                            - any_of_schemas
-                            - any_of_schemas
-                        anyof_schema_2_validator: 0
-                type: type
-        ValidationErrorLocInner:
-            title: ValidationErrorLocInner
-            description: ValidationErrorLocInner
-            properties:
-                anyof_schema_1_validator:
-                    nullable: true
-                    title: anyof_schema_1_validator
-                    type: string
-                anyof_schema_2_validator:
-                    nullable: true
-                    title: anyof_schema_2_validator
-                    type: integer
-                actual_instance:
-                    title: actual_instance
-                any_of_schemas:
-                    title: any_of_schemas
-                    type: array
-                    items:
-                        type: string
-            example:
-                anyof_schema_1_validator: anyof_schema_1_validator
-                actual_instance: ''
-                any_of_schemas:
-                    - any_of_schemas
-                    - any_of_schemas
-                anyof_schema_2_validator: 0
+          type: array
+      title: ValidationErrorLocInner

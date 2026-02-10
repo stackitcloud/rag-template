@@ -21,11 +21,6 @@ const props = defineProps<{
   deleteDocument: (documentId: string) => void;
 }>();
 
-// Deletion is not allowed while a document is in PROCESSING state
-const PROCESSING_STATE = "PROCESSING";
-const isProcessing = computed(() => props.data.status === PROCESSING_STATE);
-const canDelete = computed(() => !isProcessing.value);
-
 const statusClasses = {
   UPLOADING: "text-info",
   PROCESSING: "text-warning",
@@ -43,7 +38,6 @@ const statusText = {
 const documentIcon = computed(() => getDocumentIcon(props.data.name));
 
 const confirmDelete = () => {
-  if (!canDelete.value) return; // Guard against accidental triggers
   if (typeof document !== "undefined") {
     previouslyFocusedElement.value = document.activeElement as HTMLElement | null;
   }
@@ -144,13 +138,11 @@ watch(showDeleteModal, async (isOpen) => {
     <div class="flex items-center">
       <button
         @click="confirmDelete"
-        :disabled="!canDelete"
-        :aria-disabled="!canDelete"
         data-testid="document-delete-btn"
-        class="btn btn-sm btn-ghost btn-circle opacity-60 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        class="btn btn-sm btn-ghost btn-circle opacity-60 hover:opacity-100"
         aria-label="Delete document"
       >
-        <OnyxIcon :icon="iconTrash" :size="16" :class="canDelete ? 'text-error' : 'opacity-40'" />
+        <OnyxIcon :icon="iconTrash" :size="16" class="text-error" />
       </button>
     </div>
   </div>

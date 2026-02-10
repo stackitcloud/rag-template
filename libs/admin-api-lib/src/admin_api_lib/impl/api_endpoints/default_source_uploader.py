@@ -7,7 +7,6 @@ from contextlib import suppress
 
 from pydantic import StrictStr
 from fastapi import status, HTTPException
-from langchain_core.documents import Document
 
 from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
 from admin_api_lib.extractor_api_client.openapi_client.models.extraction_parameters import ExtractionParameters
@@ -20,17 +19,17 @@ from admin_api_lib.api_endpoints.source_uploader import SourceUploader
 from admin_api_lib.chunker.chunker import Chunker
 from admin_api_lib.models.status import Status
 from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_api_lib.impl.api_endpoints.upload_pipeline_mixin import (
+    UploadCancelledError,
+    UploadPipelineMixin,
+)
 from admin_api_lib.information_enhancer.information_enhancer import InformationEnhancer
 from admin_api_lib.utils.utils import sanitize_document_name
 
 logger = logging.getLogger(__name__)
 
 
-class UploadCancelledError(Exception):
-    """Raised when a running source upload was cancelled."""
-
-
-class DefaultSourceUploader(SourceUploader):
+class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
     """The DefaultSourceUploader is responsible for uploading source files for content extraction."""
 
     def __init__(
@@ -154,10 +153,6 @@ class DefaultSourceUploader(SourceUploader):
         if any(s == Status.PROCESSING for s in existing):
             raise ValueError(f"Document {source_name} is already in processing state")
 
-    def _assert_not_cancelled(self, source_name: str, run_id: str) -> None:
-        if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
-            raise UploadCancelledError(f"Upload cancelled for {source_name}")
-
     async def _aextract_information_pieces(
         self,
         source_name: str,
@@ -175,34 +170,6 @@ class DefaultSourceUploader(SourceUploader):
             logger.error("No information pieces found in the document: %s", source_name)
             raise RuntimeError("No information pieces found")
         return information_pieces
-
-    def _map_information_pieces(self, information_pieces: list) -> list[Document]:
-        """Map extractor information pieces to langchain documents."""
-        return [self._information_mapper.extractor_information_piece2document(piece) for piece in information_pieces]
-
-    async def _achunk_documents(self, documents: list[Document]) -> list[Document]:
-        """Chunk documents using the configured chunker in a thread pool."""
-        return await asyncio.to_thread(self._chunker.chunk, documents)
-
-    async def _abest_effort_replace_existing(self, source_name: str) -> None:
-        """Best-effort delete of existing document chunks to support re-upload."""
-        with suppress(Exception):
-            await self._document_deleter.adelete_document(
-                source_name,
-                remove_from_key_value_store=False,
-                remove_from_storage=False,
-            )
-
-    async def _abest_effort_cleanup_cancelled(self, source_name: str) -> None:
-        """Best-effort cleanup for cancelled uploads (status + vector-db artifacts)."""
-        with suppress(Exception):
-            await self._document_deleter.adelete_document(
-                source_name,
-                remove_from_key_value_store=False,
-                remove_from_storage=False,
-            )
-        with suppress(Exception):
-            self._key_value_store.remove(source_name)
 
     def _thread_worker(self, source_name, source_type, kwargs, timeout, run_id: str):
         loop = asyncio.new_event_loop()

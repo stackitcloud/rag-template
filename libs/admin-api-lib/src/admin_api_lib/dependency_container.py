@@ -84,7 +84,8 @@ class DependencyContainer(DeclarativeContainer):
     chunker_selector_config = Configuration()
 
     # Settings
-    s3_settings = S3Settings()
+    # Instantiate lazily to avoid requiring S3 env vars during import/test collection.
+    s3_settings = Singleton(S3Settings)
     chunker_settings = ChunkerSettings()
     chunker_embedder_type_settings = EmbedderClassTypeSettings()
     stackit_chunker_embedder_settings = StackitEmbedderSettings()

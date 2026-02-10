@@ -185,6 +185,45 @@ class DefaultFileUploader(FileUploader):
         if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
             raise UploadCancelledError(f"Upload cancelled for {source_name}")
 
+    async def _aextract_information_pieces(self, s3_path: Path, source_name: str) -> list:
+        """Extract information pieces for a file from the extractor service."""
+        information_pieces = await asyncio.to_thread(
+            self._extractor_api.extract_from_file_post,
+            ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name),
+        )
+        if not information_pieces:
+            logger.error("No information pieces found in the document: %s", source_name)
+            raise RuntimeError("No information pieces found")
+        return information_pieces
+
+    def _map_information_pieces(self, information_pieces: list) -> list[Document]:
+        """Map extractor information pieces to langchain documents."""
+        return [self._information_mapper.extractor_information_piece2document(piece) for piece in information_pieces]
+
+    async def _achunk_documents(self, documents: list[Document]) -> list[Document]:
+        """Chunk documents using the configured chunker in a thread pool."""
+        return await asyncio.to_thread(self._chunker.chunk, documents)
+
+    async def _abest_effort_replace_existing(self, source_name: str) -> None:
+        """Best-effort delete of existing document chunks to support re-upload."""
+        with suppress(Exception):
+            await self._document_deleter.adelete_document(
+                source_name,
+                remove_from_key_value_store=False,
+                remove_from_storage=False,
+            )
+
+    async def _abest_effort_cleanup_cancelled(self, source_name: str) -> None:
+        """Best-effort cleanup for cancelled uploads (status + vector-db artifacts)."""
+        with suppress(Exception):
+            await self._document_deleter.adelete_document(
+                source_name,
+                remove_from_key_value_store=False,
+                remove_from_storage=False,
+            )
+        with suppress(Exception):
+            self._key_value_store.remove(source_name)
+
     async def _handle_source_upload(
         self,
         s3_path: Path,
@@ -197,22 +236,11 @@ class DefaultFileUploader(FileUploader):
             run_id = self._key_value_store.start_run(source_name)
         try:
             self._assert_not_cancelled(source_name, run_id)
-            # Run blocking extractor API call in thread pool to avoid blocking event loop
-            information_pieces = await asyncio.to_thread(
-                self._extractor_api.extract_from_file_post,
-                ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name),
-            )
+            information_pieces = await self._aextract_information_pieces(s3_path, source_name)
             self._assert_not_cancelled(source_name, run_id)
 
-            if not information_pieces:
-                logger.error("No information pieces found in the document: %s", source_name)
-                raise RuntimeError("No information pieces found")
-            documents: list[Document] = []
-            for piece in information_pieces:
-                documents.append(self._information_mapper.extractor_information_piece2document(piece))
-
-            # Run blocking chunker call in thread pool to avoid blocking event loop
-            chunked_documents = await asyncio.to_thread(self._chunker.chunk, documents)
+            documents = self._map_information_pieces(information_pieces)
+            chunked_documents = await self._achunk_documents(documents)
             self._assert_not_cancelled(source_name, run_id)
 
             enhanced_documents = await self._information_enhancer.ainvoke(chunked_documents)
@@ -222,28 +250,14 @@ class DefaultFileUploader(FileUploader):
             rag_information_pieces = [
                 self._information_mapper.document2rag_information_piece(doc) for doc in enhanced_documents
             ]
-            # Replace old document
-            # deletion is allowed to fail
-            with suppress(Exception):
-                await self._document_deleter.adelete_document(
-                    source_name,
-                    remove_from_key_value_store=False,
-                    remove_from_storage=False,
-                )
+            await self._abest_effort_replace_existing(source_name)
 
             self._assert_not_cancelled(source_name, run_id)
             # Run blocking RAG API call in thread pool to avoid blocking event loop
             await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
 
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
-                with suppress(Exception):
-                    await self._document_deleter.adelete_document(
-                        source_name,
-                        remove_from_key_value_store=False,
-                        remove_from_storage=False,
-                    )
-                with suppress(Exception):
-                    self._key_value_store.remove(source_name)
+                await self._abest_effort_cleanup_cancelled(source_name)
                 logger.info("Upload for %s finished after cancellation request; cleaned up artifacts.", source_name)
                 return
 

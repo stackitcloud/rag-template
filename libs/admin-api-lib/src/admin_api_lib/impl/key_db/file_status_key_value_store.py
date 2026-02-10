@@ -36,6 +36,7 @@ class FileStatusKeyValueStore:
     ACTIVE_RUN_PREFIX = "stackit-rag-template-active-run:"
     CANCELLED_RUN_PREFIX = "stackit-rag-template-cancelled-run:"
     CANCEL_TTL_SECONDS = 6 * 60 * 60  # keep cancel markers around for a while to stop late workers
+    ACTIVE_TTL_SECONDS = 24 * 60 * 60  # keep last run_id around so late workers can detect staleness
 
     def __init__(self, settings: KeyValueSettings):
         """
@@ -161,12 +162,6 @@ class FileStatusKeyValueStore:
         all_file_informations = list(self._redis.smembers(self.STORAGE_KEY))
         return [FileStatusKeyValueStore._from_str(x) for x in all_file_informations]
 
-    def _active_run_key(self, identification: str) -> str:
-        return f"{self.ACTIVE_RUN_PREFIX}{identification}"
-
-    def _cancelled_run_key(self, identification: str) -> str:
-        return f"{self.CANCELLED_RUN_PREFIX}{identification}"
-
     def start_run(self, identification: str) -> str:
         """Start a new ingestion run for `identification` and return a run_id."""
         run_id = uuid.uuid4().hex
@@ -175,11 +170,13 @@ class FileStatusKeyValueStore:
         return run_id
 
     def finish_run(self, identification: str, run_id: str) -> None:
-        """Finish a run, clearing run/cancel markers if this run is still current."""
+        """Finish a run, keeping the last run_id around so late workers can detect staleness."""
         active = self._redis.get(self._active_run_key(identification))
         if active == run_id:
-            self._redis.delete(self._active_run_key(identification))
             self._redis.delete(self._cancelled_run_key(identification))
+            # Keep the last run_id for a while: if a newer run was started+finished quickly,
+            # older workers must still see that they are stale and must not publish results.
+            self._redis.expire(self._active_run_key(identification), self.ACTIVE_TTL_SECONDS)
 
     def cancel_run(self, identification: str) -> None:
         """Request cancellation of the currently active run for `identification`."""
@@ -200,3 +197,9 @@ class FileStatusKeyValueStore:
             return True
         active = self._redis.get(self._active_run_key(identification))
         return active is not None and active != run_id
+
+    def _active_run_key(self, identification: str) -> str:
+        return f"{self.ACTIVE_RUN_PREFIX}{identification}"
+
+    def _cancelled_run_key(self, identification: str) -> str:
+        return f"{self.CANCELLED_RUN_PREFIX}{identification}"

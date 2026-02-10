@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "extractor-api-lib"
-version = "4.1.1"
+version = "4.2.0.post20260210203817"
 description = "Extracts the content of documents, websites, etc and maps it to a common format."
 authors = [
     "STACKIT GmbH & Co. KG <data-ai@stackit.cloud>",
@@ -93,7 +93,7 @@ uvicorn = "^0.40.0"
 dependency-injector = "^4.46.0"
 pydantic-settings = "^2.9.1"
 boto3 = "^1.38.10"
-rag-core-lib = "==4.1.1"
+rag-core-lib = "==4.2.0.post20260210203817"
 python-multipart = "^0.0.22"
 oauthlib = "^3.2.2"
 requests-oauthlib = "^2.0.0"

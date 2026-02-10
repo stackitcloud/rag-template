@@ -124,10 +124,12 @@ priority = "explicit"
 
 
 
+
 [tool.poetry.group.prod.dependencies]
 # Try PyPI first, then TestPyPI automatically due to supplemental priority
-extractor-api-lib = "==4.1.1"
-rag-core-lib = "==4.1.1"
+extractor-api-lib = "==4.2.0"
+rag-core-lib = "==4.2.0"
+
 
 
 

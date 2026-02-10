@@ -11,6 +11,17 @@ class FileUploader(UploaderBase):
     """File uploader endpoint of the admin API."""
 
     @abstractmethod
+    def cancel_upload(self, identification: str) -> None:
+        """
+        Signal cancellation for an in-flight upload identified by document id.
+
+        Parameters
+        ----------
+        identification : str
+            Document identification (for example ``file:my_doc.pdf``).
+        """
+
+    @abstractmethod
     async def upload_file(
         self,
         base_url: str,

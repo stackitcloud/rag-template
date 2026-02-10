@@ -58,6 +58,12 @@ async def delete_document(
     """
     Asynchronously deletes a document based on the provided identification.
 
+    If an upload/ingestion for this document is currently running (status `PROCESSING`),
+    the backend will request cancellation and perform best-effort cleanup so the document
+    can be re-uploaded. Cancellation is cooperative: a currently running extraction step
+    may still finish, but cancelled uploads will not publish new READY/ERROR status or
+    re-upload data after cancellation.
+
     Parameters
     ----------
     identification : str

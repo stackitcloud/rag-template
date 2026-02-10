@@ -16,6 +16,10 @@ def mocks():
     extractor_api = MagicMock()
     key_value_store = MagicMock()
     key_value_store.get_all.return_value = []
+    key_value_store.start_run.return_value = "run-1"
+    key_value_store.finish_run.return_value = None
+    key_value_store.cancel_run.return_value = None
+    key_value_store.is_cancelled_or_stale.return_value = False
     information_enhancer = MagicMock()
     information_enhancer.ainvoke = AsyncMock()
     chunker = MagicMock()
@@ -198,7 +202,7 @@ async def test_upload_source_timeout_error(mocks, monkeypatch):
     source_name = f"{source_type}:{sanitize_document_name(name)}"
 
     # monkey-patch the handler to sleep so that timeout triggers
-    async def fake_handle(self, source_name_arg, source_type_arg, kwargs_arg):
+    async def fake_handle(self, source_name_arg, source_type_arg, kwargs_arg, upload_version=None):
         await asyncio.sleep(3600)
 
     # patch handler and Thread to trigger timeout synchronously
@@ -233,3 +237,52 @@ async def test_upload_source_timeout_error(mocks, monkeypatch):
     calls = [call.args for call in key_value_store.upsert.call_args_list]
     assert (source_name, Status.PROCESSING) in calls
     assert (source_name, Status.ERROR) in calls
+
+
+@pytest.mark.asyncio
+async def test_handle_source_upload_cancelled_skips_terminal_status(mocks):
+    (
+        extractor_api,
+        key_value_store,
+        information_enhancer,
+        chunker,
+        document_deleter,
+        rag_api,
+        information_mapper,
+        settings,
+    ) = mocks
+    # Setup mocks for a successful path
+    dummy_piece = MagicMock()
+    extractor_api.extract_from_source.return_value = [dummy_piece]
+    dummy_doc = MagicMock()
+    information_mapper.extractor_information_piece2document.return_value = dummy_doc
+    chunker.chunk.return_value = [dummy_doc]
+    information_enhancer.ainvoke.return_value = [dummy_doc]
+    information_mapper.document2rag_information_piece.return_value = {"p": "v"}
+
+    uploader = DefaultSourceUploader(
+        extractor_api,
+        key_value_store,
+        information_enhancer,
+        chunker,
+        document_deleter,
+        rag_api,
+        information_mapper,
+        settings=settings,
+    )
+
+    source_name = "confluence:cancelled-space"
+    key_value_store.start_run.return_value = "run-cancelled"
+    key_value_store.is_cancelled_or_stale.return_value = True
+
+    await uploader._handle_source_upload(
+        source_name,
+        "confluence",
+        [],
+        run_id="run-cancelled",
+    )
+
+    status_updates = [call.args for call in key_value_store.upsert.call_args_list]
+    assert (source_name, Status.READY) not in status_updates
+    assert (source_name, Status.ERROR) not in status_updates
+    rag_api.upload_information_piece.assert_not_called()

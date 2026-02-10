@@ -13,6 +13,17 @@ class SourceUploader(UploaderBase):
     """Abstract base class for source uploader API endpoints."""
 
     @abstractmethod
+    def cancel_upload(self, identification: str) -> None:
+        """
+        Signal cancellation for an in-flight source upload.
+
+        Parameters
+        ----------
+        identification : str
+            Document identification (for example ``confluence:my_space``).
+        """
+
+    @abstractmethod
     async def upload_source(
         self,
         source_type: StrictStr,

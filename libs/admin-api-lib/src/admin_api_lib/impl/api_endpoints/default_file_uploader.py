@@ -26,6 +26,10 @@ from admin_api_lib.utils.utils import sanitize_document_name
 logger = logging.getLogger(__name__)
 
 
+class UploadCancelledError(Exception):
+    """Raised when a running upload was cancelled."""
+
+
 class DefaultFileUploader(FileUploader):
     """The DefaultFileUploader is responsible for adding a new source file document to the available content."""
 
@@ -73,6 +77,13 @@ class DefaultFileUploader(FileUploader):
         self._background_tasks = []
         self._file_service = file_service
 
+    def cancel_upload(self, identification: str) -> None:
+        """Mark an in-flight upload as cancelled."""
+        self._key_value_store.cancel_run(identification)
+        if ":" not in identification:
+            self._key_value_store.cancel_run(f"file:{identification}")
+        logger.info("Cancellation requested for file upload: %s", identification)
+
     async def upload_file(
         self,
         base_url: str,
@@ -94,17 +105,30 @@ class DefaultFileUploader(FileUploader):
         """
         self._prune_background_tasks()
 
+        source_name = ""
+        run_id: str | None = None
+        task_started = False
         try:
             file.filename = sanitize_document_name(file.filename)
             source_name = f"file:{sanitize_document_name(file.filename)}"
             self._check_if_already_in_processing(source_name)
+            run_id = self._key_value_store.start_run(source_name)
             self._key_value_store.upsert(source_name, Status.PROCESSING)
             content = await file.read()
             s3_path = await self._asave_new_document(content, file.filename, source_name)
 
-            task = asyncio.create_task(self._handle_source_upload(s3_path, source_name, file.filename, base_url))
+            task = asyncio.create_task(
+                self._handle_source_upload(
+                    s3_path,
+                    source_name,
+                    file.filename,
+                    base_url,
+                    run_id=run_id,
+                )
+            )
             task.add_done_callback(self._log_task_exception)
             self._background_tasks.append(task)
+            task_started = True
         except ValueError as e:
             self._key_value_store.upsert(source_name, Status.ERROR)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -112,6 +136,9 @@ class DefaultFileUploader(FileUploader):
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.exception("Error while uploading %s", source_name)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        finally:
+            if run_id is not None and not task_started:
+                self._key_value_store.finish_run(source_name, run_id)
 
     def _log_task_exception(self, task: asyncio.Task) -> None:
         """
@@ -154,32 +181,42 @@ class DefaultFileUploader(FileUploader):
         if any(s == Status.PROCESSING for s in existing):
             raise ValueError(f"Document {source_name} is already in processing state")
 
+    def _assert_not_cancelled(self, source_name: str, run_id: str) -> None:
+        if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+            raise UploadCancelledError(f"Upload cancelled for {source_name}")
+
     async def _handle_source_upload(
         self,
         s3_path: Path,
         source_name: str,
         file_name: str,
         base_url: str,
+        run_id: str | None = None,
     ):
+        if run_id is None:
+            run_id = self._key_value_store.start_run(source_name)
         try:
+            self._assert_not_cancelled(source_name, run_id)
             # Run blocking extractor API call in thread pool to avoid blocking event loop
             information_pieces = await asyncio.to_thread(
                 self._extractor_api.extract_from_file_post,
                 ExtractionRequest(path_on_s3=str(s3_path), document_name=source_name),
             )
+            self._assert_not_cancelled(source_name, run_id)
 
             if not information_pieces:
-                self._key_value_store.upsert(source_name, Status.ERROR)
                 logger.error("No information pieces found in the document: %s", source_name)
-                raise Exception("No information pieces found")
+                raise RuntimeError("No information pieces found")
             documents: list[Document] = []
             for piece in information_pieces:
                 documents.append(self._information_mapper.extractor_information_piece2document(piece))
 
             # Run blocking chunker call in thread pool to avoid blocking event loop
             chunked_documents = await asyncio.to_thread(self._chunker.chunk, documents)
+            self._assert_not_cancelled(source_name, run_id)
 
             enhanced_documents = await self._information_enhancer.ainvoke(chunked_documents)
+            self._assert_not_cancelled(source_name, run_id)
             self._add_file_url(file_name, base_url, enhanced_documents)
 
             rag_information_pieces = [
@@ -194,13 +231,36 @@ class DefaultFileUploader(FileUploader):
                     remove_from_storage=False,
                 )
 
+            self._assert_not_cancelled(source_name, run_id)
             # Run blocking RAG API call in thread pool to avoid blocking event loop
             await asyncio.to_thread(self._rag_api.upload_information_piece, rag_information_pieces)
+
+            if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+                with suppress(Exception):
+                    await self._document_deleter.adelete_document(
+                        source_name,
+                        remove_from_key_value_store=False,
+                        remove_from_storage=False,
+                    )
+                with suppress(Exception):
+                    self._key_value_store.remove(source_name)
+                logger.info("Upload for %s finished after cancellation request; cleaned up artifacts.", source_name)
+                return
+
             self._key_value_store.upsert(source_name, Status.READY)
             logger.info("Source uploaded successfully: %s", source_name)
+        except UploadCancelledError:
+            with suppress(Exception):
+                self._key_value_store.remove(source_name)
+            logger.info("Upload cancelled for %s.", source_name)
         except Exception:
+            if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
+                logger.info("Upload for %s stopped because cancellation was requested.", source_name)
+                return
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.exception("Error while uploading %s", source_name)
+        finally:
+            self._key_value_store.finish_run(source_name, run_id)
 
     def _add_file_url(self, file_name: str, base_url: str, chunked_documents: list[Document]):
         document_url = f"{base_url.rstrip('/')}/document_reference/{urllib.parse.quote_plus(file_name)}"

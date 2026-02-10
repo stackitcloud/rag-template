@@ -2,6 +2,7 @@
 
 import json
 import ssl
+import uuid
 from typing import Any
 
 from redis import Redis
@@ -31,6 +32,10 @@ class FileStatusKeyValueStore:
     STORAGE_KEY = "stackit-rag-template-files"
     INNER_FILENAME_KEY = "filename"
     INNER_STATUS_KEY = "status"
+
+    ACTIVE_RUN_PREFIX = "stackit-rag-template-active-run:"
+    CANCELLED_RUN_PREFIX = "stackit-rag-template-cancelled-run:"
+    CANCEL_TTL_SECONDS = 6 * 60 * 60  # keep cancel markers around for a while to stop late workers
 
     def __init__(self, settings: KeyValueSettings):
         """
@@ -155,3 +160,43 @@ class FileStatusKeyValueStore:
         """
         all_file_informations = list(self._redis.smembers(self.STORAGE_KEY))
         return [FileStatusKeyValueStore._from_str(x) for x in all_file_informations]
+
+    def _active_run_key(self, identification: str) -> str:
+        return f"{self.ACTIVE_RUN_PREFIX}{identification}"
+
+    def _cancelled_run_key(self, identification: str) -> str:
+        return f"{self.CANCELLED_RUN_PREFIX}{identification}"
+
+    def start_run(self, identification: str) -> str:
+        """Start a new ingestion run for `identification` and return a run_id."""
+        run_id = uuid.uuid4().hex
+        self._redis.set(self._active_run_key(identification), run_id)
+        self._redis.delete(self._cancelled_run_key(identification))
+        return run_id
+
+    def finish_run(self, identification: str, run_id: str) -> None:
+        """Finish a run, clearing run/cancel markers if this run is still current."""
+        active = self._redis.get(self._active_run_key(identification))
+        if active == run_id:
+            self._redis.delete(self._active_run_key(identification))
+            self._redis.delete(self._cancelled_run_key(identification))
+
+    def cancel_run(self, identification: str) -> None:
+        """Request cancellation of the currently active run for `identification`."""
+        active = self._redis.get(self._active_run_key(identification))
+        if not active:
+            return
+        self._redis.set(self._cancelled_run_key(identification), active, ex=self.CANCEL_TTL_SECONDS)
+
+    def is_cancelled_or_stale(self, identification: str, run_id: str) -> bool:
+        """
+        Return True if this run has been cancelled or is no longer the active run.
+
+        This is what makes cancellation safe across multiple pods and multiple worker processes:
+        all processes consult the same Redis state.
+        """
+        cancelled = self._redis.get(self._cancelled_run_key(identification))
+        if cancelled == run_id:
+            return True
+        active = self._redis.get(self._active_run_key(identification))
+        return active is not None and active != run_id

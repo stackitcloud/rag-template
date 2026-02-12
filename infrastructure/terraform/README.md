@@ -92,6 +92,69 @@ terraform output -json | jq -r .cluster_name.value
 - **Security**: The sa_key.json file contains sensitive credentials and should never be committed to version control
 - **State Management**: Consider using remote state storage for team environments
 
+## Using the bucket as a Terraform S3 backend (optional)
+
+If you want Terraform state to be stored in the object storage bucket, add a backend block to your root module.
+Note: backend blocks cannot reference resources, so you must hardcode or pass the values via variables/partials.
+
+### Bootstrap script (recommended)
+
+Note: `backend "s3" {}` is already defined in `main.tf`. The bootstrap step still works because it runs `terraform init -backend=false`, which ignores the backend block.
+
+Use the helper script to bootstrap the backend in two phases:
+1) Run a local-only apply to create the bucket + credentials.
+2) Generate `.backend.hcl` and migrate state to S3.
+
+```bash
+./scripts/init-backend.sh
+```
+
+This writes `infrastructure/terraform/.backend.hcl` (contains credentials) and runs `terraform init -force-copy`.
+You can re-run the script at any time; it reuses the existing backend config if present.
+If you want remote state from the start, run this script before your first full `terraform apply`.
+
+If you want non-interactive bootstrap:
+
+```bash
+BOOTSTRAP_AUTO_APPROVE=1 ./scripts/init-backend.sh
+```
+
+Manual phase 1 (if you want to see the exact commands the script runs):
+
+```bash
+terraform init -backend=false
+terraform apply \
+  -target=stackit_objectstorage_bucket.tfstate \
+  -target=stackit_objectstorage_credentials_group.rag_creds_group \
+  -target=stackit_objectstorage_credential.rag_creds
+```
+
+### Manual backend block
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "<BUCKET_NAME>"
+    key    = "terraform.tfstate"
+    region = "eu01"
+
+    # Use the same credentials as above
+    access_key = "<ACCESS_KEY>"
+    secret_key = "<SECRET_KEY>"
+
+    endpoints = {
+      s3 = "https://object.storage.eu01.onstackit.cloud"
+    }
+
+    # AWS-specific checks must be disabled for STACKIT
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_s3_checksum            = true
+    skip_requesting_account_id  = true
+  }
+}
+```
+
 ## Cleanup
 
 To destroy all resources:

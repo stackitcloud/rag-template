@@ -1,7 +1,8 @@
 **/cr-secret.yaml
 **/customer-values.yaml
 **/auth
-
+**/.backend.hcl
+**/kubeconfig.yaml
 **/*.lock.*
 
 auth

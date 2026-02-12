@@ -1,4 +1,5 @@
 terraform {
+  backend "s3" {}
   required_providers {
     stackit = {
       source  = "stackitcloud/stackit"
@@ -9,4 +10,5 @@ terraform {
 
 provider "stackit" {
   service_account_key_path = "sa_key.json"
+  default_region           = "eu01"
 }

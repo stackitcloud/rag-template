@@ -1,0 +1,93 @@
+{{- if and .Values.features.langfuse.enabled .Values.langfuseRetention.enabled }}
+{{- $retentionImage := printf "%s:%s" .Values.langfuseRetention.image.repository .Values.langfuseRetention.image.tag -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-langfuse-retention" .Release.Name | trunc 63 | trimSuffix "-" }}
+  labels:
+    app.kubernetes.io/name: rag
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  schedule: {{ .Values.langfuseRetention.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: rag
+            app.kubernetes.io/instance: {{ .Release.Name }}
+        spec:
+          securityContext:
+            runAsUser: {{ .Values.langfuseRetention.podSecurityContext.runAsUser }}
+            runAsNonRoot: {{ .Values.langfuseRetention.podSecurityContext.runAsNonRoot }}
+          {{- if .Values.shared.imagePullSecret }}
+          imagePullSecrets:
+            - name: {{ .Values.shared.imagePullSecret.name }}
+          {{- end }}
+          restartPolicy: OnFailure
+          containers:
+            - name: apply-clickhouse-ttl
+              image: {{ $retentionImage | quote }}
+              imagePullPolicy: {{ .Values.langfuseRetention.image.pullPolicy | quote }}
+              securityContext:
+                allowPrivilegeEscalation: {{ .Values.langfuseRetention.securityContext.allowPrivilegeEscalation }}
+              {{- with .Values.langfuseRetention.resources }}
+              resources:
+{{ toYaml . | nindent 16 }}
+              {{- end }}
+              command:
+                - /bin/bash
+                - -ec
+              args:
+                - |
+                  set -euo pipefail
+
+                  if [ -z "${CLICKHOUSE_PASSWORD:-}" ] && [ -z "${CLICKHOUSE_PASSWORD_LITERAL:-}" ]; then
+                    echo "No ClickHouse password found. Check langfuse.clickhouse.auth settings and secret."
+                    exit 1
+                  fi
+                  export CLICKHOUSE_PASSWORD="${CLICKHOUSE_PASSWORD:-${CLICKHOUSE_PASSWORD_LITERAL:-}}"
+                  unset CLICKHOUSE_PASSWORD_LITERAL
+
+                  ON_CLUSTER_CLAUSE=""
+                  if [ "${CLICKHOUSE_ON_CLUSTER}" = "true" ]; then
+                    ON_CLUSTER_CLAUSE=" ON CLUSTER ${CLICKHOUSE_CLUSTER_NAME}"
+                  fi
+
+                  TABLE_ROWS="$(cat <<'EOF_TABLES'
+                  {{- range .Values.langfuseRetention.clickhouse.tables }}
+                  {{ .name }}	{{ .timestampColumn }}
+                  {{- end }}
+                  EOF_TABLES
+                  )"
+
+                  IDENTIFIER_REGEX='^[A-Za-z_][A-Za-z0-9_]*$'
+
+                  while IFS=$'\t' read -r table ts_col; do
+                    [ -z "${table}" ] && continue
+
+                    if ! [[ "${table}" =~ ${IDENTIFIER_REGEX} ]]; then
+                      echo "Invalid table identifier: ${table}"
+                      exit 1
+                    fi
+                    if ! [[ "${ts_col}" =~ ${IDENTIFIER_REGEX} ]]; then
+                      echo "Invalid timestamp column identifier: ${ts_col}"
+                      exit 1
+                    fi
+
+                    echo "Applying TTL=${RETENTION_DAYS}d to ${CLICKHOUSE_DATABASE}.${table} (${ts_col})"
+                    if ! clickhouse-client \
+                      --host "${CLICKHOUSE_HOST}" \
+                      --port "${CLICKHOUSE_PORT}" \
+                      --user "${CLICKHOUSE_USER}" \
+                      --query "ALTER TABLE ${CLICKHOUSE_DATABASE}.${table}${ON_CLUSTER_CLAUSE} MODIFY TTL ${ts_col} + toIntervalDay(${RETENTION_DAYS})"; then
+                      echo "Failed applying TTL on ${CLICKHOUSE_DATABASE}.${table}"
+                      exit 1
+                    fi
+                  done <<< "${TABLE_ROWS}"
+              env:
+{{ include "rag.langfuseRetentionClickhouseEnv" . | nindent 16 }}
+{{- end }}

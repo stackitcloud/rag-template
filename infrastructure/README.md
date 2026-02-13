@@ -573,6 +573,16 @@ For deployment of the *NGINX Ingress Controller* and a cert-manager, the followi
 
 The email in the [cert-issuer template](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
 
+For deploying RAG together with optional External Secrets Operator integration, use the wrapper chart:
+
+[rag-setup](server-setup/rag-setup/Chart.yaml)
+
+`rag-setup` keeps External Secrets optional behind `features.externalSecrets.enabled`.
+
+Notes:
+- Local development with Tilt is unchanged: Tilt deploys `infrastructure/rag` directly, so External Secrets Operator from `rag-setup` is not deployed by default.
+- For production with External Secrets, enable `features.externalSecrets.enabled=true` in `rag-setup` values and configure the `externalSecrets.secretStore` section.
+
 ## 3. Contributing
 
 Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information on how to contribute to the RAG Infrastructure.

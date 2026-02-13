@@ -1,0 +1,41 @@
+features:
+  rag:
+    enabled: true
+  externalSecrets:
+    # Keep disabled by default so dev/Tilt workflows can use the rag chart directly.
+    enabled: false
+
+rag: {}
+
+# Values for the external-secrets Helm dependency.
+external-secrets:
+  installCRDs: true
+
+externalSecrets:
+  resources:
+    # ExternalSecret/SecretStore resources managed by this wrapper chart.
+    enabled: true
+  refreshInterval: "1h"
+  remoteRefKey: "rag-secrets"
+  secretStore:
+    # Set create=false if you want to reference an already existing (Cluster)SecretStore.
+    create: true
+    name: "stackit-vault"
+    kind: "ClusterSecretStore"
+    server: "https://prod.sm.eu01.stackit.cloud"
+    path: "<<REPLACE ME>>"
+    version: "v2"
+    auth:
+      userPass:
+        path: "userpass"
+        username: "<<REPLACE ME>>"
+        secretRef:
+          name: "stackit-vault-userpass"
+          key: "password"
+          # Required by ClusterSecretStore references in ESO.
+          namespace: "cert-manager"
+  userPassSecret:
+    create: false
+    name: "stackit-vault-userpass"
+    namespace: "cert-manager"
+    password: ""

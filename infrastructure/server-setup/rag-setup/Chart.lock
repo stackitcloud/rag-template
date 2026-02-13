@@ -1,0 +1,9 @@
+dependencies:
+- name: rag
+  repository: file://../../rag
+  version: 4.1.0
+- name: external-secrets
+  repository: https://charts.external-secrets.io
+  version: 1.2.1
+digest: sha256:ecb7f0bfd9021d264ff45286a9b1e99c9e3a34ed1d6b3fe481bc24fe40d57d0c
+generated: "2026-02-13T16:40:56.676854+01:00"

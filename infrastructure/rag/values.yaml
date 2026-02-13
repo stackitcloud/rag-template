@@ -734,6 +734,37 @@ langfuse:
           name: ""
       key: ""
 
+# Optional: enforce a ClickHouse TTL for Langfuse traces without Enterprise data retention management.
+# This runs as a CronJob and applies idempotent ALTER TABLE ... MODIFY TTL commands.
+langfuseRetention:
+  enabled: false
+  retentionDays: 365
+  schedule: "15 */6 * * *"
+  # Optional deterministic deletion in addition to TTL.
+  # Uses ALTER TABLE ... DELETE WHERE ... and can run nightly.
+  hardDelete:
+    enabled: false
+    schedule: "30 3 * * *"
+    # ClickHouse mutations_sync setting:
+    # 0 = async (default), 1 = wait for local completion, 2 = wait for all replicas.
+    mutationSync: 0
+  image:
+    repository: "bitnamilegacy/clickhouse"
+    tag: "25.2.1-debian-12-r0"
+    pullPolicy: IfNotPresent
+  clickhouse:
+    # Connection/auth are taken from langfuse.clickhouse.*.
+    database: "default"
+    onCluster: true
+    clusterName: "default"
+    tables:
+      - name: "traces"
+        timestampColumn: "timestamp"
+      - name: "observations"
+        timestampColumn: "event_ts"
+      - name: "scores"
+        timestampColumn: "timestamp"
+
 minio:
   image:
     repository: bitnamilegacy/minio

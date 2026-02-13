@@ -1,0 +1,74 @@
+{{- if and .Values.features.langfuse.enabled .Values.langfuseRetention.hardDelete.enabled }}
+{{- $retentionImage := printf "%s:%s" .Values.langfuseRetention.image.repository .Values.langfuseRetention.image.tag -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-langfuse-retention-delete" .Release.Name | trunc 63 | trimSuffix "-" }}
+  labels:
+    app.kubernetes.io/name: rag
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  schedule: {{ .Values.langfuseRetention.hardDelete.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: rag
+            app.kubernetes.io/instance: {{ .Release.Name }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: delete-expired-rows
+              image: {{ $retentionImage | quote }}
+              imagePullPolicy: {{ .Values.langfuseRetention.image.pullPolicy | quote }}
+              command:
+                - /bin/bash
+                - -ec
+              args:
+                - |
+                  set -euo pipefail
+
+                  PASSWORD="${CLICKHOUSE_PASSWORD:-}"
+                  if [ -z "${PASSWORD}" ]; then
+                    PASSWORD="${CLICKHOUSE_PASSWORD_LITERAL:-}"
+                  fi
+
+                  if [ -z "${PASSWORD}" ]; then
+                    echo "No ClickHouse password found. Check langfuse.clickhouse.auth settings and secret."
+                    exit 1
+                  fi
+
+                  ON_CLUSTER_CLAUSE=""
+                  if [ "${CLICKHOUSE_ON_CLUSTER}" = "true" ]; then
+                    ON_CLUSTER_CLAUSE=" ON CLUSTER ${CLICKHOUSE_CLUSTER_NAME}"
+                  fi
+
+                  TABLE_ROWS="$(cat <<'EOF_TABLES'
+                  {{- range .Values.langfuseRetention.clickhouse.tables }}
+                  {{ .name }}	{{ .timestampColumn }}
+                  {{- end }}
+                  EOF_TABLES
+                  )"
+
+                  CUTOFF_UNIX="$(( $(date -u +%s) - RETENTION_DAYS * 86400 ))"
+
+                  while IFS=$'\t' read -r table ts_col; do
+                    [ -z "${table}" ] && continue
+
+                    echo "Deleting rows older than ${RETENTION_DAYS}d from ${CLICKHOUSE_DATABASE}.${table} (${ts_col})"
+                    clickhouse-client \
+                      --host "${CLICKHOUSE_HOST}" \
+                      --port "${CLICKHOUSE_PORT}" \
+                      --user "${CLICKHOUSE_USER}" \
+                      --password "${PASSWORD}" \
+                      --query "ALTER TABLE ${CLICKHOUSE_DATABASE}.${table}${ON_CLUSTER_CLAUSE} DELETE WHERE toDateTime(${ts_col}) < toDateTime(${CUTOFF_UNIX}) SETTINGS mutations_sync = ${MUTATION_SYNC}"
+                  done <<< "${TABLE_ROWS}"
+              env:
+                - name: MUTATION_SYNC
+                  value: {{ .Values.langfuseRetention.hardDelete.mutationSync | quote }}
+{{ include "rag.langfuseRetentionClickhouseEnv" . | nindent 16 }}
+{{- end }}

@@ -2,6 +2,41 @@ apiVersion: v1
 entries:
   rag:
   - apiVersion: v2
+    appVersion: v4.2.0
+    created: "2026-02-13T13:46:21.021116888Z"
+    dependencies:
+    - condition: features.langfuse.enabled
+      name: langfuse
+      repository: https://langfuse.github.io/langfuse-k8s
+      version: 1.5.19
+    - condition: features.qdrant.enabled
+      name: qdrant
+      repository: https://qdrant.github.io/qdrant-helm
+      version: 1.16.3
+    - condition: features.minio.enabled
+      name: minio
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.0.7
+    - alias: keydb
+      condition: features.keydb.enabled
+      name: keydb
+      repository: https://enapter.github.io/charts/
+      version: 0.48.0
+    - alias: ollama
+      condition: features.ollama.enabled
+      name: ollama
+      repository: https://otwld.github.io/ollama-helm/
+      version: 1.40.0
+    description: 'This helm chart deploys a front- and backend microservice. Together,
+      those components form rag. rag is an application, where you can upload your
+      own documents and ask question about their content and the rag will answer them. '
+    digest: 467451b8b412c77cf47e0e7e989a41f68db6ef11997afc3e9b1faea54874358e
+    name: rag
+    type: application
+    urls:
+    - https://stackitcloud.github.io/rag-template/rag-4.2.0.tgz
+    version: 4.2.0
+  - apiVersion: v2
     appVersion: v4.1.1
     created: "2026-02-04T13:59:53.742856033Z"
     dependencies:
@@ -141,4 +176,4 @@ entries:
     urls:
     - https://stackitcloud.github.io/rag-template/rag-3.3.0.tgz
     version: 3.3.0
-generated: "2026-02-04T13:59:53.711194805Z"
+generated: "2026-02-13T13:46:20.990361422Z"

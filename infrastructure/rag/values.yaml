@@ -740,6 +740,21 @@ langfuseRetention:
   enabled: false
   retentionDays: 365
   schedule: "15 */6 * * *"
+  podSecurityContext:
+    runAsUser: 1001
+    runAsNonRoot: true
+  securityContext:
+    allowPrivilegeEscalation: false
+  # Optional resources for both retention CronJobs.
+  # Example:
+  # resources:
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   limits:
+  #     cpu: 500m
+  #     memory: 512Mi
+  resources: {}
   # Optional deterministic deletion in addition to TTL.
   # Uses ALTER TABLE ... DELETE WHERE ... and can run nightly.
   hardDelete:
@@ -754,10 +769,14 @@ langfuseRetention:
     pullPolicy: IfNotPresent
   clickhouse:
     # Connection/auth are taken from langfuse.clickhouse.*.
+    # Align this with the database Langfuse actually uses in ClickHouse.
     database: "default"
-    onCluster: true
+    # Set to true only for clustered ClickHouse deployments where clusterName exists.
+    # Keep false for single-node/non-clustered deployments.
+    onCluster: false
     clusterName: "default"
     tables:
+      # timestampColumn should be a Date/DateTime/DateTime64 column in the target table.
       - name: "traces"
         timestampColumn: "timestamp"
       - name: "observations"

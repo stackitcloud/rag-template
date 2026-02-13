@@ -201,13 +201,15 @@ langfuseRetention:
     schedule: "30 3 * * *"
     mutationSync: 0
   clickhouse:
-    database: "default"
-    onCluster: true
+    database: "default" # set this to the same DB your Langfuse deployment uses
+    onCluster: false # true only for clustered ClickHouse setups
     clusterName: "default"
 ```
 
 Notes:
 - ClickHouse connection/auth for retention jobs is taken from `langfuse.clickhouse.*` (same source as Langfuse itself).
+- Make sure `langfuseRetention.clickhouse.database` matches your Langfuse ClickHouse database, not just the chart default.
+- Set `langfuseRetention.clickhouse.onCluster=true` only when your ClickHouse deployment is clustered and `clusterName` exists.
 - The CronJob applies idempotent `ALTER TABLE ... MODIFY TTL` statements on Langfuse tables (`traces`, `observations`, `scores`).
 - If `hardDelete.enabled=true`, an additional CronJob executes deterministic `ALTER TABLE ... DELETE WHERE ...` mutations.
 - Deletion is then handled by ClickHouse background merges (not instant at the exact cutoff timestamp).

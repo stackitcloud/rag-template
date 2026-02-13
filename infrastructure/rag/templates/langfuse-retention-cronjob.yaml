@@ -20,11 +20,24 @@ spec:
             app.kubernetes.io/name: rag
             app.kubernetes.io/instance: {{ .Release.Name }}
         spec:
+          securityContext:
+            runAsUser: {{ .Values.langfuseRetention.podSecurityContext.runAsUser }}
+            runAsNonRoot: {{ .Values.langfuseRetention.podSecurityContext.runAsNonRoot }}
+          {{- if .Values.shared.imagePullSecret }}
+          imagePullSecrets:
+            - name: {{ .Values.shared.imagePullSecret.name }}
+          {{- end }}
           restartPolicy: OnFailure
           containers:
             - name: apply-clickhouse-ttl
               image: {{ $retentionImage | quote }}
               imagePullPolicy: {{ .Values.langfuseRetention.image.pullPolicy | quote }}
+              securityContext:
+                allowPrivilegeEscalation: {{ .Values.langfuseRetention.securityContext.allowPrivilegeEscalation }}
+              {{- with .Values.langfuseRetention.resources }}
+              resources:
+{{ toYaml . | nindent 16 }}
+              {{- end }}
               command:
                 - /bin/bash
                 - -ec
@@ -32,15 +45,12 @@ spec:
                 - |
                   set -euo pipefail
 
-                  PASSWORD="${CLICKHOUSE_PASSWORD:-}"
-                  if [ -z "${PASSWORD}" ]; then
-                    PASSWORD="${CLICKHOUSE_PASSWORD_LITERAL:-}"
-                  fi
-
-                  if [ -z "${PASSWORD}" ]; then
+                  if [ -z "${CLICKHOUSE_PASSWORD:-}" ] && [ -z "${CLICKHOUSE_PASSWORD_LITERAL:-}" ]; then
                     echo "No ClickHouse password found. Check langfuse.clickhouse.auth settings and secret."
                     exit 1
                   fi
+                  export CLICKHOUSE_PASSWORD="${CLICKHOUSE_PASSWORD:-${CLICKHOUSE_PASSWORD_LITERAL:-}}"
+                  unset CLICKHOUSE_PASSWORD_LITERAL
 
                   ON_CLUSTER_CLAUSE=""
                   if [ "${CLICKHOUSE_ON_CLUSTER}" = "true" ]; then
@@ -54,16 +64,29 @@ spec:
                   EOF_TABLES
                   )"
 
+                  IDENTIFIER_REGEX='^[A-Za-z_][A-Za-z0-9_]*$'
+
                   while IFS=$'\t' read -r table ts_col; do
                     [ -z "${table}" ] && continue
 
+                    if ! [[ "${table}" =~ ${IDENTIFIER_REGEX} ]]; then
+                      echo "Invalid table identifier: ${table}"
+                      exit 1
+                    fi
+                    if ! [[ "${ts_col}" =~ ${IDENTIFIER_REGEX} ]]; then
+                      echo "Invalid timestamp column identifier: ${ts_col}"
+                      exit 1
+                    fi
+
                     echo "Applying TTL=${RETENTION_DAYS}d to ${CLICKHOUSE_DATABASE}.${table} (${ts_col})"
-                    clickhouse-client \
+                    if ! clickhouse-client \
                       --host "${CLICKHOUSE_HOST}" \
                       --port "${CLICKHOUSE_PORT}" \
                       --user "${CLICKHOUSE_USER}" \
-                      --password "${PASSWORD}" \
-                      --query "ALTER TABLE ${CLICKHOUSE_DATABASE}.${table}${ON_CLUSTER_CLAUSE} MODIFY TTL toDateTime(${ts_col}) + toIntervalDay(${RETENTION_DAYS})"
+                      --query "ALTER TABLE ${CLICKHOUSE_DATABASE}.${table}${ON_CLUSTER_CLAUSE} MODIFY TTL ${ts_col} + toIntervalDay(${RETENTION_DAYS})"; then
+                      echo "Failed applying TTL on ${CLICKHOUSE_DATABASE}.${table}"
+                      exit 1
+                    fi
                   done <<< "${TABLE_ROWS}"
               env:
 {{ include "rag.langfuseRetentionClickhouseEnv" . | nindent 16 }}

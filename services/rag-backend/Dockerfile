@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.13-bookworm AS build
+FROM --platform=linux/amd64 python:3.14-bookworm AS build
 
 ENV POETRY_VIRTUALENVS_PATH=/opt/.venv \
     POETRY_VIRTUALENVS_CREATE=false \
@@ -36,7 +36,7 @@ RUN poetry config virtualenvs.create false \
     && cd /app/services/rag-backend \
     && poetry install --no-interaction --no-ansi --no-root --with ${DEPENDENCY_GROUP}
 
-FROM --platform=linux/amd64 python:3.13-bookworm
+FROM --platform=linux/amd64 python:3.14-bookworm
 
 WORKDIR /app/services/rag-backend
 

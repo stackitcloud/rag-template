@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.13-bookworm AS build
+FROM --platform=linux/amd64 python:3.14-bookworm AS build
 
 # Build argument to control which dependency group to install
 ARG DEPENDENCY_GROUP=prod
@@ -32,7 +32,7 @@ RUN poetry config virtualenvs.create false \
     && cd /app/services/admin-backend \
     && poetry install --no-interaction --no-ansi --no-root --with ${DEPENDENCY_GROUP}
 
-FROM --platform=linux/amd64 python:3.13-bookworm
+FROM --platform=linux/amd64 python:3.14-bookworm
 WORKDIR /app/services/admin-backend
 
 RUN adduser --disabled-password --gecos "" --uid 10001 nonroot

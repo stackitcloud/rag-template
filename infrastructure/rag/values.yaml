@@ -569,14 +569,14 @@ langfuse:
     web:
       image:
         repository: langfuse/langfuse
-        tag: "3.150.0"
+        tag: "3.151.0"
         pullPolicy: Always
 
     # Worker deployment configuration
     worker:
       image:
         repository: langfuse/langfuse-worker
-        tag: "3.150.0"
+        tag: "3.151.0"
         pullPolicy: Always
       port: 3030
 
@@ -765,7 +765,7 @@ langfuseRetention:
     mutationSync: 0
   image:
     repository: "bitnamilegacy/clickhouse"
-    tag: "25.2.1-debian-12-r0"
+    tag: "25.7.5-debian-12-r0"
     pullPolicy: IfNotPresent
   clickhouse:
     # Connection/auth are taken from langfuse.clickhouse.*.

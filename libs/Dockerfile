@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.13-bookworm
+FROM --platform=linux/amd64 python:3.14-bookworm
 
 ARG DIRECTORY=""
 ARG TEST=1

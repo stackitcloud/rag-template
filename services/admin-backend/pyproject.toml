@@ -109,8 +109,8 @@ setuptools = "<80.11"
 filelock = "^3.20.3"
 
 [tool.poetry.group.prod.dependencies]
-admin-api-lib = "==4.2.0"
-rag-core-lib = "==4.2.0"
+admin-api-lib = "==4.2.0.post20260210203817"
+rag-core-lib = "==4.2.0.post20260210203817"
 
 [tool.poetry.group.prod-local.dependencies]
 # Use local path for Tilt/development with production Dockerfile

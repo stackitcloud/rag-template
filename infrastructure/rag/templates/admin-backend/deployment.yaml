@@ -118,6 +118,8 @@ spec:
           - configMapRef:
               name: {{ template "configmap.sourceUploaderName" . }}
           - configMapRef:
+              name: {{ template "configmap.adminVisionName" . }}
+          - configMapRef:
               name: {{ template "configmap.retryDecoratorName" . }}
           - configMapRef:
               name: {{ template "configmap.chunkerName" . }}

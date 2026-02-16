@@ -112,6 +112,8 @@ spec:
               name: {{ template "configmap.s3Name" . }}
           - configMapRef:
               name: {{ template "configmap.extractorSitemapName" . }}
+          - configMapRef:
+              name: {{ template "configmap.extractorVisionName" . }}
           - secretRef:
               name: {{ template "secret.s3RefName" . }}
         {{- $hfCacheDir := include "extractor.huggingfaceCacheDir" . }}

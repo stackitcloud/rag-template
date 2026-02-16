@@ -140,8 +140,16 @@
 {{- printf "%s-source-uploader-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "configmap.adminVisionName" -}}
+{{- printf "%s-admin-vision-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "configmap.extractorSitemapName" -}}
 {{- printf "%s-extractor-sitemap-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "configmap.extractorVisionName" -}}
+{{- printf "%s-extractor-vision-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 # image

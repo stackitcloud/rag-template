@@ -196,6 +196,10 @@ backend:
       RETRIEVER_TABLE_K_DOCUMENTS: 10
       RETRIEVER_IMAGE_THRESHOLD: 0.7
       RETRIEVER_IMAGE_K_DOCUMENTS: 10
+    vision:
+      VISION_IMAGE_LANE_ENABLED: false
+      VISION_EMBEDDING_ENABLED: false
+      VISION_IMAGE_RETRIEVER_ENABLED: false
     errorMessages:
       ERROR_MESSAGES_NO_DOCUMENTS_MESSAGE: "I'm sorry, my responses are limited. You must ask the right questions."
       ERROR_MESSAGES_NO_OR_EMPTY_COLLECTION: "No documents were provided for searching."
@@ -390,6 +394,10 @@ adminBackend:
     sourceUploader:
       # Large sitemap ingestions (per-page summaries) can take > 1 hour.
       SOURCE_UPLOADER_TIMEOUT: 3600
+    vision:
+      VISION_IMAGE_LANE_ENABLED: false
+      VISION_EMBEDDING_ENABLED: false
+      VISION_IMAGE_RETRIEVER_ENABLED: false
 
 extractor:
   replicaCount: 1
@@ -448,6 +456,10 @@ extractor:
       # Options: "docusaurus" (default), "astro", "generic"
       # Note: https://docs.stackit.cloud is built with Astro/Starlight -> use "astro".
       SITEMAP_PARSER: docusaurus
+    vision:
+      VISION_IMAGE_LANE_ENABLED: false
+      VISION_EMBEDDING_ENABLED: false
+      VISION_IMAGE_RETRIEVER_ENABLED: false
 
 adminFrontend:
   name: admin-frontend

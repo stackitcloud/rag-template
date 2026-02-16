@@ -1,0 +1,15 @@
+{
+  "name": "image_legacy_base64_valid",
+  "valid": true,
+  "piece": {
+    "type": "IMAGE",
+    "page_content": "diagram describing architecture",
+    "metadata": {
+      "document": "file:diagram.png",
+      "page": 1,
+      "id": "img-legacy-1",
+      "related": [],
+      "base64_image": "iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+  }
+}

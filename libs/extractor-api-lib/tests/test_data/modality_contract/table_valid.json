@@ -1,0 +1,14 @@
+{
+  "name": "table_valid",
+  "valid": true,
+  "piece": {
+    "type": "TABLE",
+    "page_content": "| A | B |\n| --- | --- |\n| 1 | 2 |",
+    "metadata": {
+      "document": "file:sample.csv",
+      "page": 1,
+      "id": "tbl-123",
+      "related": ["chunk-1"]
+    }
+  }
+}

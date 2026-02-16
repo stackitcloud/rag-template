@@ -1,0 +1,16 @@
+{
+  "name": "image_reference_valid",
+  "valid": true,
+  "piece": {
+    "type": "IMAGE",
+    "page_content": "OCR fallback text",
+    "metadata": {
+      "document": "file:screenshot.jpg",
+      "page": 1,
+      "id": "img-ref-1",
+      "related": [],
+      "image_ref": "s3://documents/screenshot.jpg",
+      "image_mime": "image/jpeg"
+    }
+  }
+}

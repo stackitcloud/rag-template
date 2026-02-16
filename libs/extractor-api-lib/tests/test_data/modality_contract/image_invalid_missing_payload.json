@@ -1,0 +1,14 @@
+{
+  "name": "image_invalid_missing_payload",
+  "valid": false,
+  "piece": {
+    "type": "IMAGE",
+    "page_content": "caption only",
+    "metadata": {
+      "document": "file:image.png",
+      "page": 1,
+      "id": "img-bad-1",
+      "related": []
+    }
+  }
+}

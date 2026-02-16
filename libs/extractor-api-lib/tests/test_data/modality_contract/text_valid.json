@@ -1,0 +1,14 @@
+{
+  "name": "text_valid",
+  "valid": true,
+  "piece": {
+    "type": "TEXT",
+    "page_content": "example body text",
+    "metadata": {
+      "document": "file:sample.txt",
+      "page": 1,
+      "id": "abc123",
+      "related": []
+    }
+  }
+}

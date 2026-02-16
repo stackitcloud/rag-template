@@ -1,6 +1,8 @@
 name: lint-and-test
 
 on:
+  merge_group:
+    types: [checks_requested]
   workflow_dispatch:
 
 env:
@@ -12,20 +14,24 @@ jobs:
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.changes.outputs.services }}
-      libs: ${{ steps.changes.outputs.libs }}
-      frontend: ${{ steps.changes.outputs.frontend }}
-      infrastructure: ${{ steps.changes.outputs.infrastructure }}
+      services: ${{ steps.filter.outputs.services || steps.manual.outputs.services }}
+      libs: ${{ steps.filter.outputs.libs || steps.manual.outputs.libs }}
+      frontend: ${{ steps.filter.outputs.frontend || steps.manual.outputs.frontend }}
+      infrastructure: ${{ steps.filter.outputs.infrastructure || steps.manual.outputs.infrastructure }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Detect changes
-        id: changes
+      # When running via merge queue, diff the merge-group head vs its base
+      - name: Detect changes (merge queue)
+        id: filter
+        if: github.event_name == 'merge_group'
         uses: dorny/paths-filter@v3
         with:
+          base: ${{ github.event.merge_group.base_sha }}
+          ref: ${{ github.event.merge_group.head_sha }}
           filters: |
             services:
               - 'services/admin-backend/**'
@@ -39,6 +45,16 @@ jobs:
             infrastructure:
               - 'infrastructure/**'
               - 'Tiltfile'
+
+      # When run manually, just run everything
+      - name: Mark all as changed (manual run)
+        id: manual
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "services=true" >> "$GITHUB_OUTPUT"
+          echo "libs=true" >> "$GITHUB_OUTPUT"
+          echo "frontend=true" >> "$GITHUB_OUTPUT"
+          echo "infrastructure=true" >> "$GITHUB_OUTPUT"
 
   sanitize-branch-name:
     runs-on: ubuntu-latest
@@ -110,7 +126,6 @@ jobs:
       - name: Build lint image
         run: |
           docker build -t $LINT_IMAGE_NAME --build-arg DIRECTORY=${{ matrix.library }} --build-arg TEST=0 -f libs/Dockerfile libs
-
 
       - name: Run linting
         run: |

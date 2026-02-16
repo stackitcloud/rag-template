@@ -17,7 +17,7 @@ Roll out vision support behind explicit feature flags that default to `false`:
 - `VISION_EMBEDDING_ENABLED=false`
 - `VISION_IMAGE_RETRIEVER_ENABLED=false`
 
-Flags are exposed via Helm values and config maps for backend, admin-backend, and extractor.
+Flags are exposed via Helm values and a shared config map consumed by backend, admin-backend, and extractor.
 
 ## Consequences
 

@@ -103,8 +103,8 @@ basic-auth
 {{- printf "%s-retriever-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "configmap.backendVisionName" -}}
-{{- printf "%s-backend-vision-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- define "configmap.visionName" -}}
+{{- printf "%s-vision-configmap" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "configmap.langfuseName" -}}

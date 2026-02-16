@@ -42,12 +42,3 @@ data:
   {{- range $key, $value := .Values.adminBackend.envs.sourceUploader }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ template "configmap.adminVisionName" . }}
-data:
-  {{- range $key, $value := .Values.adminBackend.envs.vision }}
-  {{ $key }}: {{ $value | quote }}
-  {{- end }}

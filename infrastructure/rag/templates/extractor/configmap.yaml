@@ -6,12 +6,3 @@ data:
   {{- range $key, $value := .Values.extractor.envs.sitemap }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ template "configmap.extractorVisionName" . }}
-data:
-  {{- range $key, $value := .Values.extractor.envs.vision }}
-  {{ $key }}: {{ $value | quote }}
-  {{- end }}

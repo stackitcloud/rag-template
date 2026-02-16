@@ -110,7 +110,7 @@ spec:
           - configMapRef:
               name: {{ template "configmap.retrieverName" . }}
           - configMapRef:
-              name: {{ template "configmap.backendVisionName" . }}
+              name: {{ template "configmap.visionName" . }}
           - configMapRef:
               name: {{ template "configmap.rerankerName" . }}
           - configMapRef:

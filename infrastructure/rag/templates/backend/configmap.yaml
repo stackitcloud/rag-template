@@ -19,9 +19,9 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "configmap.backendVisionName" . }}
+  name: {{ template "configmap.visionName" . }}
 data:
-  {{- range $key, $value := .Values.backend.envs.vision }}
+  {{- range $key, $value := .Values.shared.envs.vision }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
 ---

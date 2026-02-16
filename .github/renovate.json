@@ -67,6 +67,12 @@
       "addLabels": ["python"]
     },
     {
+      "description": "Ignore Python interpreter version updates",
+      "matchManagers": ["poetry"],
+      "matchDepNames": ["python"],
+      "enabled": false
+    },
+    {
       "description": "Label Node.js dependencies",
       "matchManagers": ["npm"],
       "addLabels": ["nodejs"]
@@ -75,6 +81,12 @@
       "description": "Label Docker images",
       "matchManagers": ["dockerfile", "docker-compose"],
       "addLabels": ["docker"]
+    },
+    {
+      "description": "Ignore Python base image updates in Dockerfiles",
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["python", "docker.io/library/python", "library/python"],
+      "enabled": false
     },
     {
       "description": "Label Helm charts",

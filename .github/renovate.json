@@ -13,6 +13,11 @@
   "repositories": ["stackitcloud/rag-template"],
   "hostRules": [
     {
+      "hostType": "pypi",
+      "matchHost": "test.pypi.org",
+      "enabled": false
+    },
+    {
       "hostType": "docker",
       "matchHost": "ghcr.io"
     },

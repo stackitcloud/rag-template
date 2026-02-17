@@ -37,3 +37,10 @@ variable "rag_secrets" {
   type        = map(string)
   sensitive   = true
 }
+
+variable "rag_secrets_overrides" {
+  description = "Optional map merged into rag_secrets (useful for infra-derived values)."
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}

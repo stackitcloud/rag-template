@@ -43,3 +43,15 @@ output "object_storage_secret_key" {
 output "object_storage_bucket" {
   value = stackit_objectstorage_bucket.tfstate.name
 }
+
+output "object_storage_documents_bucket" {
+  value = stackit_objectstorage_bucket.documents.name
+}
+
+output "object_storage_langfuse_bucket" {
+  value = stackit_objectstorage_bucket.langfuse.name
+}
+
+output "object_storage_endpoint" {
+  value = "https://object.storage.${var.region}.onstackit.cloud"
+}

@@ -598,17 +598,45 @@ For deployment of the *NGINX Ingress Controller* and a cert-manager, the followi
 
 [base-setup](server-setup/base-setup/Chart.yaml)
 
-The email in the [cert-issuer template](server-setup/base-setup/templates/cert-issuer.yaml) should be changed from `<replace@me.com>` to a real email address.
+Set a real ACME email for cert-manager via the deploy script (`--issuer-email`) or via `base-setup` value `certIssuer.email`.
 
-For deploying RAG together with optional External Secrets Operator integration, use the wrapper chart:
+For deploying RAG together with External Secrets Operator integration, use the wrapper chart:
 
 [rag-setup](server-setup/rag-setup/Chart.yaml)
 
-`rag-setup` keeps External Secrets optional behind `features.externalSecrets.enabled`.
+`rag-setup` defaults are production-oriented and reference ESO-managed secrets.
 
 Notes:
 - Local development with Tilt is unchanged: Tilt deploys `infrastructure/rag` directly, so External Secrets Operator from `rag-setup` is not deployed by default.
-- For production with External Secrets, enable `features.externalSecrets.enabled=true` in `rag-setup` values and configure the `externalSecrets.secretStore` section.
+- Fastest production path (one command after you prepared `seed-secrets/terraform.tfvars`):
+
+```bash
+./infrastructure/scripts/deploy-rag-prod.sh \
+  --issuer-email you@example.com \
+  --auto-approve
+```
+
+- The script performs all steps:
+  - Terraform backend bootstrap (if needed) and infra apply
+  - seed-secrets apply (with infra-derived overrides for PostgreSQL/Redis/S3 keys)
+  - generation of `server-setup/rag-setup/values.prod.auto.yaml`
+  - deployment of `base-setup` and `rag-setup`
+
+- Manual fallback: generate the rag values override directly from Terraform outputs:
+
+```bash
+cd infrastructure/terraform
+./scripts/generate-rag-setup-prod-values.sh \
+  --output ../server-setup/rag-setup/values.prod.auto.yaml
+```
+
+- Manual fallback: deploy rag-setup with:
+
+```bash
+helm upgrade --install rag-setup infrastructure/server-setup/rag-setup \
+  -f infrastructure/server-setup/rag-setup/values.yaml \
+  -f infrastructure/server-setup/rag-setup/values.prod.auto.yaml
+```
 
 ## 3. Contributing
 

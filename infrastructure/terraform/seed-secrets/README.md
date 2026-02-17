@@ -14,12 +14,20 @@ Why this is a separate step:
    - `vault_username`/`vault_password` are from the `secretsmanager_*` outputs.
    - `rag_secrets` should include all keys referenced by your ExternalSecret resources.
      For the cert-manager webhook, store the service account key JSON under `STACKIT_CERT_MANAGER_SA_JSON` (use a heredoc to avoid escaping).
+   - Optional: `rag_secrets_overrides` can be used to force specific keys (for example infra-derived PostgreSQL/Redis/S3 values).
 3. Run:
    ```bash
    terraform init
    terraform plan
    terraform apply
    ```
+
+When using `infrastructure/scripts/deploy-rag-prod.sh`, the script passes `rag_secrets_overrides` automatically for:
+- `POSTGRES_PASSWORD`
+- `REDIS_USERNAME`
+- `REDIS_PASSWORD`
+- `S3_ACCESS_KEY_ID`
+- `S3_SECRET_ACCESS_KEY`
 
 ## Security note
 

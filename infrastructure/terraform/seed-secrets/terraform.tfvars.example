@@ -20,7 +20,10 @@ rag_secrets = {
   BASIC_AUTH_USER          = "<<BASIC_AUTH_USER>>"
   BASIC_AUTH_PASSWORD      = "<<BASIC_AUTH_PASSWORD>>"
   BASIC_AUTH               = "<<BASIC_AUTH_HTPASSWD>>"
+  # The production deploy script auto-populates the following from Terraform outputs:
+  # POSTGRES_PASSWORD, REDIS_USERNAME, REDIS_PASSWORD, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY
   POSTGRES_PASSWORD        = "<<POSTGRES_PASSWORD>>"
+  REDIS_USERNAME           = "<<REDIS_USERNAME>>"
   REDIS_PASSWORD           = "<<REDIS_PASSWORD>>"
   CLICKHOUSE_PASSWORD      = "<<CLICKHOUSE_PASSWORD>>"
   STACKIT_CERT_MANAGER_SA_JSON = <<EOF

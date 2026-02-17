@@ -71,6 +71,22 @@ Important: The sa_key.json file contains sensitive credentials. Never commit it 
    terraform apply rag.tfplan
    ```
 
+6. **Run one-command production deployment (recommended)**
+   ```bash
+   cd ..
+   ./scripts/deploy-rag-prod.sh --issuer-email you@example.com --auto-approve
+   ```
+   This wraps Terraform + Helm orchestration end-to-end.
+
+7. **Or only generate Helm overrides for rag-setup**
+   ```bash
+   ./scripts/generate-rag-setup-prod-values.sh \
+     --output ../server-setup/rag-setup/values.prod.auto.yaml
+   ```
+   This command reads Terraform outputs and writes a production override for the wrapper chart.
+   It pre-fills DNS-based hostnames, Secrets Manager path/user, Postgres connection values,
+   Redis host/port/username, and object storage endpoint/buckets.
+
 ## Single-Node SKE Configuration
 
 The SKE cluster is configured with a single node setup which is suitable for development and testing:

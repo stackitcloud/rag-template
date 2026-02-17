@@ -1,7 +1,9 @@
 resource "stackit_dns_zone" "rag_zone" {
-  project_id = var.project_id
-  name       = "${var.name_prefix}-zone"
-  dns_name   = var.dns_name
+  project_id    = var.project_id
+  name          = "${var.name_prefix}-zone"
+  dns_name      = var.dns_name
+  contact_email = "data-ai@stackit.cloud"
+  type          = "primary"
 }
 
 output "dns_nameservers" {

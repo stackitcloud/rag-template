@@ -78,3 +78,34 @@
 {{- toYaml $data -}}
 {{- end }}
 {{- end -}}
+
+{{/* Shared ClickHouse env for Langfuse retention CronJobs. */}}
+{{- define "rag.langfuseRetentionClickhouseEnv" -}}
+{{- $chHost := default (printf "%s-clickhouse" .Release.Name | trunc 63 | trimSuffix "-") .Values.langfuse.clickhouse.host -}}
+{{- $chUser := default "default" .Values.langfuse.clickhouse.auth.username -}}
+{{- $chPasswordSecretName := default (printf "%s-clickhouse" .Release.Name | trunc 63 | trimSuffix "-") .Values.langfuse.clickhouse.auth.existingSecret -}}
+{{- $chPasswordKey := .Values.langfuse.clickhouse.auth.existingSecretKey -}}
+{{- $chNativePort := default 9000 .Values.langfuse.clickhouse.nativePort -}}
+- name: CLICKHOUSE_HOST
+  value: {{ $chHost | quote }}
+- name: CLICKHOUSE_PORT
+  value: {{ $chNativePort | quote }}
+- name: CLICKHOUSE_USER
+  value: {{ $chUser | quote }}
+- name: CLICKHOUSE_DATABASE
+  value: {{ .Values.langfuseRetention.clickhouse.database | quote }}
+- name: CLICKHOUSE_ON_CLUSTER
+  value: {{ ternary "true" "false" .Values.langfuseRetention.clickhouse.onCluster | quote }}
+- name: CLICKHOUSE_CLUSTER_NAME
+  value: {{ .Values.langfuseRetention.clickhouse.clusterName | quote }}
+- name: RETENTION_DAYS
+  value: {{ .Values.langfuseRetention.retentionDays | quote }}
+- name: CLICKHOUSE_PASSWORD_LITERAL
+  value: {{ .Values.langfuse.clickhouse.auth.password | quote }}
+- name: CLICKHOUSE_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ $chPasswordSecretName | quote }}
+      key: {{ default "CLICKHOUSE_PASSWORD" $chPasswordKey | quote }}
+      optional: true
+{{- end -}}

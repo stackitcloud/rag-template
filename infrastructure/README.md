@@ -188,6 +188,33 @@ For local development you can let Tilt generate Langfuse init secrets automatica
 - Tilt runs Kustomize on `infrastructure/kustomize/langfuse` and applies the resulting `langfuse-init-secrets` (hash disabled) before Helm resources.
 - This is dev-only. For production, create/manage secrets with your secret manager and set `secretKeyRef.name` in `values.yaml` to your managed secret.
 
+**Langfuse Trace Retention via ClickHouse TTL (without Enterprise)**  
+If you want automatic deletion (for example after 1 year) without Langfuse Enterprise data-retention management, enable the chart-level retention CronJob:
+
+```yaml
+langfuseRetention:
+  enabled: true
+  retentionDays: 365
+  schedule: "15 */6 * * *"
+  hardDelete:
+    enabled: true
+    schedule: "30 3 * * *"
+    mutationSync: 0
+  clickhouse:
+    database: "default" # set this to the same DB your Langfuse deployment uses
+    onCluster: false # true only for clustered ClickHouse setups
+    clusterName: "default"
+```
+
+Notes:
+- ClickHouse connection/auth for retention jobs is taken from `langfuse.clickhouse.*` (same source as Langfuse itself).
+- Make sure `langfuseRetention.clickhouse.database` matches your Langfuse ClickHouse database, not just the chart default.
+- Set `langfuseRetention.clickhouse.onCluster=true` only when your ClickHouse deployment is clustered and `clusterName` exists.
+- The CronJob applies idempotent `ALTER TABLE ... MODIFY TTL` statements on Langfuse tables (`traces`, `observations`, `scores`).
+- If `hardDelete.enabled=true`, an additional CronJob executes deterministic `ALTER TABLE ... DELETE WHERE ...` mutations.
+- Deletion is then handled by ClickHouse background merges (not instant at the exact cutoff timestamp).
+- Avoid applying TTL blindly to every table. Some tables are views/metadata and should not be retention-trimmed.
+
 ### 1.2 Qdrant
 
 The deployment of the Qdrant can be disabled by setting the following value in the helm-chart:

@@ -69,8 +69,8 @@ langsmith = "^0.6.3"
 mammoth = "^1.11.0"
 marshmallow = "^3.26.2"
 protobuf = "^6.33.5"
-torch = { version = "^2.9.0+cpu", source = "pytorch_cpu" }
-torchvision = { version = "^0.24.1+cpu", source = "pytorch_cpu" }
+torch = { version = "^2.10.0", source = "pytorch_cpu" }
+torchvision = { version = "^0.25.0", source = "pytorch_cpu" }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"

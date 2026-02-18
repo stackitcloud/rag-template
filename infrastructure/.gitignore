@@ -4,7 +4,7 @@
 **/.backend.hcl
 **/kubeconfig.yaml
 **/*.lock.*
-
+**/values.prod.auto.yaml
 auth
 
 .DS_Store

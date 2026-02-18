@@ -1,0 +1,16 @@
+apiVersion: v2
+name: rag-setup
+description: |
+  Wrapper chart that deploys rag and optional external-secrets resources.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+- name: rag
+  repository: "https://stackitcloud.github.io/rag-template"
+  version: "4.2.0"
+  condition: features.rag.enabled
+- name: external-secrets
+  repository: https://charts.external-secrets.io
+  version: "2.0.0"
+  condition: features.externalSecrets.enabled

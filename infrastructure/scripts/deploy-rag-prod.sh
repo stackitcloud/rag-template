@@ -15,6 +15,8 @@ HELM_TIMEOUT="20m"
 BASE_NAMESPACE="cert-manager"
 RAG_NAMESPACE="rag"
 VAULT_USERPASS_NAMESPACE="cert-manager"
+BASE_NAMESPACE_EXPLICIT=0
+VAULT_USERPASS_NAMESPACE_EXPLICIT=0
 VALUES_OUTPUT_FILE="${RAG_CHART_DIR}/values.prod.auto.yaml"
 SEED_TFVARS_FILE="${SEED_DIR}/terraform.tfvars"
 ISSUER_EMAIL=""
@@ -80,6 +82,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --base-namespace)
       BASE_NAMESPACE="${2:-}"
+      BASE_NAMESPACE_EXPLICIT=1
       shift 2
       ;;
     --rag-namespace)
@@ -88,6 +91,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --vault-userpass-namespace)
       VAULT_USERPASS_NAMESPACE="${2:-}"
+      VAULT_USERPASS_NAMESPACE_EXPLICIT=1
       shift 2
       ;;
     --helm-timeout)
@@ -164,6 +168,58 @@ fi
 log() {
   echo "[deploy-rag-prod] $*"
 }
+
+discover_base_setup_namespace() {
+  local ns=""
+  local annotated_release_name=""
+  local annotated_release_namespace=""
+
+  ns="$(
+    helm list -A -o json 2>/dev/null \
+      | jq -r '.[] | select(.name == "base-setup") | .namespace' \
+      | head -n1 || true
+  )"
+  if [[ -n "${ns}" && "${ns}" != "null" ]]; then
+    printf '%s' "${ns}"
+    return
+  fi
+
+  annotated_release_name="$(
+    kubectl get clusterrole base-setup-cert-manager-cainjector \
+      -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-name}' 2>/dev/null || true
+  )"
+  annotated_release_namespace="$(
+    kubectl get clusterrole base-setup-cert-manager-cainjector \
+      -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-namespace}' 2>/dev/null || true
+  )"
+
+  if [[ "${annotated_release_name}" == "base-setup" && -n "${annotated_release_namespace}" ]]; then
+    printf '%s' "${annotated_release_namespace}"
+    return
+  fi
+
+  if [[ -n "${annotated_release_name}" && "${annotated_release_name}" != "base-setup" ]]; then
+    echo "ClusterRole base-setup-cert-manager-cainjector is owned by Helm release ${annotated_release_name}, not base-setup." >&2
+    echo "Clean up that existing release/resource or choose a different base release name before continuing." >&2
+    exit 1
+  fi
+
+  return 0
+}
+
+existing_base_namespace="$(discover_base_setup_namespace)"
+if [[ -n "${existing_base_namespace}" && "${existing_base_namespace}" != "${BASE_NAMESPACE}" ]]; then
+  if [[ "${BASE_NAMESPACE_EXPLICIT}" -eq 0 ]]; then
+    log "Detected existing base-setup ownership in namespace ${existing_base_namespace}; using it instead of ${BASE_NAMESPACE}"
+    BASE_NAMESPACE="${existing_base_namespace}"
+  else
+    log "base-setup ownership exists in namespace ${existing_base_namespace}, but --base-namespace=${BASE_NAMESPACE} was explicitly requested"
+  fi
+
+  if [[ "${VAULT_USERPASS_NAMESPACE_EXPLICIT}" -eq 0 ]]; then
+    VAULT_USERPASS_NAMESPACE="${existing_base_namespace}"
+  fi
+fi
 
 extract_rag_secret_value() {
   local key="$1"
@@ -290,7 +346,7 @@ if [[ -n "${generated_basic_auth_password}" ]]; then
   fi
 fi
 
-seed_override_file="$(mktemp)"
+seed_override_file="$(mktemp "${TMPDIR:-/tmp}/rag-seed-overrides.XXXXXX.tfvars.json")"
 cleanup() {
   rm -f "${seed_override_file}"
 }
@@ -422,6 +478,44 @@ helm upgrade --install base-setup "${BASE_CHART_DIR}" \
   --set certIssuer.email="${ISSUER_EMAIL}" \
   --wait \
   --timeout "${HELM_TIMEOUT}"
+
+rag_setup_release_exists=0
+if helm status rag-setup -n "${RAG_NAMESPACE}" >/dev/null 2>&1; then
+  rag_setup_release_exists=1
+fi
+
+if ! kubectl get crd clustersecretstores.external-secrets.io >/dev/null 2>&1; then
+  if [[ "${rag_setup_release_exists}" -eq 1 ]]; then
+    echo "External Secrets CRD clustersecretstores.external-secrets.io is missing, but rag-setup release already exists." >&2
+    echo "Refusing automatic bootstrap to avoid changing an existing release unexpectedly." >&2
+    echo "Fix CRDs/operator first, then rerun deploy." >&2
+    exit 1
+  fi
+
+  log "External Secrets CRDs not found; bootstrapping rag-setup dependencies (operator/CRDs) first"
+  helm upgrade --install rag-setup "${RAG_CHART_DIR}" \
+    -n "${RAG_NAMESPACE}" \
+    --create-namespace \
+    -f "${RAG_CHART_DIR}/values.yaml" \
+    -f "${VALUES_OUTPUT_FILE}" \
+    --set features.rag.enabled=false \
+    --set externalSecrets.resources.enabled=false \
+    --wait \
+    --timeout "${HELM_TIMEOUT}"
+
+  log "Waiting for External Secrets CRDs to become available"
+  for _ in $(seq 1 30); do
+    if kubectl get crd clustersecretstores.external-secrets.io >/dev/null 2>&1; then
+      break
+    fi
+    sleep 2
+  done
+
+  if ! kubectl get crd clustersecretstores.external-secrets.io >/dev/null 2>&1; then
+    echo "External Secrets CRDs are still missing after bootstrap step." >&2
+    exit 1
+  fi
+fi
 
 log "Deploying rag-setup chart"
 helm upgrade --install rag-setup "${RAG_CHART_DIR}" \

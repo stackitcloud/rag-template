@@ -16,6 +16,8 @@ This Terraform configuration deploys:
 - STACKIT account with service account credentials
 - Service account JSON key file
 
+Bootstrap note: Terraform needs an existing service-account key file (`sa_key.json`) to authenticate the provider.
+
 ## Setup Instructions
 
 1. **Prepare credentials**
@@ -52,9 +54,14 @@ Important: The sa_key.json file contains sensitive credentials. Never commit it 
 
 2. **Review and customize variables**
    ```
+   cp terraform.tfvars.example terraform.tfvars
    # Edit terraform.tfvars with your project ID and other preferences
    vim terraform.tfvars
    ```
+   Required values in `terraform.tfvars`:
+   - `project_id`
+   - `dns_name` (must match `^([a-z0-9.-]+)$`, typically `*.runs.onstackit.cloud`)
+   - `rag_cluster_name` (max 11 chars, lowercase letters/numbers/hyphens)
 
 3. **Initialize Terraform**
    ```
@@ -77,6 +84,9 @@ Important: The sa_key.json file contains sensitive credentials. Never commit it 
    ./scripts/deploy-rag-prod.sh --issuer-email you@example.com --auto-approve
    ```
    This wraps Terraform + Helm orchestration end-to-end.
+   `STACKIT_CERT_MANAGER_SA_JSON` must be provided in `seed-secrets/terraform.tfvars` (or via `rag_secrets_overrides`).
+   It auto-injects `STACKIT_EMBEDDER_API_KEY`, `STACKIT_VLLM_API_KEY`, and `RAGAS_OPENAI_API_KEY` from `model_serving_bearer_token`.
+   It auto-generates selected app secrets (Langfuse/basic auth/clickhouse) when placeholders are still present.
 
 7. **Or only generate Helm overrides for rag-setup**
    ```bash
@@ -115,7 +125,7 @@ Note: backend blocks cannot reference resources, so you must hardcode or pass th
 
 ### Bootstrap script (recommended)
 
-Note: `backend "s3" {}` is already defined in `main.tf`. The bootstrap step still works because it runs `terraform init -backend=false`, which ignores the backend block.
+Note: `backend "s3" {}` is already defined in `main.tf`. During bootstrap, the helper script temporarily removes the backend stanza to run a local apply for bucket/credentials creation, restores `main.tf`, then migrates state to S3.
 
 Use the helper script to bootstrap the backend in two phases:
 1) Run a local-only apply to create the bucket + credentials.
@@ -135,14 +145,16 @@ If you want non-interactive bootstrap:
 BOOTSTRAP_AUTO_APPROVE=1 ./scripts/init-backend.sh
 ```
 
-Manual phase 1 (if you want to see the exact commands the script runs):
+Manual phase 1 (advanced; the script is recommended):
 
 ```bash
-terraform init -backend=false
+# temporarily remove backend "s3" {} from main.tf
 terraform apply \
   -target=stackit_objectstorage_bucket.tfstate \
   -target=stackit_objectstorage_credentials_group.rag_creds_group \
   -target=stackit_objectstorage_credential.rag_creds
+# restore main.tf, write .backend.hcl, then:
+# terraform init -reconfigure -backend-config=.backend.hcl -force-copy
 ```
 
 ### Manual backend block

@@ -1,3 +1,13 @@
 project_id  = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX"
 name_prefix = "rag-prod"
 region      = "eu01"
+
+# Required:
+# - lowercase letters, numbers, hyphens, dots
+# - should end with .runs.onstackit.cloud
+dns_name = "rag-prod-xxxxx.runs.onstackit.cloud"
+
+# Required:
+# - lowercase letters, numbers, hyphens
+# - max length 11
+rag_cluster_name = "rag-prod01"

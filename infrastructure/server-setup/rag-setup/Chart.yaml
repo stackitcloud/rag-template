@@ -7,8 +7,8 @@ version: 0.1.0
 appVersion: "0.1.0"
 dependencies:
 - name: rag
-  repository: "file://../../rag"
-  version: "4.1.0"
+  repository: "https://stackitcloud.github.io/rag-template"
+  version: "4.2.0"
   condition: features.rag.enabled
 - name: external-secrets
   repository: https://charts.external-secrets.io

@@ -221,8 +221,8 @@ rag:
         RAG_CLASS_TYPE_LLM_TYPE: "stackit"
       ragas:
         RAGAS_IS_DEBUG: false
-        RAGAS_MODEL: "gpt-4o-mini"
-        RAGAS_USE_OPENAI: true
+        RAGAS_MODEL: "openai/gpt-oss-120b"
+        RAGAS_USE_OPENAI: false
         RAGAS_TIMEOUT: 60
         RAGAS_EVALUATION_DATASET_NAME: "eval-data"
         RAGAS_MAX_CONCURRENCY: "5"

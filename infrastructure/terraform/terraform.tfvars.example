@@ -4,6 +4,7 @@ region      = "eu01"
 
 # Required:
 # - lowercase letters, numbers, hyphens, dots
+# - at least one dot (multi-level DNS name)
 # - should end with .runs.onstackit.cloud
 dns_name = "rag-prod-xxxxx.runs.onstackit.cloud"
 

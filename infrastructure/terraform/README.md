@@ -60,7 +60,7 @@ Important: The sa_key.json file contains sensitive credentials. Never commit it 
    ```
    Required values in `terraform.tfvars`:
    - `project_id`
-   - `dns_name` (must match `^([a-z0-9.-]+)$`, typically `*.runs.onstackit.cloud`)
+   - `dns_name` (valid multi-level domain with at least one dot, typically `*.runs.onstackit.cloud`)
    - `rag_cluster_name` (max 11 chars, lowercase letters/numbers/hyphens)
 
 3. **Initialize Terraform**

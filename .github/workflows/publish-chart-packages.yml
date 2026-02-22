@@ -28,7 +28,7 @@ jobs:
       allow: ${{ steps.allow_manual.outputs.allow || steps.allow_push.outputs.allow }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Allow manual run
         id: allow_manual
         if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ needs.gate.outputs.allow == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.ref || 'main' }}

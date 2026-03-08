@@ -65,7 +65,7 @@ repository = "https://github.com/stackitcloud/rag-template"
 python = ">=3.13,<3.14"
 extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 azure-core = "^1.38.0"
-langsmith = "^0.6.3"
+langsmith = "^0.7.0"
 mammoth = "^1.11.0"
 marshmallow = "^3.26.2"
 protobuf = "^6.33.5"

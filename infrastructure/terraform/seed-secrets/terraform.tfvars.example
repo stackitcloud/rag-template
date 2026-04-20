@@ -1,9 +1,10 @@
-vault_mount_path = "<<SECRETS_MANAGER_INSTANCE_ID>>"
-vault_username   = "<<SECRETS_MANAGER_USERNAME>>"
-vault_password   = "<<SECRETS_MANAGER_PASSWORD>>"
+# Required only when running this module directly (deploy-rag-prod.sh injects them automatically):
+# vault_mount_path = "<<SECRETS_MANAGER_INSTANCE_ID>>"
+# vault_username   = "<<SECRETS_MANAGER_USERNAME>>"
+# vault_password   = "<<SECRETS_MANAGER_PASSWORD>>"
 
 rag_secrets = {
-  LANGFUSE_INIT_ORG_ID    = "<LANGFUSE_INIT_ORG_ID>>"
+  LANGFUSE_INIT_ORG_ID     = "<<LANGFUSE_INIT_ORG_ID>>"
   LANGFUSE_INIT_PROJECT_ID = "<<LANGFUSE_INIT_PROJECT_ID>>"
   LANGFUSE_INIT_USER_EMAIL = "<<LANGFUSE_INIT_USER_EMAIL>>"
   LANGFUSE_INIT_USER_NAME   = "<<LANGFUSE_INIT_USER_NAME>>"
@@ -12,18 +13,30 @@ rag_secrets = {
   LANGFUSE_SECRET_KEY      = "<<LANGFUSE_SECRET_KEY>>"
   LANGFUSE_SALT            = "<<LANGFUSE_SALT>>"
   LANGFUSE_NEXTAUTH        = "<<LANGFUSE_NEXTAUTH>>"
-  STACKIT_EMBEDDER_API_KEY = "<<STACKIT_EMBEDDER_API_KEY>>"
-  STACKIT_VLLM_API_KEY     = "<<STACKIT_VLLM_API_KEY>>"
+  # Keep RAGAS_OPENAI_API_KEY only if you run RAGAS in OpenAI mode (RAGAS_USE_OPENAI=true).
+  # For STACKIT mode, set RAGAS_USE_OPENAI=false in values and this key is not used.
   RAGAS_OPENAI_API_KEY     = "<<RAGAS_OPENAI_API_KEY>>"
-  S3_ACCESS_KEY_ID         = "<<S3_ACCESS_KEY_ID>>"
-  S3_SECRET_ACCESS_KEY     = "<<S3_SECRET_ACCESS_KEY>>"
-  BASIC_AUTH_USER          = "<<BASIC_AUTH_USER>>"
-  BASIC_AUTH_PASSWORD      = "<<BASIC_AUTH_PASSWORD>>"
-  BASIC_AUTH               = "<<BASIC_AUTH_HTPASSWD>>"
-  POSTGRES_PASSWORD        = "<<POSTGRES_PASSWORD>>"
-  REDIS_PASSWORD           = "<<REDIS_PASSWORD>>"
-  CLICKHOUSE_PASSWORD      = "<<CLICKHOUSE_PASSWORD>>"
+  # JSON string for STACKIT DNS webhook auth (service account key JSON).
+  # Paste full JSON as heredoc.
   STACKIT_CERT_MANAGER_SA_JSON = <<EOF
 <<STACKIT_CERT_MANAGER_SA_JSON>>
 EOF
+  BASIC_AUTH_USER          = "<<BASIC_AUTH_USER>>"
+  BASIC_AUTH_PASSWORD      = "<<BASIC_AUTH_PASSWORD>>"
+  BASIC_AUTH               = "<<BASIC_AUTH_HTPASSWD>>"
+  CLICKHOUSE_PASSWORD      = "<<CLICKHOUSE_PASSWORD>>"
 }
+
+# Optional only when running this module directly.
+# deploy-rag-prod.sh injects these from Terraform outputs automatically:
+# and auto-generates selected values when missing/placeholders.
+# rag_secrets_overrides = {
+#   POSTGRES_PASSWORD    = "<<POSTGRES_PASSWORD>>"
+#   REDIS_USERNAME       = "<<REDIS_USERNAME>>"
+#   REDIS_PASSWORD       = "<<REDIS_PASSWORD>>"
+#   S3_ACCESS_KEY_ID     = "<<S3_ACCESS_KEY_ID>>"
+#   S3_SECRET_ACCESS_KEY = "<<S3_SECRET_ACCESS_KEY>>"
+#   STACKIT_EMBEDDER_API_KEY = "<<MODEL_SERVING_BEARER_TOKEN>>"
+#   STACKIT_VLLM_API_KEY     = "<<MODEL_SERVING_BEARER_TOKEN>>"
+#   RAGAS_OPENAI_API_KEY      = "<<MODEL_SERVING_BEARER_TOKEN>>"
+# }

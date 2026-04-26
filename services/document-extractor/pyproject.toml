@@ -79,7 +79,7 @@ httpx = "^0.28.1"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
-black = "^25.1.0"
+black = "^26.0.0"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 flake8-quotes = "^3.4.0"

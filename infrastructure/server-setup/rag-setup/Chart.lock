@@ -1,0 +1,9 @@
+dependencies:
+- name: rag
+  repository: https://stackitcloud.github.io/rag-template
+  version: 4.2.0
+- name: external-secrets
+  repository: https://charts.external-secrets.io
+  version: 2.0.0
+digest: sha256:4752701651a586417a192aced414d7c9f465c085179fc3ffa977f809e77a03c7
+generated: "2026-02-18T11:12:32.037377+01:00"

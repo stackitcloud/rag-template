@@ -1,9 +1,36 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "/libs"
+      - "/libs/admin-api-lib"
+      - "/libs/extractor-api-lib"
+      - "/libs/rag-core-api"
+      - "/libs/rag-core-lib"
+      - "/services/admin-backend"
+      - "/services/document-extractor"
+      - "/services/mcp-server"
+      - "/services/rag-backend"
     versioning-strategy: increase-if-necessary
     schedule:
       interval: "daily"
-    open-pull-requests-limit: 20
+    open-pull-requests-limit: 0
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
 
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/services/frontend"
+      - "/services/frontend/libs/shared/utils"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"

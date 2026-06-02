@@ -16,10 +16,10 @@ jobs:
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.filter.outputs.services || steps.manual.outputs.services }}
-      libs: ${{ steps.filter.outputs.libs || steps.manual.outputs.libs }}
-      frontend: ${{ steps.filter.outputs.frontend || steps.manual.outputs.frontend }}
-      infrastructure: ${{ steps.filter.outputs.infrastructure || steps.manual.outputs.infrastructure }}
+      services: ${{ steps.filter_pr.outputs.services || steps.filter_merge.outputs.services || steps.manual.outputs.services }}
+      libs: ${{ steps.filter_pr.outputs.libs || steps.filter_merge.outputs.libs || steps.manual.outputs.libs }}
+      frontend: ${{ steps.filter_pr.outputs.frontend || steps.filter_merge.outputs.frontend || steps.manual.outputs.frontend }}
+      infrastructure: ${{ steps.filter_pr.outputs.infrastructure || steps.filter_merge.outputs.infrastructure || steps.manual.outputs.infrastructure }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -27,8 +27,27 @@ jobs:
           fetch-depth: 0
 
       # When running via merge queue, diff the merge-group head vs its base
+      - name: Detect changes (pull request)
+        id: filter_pr
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            services:
+              - 'services/admin-backend/**'
+              - 'services/document-extractor/**'
+              - 'services/rag-backend/**'
+              - 'services/mcp-server/**'
+            libs:
+              - 'libs/**'
+            frontend:
+              - 'services/frontend/**'
+            infrastructure:
+              - 'infrastructure/**'
+              - 'Tiltfile'
+
       - name: Detect changes (merge queue)
-        id: filter
+        id: filter_merge
         if: github.event_name == 'merge_group'
         uses: dorny/paths-filter@v3
         with:
@@ -215,7 +234,11 @@ jobs:
         run: |
           curl https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz | tar xz
           sudo mv linux-amd64/helm /usr/local/bin/helm
-          helm lint infrastructure/rag/
+          find infrastructure -name Chart.yaml -print0 | while IFS= read -r -d '' chart; do
+            chart_dir="$(dirname "$chart")"
+            helm dependency build "$chart_dir"
+            helm lint "$chart_dir"
+          done
 
   summary:
     name: Lint and Test CI Summary

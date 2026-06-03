@@ -2,7 +2,6 @@
 
 from pydantic_settings import BaseSettings
 from langchain.chat_models import init_chat_model
-from langchain.chat_models.base import _SUPPORTED_PROVIDERS
 from langchain_core.language_models.base import BaseLanguageModel
 from langchain_core.runnables import ConfigurableField
 
@@ -75,14 +74,16 @@ def chat_model_provider(
         if generic_key in data:
             data[specific_key] = data.pop(generic_key)
 
-    if provider not in _SUPPORTED_PROVIDERS:
-        raise ValueError(f"Unsupported provider '{provider}'. Supported: {_SUPPORTED_PROVIDERS}")
-
-    chat = init_chat_model(
-        model=model_name,
-        model_provider=provider,
-        **data,
-    )
+    try:
+        chat = init_chat_model(
+            model=model_name,
+            model_provider=provider,
+            **data,
+        )
+    except ValueError as exc:
+        if "Unsupported model_provider" not in str(exc):
+            raise
+        raise ValueError(f"Unsupported provider '{provider}'") from exc
     config_fields = extract_configurable_fields(settings)
     if config_fields:
         return chat.configurable_fields(**config_fields)

@@ -2,7 +2,11 @@
 
 import pytest
 
-from src.docstring_system import DocstringTemplateSystem, extensible_docstring, setup_extensible_docstrings
+from src.docstring_system import (
+    DocstringTemplateSystem,
+    extensible_docstring,
+    setup_extensible_docstrings,
+)
 from src.settings.mcp_settings import MCPSettings
 
 
@@ -36,7 +40,10 @@ def test_class_factory():
 
             @extensible_docstring("chat_with_history")
             def chat_with_history(self, session_id: str, message: str, history: list = None) -> dict:
-                return {"answer": f"Response for {session_id}: {message}", "citations": []}
+                return {
+                    "answer": f"Response for {session_id}: {message}",
+                    "citations": [],
+                }
 
         return TestClass(settings)
 
@@ -330,7 +337,10 @@ def test_missing_settings_attributes():
 def test_empty_configuration():
     """Test behavior with empty configuration."""
     settings = MCPSettings(
-        chat_simple_description="", chat_simple_parameter_descriptions={}, chat_simple_notes="", chat_simple_examples=""
+        chat_simple_description="",
+        chat_simple_parameter_descriptions={},
+        chat_simple_notes="",
+        chat_simple_examples="",
     )
 
     class TestClass:

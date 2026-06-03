@@ -29,7 +29,6 @@ from extractor_api_lib.models.extraction_parameters import ExtractionParameters
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.models.information_piece import InformationPiece
 
-
 router = APIRouter()
 
 ns_pkg = extractor_api_lib.impl
@@ -40,7 +39,10 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 @router.post(
     "/extract_from_file",
     responses={
-        200: {"model": List[InformationPiece], "description": "List of extracted information."},
+        200: {
+            "model": List[InformationPiece],
+            "description": "List of extracted information.",
+        },
         422: {"description": "Body is not a valid PDF."},
         500: {"description": "Something somewhere went terribly wrong."},
     },

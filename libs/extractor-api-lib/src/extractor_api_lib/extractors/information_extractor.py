@@ -5,7 +5,9 @@ from abc import ABC, abstractmethod
 
 from extractor_api_lib.models.extraction_parameters import ExtractionParameters
 from extractor_api_lib.impl.types.extractor_types import ExtractorTypes
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 
 
 class InformationExtractor(ABC):

@@ -12,11 +12,15 @@ from unstructured.partition.pptx import partition_pptx
 
 
 from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
+from extractor_api_lib.extractors.information_file_extractor import (
+    InformationFileExtractor,
+)
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
 
 logger = logging.getLogger(__name__)
@@ -109,7 +113,13 @@ class MSDocsExtractor(InformationFileExtractor):
                 old_page = current_page
 
             if el.text.strip():
-                self._process_element(el, page_content_lines, processed_elements, document_name, current_page)
+                self._process_element(
+                    el,
+                    page_content_lines,
+                    processed_elements,
+                    document_name,
+                    current_page,
+                )
 
         if page_content_lines:
             processed_elements.append(self._create_text_piece(document_name, current_page, page_content_lines))

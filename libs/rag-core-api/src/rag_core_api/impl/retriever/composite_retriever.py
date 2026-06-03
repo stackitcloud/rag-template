@@ -81,7 +81,10 @@ class CompositeRetriever(Retriever):
             retriever.verify_readiness()
 
     async def ainvoke(
-        self, retriever_input: str, config: Optional[RunnableConfig] = None, **kwargs: Any
+        self,
+        retriever_input: str,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
     ) -> list[Document]:
         """
         Asynchronously invokes the retrievers with the given input and configuration.
@@ -223,7 +226,10 @@ class CompositeRetriever(Retriever):
         return documents
 
     async def _arerank_pruning(
-        self, documents: list[Document], retriever_input: dict, config: Optional[RunnableConfig] = None
+        self,
+        documents: list[Document],
+        retriever_input: dict,
+        config: Optional[RunnableConfig] = None,
     ) -> list[Document]:
         """Prune documents by reranker.
 

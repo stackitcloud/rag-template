@@ -19,7 +19,9 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
-from rag_core_api.impl.answer_generation_chains.language_detection_chain import LanguageDetectionChain
+from rag_core_api.impl.answer_generation_chains.language_detection_chain import (
+    LanguageDetectionChain,
+)
 from rag_core_api.impl.api_endpoints.default_chat import DefaultChat
 from rag_core_api.impl.api_endpoints.default_information_pieces_remover import (
     DefaultInformationPiecesRemover,
@@ -58,7 +60,9 @@ from rag_core_api.prompt_templates.answer_generation_prompt import (
 from rag_core_api.prompt_templates.question_rephrasing_prompt import (
     QUESTION_REPHRASING_PROMPT,
 )
-from rag_core_api.prompt_templates.language_detection_prompt import LANGUAGE_DETECTION_PROMPT
+from rag_core_api.prompt_templates.language_detection_prompt import (
+    LANGUAGE_DETECTION_PROMPT,
+)
 from rag_core_lib.impl.data_types.content_type import ContentType
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.llms.llm_factory import chat_model_provider
@@ -100,7 +104,8 @@ class DependencyContainer(DeclarativeContainer):
     embedder = Selector(
         class_selector_config.embedder_type,
         ollama=Singleton(
-            LangchainCommunityEmbedder, embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump())
+            LangchainCommunityEmbedder,
+            embedder=Singleton(OllamaEmbeddings, **ollama_embedder_settings.model_dump()),
         ),
         stackit=Singleton(StackitEmbedder, stackit_embedder_settings, retry_decorator_settings),
     )
@@ -131,7 +136,9 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     flashrank_reranker = Singleton(
-        FlashrankRerank, top_n=reranker_settings.k_documents, score_threshold=reranker_settings.min_relevance_score
+        FlashrankRerank,
+        top_n=reranker_settings.k_documents,
+        score_threshold=reranker_settings.min_relevance_score,
     )
     reranker = Singleton(FlashrankReranker, flashrank_reranker)
 
@@ -254,14 +261,14 @@ class DependencyContainer(DeclarativeContainer):
             class_selector_config.llm_type,
             stackit=Singleton(
                 ChatOpenAI,
-                model=ragas_settings.model if ragas_settings.model else stackit_vllm_settings.model,
+                model=(ragas_settings.model if ragas_settings.model else stackit_vllm_settings.model),
                 timeout=ragas_settings.timeout,
                 openai_api_base=stackit_vllm_settings.base_url,
                 openai_api_key=stackit_vllm_settings.api_key,
             ),
             ollama=Singleton(
                 ChatOllama,
-                model=ragas_settings.model if ragas_settings.model else ollama_settings.model,
+                model=(ragas_settings.model if ragas_settings.model else ollama_settings.model),
                 base_url=ollama_settings.base_url,
             ),
         )

@@ -1,4 +1,8 @@
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 
 # Generic LangChain ChatPromptTemplate - works with any LLM
 QUESTION_REPHRASING_PROMPT = ChatPromptTemplate.from_messages(
@@ -14,10 +18,8 @@ Rules:
 - If the original question is already standalone, return it unchanged.
 - Return ONLY the rewritten question text. No preamble, no quotes."""
         ),
-        HumanMessagePromptTemplate.from_template(
-            """Question: {question}
+        HumanMessagePromptTemplate.from_template("""Question: {question}
 ChatHistory: {history}
-language: {language}"""
-        ),
+language: {language}"""),
     ]
 )

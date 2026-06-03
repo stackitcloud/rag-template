@@ -20,10 +20,14 @@ import camelot
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType
 from extractor_api_lib.impl.utils.utils import hash_datetime
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 from extractor_api_lib.table_converter.dataframe_converter import DataframeConverter
 from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
+from extractor_api_lib.extractors.information_file_extractor import (
+    InformationFileExtractor,
+)
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pdfminer").setLevel(logging.WARNING)
@@ -139,7 +143,7 @@ class PDFExtractor(InformationFileExtractor):
 
                     is_text_based = self._is_text_based(page)
 
-                    (new_pdf_elements, current_title) = self._extract_content_from_page(
+                    new_pdf_elements, current_title = self._extract_content_from_page(
                         page_index=page_idx,
                         page=page,
                         is_text_based=is_text_based,
@@ -264,7 +268,12 @@ class PDFExtractor(InformationFileExtractor):
         rough_text = pytesseract.image_to_string(image, lang="eng")
         if not rough_text and with_image_masking:
             return self._extract_text_from_scanned_page(
-                page, scale_x, scale_y, original_image, pdf_page_height, with_image_masking=False
+                page,
+                scale_x,
+                scale_y,
+                original_image,
+                pdf_page_height,
+                with_image_masking=False,
             )
         lang_code = self._auto_detect_language(rough_text)
         tesseract_lang = self._lang_map.get(lang_code, "eng")

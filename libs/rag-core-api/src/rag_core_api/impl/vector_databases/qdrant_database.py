@@ -11,7 +11,6 @@ from rag_core_api.embeddings.embedder import Embedder
 from rag_core_api.impl.settings.vector_db_settings import VectorDatabaseSettings
 from rag_core_api.vector_databases.vector_database import VectorDatabase
 
-
 logger = logging.getLogger(__name__)
 
 

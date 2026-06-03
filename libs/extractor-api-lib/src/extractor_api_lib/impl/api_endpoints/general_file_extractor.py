@@ -5,11 +5,17 @@ from pathlib import Path
 import tempfile
 
 from extractor_api_lib.api_endpoints.file_extractor import FileExtractor
-from extractor_api_lib.impl.mapper.internal2external_information_piece import Internal2ExternalInformationPiece
+from extractor_api_lib.impl.mapper.internal2external_information_piece import (
+    Internal2ExternalInformationPiece,
+)
 from extractor_api_lib.models.extraction_request import ExtractionRequest
 from extractor_api_lib.file_services.file_service import FileService
-from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.extractors.information_file_extractor import (
+    InformationFileExtractor,
+)
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 from extractor_api_lib.models.information_piece import InformationPiece
 
 logger = logging.getLogger(__name__)
@@ -107,7 +113,9 @@ class GeneralFileExtractor(FileExtractor):
                     raise ValueError(f"No extractor found for file-ending {file_type}")
 
                 results = await self._run_extractors_with_fallback(
-                    list(reversed(correct_extractors)), temp_file_path, extraction_request.document_name
+                    list(reversed(correct_extractors)),
+                    temp_file_path,
+                    extraction_request.document_name,
                 )
 
                 return [self._mapper.map_internal_to_external(x) for x in results if x.page_content is not None]

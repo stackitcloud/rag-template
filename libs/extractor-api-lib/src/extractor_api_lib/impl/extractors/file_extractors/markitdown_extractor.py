@@ -10,7 +10,9 @@ from markdown_it import MarkdownIt
 from markitdown import MarkItDown
 from pypdf import PdfReader, PdfWriter
 
-from extractor_api_lib.extractors.information_file_extractor import InformationFileExtractor
+from extractor_api_lib.extractors.information_file_extractor import (
+    InformationFileExtractor,
+)
 from extractor_api_lib.file_services.file_service import FileService
 from extractor_api_lib.impl.types.content_type import ContentType
 from extractor_api_lib.impl.types.file_type import FileType

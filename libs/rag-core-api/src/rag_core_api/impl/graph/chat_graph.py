@@ -20,7 +20,9 @@ from rag_core_api.impl.answer_generation_chains.answer_generation_chain import (
     AnswerGenerationChain,
 )
 from rag_core_api.impl.answer_generation_chains.rephrasing_chain import RephrasingChain
-from rag_core_api.impl.answer_generation_chains.language_detection_chain import LanguageDetectionChain
+from rag_core_api.impl.answer_generation_chains.language_detection_chain import (
+    LanguageDetectionChain,
+)
 from rag_core_api.impl.graph.graph_state.graph_state import AnswerGraphState
 from rag_core_api.impl.retriever.no_or_empty_collection_error import (
     NoOrEmptyCollectionError,
@@ -109,7 +111,10 @@ class DefaultChatGraph(GraphBase):
         self._graph = self._setup_graph()
 
     async def ainvoke(
-        self, graph_input: ChatRequest, config: Optional[RunnableConfig] = None, **kwargs: Any
+        self,
+        graph_input: ChatRequest,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
     ) -> ChatResponse:
         """
         Asynchronously invokes the chat graph with the provided input and configuration.
@@ -306,7 +311,9 @@ class DefaultChatGraph(GraphBase):
         self._state_graph.add_edge(GraphNodeNames.DETERMINE_LANGUAGE, GraphNodeNames.REPHRASE)
         self._state_graph.add_edge(GraphNodeNames.REPHRASE, GraphNodeNames.RETRIEVE)
         self._state_graph.add_conditional_edges(
-            GraphNodeNames.RETRIEVE, self._docs_retrieved_edge, [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE]
+            GraphNodeNames.RETRIEVE,
+            self._docs_retrieved_edge,
+            [GraphNodeNames.GENERATE, GraphNodeNames.ERROR_NODE],
         )
         self._state_graph.add_edge(GraphNodeNames.GENERATE, END)
         self._state_graph.add_edge(GraphNodeNames.ERROR_NODE, END)

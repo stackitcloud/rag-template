@@ -147,7 +147,8 @@ class FileStatusKeyValueStore:
         correct_file_name = [x for x in all_documents if x[0] == file_name]
         for file_name_related in correct_file_name:
             self._redis.srem(
-                self.STORAGE_KEY, FileStatusKeyValueStore._to_str(file_name_related[0], file_name_related[1])
+                self.STORAGE_KEY,
+                FileStatusKeyValueStore._to_str(file_name_related[0], file_name_related[1]),
             )
 
     def get_all(self) -> list[tuple[str, Status]]:

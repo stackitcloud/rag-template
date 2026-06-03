@@ -41,7 +41,9 @@ class InformationPiece2Document:
     METADATA_TYPE_KEY = "type"
 
     @staticmethod
-    def extractor_information_piece2document(info: ExtractorInformationPiece) -> LangchainDocument:
+    def extractor_information_piece2document(
+        info: ExtractorInformationPiece,
+    ) -> LangchainDocument:
         """
         Convert an ExtractorInformationPiece instance to a LangchainDocument instance.
 
@@ -68,7 +70,9 @@ class InformationPiece2Document:
         return LangchainDocument(page_content=info.page_content, metadata=metadata)
 
     @staticmethod
-    def document2rag_information_piece(document: LangchainDocument) -> RagInformationPiece:
+    def document2rag_information_piece(
+        document: LangchainDocument,
+    ) -> RagInformationPiece:
         """
         Convert a LangchainDocument to a RagInformationPiece.
 

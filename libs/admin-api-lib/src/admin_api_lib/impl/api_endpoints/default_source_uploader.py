@@ -8,17 +8,25 @@ from contextlib import suppress
 from pydantic import StrictStr
 from fastapi import status, HTTPException
 
-from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
-from admin_api_lib.extractor_api_client.openapi_client.models.extraction_parameters import ExtractionParameters
+from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import (
+    ExtractorApi,
+)
+from admin_api_lib.extractor_api_client.openapi_client.models.extraction_parameters import (
+    ExtractionParameters,
+)
 from admin_api_lib.impl.settings.source_uploader_settings import SourceUploaderSettings
 from admin_api_lib.models.key_value_pair import KeyValuePair
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi
-from admin_api_lib.impl.mapper.informationpiece2document import InformationPiece2Document
+from admin_api_lib.impl.mapper.informationpiece2document import (
+    InformationPiece2Document,
+)
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.api_endpoints.source_uploader import SourceUploader
 from admin_api_lib.chunker.chunker import Chunker
 from admin_api_lib.models.status import Status
-from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_api_lib.impl.key_db.file_status_key_value_store import (
+    FileStatusKeyValueStore,
+)
 from admin_api_lib.impl.api_endpoints.upload_pipeline_mixin import (
     UploadCancelledError,
     UploadPipelineMixin,
@@ -163,7 +171,9 @@ class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
         information_pieces = await asyncio.to_thread(
             self._extractor_api.extract_from_source,
             ExtractionParameters(
-                source_type=source_type, document_name=source_name, kwargs=[x.to_dict() for x in kwargs]
+                source_type=source_type,
+                document_name=source_name,
+                kwargs=[x.to_dict() for x in kwargs],
             ),
         )
         if not information_pieces:
@@ -188,7 +198,10 @@ class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
             )
         except asyncio.TimeoutError:
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
-                logger.info("Timed out worker for %s ignored because upload was cancelled.", source_name)
+                logger.info(
+                    "Timed out worker for %s ignored because upload was cancelled.",
+                    source_name,
+                )
                 return
             logger.error(
                 "Upload of %s timed out after %s seconds (increase SOURCE_UPLOADER_TIMEOUT to allow longer ingestions)",
@@ -198,7 +211,10 @@ class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
             self._key_value_store.upsert(source_name, Status.ERROR)
         except Exception:
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
-                logger.info("Worker exception for %s ignored because upload was cancelled.", source_name)
+                logger.info(
+                    "Worker exception for %s ignored because upload was cancelled.",
+                    source_name,
+                )
                 return
             logger.exception("Error while uploading %s", source_name)
             self._key_value_store.upsert(source_name, Status.ERROR)
@@ -242,7 +258,10 @@ class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
 
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
                 await self._abest_effort_cleanup_cancelled(source_name)
-                logger.info("Upload for %s finished after cancellation request; cleaned up artifacts.", source_name)
+                logger.info(
+                    "Upload for %s finished after cancellation request; cleaned up artifacts.",
+                    source_name,
+                )
                 return
 
             self._key_value_store.upsert(source_name, Status.READY)
@@ -253,7 +272,10 @@ class DefaultSourceUploader(UploadPipelineMixin, SourceUploader):
             logger.info("Upload cancelled for %s.", source_name)
         except Exception:
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
-                logger.info("Upload for %s stopped because cancellation was requested.", source_name)
+                logger.info(
+                    "Upload for %s stopped because cancellation was requested.",
+                    source_name,
+                )
                 return
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.exception("Error while uploading %s", source_name)

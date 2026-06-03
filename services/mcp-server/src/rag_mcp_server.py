@@ -9,11 +9,17 @@ from rag_backend_client.openapi_client.models.chat_request import ChatRequest
 from rag_backend_client.openapi_client.api.rag_api import RagApi
 from rag_backend_client.openapi_client.models.chat_response import ChatResponse
 from rag_backend_client.openapi_client.models.chat_history import ChatHistory
-from rag_backend_client.openapi_client.models.chat_history_message import ChatHistoryMessage
+from rag_backend_client.openapi_client.models.chat_history_message import (
+    ChatHistoryMessage,
+)
 from rag_backend_client.openapi_client.models.chat_role import ChatRole
 from typing import Any
 
-from docstring_system import DocstringTemplateSystem, extensible_docstring, setup_extensible_docstrings
+from docstring_system import (
+    DocstringTemplateSystem,
+    extensible_docstring,
+    setup_extensible_docstrings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -70,10 +76,17 @@ class RagMcpServer:
         simplified_citations = []
         for citation in response.citations:
             simplified_citations.append(
-                {"content": citation.page_content, "metadata": {pair.key: pair.value for pair in citation.metadata}}
+                {
+                    "content": citation.page_content,
+                    "metadata": {pair.key: pair.value for pair in citation.metadata},
+                }
             )
 
-        return {"answer": response.answer, "finish_reason": response.finish_reason, "citations": simplified_citations}
+        return {
+            "answer": response.answer,
+            "finish_reason": response.finish_reason,
+            "citations": simplified_citations,
+        }
 
     def _register_tools(self):
         """Register all MCP tools with the server."""

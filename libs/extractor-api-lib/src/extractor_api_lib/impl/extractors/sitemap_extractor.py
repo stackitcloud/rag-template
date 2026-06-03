@@ -7,7 +7,9 @@ import json
 import logging
 
 from extractor_api_lib.impl.types.extractor_types import ExtractorTypes
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 from extractor_api_lib.models.extraction_parameters import ExtractionParameters
 from extractor_api_lib.extractors.information_extractor import InformationExtractor
 from extractor_api_lib.impl.mapper.sitemap_document2information_piece import (
@@ -66,9 +68,18 @@ class SitemapExtractor(InformationExtractor):
         parser_override: Optional[str],
     ) -> tuple[Optional[callable], Optional[callable]]:
         mapping = {
-            "docusaurus": (docusaurus_sitemap_parser_function, docusaurus_sitemap_metadata_parser_function),
-            "astro": (astro_sitemap_parser_function, astro_sitemap_metadata_parser_function),
-            "generic": (generic_sitemap_parser_function, generic_sitemap_metadata_parser_function),
+            "docusaurus": (
+                docusaurus_sitemap_parser_function,
+                docusaurus_sitemap_metadata_parser_function,
+            ),
+            "astro": (
+                astro_sitemap_parser_function,
+                astro_sitemap_metadata_parser_function,
+            ),
+            "generic": (
+                generic_sitemap_parser_function,
+                generic_sitemap_metadata_parser_function,
+            ),
         }
 
         if not parser_override:

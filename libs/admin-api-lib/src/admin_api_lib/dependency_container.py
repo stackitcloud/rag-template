@@ -14,7 +14,9 @@ from admin_api_lib.extractor_api_client.openapi_client.api_client import ApiClie
 from admin_api_lib.extractor_api_client.openapi_client.configuration import (
     Configuration as ExtractorConfiguration,
 )
-from admin_api_lib.impl.api_endpoints.default_source_uploader import DefaultSourceUploader
+from admin_api_lib.impl.api_endpoints.default_source_uploader import (
+    DefaultSourceUploader,
+)
 from admin_api_lib.impl.api_endpoints.default_document_deleter import (
     DefaultDocumentDeleter,
 )
@@ -38,7 +40,9 @@ from admin_api_lib.impl.key_db.file_status_key_value_store import (
 from admin_api_lib.impl.mapper.informationpiece2document import (
     InformationPiece2Document,
 )
-from admin_api_lib.impl.settings.chunker_class_type_settings import ChunkerClassTypeSettings
+from admin_api_lib.impl.settings.chunker_class_type_settings import (
+    ChunkerClassTypeSettings,
+)
 from admin_api_lib.impl.settings.chunker_settings import ChunkerSettings
 from admin_api_lib.impl.settings.document_extractor_settings import (
     DocumentExtractorSettings,
@@ -166,7 +170,8 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     summary_text_splitter = Singleton(RecursiveCharacterTextSplitter)(
-        chunk_size=summarizer_settings.maximum_input_size, chunk_overlap=chunker_settings.overlap
+        chunk_size=summarizer_settings.maximum_input_size,
+        chunk_overlap=chunker_settings.overlap,
     )
 
     langfuse = Singleton(
@@ -209,7 +214,10 @@ class DependencyContainer(DeclarativeContainer):
     )
 
     document_deleter = Singleton(
-        DefaultDocumentDeleter, rag_api=rag_api, file_service=file_service, key_value_store=key_value_store
+        DefaultDocumentDeleter,
+        rag_api=rag_api,
+        file_service=file_service,
+        key_value_store=key_value_store,
     )
     documents_status_retriever = Singleton(DefaultDocumentsStatusRetriever, key_value_store=key_value_store)
 

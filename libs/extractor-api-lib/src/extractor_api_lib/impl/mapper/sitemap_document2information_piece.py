@@ -33,7 +33,7 @@ class SitemapLangchainDocument2InformationPiece(SourceLangchainDocument2Informat
     def _map_meta(self, internal: dict, document_name: str) -> dict:
         metadata = {}
         for key, value in internal.items():
-            metadata[self.USE_CASE_DOCUMENT_URL_KEY if key == self.SOURCE_LOADER_SOURCE_URL_KEY else key] = value
+            metadata[(self.USE_CASE_DOCUMENT_URL_KEY if key == self.SOURCE_LOADER_SOURCE_URL_KEY else key)] = value
 
             page_title_matches = [v for k, v in metadata.items() if k == self.SOURCE_LOADER_TITLE_KEY]
             page_title = page_title_matches[0] if page_title_matches else "Unknown Title"

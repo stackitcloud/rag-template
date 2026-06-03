@@ -28,7 +28,6 @@ from rag_core_api.utils.utils import (
     JSONISH_LOOSE_RE,
 )
 
-
 RunnableInput = AnswerGraphState
 RunnableOutput = str
 

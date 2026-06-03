@@ -18,7 +18,10 @@ from admin_api_lib.summarizer.summarizer import (
 from rag_core_lib.impl.langfuse_manager.langfuse_manager import LangfuseManager
 from rag_core_lib.impl.settings.retry_decorator_settings import RetryDecoratorSettings
 from rag_core_lib.impl.utils.async_threadsafe_semaphore import AsyncThreadsafeSemaphore
-from rag_core_lib.impl.utils.retry_decorator import create_retry_decorator_settings, retry_with_backoff
+from rag_core_lib.impl.utils.retry_decorator import (
+    create_retry_decorator_settings,
+    retry_with_backoff,
+)
 
 logger = logging.getLogger(__name__)
 

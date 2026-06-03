@@ -87,7 +87,10 @@ def headers_from_exception(exc: BaseException) -> dict[str, str]:
 
 def wait_from_rate_limit_headers(
     headers: dict[str, str],
-    header_names: Iterable[str] = ("x-ratelimit-reset-requests", "x-ratelimit-reset-tokens"),
+    header_names: Iterable[str] = (
+        "x-ratelimit-reset-requests",
+        "x-ratelimit-reset-tokens",
+    ),
 ) -> Optional[float]:
     """Extract the wait time from rate limit headers, if available.
 

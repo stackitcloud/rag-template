@@ -336,7 +336,10 @@ class RagApi:
         """  # noqa: E501
 
         _param = self._evaluate_serialize(
-            _request_auth=_request_auth, _content_type=_content_type, _headers=_headers, _host_index=_host_index
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
@@ -389,7 +392,10 @@ class RagApi:
         """  # noqa: E501
 
         _param = self._evaluate_serialize(
-            _request_auth=_request_auth, _content_type=_content_type, _headers=_headers, _host_index=_host_index
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
@@ -442,7 +448,10 @@ class RagApi:
         """  # noqa: E501
 
         _param = self._evaluate_serialize(
-            _request_auth=_request_auth, _content_type=_content_type, _headers=_headers, _host_index=_host_index
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {

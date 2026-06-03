@@ -17,7 +17,6 @@ from rag_core_lib.impl.utils.utils import (
     wait_from_rate_limit_headers,
 )
 
-
 # Use ParamSpec and TypeVar for type-safe decorators
 P = ParamSpec("P")
 R = TypeVar("R")

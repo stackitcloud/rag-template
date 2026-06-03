@@ -25,7 +25,11 @@ class GraphBase(AsyncRunnable[Input, Output], ABC):
     ERROR_MESSAGES_KEY = "error_messages"
     FINISH_REASONS = "finish_reasons"
 
-    def __init__(self, graph_state_cls: Type[Any], graph_state_output_cls: Optional[Type[Any]] = None):
+    def __init__(
+        self,
+        graph_state_cls: Type[Any],
+        graph_state_output_cls: Optional[Type[Any]] = None,
+    ):
         """
         Initialize the GraphBase.
 

@@ -14,12 +14,13 @@ import logging
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_experimental.text_splitter import SemanticChunker as LangchainSemanticChunker
+from langchain_experimental.text_splitter import (
+    SemanticChunker as LangchainSemanticChunker,
+)
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from nltk.tokenize import PunktSentenceTokenizer
 
 from admin_api_lib.chunker.chunker import Chunker
-
 
 logger = logging.getLogger(__name__)
 

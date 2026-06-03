@@ -5,9 +5,10 @@ import logging
 from extractor_api_lib.models.extraction_parameters import ExtractionParameters
 from extractor_api_lib.extractors.information_extractor import InformationExtractor
 from extractor_api_lib.models.information_piece import InformationPiece
-from extractor_api_lib.impl.mapper.internal2external_information_piece import Internal2ExternalInformationPiece
+from extractor_api_lib.impl.mapper.internal2external_information_piece import (
+    Internal2ExternalInformationPiece,
+)
 from extractor_api_lib.api_endpoints.source_extractor import SourceExtractor
-
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,11 @@ class GeneralSourceExtractor(SourceExtractor):
     appropriate extractor based on the file type of the document.
     """
 
-    def __init__(self, available_extractors: list[InformationExtractor], mapper: Internal2ExternalInformationPiece):
+    def __init__(
+        self,
+        available_extractors: list[InformationExtractor],
+        mapper: Internal2ExternalInformationPiece,
+    ):
         """
         Initialize the GeneralExtractor.
 

@@ -4,14 +4,15 @@ import logging
 from langchain_community.document_loaders import ConfluenceLoader
 
 from extractor_api_lib.impl.types.extractor_types import ExtractorTypes
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 from extractor_api_lib.models.extraction_parameters import ExtractionParameters
 from extractor_api_lib.extractors.information_extractor import InformationExtractor
 from extractor_api_lib.impl.mapper.confluence_langchain_document2information_piece import (
     ConfluenceLangchainDocument2InformationPiece,
 )
 from langchain_community.document_loaders.confluence import ContentFormat
-
 
 logger = logging.getLogger(__name__)
 

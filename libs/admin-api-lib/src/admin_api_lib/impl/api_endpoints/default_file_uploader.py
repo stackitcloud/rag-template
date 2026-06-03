@@ -11,15 +11,23 @@ from fastapi import UploadFile, status, HTTPException
 from langchain_core.documents import Document
 
 from admin_api_lib.file_services.file_service import FileService
-from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import ExtractionRequest
+from admin_api_lib.extractor_api_client.openapi_client.models.extraction_request import (
+    ExtractionRequest,
+)
 from admin_api_lib.api_endpoints.file_uploader import FileUploader
-from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import ExtractorApi
+from admin_api_lib.extractor_api_client.openapi_client.api.extractor_api import (
+    ExtractorApi,
+)
 from admin_api_lib.rag_backend_client.openapi_client.api.rag_api import RagApi
-from admin_api_lib.impl.mapper.informationpiece2document import InformationPiece2Document
+from admin_api_lib.impl.mapper.informationpiece2document import (
+    InformationPiece2Document,
+)
 from admin_api_lib.api_endpoints.document_deleter import DocumentDeleter
 from admin_api_lib.chunker.chunker import Chunker
 from admin_api_lib.models.status import Status
-from admin_api_lib.impl.key_db.file_status_key_value_store import FileStatusKeyValueStore
+from admin_api_lib.impl.key_db.file_status_key_value_store import (
+    FileStatusKeyValueStore,
+)
 from admin_api_lib.impl.api_endpoints.upload_pipeline_mixin import (
     UploadCancelledError,
     UploadPipelineMixin,
@@ -226,7 +234,10 @@ class DefaultFileUploader(UploadPipelineMixin, FileUploader):
 
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
                 await self._abest_effort_cleanup_cancelled(source_name)
-                logger.info("Upload for %s finished after cancellation request; cleaned up artifacts.", source_name)
+                logger.info(
+                    "Upload for %s finished after cancellation request; cleaned up artifacts.",
+                    source_name,
+                )
                 return
 
             self._key_value_store.upsert(source_name, Status.READY)
@@ -237,7 +248,10 @@ class DefaultFileUploader(UploadPipelineMixin, FileUploader):
             logger.info("Upload cancelled for %s.", source_name)
         except Exception:
             if self._key_value_store.is_cancelled_or_stale(source_name, run_id):
-                logger.info("Upload for %s stopped because cancellation was requested.", source_name)
+                logger.info(
+                    "Upload for %s stopped because cancellation was requested.",
+                    source_name,
+                )
                 return
             self._key_value_store.upsert(source_name, Status.ERROR)
             logger.exception("Error while uploading %s", source_name)

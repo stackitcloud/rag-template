@@ -158,7 +158,13 @@ class LangfuseRagasEvaluator(Evaluator):
         ]
         await gather(*evaluate_tasks)
 
-    async def _aevaluate_question(self, item, experiment_name: str, generation_time: datetime, config: RunnableConfig):
+    async def _aevaluate_question(
+        self,
+        item,
+        experiment_name: str,
+        generation_time: datetime,
+        config: RunnableConfig,
+    ):
         async with self._semaphore:
             chat_request = ChatRequest(message=item.input)
 
@@ -239,7 +245,10 @@ class LangfuseRagasEvaluator(Evaluator):
 
     def _load_dataset_items(self) -> list[dict] | None:
         if not os.path.exists(self._settings.dataset_filename):
-            logger.error("Dataset file does not exist. Filename: %s", self._settings.dataset_filename)
+            logger.error(
+                "Dataset file does not exist. Filename: %s",
+                self._settings.dataset_filename,
+            )
             return None
 
         with open(self._settings.dataset_filename, "r", encoding="utf-8") as file:

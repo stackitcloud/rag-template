@@ -4,7 +4,11 @@ import logging
 from typing import Optional
 
 from langchain_core.language_models.llms import LLM
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 from langfuse import Langfuse
 from langfuse.api.resources.commons.errors.not_found_error import NotFoundError
 from langfuse.model import TextPromptClient
@@ -81,7 +85,10 @@ class LangfuseManager:
             langfuse_prompt = self._langfuse.get_prompt(base_prompt_name, type="chat")
             return langfuse_prompt
         except NotFoundError:
-            logger.info("Prompt '%s' not found in Langfuse. Creating new chat prompt.", base_prompt_name)
+            logger.info(
+                "Prompt '%s' not found in Langfuse. Creating new chat prompt.",
+                base_prompt_name,
+            )
 
             local_prompt = self._managed_prompts[base_prompt_name]
             chat_messages = self._convert_chat_prompt_to_langfuse_format(local_prompt)

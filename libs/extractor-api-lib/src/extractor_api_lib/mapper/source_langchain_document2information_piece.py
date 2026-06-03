@@ -3,7 +3,9 @@
 from abc import abstractmethod, ABC
 from langchain_core.documents import Document as LangchainDocument
 
-from extractor_api_lib.models.dataclasses.internal_information_piece import InternalInformationPiece
+from extractor_api_lib.models.dataclasses.internal_information_piece import (
+    InternalInformationPiece,
+)
 from extractor_api_lib.models.content_type import ContentType
 
 

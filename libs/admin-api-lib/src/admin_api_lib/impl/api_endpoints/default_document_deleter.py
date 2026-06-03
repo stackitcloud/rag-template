@@ -24,7 +24,12 @@ logger = logging.getLogger(__name__)
 class DefaultDocumentDeleter(DocumentDeleter):
     """A class used to delete documents from file storage and vector database."""
 
-    def __init__(self, file_service: FileService, rag_api: RagApi, key_value_store: FileStatusKeyValueStore):
+    def __init__(
+        self,
+        file_service: FileService,
+        rag_api: RagApi,
+        key_value_store: FileStatusKeyValueStore,
+    ):
         """
         Initialize the DefaultDocumentDeleter.
 
@@ -105,7 +110,10 @@ class DefaultDocumentDeleter(DocumentDeleter):
             if storage_key:
                 self._file_service.delete_file(storage_key)
             else:
-                logger.debug("Skipping file storage deletion for non-file source: %s", identification)
+                logger.debug(
+                    "Skipping file storage deletion for non-file source: %s",
+                    identification,
+                )
         except Exception as e:
             error_messages += f"Error while deleting {identification} from file storage\n {str(e)}\n"
         return error_messages

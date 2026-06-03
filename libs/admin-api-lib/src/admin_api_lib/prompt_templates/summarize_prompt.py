@@ -1,6 +1,10 @@
 """Module for the summarize prompt template."""
 
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 
 SUMMARIZE_PROMPT = ChatPromptTemplate.from_messages(
     [

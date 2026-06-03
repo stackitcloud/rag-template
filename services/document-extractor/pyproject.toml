@@ -65,7 +65,7 @@ repository = "https://github.com/stackitcloud/rag-template"
 python = ">=3.13,<3.14"
 extractor-api-lib = {path = "../../libs/extractor-api-lib", develop = true}
 azure-core = "^1.38.0"
-langsmith = "^0.6.3"
+langsmith = "^0.8.0"
 mammoth = "^1.11.0"
 marshmallow = "^3.26.2"
 protobuf = "^6.33.5"
@@ -79,7 +79,7 @@ httpx = "^0.28.1"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^7.2.0"
-black = "^25.1.0"
+black = "^26.3.1"
 flake8-black = "^0.4.0"
 flake8-pyproject = "^1.2.3"
 flake8-quotes = "^3.4.0"

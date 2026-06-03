@@ -21,7 +21,6 @@ from extractor_api_lib.impl.utils.sitemap_extractor_utils import (
     generic_sitemap_metadata_parser_function,
 )
 
-
 pytest.importorskip("bs4")
 
 

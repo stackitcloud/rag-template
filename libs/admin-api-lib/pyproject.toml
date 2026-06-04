@@ -80,7 +80,7 @@ known_local_folder = ["admin_api_lib", "rag_core_lib"]
 max-line-length = 120
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.5"
+pytest = "^9.0.3"
 pytest-asyncio = "^1.0.0"
 coverage = "^7.8.0"
 
@@ -125,7 +125,7 @@ tqdm = "^4.67.1"
 langfuse = "^3.10.1"
 redis = "^6.0.0"
 pyyaml = "^6.0.2"
-python-multipart = "^0.0.29"
+python-multipart = "^0.0.32"
 marshmallow = "^3.26.2"
 protobuf = ">=5.29.6,<6.0.0"
 langchain-experimental = "^0.4.0"

@@ -22,6 +22,8 @@ from unittest.mock import MagicMock
 
 from mocks.mock_environment_variables import mock_environment_variables
 from mocks.mock_logging_directory import mock_logging_config
+from mocks.mock_reranker import MockReranker
+from mocks.mock_sparse_embeddings import MockSparseEmbeddings
 from mocks import MockLangfuseManager
 
 mock_environment_variables()
@@ -68,6 +70,8 @@ async def adjusted_app() -> AsyncGenerator[FastAPI, None]:
                 embedder=providers.Singleton(FakeEmbeddings, **FakeEmbedderSettings().model_dump()),
             )
         )
+        app.container.sparse_embedder.override(providers.Singleton(MockSparseEmbeddings))
+        app.container.reranker.override(providers.Singleton(MockReranker))
 
         # Override Langfuse with mock implementation
         mock_langfuse = providers.Singleton(MagicMock)
@@ -90,6 +94,9 @@ async def adjusted_app() -> AsyncGenerator[FastAPI, None]:
             client.create_collection(
                 collection_name=collection_name,
                 vectors_config=models.VectorParams(size=FakeEmbedderSettings().size, distance=models.Distance.COSINE),
+                sparse_vectors_config={
+                    "langchain-sparse": models.SparseVectorParams(),
+                },
             )
         yield app
         # Clean up

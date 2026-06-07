@@ -132,7 +132,7 @@ torchvision = [
   { version = "0.25.0+82df5f5", source = "pytorch_cpu", markers = "sys_platform == 'win32' and (platform_machine == 'arm64' or platform_machine == 'ARM64')" },
   { version = "0.25.0+cpu", source = "pytorch_cpu", markers = "sys_platform == 'linux' or (sys_platform == 'win32' and platform_machine != 'arm64' and platform_machine != 'ARM64')" },
 ]
-transformers = ">=4.53.3,<5.0.0"
+transformers = ">=5.0.0,<5.1.0"
 pypandoc = ">=1.6.2"
 pypandoc_binary = ">=1.6.2"
 

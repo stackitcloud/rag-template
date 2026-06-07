@@ -1905,18 +1905,18 @@ uuid-utils = ">=0.12.0,<1.0"
 
 [[package]]
 name = "langchain-openai"
-version = "1.1.8"
+version = "1.1.9"
 description = "An integration package connecting OpenAI and LangChain"
 optional = false
 python-versions = "<4.0.0,>=3.10.0"
 groups = ["main"]
 files = [
-    {file = "langchain_openai-1.1.8-py3-none-any.whl", hash = "sha256:c37d99eac78700cca2bef8d503cf367065685e1ac4cbdf674056046f3bebf118"},
-    {file = "langchain_openai-1.1.8.tar.gz", hash = "sha256:3ff66966812a2362a8ccbcad24b517708f39c42471517abe77b07adc818a2c22"},
+    {file = "langchain_openai-1.1.9-py3-none-any.whl", hash = "sha256:ca2482b136c45fb67c0db84a9817de675e0eb8fb2203a33914c1b7a96f273940"},
+    {file = "langchain_openai-1.1.9.tar.gz", hash = "sha256:fdee25dcf4b0685d8e2f59856f4d5405431ef9e04ab53afe19e2e8360fed8234"},
 ]
 
 [package.dependencies]
-langchain-core = ">=1.2.9,<2.0.0"
+langchain-core = ">=1.2.11,<2.0.0"
 openai = ">=1.109.1,<3.0.0"
 tiktoken = ">=0.7.0,<1.0.0"
 

@@ -137,7 +137,7 @@ pypandoc = ">=1.6.2"
 pypandoc_binary = ">=1.6.2"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.5"
+pytest = "^9.0.0"
 pytest-asyncio = "^0.26.0"
 coverage = "^7.8.0"
 httpx = "^0.28.1"

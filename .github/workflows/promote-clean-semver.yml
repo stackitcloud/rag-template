@@ -34,6 +34,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.ref || 'main' }}
+          persist-credentials: false
 
       - name: Load version metadata (workflow_run)
         if: ${{ github.event_name == 'workflow_run' }}
@@ -188,7 +189,7 @@ jobs:
 
       - name: Open PR with updated locks, pins, and Chart appVersion
         id: cpr
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/refresh-locks-${{ steps.versions.outputs.clean_version }}-${{ github.run_number }}
           title: "chore(release): refresh service lockfiles for ${{ steps.versions.outputs.clean_version }}"

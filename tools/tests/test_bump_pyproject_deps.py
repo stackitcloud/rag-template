@@ -96,6 +96,40 @@ def test_bump_updates_internal_lib_dependency_pins(tmp_path: Path, monkeypatch) 
     assert extractor_api_doc["tool"]["poetry"]["dependencies"]["rag-core-lib"] == "==4.1.0"
 
 
+def test_bump_can_keep_local_internal_lib_dependencies(tmp_path: Path, monkeypatch) -> None:
+    rag_core_lib = tmp_path / "rag-core-lib.toml"
+    rag_core_api = tmp_path / "rag-core-api.toml"
+
+    _write_pyproject(rag_core_lib, "rag-core-lib", "4.0.0", with_rag_core_dep=False)
+    _write_pyproject(rag_core_api, "rag-core-api", "4.0.0", with_rag_core_dep=False)
+    with rag_core_api.open("a") as pyproject:
+        pyproject.write('rag-core-lib = {path = "../rag-core-lib", develop = true}\n')
+
+    monkeypatch.setattr(
+        bump_pyproject_deps,
+        "LIBS_VERSION_FILES",
+        [rag_core_lib, rag_core_api],
+    )
+    monkeypatch.setattr(
+        bump_pyproject_deps,
+        "LIB_DEP_PINS",
+        {rag_core_api: {"tool.poetry.dependencies.rag-core-lib": "=={v}"}},
+    )
+
+    bump_pyproject_deps.bump(
+        "4.1.0.post20260608070825",
+        bump_libs=True,
+        bump_service_pins=False,
+        pin_lib_dependencies=False,
+    )
+
+    rag_core_api_doc = tomlkit.parse(rag_core_api.read_text())
+    assert rag_core_api_doc["tool"]["poetry"]["version"] == "4.1.0.post20260608070825"
+    dependency = rag_core_api_doc["tool"]["poetry"]["dependencies"]["rag-core-lib"]
+    assert dependency["path"] == "../rag-core-lib"
+    assert dependency["develop"] is True
+
+
 def test_bump_updates_service_pins(tmp_path: Path, monkeypatch) -> None:
     service_pyproject = tmp_path / "document-extractor.toml"
     service_pyproject.write_text(

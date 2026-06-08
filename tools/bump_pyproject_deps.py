@@ -91,7 +91,12 @@ def _get_table(doc: tomlkit.TOMLDocument, path: list[str]) -> Any | None:
     return ref
 
 
-def bump(version: str, bump_libs: bool = True, bump_service_pins: bool = True) -> None:
+def bump(
+    version: str,
+    bump_libs: bool = True,
+    bump_service_pins: bool = True,
+    pin_lib_dependencies: bool = True,
+) -> None:
     # 1) bump libs versions (textual, non-destructive)
     if bump_libs:
         for file in LIBS_VERSION_FILES:
@@ -100,26 +105,27 @@ def bump(version: str, bump_libs: bool = True, bump_service_pins: bool = True) -
             file.write_text(new_txt)
             print(f"Updated {file} -> tool.poetry.version = {version}")
 
-        # Keep internal lib dependency pins aligned with the bumped version.
-        for file, mapping in LIB_DEP_PINS.items():
-            txt = file.read_text()
-            doc = tomlkit.parse(txt)
-            deps = _get_table(doc, [
-                'tool', 'poetry', 'dependencies'
-            ])
-            if deps is None or not hasattr(deps, '__contains__'):
-                print(f"Skip {file}: dependencies table not found")
+        if pin_lib_dependencies:
+            # Keep internal lib dependency pins aligned with the bumped version.
+            for file, mapping in LIB_DEP_PINS.items():
+                txt = file.read_text()
+                doc = tomlkit.parse(txt)
+                deps = _get_table(doc, [
+                    'tool', 'poetry', 'dependencies'
+                ])
+                if deps is None or not hasattr(deps, '__contains__'):
+                    print(f"Skip {file}: dependencies table not found")
+                    file.write_text(tomlkit.dumps(doc))
+                    continue
+                for dotted, template in mapping.items():
+                    pkg = dotted.split('.')[-1]
+                    if pkg in deps:
+                        val = template.format(v=version)
+                        deps[pkg] = val
+                        print(f"Pinned {file} -> {pkg} = {val}")
+                    else:
+                        print(f"Skip {file}: {pkg} not present in dependencies")
                 file.write_text(tomlkit.dumps(doc))
-                continue
-            for dotted, template in mapping.items():
-                pkg = dotted.split('.')[-1]
-                if pkg in deps:
-                    val = template.format(v=version)
-                    deps[pkg] = val
-                    print(f"Pinned {file} -> {pkg} = {val}")
-                else:
-                    print(f"Skip {file}: {pkg} not present in dependencies")
-            file.write_text(tomlkit.dumps(doc))
 
     # 2) bump service pins only inside [tool.poetry.group.prod.dependencies]
     if bump_service_pins:
@@ -149,13 +155,23 @@ def main() -> int:
     ap.add_argument("--version", required=True)
     ap.add_argument("--bump-libs", action="store_true", help="Bump versions in internal libs only")
     ap.add_argument("--bump-service-pins", action="store_true", help="Bump service dependency pins only")
+    ap.add_argument(
+        "--skip-lib-dependency-pins",
+        action="store_true",
+        help="Keep local internal library dependencies unchanged while bumping package versions",
+    )
     args = ap.parse_args()
 
     # Backward compatibility: if neither flag is provided, do both
     bump_libs = args.bump_libs or (not args.bump_libs and not args.bump_service_pins)
     bump_service_pins = args.bump_service_pins or (not args.bump_libs and not args.bump_service_pins)
 
-    bump(args.version, bump_libs=bump_libs, bump_service_pins=bump_service_pins)
+    bump(
+        args.version,
+        bump_libs=bump_libs,
+        bump_service_pins=bump_service_pins,
+        pin_lib_dependencies=not args.skip_lib_dependency_pins,
+    )
     return 0
 
 

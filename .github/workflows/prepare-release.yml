@@ -100,7 +100,10 @@ jobs:
 
       - name: Bump internal libs only (no service pins)
         run: |
-          python tools/bump_pyproject_deps.py --version "${{ steps.semrel.outputs.version }}" --bump-libs
+          python tools/bump_pyproject_deps.py \
+            --version "${{ steps.semrel.outputs.version }}" \
+            --bump-libs \
+            --skip-lib-dependency-pins
 
       - name: Commit and open PR
         uses: peter-evans/create-pull-request@v8

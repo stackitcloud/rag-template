@@ -60,6 +60,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -102,7 +103,7 @@ jobs:
           python tools/bump_pyproject_deps.py --version "${{ steps.semrel.outputs.version }}" --bump-libs
 
       - name: Commit and open PR
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/release-${{ steps.semrel.outputs.version }}
           title: "chore(release): prepare ${{ steps.semrel.outputs.version }}"

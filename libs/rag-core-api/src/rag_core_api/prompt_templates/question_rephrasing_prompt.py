@@ -18,10 +18,8 @@ Rules:
 - If the original question is already standalone, return it unchanged.
 - Return ONLY the rewritten question text. No preamble, no quotes."""
         ),
-        HumanMessagePromptTemplate.from_template(
-            """Question: {question}
+        HumanMessagePromptTemplate.from_template("""Question: {question}
 ChatHistory: {history}
-language: {language}"""
-        ),
+language: {language}"""),
     ]
 )

@@ -1,6 +1,14 @@
 cert-manager:
     installCRDs: false
 
+certIssuer:
+    name: letsencrypt-cluster-issuer
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Use a real email address for ACME account registration.
+    email: "<replace@me.com>"
+    privateKeySecretName: letsencrypt-cluster-issuer-key
+    ingressClass: nginx
+
 # Configuration overrides for the official ingress-nginx chart dependency.
 # Pin the controller image tag to v1.13.3 (matching the script installation).
 ingress-nginx:

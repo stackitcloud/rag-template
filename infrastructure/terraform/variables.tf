@@ -7,8 +7,8 @@ variable "dns_name" {
   description = "DNS name for the service. Desired free sub‑domain (e.g. ends with .runs.onstackit.cloud)."
   type        = string
   validation {
-    condition     = can(regex("^([a-z0-9.-]+)$", var.dns_name))
-    error_message = "The DNS name must only contain lowercase letters, numbers, hyphens, and dots."
+    condition     = can(regex("^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", var.dns_name))
+    error_message = "The DNS name must be a valid multi-level domain (at least one dot), using lowercase letters, numbers, and hyphens."
   }
 }
 

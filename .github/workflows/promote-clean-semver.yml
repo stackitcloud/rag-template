@@ -70,7 +70,7 @@ jobs:
           echo "clean_version_tag=$CLEAN_VERSION_TAG" >> $GITHUB_OUTPUT
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.14'
 

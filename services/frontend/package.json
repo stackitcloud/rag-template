@@ -54,7 +54,7 @@
         "@vue/test-utils": "^2.4.1",
         "autoprefixer": "^10.4.17",
         "axios": "^1.16.1",
-        "cypress": "^15.16.0",
+        "cypress": "^16.0.0",
         "daisyui": "^5.1.31",
         "esbuild": "^0.28.0",
         "eslint": "^9.36.0",

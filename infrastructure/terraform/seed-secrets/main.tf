@@ -22,5 +22,5 @@ provider "vault" {
 resource "vault_kv_secret_v2" "rag_docs" {
   mount     = var.vault_mount_path
   name      = var.vault_secret_name
-  data_json = jsonencode(var.rag_secrets)
+  data_json = jsonencode(merge(var.rag_secrets, var.rag_secrets_overrides))
 }

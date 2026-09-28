@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TF_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+OUTPUT_FILE="-"
+STATE_FILE=""
+
+usage() {
+  cat <<'EOF'
+Generate a production override values file for the rag-setup Helm chart from Terraform outputs.
+
+Usage:
+  ./scripts/generate-rag-setup-prod-values.sh [--output <path>] [--state-file <path>] [--terraform-dir <path>]
+
+Options:
+  --output <path>        Write YAML to this file. Use "-" (default) for stdout.
+  --state-file <path>    Read outputs from a local Terraform state file (JSON) with jq.
+  --terraform-dir <path> Terraform root directory (default: infrastructure/terraform).
+
+Environment overrides:
+  RAG_HOST               Default: rag.<dns_name output>
+  ADMIN_HOST             Default: admin.<dns_name output>
+  LANGFUSE_HOST          Default: langfuse.<dns_name output>
+  S3_ENDPOINT            Default: object_storage_endpoint output
+  DOCUMENTS_BUCKET       Default: object_storage_documents_bucket output
+  LANGFUSE_BUCKET        Default: object_storage_langfuse_bucket output
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output)
+      OUTPUT_FILE="${2:-}"
+      shift 2
+      ;;
+    --state-file)
+      STATE_FILE="${2:-}"
+      shift 2
+      ;;
+    --terraform-dir)
+      TF_DIR="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -n "${STATE_FILE}" ]]; then
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "jq is required when --state-file is used." >&2
+    exit 1
+  fi
+  if [[ ! -f "${STATE_FILE}" ]]; then
+    echo "State file not found: ${STATE_FILE}" >&2
+    exit 1
+  fi
+else
+  if ! command -v terraform >/dev/null 2>&1; then
+    echo "terraform is required when --state-file is not used." >&2
+    exit 1
+  fi
+fi
+
+get_output() {
+  local key="$1"
+  if [[ -n "${STATE_FILE}" ]]; then
+    local value
+    value="$(jq -er --arg key "${key}" '.outputs[$key].value // empty' "${STATE_FILE}" 2>/dev/null || true)"
+    if [[ -n "${value}" && "${value}" != "null" ]]; then
+      printf '%s\n' "${value}"
+      return 0
+    fi
+
+    case "${key}" in
+      redis_host)
+        jq -er '.resources[] | select(.type=="stackit_redis_credential" and .name=="rag_redis_cred") | .instances[0].attributes.host' "${STATE_FILE}"
+        ;;
+      redis_port)
+        jq -er '.resources[] | select(.type=="stackit_redis_credential" and .name=="rag_redis_cred") | .instances[0].attributes.port' "${STATE_FILE}"
+        ;;
+      redis_username)
+        jq -er '.resources[] | select(.type=="stackit_redis_credential" and .name=="rag_redis_cred") | .instances[0].attributes.username' "${STATE_FILE}"
+        ;;
+      object_storage_documents_bucket)
+        jq -er '.resources[] | select(.type=="stackit_objectstorage_bucket" and .name=="documents") | .instances[0].attributes.name' "${STATE_FILE}"
+        ;;
+      object_storage_langfuse_bucket)
+        jq -er '.resources[] | select(.type=="stackit_objectstorage_bucket" and .name=="langfuse") | .instances[0].attributes.name' "${STATE_FILE}"
+        ;;
+      object_storage_endpoint)
+        local region
+        region="$(jq -er '.resources[] | select(.type=="stackit_objectstorage_bucket" and .name=="documents") | .instances[0].attributes.region' "${STATE_FILE}" 2>/dev/null || true)"
+        if [[ -z "${region}" || "${region}" == "null" ]]; then
+          region="${STACKIT_REGION:-eu01}"
+        fi
+        printf 'https://object.storage.%s.onstackit.cloud\n' "${region}"
+        ;;
+      *)
+        echo "Missing output '${key}' in ${STATE_FILE}. Run terraform apply to refresh outputs." >&2
+        return 1
+        ;;
+    esac
+  else
+    terraform -chdir="${TF_DIR}" output -raw "${key}"
+  fi
+}
+
+dns_name="$(get_output dns_name)"
+dns_name="${dns_name%.}"
+secretsmanager_instance_id="$(get_output secretsmanager_instance_id)"
+secretsmanager_username="$(get_output secretsmanager_username)"
+postgres_host="$(get_output postgres_host)"
+postgres_port="$(get_output postgres_port)"
+postgres_username="$(get_output postgres_username)"
+postgres_database="$(get_output postgres_database)"
+redis_host="$(get_output redis_host)"
+redis_port="$(get_output redis_port)"
+redis_username="$(get_output redis_username)"
+object_storage_endpoint="$(get_output object_storage_endpoint)"
+documents_bucket="$(get_output object_storage_documents_bucket)"
+langfuse_bucket="$(get_output object_storage_langfuse_bucket)"
+
+rag_host="${RAG_HOST:-rag.${dns_name}}"
+admin_host="${ADMIN_HOST:-admin.${dns_name}}"
+langfuse_host="${LANGFUSE_HOST:-langfuse.${dns_name}}"
+s3_endpoint="${S3_ENDPOINT:-${object_storage_endpoint}}"
+documents_bucket="${DOCUMENTS_BUCKET:-${documents_bucket}}"
+langfuse_bucket="${LANGFUSE_BUCKET:-${langfuse_bucket}}"
+
+render_yaml() {
+  cat <<EOF
+# Generated by infrastructure/terraform/scripts/generate-rag-setup-prod-values.sh
+# Keep secrets in Vault (rag-secrets). This file only wires non-secret infrastructure values.
+
+features:
+  externalSecrets:
+    enabled: true
+
+externalSecrets:
+  secretStore:
+    path: "${secretsmanager_instance_id}"
+    auth:
+      userPass:
+        username: "${secretsmanager_username}"
+
+rag:
+  backend:
+    ingress:
+      host:
+        name: "${rag_host}"
+  frontend:
+    ingress:
+      host:
+        name: "${rag_host}"
+    envs:
+      vite:
+        VITE_API_URL: "https://${rag_host}/api"
+        VITE_CHAT_URL: "https://${rag_host}"
+        VITE_ADMIN_URL: "https://${admin_host}"
+        VITE_ADMIN_API_URL: "https://${admin_host}/api"
+  adminBackend:
+    ingress:
+      host:
+        name: "${admin_host}"
+    envs:
+      keyValueStore:
+        USECASE_KEYVALUE_HOST: "${redis_host}"
+        USECASE_KEYVALUE_PORT: "${redis_port}"
+  adminFrontend:
+    ingress:
+      host:
+        name: "${admin_host}"
+  shared:
+    config:
+      dns:
+      - "${rag_host}"
+      - "${admin_host}"
+      tls:
+        host: "${rag_host}"
+    envs:
+      s3:
+        S3_ENDPOINT: "${s3_endpoint}"
+        S3_BUCKET: "${documents_bucket}"
+  langfuse:
+    langfuse:
+      nextauth:
+        url: "https://${langfuse_host}"
+      extraInitContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          timeout 300 sh -c '
+            until nc -z ${postgres_host} ${postgres_port}; do
+              echo "Waiting for PostgreSQL to be ready..."
+              sleep 2
+            done
+          '
+    postgresql:
+      host: "${postgres_host}"
+      port: ${postgres_port}
+      auth:
+        username: "${postgres_username}"
+        database: "${postgres_database}"
+    redis:
+      host: "${redis_host}"
+      port: ${redis_port}
+      auth:
+        username: "${redis_username}"
+    s3:
+      endpoint: "${s3_endpoint}"
+      bucket: "${langfuse_bucket}"
+      eventUpload:
+        endpoint: "${s3_endpoint}"
+        bucket: "${langfuse_bucket}"
+EOF
+}
+
+if [[ "${OUTPUT_FILE}" == "-" ]]; then
+  render_yaml
+else
+  mkdir -p "$(dirname "${OUTPUT_FILE}")"
+  render_yaml > "${OUTPUT_FILE}"
+  echo "Wrote ${OUTPUT_FILE}" >&2
+fi
